@@ -12,6 +12,7 @@ if script then
 end
 
 local ceil = math.ceil
+local floor = math.floor
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local map_position_tuple = Utils.map_position_tuple
@@ -22,12 +23,16 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 local VIEW_RECT_MARGIN = 6 -- tiles
+local CHUNK_SIZE = 32      -- tiles per chunk
 
 --- @class LabEntityOverlay
 --- @field [1] LuaEntity Lab entity.
 --- @field [2] LuaRenderObject Render object for the overlay.
 --- @field [3] MapPositionTuple Position of the entity.
 --- @field [4] MapPositionRect Rectangle boundaries of the entity.
+--- @field [5] number Surface index of the entity.
+--- @field [6] number Chunk X coordinate of the entity.
+--- @field [7] number Chunk Y coordinate of the entity.
 
 --- Constructor
 ---
@@ -45,9 +50,18 @@ function LabOverlayRenderer.new(color_registry)
     --- @type table<number, LabEntityOverlay>
     overlays = {},
 
+    --- Overlays indexed by surface and chunk for efficient spatial lookup.
+    --- chunks[surface_index][chunk_x][chunk_y][unit_number] = LabEntityOverlay
+    --- @type table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
+    chunks = {},
+
     --- Player's position.
     --- @type MapPositionTuple
     player_position = { 0, 0 },
+
+    --- Player's surface index.
+    --- @type number
+    player_surface_index = 0,
 
     --- Player's force.
     --- @type LuaForce|nil
@@ -95,6 +109,51 @@ function LabOverlayRenderer:set_lab_scale(lab_name, scale)
   end
 end
 
+--- Insert an overlay into the chunk index.
+---
+--- @param chunks table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
+--- @param unit_number number
+--- @param overlay LabEntityOverlay
+local function insert_into_chunks(chunks, unit_number, overlay)
+  local surface_index = overlay[5]
+  local cx = overlay[6]
+  local cy = overlay[7]
+  local surface_chunks = chunks[surface_index]
+  if not surface_chunks then
+    surface_chunks = {}
+    chunks[surface_index] = surface_chunks
+  end
+  local col = surface_chunks[cx]
+  if not col then
+    col = {}
+    surface_chunks[cx] = col
+  end
+  local chunk_overlays = col[cy]
+  if not chunk_overlays then
+    chunk_overlays = {}
+    col[cy] = chunk_overlays
+  end
+  chunk_overlays[unit_number] = overlay
+end
+
+--- Remove an overlay from the chunk index.
+---
+--- @param chunks table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
+--- @param unit_number number
+--- @param overlay LabEntityOverlay
+local function remove_from_chunks(chunks, unit_number, overlay)
+  local surface_index = overlay[5]
+  local cx = overlay[6]
+  local cy = overlay[7]
+  local surface_chunks = chunks[surface_index]
+  if not surface_chunks then return end
+  local col = surface_chunks[cx]
+  if not col then return end
+  local chunk_overlays = col[cy]
+  if not chunk_overlays then return end
+  chunk_overlays[unit_number] = nil
+end
+
 --- Render an overlay for a lab entity.
 ---
 --- If the overlay already exists and `force_render` is `false`, skip rendering and returns the existing overlay.
@@ -114,6 +173,11 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local target_lab = self.target_labs[lab.name]
   if not target_lab then return nil end
 
+  -- Remove old overlay from chunk index if force re-rendering.
+  if overlay then
+    remove_from_chunks(self.chunks, lab_unit_number, overlay)
+  end
+
   local animation = draw_animation({
     animation = target_lab.animation,
     surface = lab.surface,
@@ -124,17 +188,28 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     visible = false,
   })
 
-  self.overlays[lab_unit_number] = {
+  local pos = map_position_tuple(lab.position)
+  local surface_index = lab.surface_index
+  local cx = floor(pos[1] / CHUNK_SIZE)
+  local cy = floor(pos[2] / CHUNK_SIZE)
+
+  local new_overlay = {
     lab,
     animation,
-    map_position_tuple(lab.position),
+    pos,
     get_entity_rect(lab),
+    surface_index,
+    cx,
+    cy,
   }
+
+  self.overlays[lab_unit_number] = new_overlay
+  insert_into_chunks(self.chunks, lab_unit_number, new_overlay)
 
   -- Register the lab entity to be notified by `on_object_destroyed` when it is destroyed.
   script.register_on_object_destroyed(lab)
 
-  return overlay
+  return new_overlay
 end
 
 --- Render overlays for all lab entities.
@@ -166,6 +241,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab)
     animation.destroy()
   end
 
+  remove_from_chunks(self.chunks, lab_unit_number, overlay)
   self.overlays[lab_unit_number] = nil
 end
 
@@ -177,18 +253,30 @@ function LabOverlayRenderer:update_lab_position(lab)
   if not lab_unit_number then return end
 
   local overlay = self.overlays[lab_unit_number]
-  if overlay then
-    overlay[4] = get_entity_rect(lab)
+  if not overlay then return end
 
-    local animation = overlay[2]
-    if animation.surface.index == lab.surface_index then
-      -- Same surface
-      animation.target = lab
-    else
-      -- The entity is teleported to another surface!
-      animation.destroy()
-      self:render_overlay_for_lab(lab, true) -- Force re-render
+  overlay[4] = get_entity_rect(lab)
+
+  local animation = overlay[2]
+  if animation.surface.index == lab.surface_index then
+    -- Same surface: update animation target and chunk index if chunk changed.
+    animation.target = lab
+
+    local lab_position = lab.position
+    local new_cx = floor((lab_position.x or lab_position[1]) / CHUNK_SIZE)
+    local new_cy = floor((lab_position.y or lab_position[2]) / CHUNK_SIZE)
+    if overlay[6] ~= new_cx or overlay[7] ~= new_cy then
+      remove_from_chunks(self.chunks, lab_unit_number, overlay)
+      overlay[6] = new_cx
+      overlay[7] = new_cy
+      insert_into_chunks(self.chunks, lab_unit_number, overlay)
     end
+  else
+    -- The entity is teleported to another surface!
+    animation.destroy()
+    remove_from_chunks(self.chunks, lab_unit_number, overlay)
+    self.overlays[lab_unit_number] = nil
+    self:render_overlay_for_lab(lab, true) -- Force re-render
   end
 end
 
@@ -211,6 +299,7 @@ function LabOverlayRenderer:update_player_position(player)
   self_player_position[2] = pos_y
 
   self.player_force = player.force --[[@as LuaForce]]
+  self.player_surface_index = player.surface_index
 
   if #game.connected_players > 1 then
     self.update_mode = "always"
@@ -244,6 +333,7 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
 
   local overlays = self.overlays
+  local chunks = self.chunks
   local player_position = self.player_position
   local view_rect = self.view_rect
 
@@ -272,7 +362,7 @@ function LabOverlayRenderer:get_tick_function()
       current_research_colors = current_research and self.color_registry:get_colors_for_research(current_research)
     end
 
-    -- `mendering_tick` goes up to 60, then goes down to 0, then repeat.
+    -- `meandering_tick` goes up to 60, then goes down to 0, then repeat.
     -- On changing the direction, chooses a new color function.
     if meandering_tick == 60 then
       meandering_direction = -1
@@ -287,37 +377,78 @@ function LabOverlayRenderer:get_tick_function()
     local player_force_index = player_force.index
     local current_research_colors = current_research_colors --- @diagnostic disable-line: redefined-local
     local player_position = player_position                 --- @diagnostic disable-line: redefined-local
-    local view_rect = view_rect                             --- @diagnostic disable-line: redefined-local
     local meandering_tick = meandering_tick                 --- @diagnostic disable-line: redefined-local
     local color_function = color_function                   --- @diagnostic disable-line: redefined-local
     local color = color                                     --- @diagnostic disable-line: redefined-local
     local STATUS_WORKING = STATUS_WORKING                   --- @diagnostic disable-line: redefined-local
     local STATUS_LOW_POWER = STATUS_LOW_POWER               --- @diagnostic disable-line: redefined-local
 
-    for unit_number, overlay in pairs(overlays) do
-      local entity = overlay[1]
-      local animation = overlay[2]
-      local entity_position = overlay[3]
-      local rect = overlay[4]
+    if is_always_update then
+      -- In `always` mode, update all overlays on all surfaces.
+      for _, overlay in pairs(overlays) do
+        local entity = overlay[1]
+        local animation = overlay[2]
+        local entity_position = overlay[3]
 
-      local status = entity.status
-      local is_visible = (
-        (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
-        current_research_colors ~= nil and
-        entity.force_index == player_force_index
-      )
+        local status = entity.status
+        local is_visible = (
+          (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+          current_research_colors ~= nil and
+          entity.force_index == player_force_index
+        )
 
-      if animation.visible ~= is_visible then
-        animation.visible = is_visible
-      end
+        if animation.visible ~= is_visible then
+          animation.visible = is_visible
+        end
 
-      if is_visible then
-        --- @cast current_research_colors ColorTuple[]
-
-        -- Update the overlay color only if the view rect and the entity rect are overlapping each other, or `always` update mode.
-        if is_always_update or (view_rect[1] < rect[3] and rect[1] < view_rect[3] and view_rect[2] < rect[4] and rect[2] < view_rect[4]) then
+        if is_visible then
+          --- @cast current_research_colors ColorTuple[]
           color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
           animation.color = color
+        end
+      end
+    else
+      -- In `view` mode, only update overlays in chunks that overlap the view rect.
+      -- This avoids iterating all labs when most of them are off-screen.
+      local view_rect = view_rect                           --- @diagnostic disable-line: redefined-local
+      local surface_chunks = chunks[self.player_surface_index]
+      if not surface_chunks then return end
+
+      local chunk_left   = floor(view_rect[1] / CHUNK_SIZE)
+      local chunk_top    = floor(view_rect[2] / CHUNK_SIZE)
+      local chunk_right  = floor(view_rect[3] / CHUNK_SIZE)
+      local chunk_bottom = floor(view_rect[4] / CHUNK_SIZE)
+
+      for cx = chunk_left, chunk_right do
+        local col = surface_chunks[cx]
+        if col then
+          for cy = chunk_top, chunk_bottom do
+            local chunk_overlays = col[cy]
+            if chunk_overlays then
+              for _, overlay in pairs(chunk_overlays) do
+                local entity = overlay[1]
+                local animation = overlay[2]
+                local entity_position = overlay[3]
+
+                local status = entity.status
+                local is_visible = (
+                  (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+                  current_research_colors ~= nil and
+                  entity.force_index == player_force_index
+                )
+
+                if animation.visible ~= is_visible then
+                  animation.visible = is_visible
+                end
+
+                if is_visible then
+                  --- @cast current_research_colors ColorTuple[]
+                  color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
+                  animation.color = color
+                end
+              end
+            end
+          end
         end
       end
     end
