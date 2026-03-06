@@ -10,12 +10,12 @@ local random = math.random
 
 -- Precomputed reciprocals: multiplication is faster than division in Lua 5.2,
 -- because the compiler does not fold constant divisions into multiplications.
-local inv_pi = 1 / math.pi
-local inv_8 = 1 / 8
-local inv_9 = 1 / 9
-local inv_10 = 1 / 10
-local inv_30 = 1 / 30
-local inv_40 = 1 / 40
+local INV_PI = 1 / math.pi
+local INV_8 = 1 / 8
+local INV_9 = 1 / 9
+local INV_10 = 1 / 10
+local INV_30 = 1 / 30
+local INV_40 = 1 / 40
 
 --- Circularly interpolates between colors at time `t`.
 ---
@@ -59,7 +59,7 @@ ColorFunctions.loop_interpolate = loop_interpolate
 --- @type ColorFunction[]
 local functions_for_lq = {
   function (output, tick, colors, player_position, lab_position)
-    return loop_interpolate(output, tick * inv_40, colors, #colors, 1.5)
+    return loop_interpolate(output, tick * INV_40, colors, #colors, 1.5)
   end,
 }
 ColorFunctions.functions_for_lq = functions_for_lq
@@ -70,7 +70,7 @@ local functions_for_hq = {
   function (output, tick, colors, player_position, lab_position)
     local dx = lab_position[1] - player_position[1]
     local dy = lab_position[2] - player_position[2]
-    local t = sqrt(dx * dx + dy * dy) * inv_8 + tick * inv_40
+    local t = sqrt(dx * dx + dy * dy) * INV_8 + tick * INV_40
     return loop_interpolate(output, t, colors, #colors, 1.5)
   end,
 
@@ -79,33 +79,33 @@ local functions_for_hq = {
     local theta = atan2(lab_position[2] - player_position[2], lab_position[1] - player_position[1])
     local n_colors = #colors
     -- Map angle [-pi, pi] to [0, 1], then scale to the color array length.
-    local t = (theta * inv_pi * 0.5 + 0.5) * n_colors + tick * inv_30
+    local t = (theta * INV_PI * 0.5 + 0.5) * n_colors + tick * INV_30
     return loop_interpolate(output, t, colors, n_colors, 2)
   end,
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
   function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[1] - player_position[1]) * inv_10 + tick * inv_30
+    local t = abs(lab_position[1] - player_position[1]) * INV_10 + tick * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [4] Vertical: color cycles based on vertical separation only.
   function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[2] - player_position[2]) * inv_10 + tick * inv_30
+    local t = abs(lab_position[2] - player_position[2]) * INV_10 + tick * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
   function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[1] - player_position[1] + lab_position[2] - player_position[2]) * inv_10 + tick * inv_30
+    local t = abs(lab_position[1] - player_position[1] + lab_position[2] - player_position[2]) * INV_10 + tick * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
   function (output, tick, colors, player_position, lab_position)
-    local t = abs(floor((lab_position[1] - player_position[1]) * inv_9)
-        + floor((lab_position[2] - player_position[2]) * inv_8))
-      + tick * inv_10
+    local t = abs(floor((lab_position[1] - player_position[1]) * INV_9)
+        + floor((lab_position[2] - player_position[2]) * INV_8))
+      + tick * INV_10
     return loop_interpolate(output, t, colors, #colors, 5)
   end,
 }

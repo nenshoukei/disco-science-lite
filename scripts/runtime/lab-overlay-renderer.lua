@@ -2,6 +2,7 @@ local consts = require("scripts.shared.consts")
 local config_target_labs = require("scripts.shared.config.target-labs")
 local Utils = require("scripts.shared.utils")
 local ColorFunctions = require("scripts.runtime.color-functions")
+local ChunkMap = require("scripts.runtime.chunk-map")
 
 --- @class LabOverlayRenderer
 local LabOverlayRenderer = {}
@@ -12,27 +13,23 @@ if script then
 end
 
 local ceil = math.ceil
-local floor = math.floor
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local map_position_tuple = Utils.map_position_tuple
 local get_entity_rect = Utils.get_entity_rect
+local rect_to_chunk_range = ChunkMap.rect_to_chunk_range
 local MOD_NAME = consts.MOD_NAME
 local LAB_OVERLAY_ANIMATION_NAME = consts.LAB_OVERLAY_ANIMATION_NAME
 local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 local VIEW_RECT_MARGIN = 6 -- tiles
-local CHUNK_SIZE = 32      -- tiles per chunk
 
---- @class LabEntityOverlay
+--- @class LabOverlay
 --- @field [1] LuaEntity Lab entity.
 --- @field [2] LuaRenderObject Render object for the overlay.
 --- @field [3] MapPositionTuple Position of the entity.
 --- @field [4] MapPositionRect Rectangle boundaries of the entity.
---- @field [5] number Surface index of the entity.
---- @field [6] number Chunk X coordinate of the entity.
---- @field [7] number Chunk Y coordinate of the entity.
 
 --- Constructor
 ---
@@ -47,13 +44,12 @@ function LabOverlayRenderer.new(color_registry)
     target_labs = table.deepcopy(config_target_labs),
 
     --- Overlays for lab entities. Key is LuaEntity unit_number.
-    --- @type table<number, LabEntityOverlay>
+    --- @type table<number, LabOverlay>
     overlays = {},
 
-    --- Overlays indexed by surface and chunk for efficient spatial lookup.
-    --- chunks[surface_index][chunk_x][chunk_y][unit_number] = LabEntityOverlay
-    --- @type table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
-    chunks = {},
+    --- Spatial map for efficient view-range iteration.
+    --- @type ChunkMap
+    chunk_map = ChunkMap.new(),
 
     --- Player's position.
     --- @type MapPositionTuple
@@ -109,58 +105,13 @@ function LabOverlayRenderer:set_lab_scale(lab_name, scale)
   end
 end
 
---- Insert an overlay into the chunk index.
----
---- @param chunks table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
---- @param unit_number number
---- @param overlay LabEntityOverlay
-local function insert_into_chunks(chunks, unit_number, overlay)
-  local surface_index = overlay[5]
-  local cx = overlay[6]
-  local cy = overlay[7]
-  local surface_chunks = chunks[surface_index]
-  if not surface_chunks then
-    surface_chunks = {}
-    chunks[surface_index] = surface_chunks
-  end
-  local col = surface_chunks[cx]
-  if not col then
-    col = {}
-    surface_chunks[cx] = col
-  end
-  local chunk_overlays = col[cy]
-  if not chunk_overlays then
-    chunk_overlays = {}
-    col[cy] = chunk_overlays
-  end
-  chunk_overlays[unit_number] = overlay
-end
-
---- Remove an overlay from the chunk index.
----
---- @param chunks table<number, table<number, table<number, table<number, LabEntityOverlay>>>>
---- @param unit_number number
---- @param overlay LabEntityOverlay
-local function remove_from_chunks(chunks, unit_number, overlay)
-  local surface_index = overlay[5]
-  local cx = overlay[6]
-  local cy = overlay[7]
-  local surface_chunks = chunks[surface_index]
-  if not surface_chunks then return end
-  local col = surface_chunks[cx]
-  if not col then return end
-  local chunk_overlays = col[cy]
-  if not chunk_overlays then return end
-  chunk_overlays[unit_number] = nil
-end
-
 --- Render an overlay for a lab entity.
 ---
 --- If the overlay already exists and `force_render` is `false`, skip rendering and returns the existing overlay.
 ---
 --- @param lab LuaEntity The lab entity.
 --- @param force_render boolean? If `true`, it renders the overlay even if it already exists.
---- @return LabEntityOverlay|nil # The rendered overlay. `nil` if the lab is not target.
+--- @return LabOverlay|nil # The rendered overlay. `nil` if the lab is not target.
 function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   if not lab.valid or lab.type ~= "lab" then return nil end
 
@@ -173,11 +124,6 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local target_lab = self.target_labs[lab.name]
   if not target_lab then return nil end
 
-  -- Remove old overlay from chunk index if force re-rendering.
-  if overlay then
-    remove_from_chunks(self.chunks, lab_unit_number, overlay)
-  end
-
   local animation = draw_animation({
     animation = target_lab.animation,
     surface = lab.surface,
@@ -188,23 +134,15 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     visible = false,
   })
 
-  local pos = map_position_tuple(lab.position)
-  local surface_index = lab.surface_index
-  local cx = floor(pos[1] / CHUNK_SIZE)
-  local cy = floor(pos[2] / CHUNK_SIZE)
-
   local new_overlay = {
     lab,
     animation,
-    pos,
+    map_position_tuple(lab.position),
     get_entity_rect(lab),
-    surface_index,
-    cx,
-    cy,
   }
 
   self.overlays[lab_unit_number] = new_overlay
-  insert_into_chunks(self.chunks, lab_unit_number, new_overlay)
+  self.chunk_map:insert(lab, new_overlay)
 
   -- Register the lab entity to be notified by `on_object_destroyed` when it is destroyed.
   script.register_on_object_destroyed(lab)
@@ -241,7 +179,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab)
     animation.destroy()
   end
 
-  remove_from_chunks(self.chunks, lab_unit_number, overlay)
+  self.chunk_map:remove(lab_unit_number)
   self.overlays[lab_unit_number] = nil
 end
 
@@ -259,22 +197,13 @@ function LabOverlayRenderer:update_lab_position(lab)
 
   local animation = overlay[2]
   if animation.surface.index == lab.surface_index then
-    -- Same surface: update animation target and chunk index if chunk changed.
+    -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
-
-    local lab_position = lab.position
-    local new_cx = floor((lab_position.x or lab_position[1]) / CHUNK_SIZE)
-    local new_cy = floor((lab_position.y or lab_position[2]) / CHUNK_SIZE)
-    if overlay[6] ~= new_cx or overlay[7] ~= new_cy then
-      remove_from_chunks(self.chunks, lab_unit_number, overlay)
-      overlay[6] = new_cx
-      overlay[7] = new_cy
-      insert_into_chunks(self.chunks, lab_unit_number, overlay)
-    end
+    self.chunk_map:move(lab)
   else
     -- The entity is teleported to another surface!
     animation.destroy()
-    remove_from_chunks(self.chunks, lab_unit_number, overlay)
+    self.chunk_map:remove(lab_unit_number)
     self.overlays[lab_unit_number] = nil
     self:render_overlay_for_lab(lab, true) -- Force re-render
   end
@@ -333,7 +262,8 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
 
   local overlays = self.overlays
-  local chunks = self.chunks
+  -- Capture the raw data table from ChunkMap for zero-overhead access in the hot path.
+  local chunk_map_data = self.chunk_map.data
   local player_position = self.player_position
   local view_rect = self.view_rect
 
@@ -410,14 +340,11 @@ function LabOverlayRenderer:get_tick_function()
     else
       -- In `view` mode, only update overlays in chunks that overlap the view rect.
       -- This avoids iterating all labs when most of them are off-screen.
-      local view_rect = view_rect                           --- @diagnostic disable-line: redefined-local
-      local surface_chunks = chunks[self.player_surface_index]
+      local view_rect = view_rect --- @diagnostic disable-line: redefined-local
+      local surface_chunks = chunk_map_data[self.player_surface_index]
       if not surface_chunks then return end
 
-      local chunk_left   = floor(view_rect[1] / CHUNK_SIZE)
-      local chunk_top    = floor(view_rect[2] / CHUNK_SIZE)
-      local chunk_right  = floor(view_rect[3] / CHUNK_SIZE)
-      local chunk_bottom = floor(view_rect[4] / CHUNK_SIZE)
+      local chunk_left, chunk_top, chunk_right, chunk_bottom = rect_to_chunk_range(view_rect)
 
       for cx = chunk_left, chunk_right do
         local col = surface_chunks[cx]
