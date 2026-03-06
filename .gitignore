@@ -1,0 +1,14 @@
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.default.json
+
+.claude/*.local.json
+
+*.code-workspace
+*.zip
+
+/luarocks
+/lua
+/lua_modules
+/.luarocks

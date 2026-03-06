@@ -1,0 +1,19 @@
+local PREFIX = "mks-dsl"
+local NAME_PREFIX = PREFIX .. "-"
+local MOD_NAME = "disco-science-lite"
+local MOD_DIR = "__" .. MOD_NAME .. "__/"
+local GRAPHICS_DIR = MOD_DIR .. "graphics/"
+
+local consts = {
+  PREFIX = PREFIX,
+  NAME_PREFIX = NAME_PREFIX,
+  MOD_NAME = MOD_NAME,
+  MOD_DIR = MOD_DIR,
+  GRAPHICS_DIR = GRAPHICS_DIR,
+
+  LAB_CREATED_EFFECT_ID = "ds-create-lab", -- For compatibility with DS
+  LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",
+  BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
+}
+
+return consts

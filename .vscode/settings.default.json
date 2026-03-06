@@ -1,0 +1,13 @@
+{
+  "Lua.runtime.version": "Lua 5.2",
+  "Lua.runtime.pathStrict": true,
+  "Lua.workspace.checkThirdParty": "ApplyInMemory",
+  "Lua.workspace.userThirdParty": [
+    "/Users/user/Library/Application Support/Windsurf/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/sumneko-3rd"
+  ],
+  "Lua.workspace.library": [
+    "${addons}/luassert/module/library",
+    "${addons}/busted/module/library",
+    "${addons}/lua-cjson/module/library"
+  ]
+}
