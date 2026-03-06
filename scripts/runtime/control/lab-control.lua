@@ -1,24 +1,30 @@
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
+local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
 
 --- @class LabControl : event_handler
 local LabControl = {}
 
---- @type ColorRegistry
-local color_registry
+--- @type LabOverlayRenderer
+local lab_overlay_renderer
+
+local function initialize()
+  lab_overlay_renderer = storage.lab_overlay_renderer or LabOverlayRenderer.new(ColorRegistry.new())
+  storage.lab_overlay_renderer = lab_overlay_renderer
+
+  script.on_nth_tick(2, lab_overlay_renderer:get_tick_function())
+end
 
 function LabControl.on_init()
-  color_registry = ColorRegistry.new()
-
-  storage.color_registry = color_registry
+  initialize()
 end
 
 function LabControl.on_load()
-  color_registry = storage.color_registry or ColorRegistry.new()
+  initialize()
 end
 
 function LabControl.add_remote_interface()
-  assert(storage, "storage is not initialized")
+  assert(lab_overlay_renderer, "Not initialized")
   RemoteInterface.bind_storage(storage --[[@as DiscoScienceStorage]])
 
   -- Compatible with original DiscoScience interface

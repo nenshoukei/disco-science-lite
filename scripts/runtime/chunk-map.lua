@@ -10,11 +10,12 @@ local ChunkMap = {}
 ChunkMap.__index = ChunkMap
 
 --- An entry stored in the chunk map for a single entity.
---- @class ChunkMapEntry
+--- @generic T
+--- @class ChunkMapEntry<T>
 --- @field [1] number Surface index of the entity.
 --- @field [2] number Chunk X coordinate of the entity.
 --- @field [3] number Chunk Y coordinate of the entity.
---- @field [4] any The entity.
+--- @field [4] T The entity value.
 
 if script then
   script.register_metatable("ChunkMap", ChunkMap)
@@ -57,7 +58,7 @@ function ChunkMap.new()
     data = {},
 
     --- Entry lookup by unit_number.
-    --- @type table<number, ChunkMapEntry>
+    --- @type table<number, ChunkMapEntry<T>>
     entries = {},
   }
   return setmetatable(self, ChunkMap)
