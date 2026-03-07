@@ -21,9 +21,6 @@ function ColorRegistry.new()
   local self = {
     --- Dictionary of ingredient colors. Key is ingredient's ItemPrototype name.
     ingredient_colors = config_ingredient_colors,
-
-    --- Whether `validate_technology_prototypes()` has been called on the global `prototypes`
-    validated = false,
   }
   return setmetatable(self, ColorRegistry)
 end
@@ -38,7 +35,6 @@ function ColorRegistry:set_ingredient_color(name, color)
     self.ingredient_colors = table.deepcopy(config_ingredient_colors)
   end
   self.ingredient_colors[name] = Utils.color_tuple(color)
-  self.validated = false
 end
 
 --- Get color for an ingredient (science pack)
@@ -55,19 +51,9 @@ end
 --- It scans all technology prototypes, and checks if their researching ingredients are registered.
 --- If there is any ingredient not registered, write logs for them.
 ---
---- If `all_prototypes` is not given, or is the global `prototypes`, it skips the validation after the first time.
---- This skip is reset when ingredient colors change.
----
 --- @param all_prototypes LuaPrototypes? Prototypes to be scanned. Defaults to the global `prototypes`.
 --- @return string[]|nil # Names of technology prototypes not registered. `nil` if all ingredients registered.
 function ColorRegistry:validate_technology_prototypes(all_prototypes)
-  if not all_prototypes or all_prototypes == prototypes then
-    if self.validated then
-      return
-    end
-    self.validated = true
-  end
-
   all_prototypes = all_prototypes or prototypes
   local ingredient_colors = self.ingredient_colors
 

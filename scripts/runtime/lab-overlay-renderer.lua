@@ -59,10 +59,9 @@ function LabOverlayRenderer.new(color_registry)
     --- @type ChunkMap<LabOverlay>
     chunk_map = ChunkMap.new(),
 
-    --- Chunk ranges visible to each connected player.
-    --- Empty when no player is active (e.g. all in chart mode).
-    --- @type PlayerView[]
-    player_views = {},
+    --- Chunk range visible to the player. nil when no player is active.
+    --- @type PlayerView|nil
+    player_view = nil,
 
     --- Player's position. Used by the color function.
     --- Updated to the first active player's position.
@@ -165,9 +164,8 @@ end
 
 --- Remove the overlay from the lab entity.
 ---
---- @param lab LuaEntity
-function LabOverlayRenderer:remove_overlay_from_lab(lab)
-  local lab_unit_number = lab.unit_number
+--- @param lab_unit_number number The unit_number of the removed lab entity.
+function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   if not lab_unit_number then return end
 
   local overlay = self.overlays[lab_unit_number]
@@ -180,6 +178,37 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab)
 
   self.chunk_map:remove(lab_unit_number)
   self.overlays[lab_unit_number] = nil
+end
+
+--- Remove all overlays on the given surface.
+---
+--- Call this on `on_surface_deleted` or `on_surface_cleared`.
+--- Destroys render objects if still valid (e.g. on surface clear), and cleans up Lua data structures.
+---
+--- @param surface_index number
+function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
+  local surface_chunks = self.chunk_map.data[surface_index]
+  if not surface_chunks then return end
+
+  local overlays = self.overlays
+  local entries = self.chunk_map.entries
+  for _, col in pairs(surface_chunks) do
+    for _, chunk in pairs(col) do
+      for unit_number in pairs(chunk) do
+        local overlay = overlays[unit_number]
+        if overlay then
+          local animation = overlay[2]
+          if animation.valid then
+            animation.destroy()
+          end
+          overlays[unit_number] = nil
+        end
+        entries[unit_number] = nil
+      end
+    end
+  end
+
+  self.chunk_map.data[surface_index] = nil
 end
 
 --- Update the lab entity position for updating its overlay.
@@ -208,68 +237,65 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
---- Rebuild the per-player view data from all connected players.
+--- Rebuild the view data from the single connected player.
 ---
---- Call this whenever any player's position, zoom, or surface changes.
---- The first active player's force and position are used for color calculations.
-function LabOverlayRenderer:update_player_views()
+--- Call this whenever the player's position, zoom, or surface changes.
+--- Does nothing if multiplayer (more than one connected player).
+function LabOverlayRenderer:update_player_view()
   local players = game.connected_players
-  local player_views = self.player_views
-  local n = 0
 
-  for i = 1, #players do
-    local player = players[i]
-    if player.render_mode ~= RENDER_MODE_CHART then
-      local player_position = player.position
-      local pos_x = player_position.x
-      local pos_y = player_position.y
-
-      -- Use the first active player for force and position (used by color function).
-      if n == 0 then
-        self.player_force = player.force --[[@as LuaForce]]
-        local self_player_position = self.player_position
-        self_player_position[1] = pos_x
-        self_player_position[2] = pos_y
-      end
-
-      local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
-      local display_resolution = player.display_resolution
-      local half_view_width = ceil(display_resolution.width / f)
-      local half_view_height = ceil(display_resolution.height / f)
-
-      local view_left = pos_x - half_view_width - VIEW_RECT_MARGIN
-      local view_top = pos_y - half_view_height - VIEW_RECT_MARGIN
-      local view_right = pos_x + half_view_width + VIEW_RECT_MARGIN
-      local view_bottom = pos_y + half_view_height + VIEW_RECT_MARGIN
-
-      local chunk_left, chunk_top, chunk_right, chunk_bottom =
-        rect_to_chunk_range({ view_left, view_top, view_right, view_bottom })
-
-      n = n + 1
-      local view = player_views[n]
-      if not view then
-        view = { 0, 0, 0, 0, 0 }
-        player_views[n] = view
-      end
-      view[1] = player.surface_index
-      view[2] = chunk_left
-      view[3] = chunk_top
-      view[4] = chunk_right
-      view[5] = chunk_bottom
-    end
+  -- This mod is single-player only. Do not update in multiplayer.
+  if #players ~= 1 then
+    self.player_view = nil
+    return
   end
 
-  -- Clear stale entries from previous calls with more players.
-  for i = n + 1, #player_views do
-    player_views[i] = nil
+  local player = players[1]
+  if player.render_mode == RENDER_MODE_CHART then
+    self.player_view = nil
+    return
   end
+
+  self.player_force = player.force --[[@as LuaForce]]
+
+  local player_position = player.position
+  local pos_x = player_position.x
+  local pos_y = player_position.y
+  local self_player_position = self.player_position
+  self_player_position[1] = pos_x
+  self_player_position[2] = pos_y
+
+  local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
+  local display_resolution = player.display_resolution
+  local half_view_width = ceil(display_resolution.width / f)
+  local half_view_height = ceil(display_resolution.height / f)
+
+  local view_rect = {
+    pos_x - half_view_width - VIEW_RECT_MARGIN,
+    pos_y - half_view_height - VIEW_RECT_MARGIN,
+    pos_x + half_view_width + VIEW_RECT_MARGIN,
+    pos_y + half_view_height + VIEW_RECT_MARGIN,
+  }
+  local chunk_left, chunk_top, chunk_right, chunk_bottom = rect_to_chunk_range(view_rect)
+
+  -- Update in-place
+  local view = self.player_view
+  if not view then
+    view = { 0, 0, 0, 0, 0 }
+    self.player_view = view
+  end
+  view[1] = player.surface_index
+  view[2] = chunk_left
+  view[3] = chunk_top
+  view[4] = chunk_right
+  view[5] = chunk_bottom
 end
 
 --- Get a tick function to be called by on_tick event.
 ---
---- The function updates overlays in the chunk ranges visible to each connected player.
+--- The function updates overlays in the chunk range visible to the player.
 ---
---- @return fun(event: EventData.on_tick)
+--- @return fun()
 function LabOverlayRenderer:get_tick_function()
   -- Because a tick function is critical for UPS (Updates Per Second), we should optimize it very tightly.
   --
@@ -280,10 +306,7 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
 
   local color_registry = self.color_registry
-  -- Capture the raw data table from ChunkMap for zero-overhead access in the hot path.
   local chunk_map_data = self.chunk_map.data
-  -- Capture as upvalue: the table is mutated by update_player_views, not replaced.
-  local player_views = self.player_views
   local player_position = self.player_position
 
   -- For temporary. This will go into settings.
@@ -297,18 +320,12 @@ function LabOverlayRenderer:get_tick_function()
   local color_function_index, color_function = ColorFunctions.choose_random(hq)
   local color = { 0, 0, 0 }
 
-  -- Tracks which chunks have already been processed this tick to avoid redundant
-  -- updates when multiple players' views overlap. Mirrors chunk_map_data structure:
-  -- chunk_ticks[surface_index][cx][cy] = current_tick.
-  --- @type table<number, table<number, table<number, number>>>
-  local chunk_ticks = {}
-  local current_tick = 0
-
   return function ()
-    -- Return early when no player is active (all disconnected or in chart mode).
-    if not player_views[1] then return end
+    -- Return early when no player is active (disconnected or in chart mode).
+    local player_view = self.player_view
+    if not player_view then return end
 
-    -- `self.player_force` is always set when player_views is non-empty.
+    -- `self.player_force` is always set when player_view is non-nil.
     local player_force = self.player_force --[[@as LuaForce]]
     if player_force.current_research ~= current_research then
       current_research = player_force.current_research
@@ -325,7 +342,6 @@ function LabOverlayRenderer:get_tick_function()
       color_function_index, color_function = ColorFunctions.choose_random(hq, color_function_index)
     end
     meandering_tick = meandering_tick + meandering_direction
-    current_tick = current_tick + 1
 
     -- We do this for performance
     local player_force_index = player_force.index
@@ -336,63 +352,41 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                                     --- @diagnostic disable-line: redefined-local
     local STATUS_WORKING = STATUS_WORKING                   --- @diagnostic disable-line: redefined-local
     local STATUS_LOW_POWER = STATUS_LOW_POWER               --- @diagnostic disable-line: redefined-local
-    local current_tick = current_tick                       --- @diagnostic disable-line: redefined-local
-    local chunk_ticks = chunk_ticks                         --- @diagnostic disable-line: redefined-local
 
-    -- Update overlays in the chunk ranges visible to each connected player.
-    -- chunk_ticks ensures each chunk is processed at most once per tick,
-    -- even when multiple players' views overlap.
-    for i = 1, #player_views do
-      local view = player_views[i]
-      local surface_index = view[1]
-      local surface_chunks = chunk_map_data[surface_index]
-      if surface_chunks then
-        local chunk_left = view[2]
-        local chunk_top = view[3]
-        local chunk_right = view[4]
-        local chunk_bottom = view[5]
+    -- Update overlays in the chunk range visible to the player.
+    local surface_chunks = chunk_map_data[player_view[1]]
+    if surface_chunks then
+      local chunk_left = player_view[2]
+      local chunk_top = player_view[3]
+      local chunk_right = player_view[4]
+      local chunk_bottom = player_view[5]
 
-        local ticks_surface = chunk_ticks[surface_index]
-        if not ticks_surface then
-          ticks_surface = {}
-          chunk_ticks[surface_index] = ticks_surface
-        end
+      for cx = chunk_left, chunk_right do
+        local col = surface_chunks[cx]
+        if col then
+          for cy = chunk_top, chunk_bottom do
+            local chunk = col[cy]
+            if chunk then
+              for _, overlay in pairs(chunk) do
+                local entity = overlay[1]
+                local animation = overlay[2]
+                local entity_position = overlay[3]
 
-        for cx = chunk_left, chunk_right do
-          local col = surface_chunks[cx]
-          if col then
-            local ticks_col = ticks_surface[cx]
-            if not ticks_col then
-              ticks_col = {}
-              ticks_surface[cx] = ticks_col
-            end
+                local status = entity.status
+                local is_visible = (
+                  (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+                  current_research_colors ~= nil and
+                  entity.force_index == player_force_index
+                )
 
-            for cy = chunk_top, chunk_bottom do
-              local chunk = col[cy]
-              if chunk and ticks_col[cy] ~= current_tick then
-                ticks_col[cy] = current_tick
+                if animation.visible ~= is_visible then
+                  animation.visible = is_visible
+                end
 
-                for _, overlay in pairs(chunk) do
-                  local entity = overlay[1]
-                  local animation = overlay[2]
-                  local entity_position = overlay[3]
-
-                  local status = entity.status
-                  local is_visible = (
-                    (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
-                    current_research_colors ~= nil and
-                    entity.force_index == player_force_index
-                  )
-
-                  if animation.visible ~= is_visible then
-                    animation.visible = is_visible
-                  end
-
-                  if is_visible then
-                    --- @cast current_research_colors ColorTuple[]
-                    color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
-                    animation.color = color
-                  end
+                if is_visible then
+                  --- @cast current_research_colors ColorTuple[]
+                  color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
+                  animation.color = color
                 end
               end
             end

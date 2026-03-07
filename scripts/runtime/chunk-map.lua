@@ -113,13 +113,23 @@ function ChunkMap:remove(unit_number)
   local entry = self.entries[unit_number]
   if not entry then return end
 
-  local surface_chunks = self.data[entry[1]]
+  local data = self.data
+  local surface_chunks = data[entry[1]]
   if surface_chunks then
     local col = surface_chunks[entry[2]]
     if col then
       local chunk = col[entry[3]]
       if chunk then
         chunk[unit_number] = nil
+        if not next(chunk) then
+          col[entry[3]] = nil
+          if not next(col) then
+            surface_chunks[entry[2]] = nil
+            if not next(surface_chunks) then
+              data[entry[1]] = nil
+            end
+          end
+        end
       end
     end
   end
@@ -147,41 +157,9 @@ function ChunkMap:move(entity)
 
   if entry[1] == new_surface_index and entry[2] == new_cx and entry[3] == new_cy then return end
 
-  -- Remove from old chunk.
-  local old_surface_chunks = self.data[entry[1]]
-  if old_surface_chunks then
-    local col = old_surface_chunks[entry[2]]
-    if col then
-      local chunk = col[entry[3]]
-      if chunk then
-        chunk[unit_number] = nil
-      end
-    end
-  end
-
-  -- Insert into new chunk.
-  local data = self.data
-  local new_surface_chunks = data[new_surface_index]
-  if not new_surface_chunks then
-    new_surface_chunks = {}
-    data[new_surface_index] = new_surface_chunks
-  end
-  local col = new_surface_chunks[new_cx]
-  if not col then
-    col = {}
-    new_surface_chunks[new_cx] = col
-  end
-  local chunk = col[new_cy]
-  if not chunk then
-    chunk = {}
-    col[new_cy] = chunk
-  end
-  chunk[unit_number] = entry[4]
-
-  -- Update entry in place to avoid allocating a new table.
-  entry[1] = new_surface_index
-  entry[2] = new_cx
-  entry[3] = new_cy
+  local value = entry[4]
+  self:remove(unit_number)
+  self:insert(entity, value)
 end
 
 --- Return the raw surface chunks table for direct iteration in hot paths.
