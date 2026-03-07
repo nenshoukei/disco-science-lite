@@ -77,12 +77,12 @@ describe("ColorFunctions", function ()
   describe("functions", function ()
     local origin = { 0, 0 }
 
-    it("provides exactly 6 color functions", function ()
-      assert.are.equal(6, #ColorFunctions.functions)
+    it("provides exactly 10 color functions", function ()
+      assert.are.equal(10, #ColorFunctions.functions)
     end)
 
-    -- Generic properties shared by all 6 functions
-    for i = 1, 6 do
+    -- Generic properties shared by all 10 functions
+    for i = 1, 10 do
       describe(string.format("[%d]", i), function ()
         it("writes three numeric values into output", function ()
           local out = {}
@@ -104,7 +104,7 @@ describe("ColorFunctions", function ()
 
         it("produces a different result at a different phase", function ()
           -- pos = {4, 3}: chosen so that phase=0 and phase=1000 land in different
-          -- color segments for all 6 functions (avoids mod-3 period coincidences).
+          -- color segments for all 10 functions (avoids mod-3 period coincidences).
           local pos = { 4, 3 }
           local out1, out2 = {}, {}
           ColorFunctions.functions[i](out1, 0, colors, origin, pos)
@@ -113,10 +113,12 @@ describe("ColorFunctions", function ()
         end)
 
         it("produces a different result at a different lab position", function ()
-          -- pos1/pos2 differ in both x and y so that distance, angle, horizontal,
-          -- vertical, and diagonal components all differ across all 6 functions.
+          -- pos1/pos2 are chosen so that all 10 functions produce distinct colors.
+          -- {5, 0} and {4, 8} differ in both x and y, land in different color segments
+          -- for each function (including the 4-fold Kaleidoscope which was sensitive to
+          -- positions that map to the same clamped segment via |dx|/|dy| folding).
           local pos1 = { 5, 0 }
-          local pos2 = { 3, 10 }
+          local pos2 = { 4, 8 }
           local out1, out2 = {}, {}
           ColorFunctions.functions[i](out1, 0, colors, origin, pos1)
           ColorFunctions.functions[i](out2, 0, colors, origin, pos2)
@@ -216,6 +218,77 @@ describe("ColorFunctions", function ()
         ColorFunctions.functions[6](out1, 0, colors, origin, lab_cell0)
         ColorFunctions.functions[6](out2, 0, colors, origin, lab_cell1)
         assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+      end)
+    end)
+
+    describe("[7] Spiral", function ()
+      it("labs at equal distance but different angles have different colors", function ()
+        -- Both at distance 8 from player, but at different angles.
+        -- Spiral combines radial and angular, so equal distance != equal color.
+        local lab_east  = {  8, 0 } -- theta = 0
+        local lab_north = { 0, -8 } -- theta = -pi/2
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[7](out1, 0, colors, origin, lab_east)
+        ColorFunctions.functions[7](out2, 0, colors, origin, lab_north)
+        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+      end)
+    end)
+
+    describe("[8] Diamond", function ()
+      it("returns the same color for labs on the same Manhattan-distance ring", function ()
+        local lab_a = { 8, 0 } -- |dx|+|dy| = 8
+        local lab_b = { 4, 4 } -- |dx|+|dy| = 8
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[8](out1, 0, colors, origin, lab_a)
+        ColorFunctions.functions[8](out2, 0, colors, origin, lab_b)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[9] Checkerboard", function ()
+      it("returns the same color for labs in the same grid cell", function ()
+        local lab_a = { 1, 1 } -- cell (0, 0)
+        local lab_b = { 4, 3 } -- cell (0, 0)
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[9](out1, 0, colors, origin, lab_a)
+        ColorFunctions.functions[9](out2, 0, colors, origin, lab_b)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("returns a different color for labs in adjacent grid cells", function ()
+        local lab_cell0 = {  1, 0 } -- cell (0, 0), gx+gy=0
+        local lab_cell1 = { 10, 0 } -- cell (1, 0), gx+gy=1
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[9](out1, 0, colors, origin, lab_cell0)
+        ColorFunctions.functions[9](out2, 0, colors, origin, lab_cell1)
+        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+      end)
+    end)
+
+    describe("[10] Kaleidoscope", function ()
+      it("labs mirrored across both axes have the same color (4-fold symmetry)", function ()
+        local lab_ne = {  5,  3 }
+        local lab_nw = { -5,  3 }
+        local lab_se = {  5, -3 }
+        local lab_sw = { -5, -3 }
+        local out_ne, out_nw, out_se, out_sw = {}, {}, {}, {}
+        ColorFunctions.functions[10](out_ne, 0, colors, origin, lab_ne)
+        ColorFunctions.functions[10](out_nw, 0, colors, origin, lab_nw)
+        ColorFunctions.functions[10](out_se, 0, colors, origin, lab_se)
+        ColorFunctions.functions[10](out_sw, 0, colors, origin, lab_sw)
+        assert.are.equal(out_ne[1], out_nw[1])
+        assert.are.equal(out_ne[2], out_nw[2])
+        assert.are.equal(out_ne[3], out_nw[3])
+        assert.are.equal(out_ne[1], out_se[1])
+        assert.are.equal(out_ne[2], out_se[2])
+        assert.are.equal(out_ne[3], out_se[3])
+        assert.are.equal(out_ne[1], out_sw[1])
+        assert.are.equal(out_ne[2], out_sw[2])
+        assert.are.equal(out_ne[3], out_sw[3])
       end)
     end)
   end)
