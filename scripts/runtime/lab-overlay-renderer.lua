@@ -136,7 +136,7 @@ end
 ---
 --- The tick function returned by `get_tick_function()` should be refreshed afterwards.
 function LabOverlayRenderer:render_overlays_for_all_labs()
-  -- Update player view so render_overlay_for_lab can filter by the current player force.
+  -- Update player tracker so render_overlay_for_lab can filter by the current player force.
   self.player_tracker:update(game.connected_players)
 
   -- Destroy all rendering objects and reset data structures.
@@ -229,10 +229,10 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
---- Update the player view from `game.connected_players`.
+--- Update the players from `game.connected_players`.
 ---
 --- Called by event handlers (position/zoom/surface changes).
-function LabOverlayRenderer:update_player_view()
+function LabOverlayRenderer:update_players()
   self.player_tracker:update(game.connected_players)
 end
 
@@ -240,7 +240,7 @@ end
 ---
 --- Called periodically (not every tick) to avoid expensive C bridge calls on every tick:
 ---   - Tracks current research and updates current_research_colors when it changes.
----   - Checks entity.status and updates overlay[5] (cached visible state) and animation.visible.
+---   - Checks entity.status and updates overlay[OV_VISIBLE] and animation.visible.
 function LabOverlayRenderer:update_overlay_states()
   local player_tracker = self.player_tracker
   local view = player_tracker.view
@@ -297,22 +297,21 @@ function LabOverlayRenderer:get_tick_function()
   --
   -- For optimization, as much as possible we should:
   -- * Avoid access to the same key on a table multiple times.
+  -- * Avoid access to a table by using string keys. Use array indices instead.
   -- * Avoid access to the same outer-scope variable (upvalue) multiple times.
   -- * Avoid function calls. Make it inline.
   -- * Avoid creating a new object.
+  -- * Avoid access to native objects provided by Factorio. Lua-C-bridge is expensive.
 
   local chunk_map_data = self.chunk_map.data
   local player_tracker = self.player_tracker
   local view = player_tracker.view
   local player_position = player_tracker.position
 
-  -- For temporary. This will go into settings.
-  local hq = true
-
   local meandering_tick = 1
   local meandering_direction = 1
   local meandering_target = random(100, 300)
-  local color_function_index, color_function = ColorFunctions.choose_random(hq)
+  local color_function, color_function_index = ColorFunctions.choose_random()
   local color_switch_counter = 0
   local color = { 0, 0, 0 }
   local stride_offset = 1
@@ -344,7 +343,7 @@ function LabOverlayRenderer:get_tick_function()
     color_switch_counter = color_switch_counter + 1
     if color_switch_counter == COLOR_SWITCH_INTERVAL then
       color_switch_counter = 0
-      color_function_index, color_function = ColorFunctions.choose_random(hq, color_function_index)
+      color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
     end
 
     stride_offset = stride_offset + 1

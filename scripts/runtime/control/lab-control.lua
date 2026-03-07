@@ -12,7 +12,7 @@ local renderer
 
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
-  script.on_nth_tick(5, function () renderer:update_player_view() end)
+  script.on_nth_tick(10, function () renderer:update_players() end)
   script.on_nth_tick(30, function () renderer:update_overlay_states() end)
 end
 
@@ -60,9 +60,9 @@ function LabControl.add_remote_interface()
   remote.add_interface("DiscoScience", RemoteInterface.functions)
 end
 
-local function renderer_update_player_view()
+local function renderer_update_players()
   if renderer then
-    renderer:update_player_view()
+    renderer:update_players()
   end
 end
 
@@ -70,11 +70,11 @@ local LAB_CREATED_EFFECT_ID = consts.LAB_CREATED_EFFECT_ID
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
-  [defines.events.on_player_changed_position] = renderer_update_player_view,
-  [defines.events.on_player_changed_surface] = renderer_update_player_view,
-  [defines.events.on_player_display_resolution_changed] = renderer_update_player_view,
-  [defines.events.on_player_created] = renderer_update_player_view,
-  [defines.events.on_player_removed] = renderer_update_player_view,
+  [defines.events.on_player_changed_position] = renderer_update_players,
+  [defines.events.on_player_changed_surface] = renderer_update_players,
+  [defines.events.on_player_display_resolution_changed] = renderer_update_players,
+  [defines.events.on_player_created] = renderer_update_players,
+  [defines.events.on_player_removed] = renderer_update_players,
 
   [defines.events.on_player_changed_force] = function ()
     -- Rebuild overlays because the force filter in render_overlay_for_lab depends on the

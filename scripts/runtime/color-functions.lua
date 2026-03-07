@@ -57,15 +57,7 @@ ColorFunctions.loop_interpolate = loop_interpolate
 --- @alias ColorFunction fun(output: ColorTuple, tick: number, colors: ColorTuple[], player_position: MapPositionTuple, lab_position: MapPositionTuple)
 
 --- @type ColorFunction[]
-local functions_for_lq = {
-  function (output, tick, colors, player_position, lab_position)
-    return loop_interpolate(output, tick * INV_40, colors, #colors, 1.5)
-  end,
-}
-ColorFunctions.functions_for_lq = functions_for_lq
-
---- @type ColorFunction[]
-local functions_for_hq = {
+local functions = {
   -- [1] Radial: color cycles based on the distance between the player and the lab.
   function (output, tick, colors, player_position, lab_position)
     local dx = lab_position[1] - player_position[1]
@@ -109,33 +101,28 @@ local functions_for_hq = {
     return loop_interpolate(output, t, colors, #colors, 5)
   end,
 }
-ColorFunctions.functions_for_hq = functions_for_hq
+ColorFunctions.functions = functions
+
+local n_functions = #functions
 
 --- Choose a random color function.
 ---
 --- If `prev_index` is given, that index will not be chosen.
 ---
---- @param hq boolean `true` for HQ mode, `false` for LQ mode.
---- @param prev_index integer|nil Previous color function index. `nil` for first time.
---- @return integer # Index of chosen color function.
+--- @param prev_index integer? Previous color function index. `nil` for first time.
 --- @return ColorFunction # Chosen color function.
-function ColorFunctions.choose_random(hq, prev_index)
-  local funcs = hq and functions_for_hq or functions_for_lq
-  local n_funcs = #funcs
-  if n_funcs == 1 then
-    return 1, funcs[1]
-  else
-    local new_index
-    if prev_index then
-      new_index = random(1, n_funcs - 1)
-      if new_index >= prev_index then
-        new_index = new_index + 1
-      end
-    else
-      new_index = random(1, n_funcs)
+--- @return integer # Index of chosen color function.
+function ColorFunctions.choose_random(prev_index)
+  local new_index
+  if prev_index then
+    new_index = random(1, n_functions - 1)
+    if new_index >= prev_index then
+      new_index = new_index + 1
     end
-    return new_index, funcs[new_index]
+  else
+    new_index = random(1, n_functions)
   end
+  return functions[new_index], new_index
 end
 
 return ColorFunctions
