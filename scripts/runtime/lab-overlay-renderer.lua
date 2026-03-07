@@ -1,5 +1,4 @@
 local consts = require("scripts.shared.consts")
-local config_target_labs = require("scripts.shared.config.target-labs")
 local Utils = require("scripts.shared.utils")
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
@@ -8,22 +7,21 @@ local ChunkMap = require("scripts.runtime.chunk-map")
 local LabOverlayRenderer = {}
 LabOverlayRenderer.__index = LabOverlayRenderer
 
-if script then
-  script.register_metatable("LabOverlayRenderer", LabOverlayRenderer)
-end
-
 local ceil = math.ceil
+local max = math.max
+local random = math.random
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local map_position_tuple = Utils.map_position_tuple
 local get_entity_rect = Utils.get_entity_rect
 local rect_to_chunk_range = ChunkMap.rect_to_chunk_range
 local MOD_NAME = consts.MOD_NAME
-local LAB_OVERLAY_ANIMATION_NAME = consts.LAB_OVERLAY_ANIMATION_NAME
 local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 local VIEW_RECT_MARGIN = 6 -- tiles
+local STRIDE = 6           -- Number of ticks to spread overlay updates over.
+local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switches.
 
 --- @class LabOverlay
 --- @field [1] LuaEntity Lab entity.
@@ -42,14 +40,13 @@ local VIEW_RECT_MARGIN = 6 -- tiles
 --- Constructor
 ---
 --- @param color_registry ColorRegistry
+--- @param target_lab_registry TargetLabRegistry
 --- @return LabOverlayRenderer
-function LabOverlayRenderer.new(color_registry)
+function LabOverlayRenderer.new(color_registry, target_lab_registry)
   --- @class LabOverlayRenderer
   local self = {
     color_registry = color_registry,
-
-    --- Dictionary of target labs. Key is LabPrototype name.
-    target_labs = table.deepcopy(config_target_labs),
+    target_lab_registry = target_lab_registry,
 
     --- Overlays for lab entities. Key is LuaEntity unit_number.
     --- @type table<number, LabOverlay>
@@ -76,33 +73,6 @@ function LabOverlayRenderer.new(color_registry)
   return setmetatable(self, LabOverlayRenderer)
 end
 
---- Add a new target lab type.
----
---- @param lab_name string LabPrototype name.
---- @param target_lab TargetLab Settings for the lab.
-function LabOverlayRenderer:add_target_lab(lab_name, target_lab)
-  self.target_labs[lab_name] = target_lab
-end
-
---- Set scale of the target lab.
----
---- If the given lab is not a target, it will registers the lab as a target with the default overlay.
----
---- @param lab_name string LabPrototype name.
---- @param scale integer Scale of the lab. (Default scale is `1`)
-function LabOverlayRenderer:set_lab_scale(lab_name, scale)
-  local target_lab = self.target_labs[lab_name]
-  if target_lab then
-    target_lab.scale = scale
-  else
-    -- Automatically creates a TargetLab with the default overlay.
-    self.target_labs[lab_name] = {
-      animation = LAB_OVERLAY_ANIMATION_NAME,
-      scale = scale,
-    }
-  end
-end
-
 --- Render an overlay for a lab entity.
 ---
 --- If the overlay already exists and `force_render` is `false`, skip rendering and returns the existing overlay.
@@ -119,7 +89,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local overlay = self.overlays[lab_unit_number]
   if overlay and not force_render then return overlay end
 
-  local target_lab = self.target_labs[lab.name]
+  local target_lab = self.target_lab_registry:get(lab.name)
   if not target_lab then return nil end
 
   local animation = draw_animation({
@@ -317,8 +287,11 @@ function LabOverlayRenderer:get_tick_function()
 
   local meandering_tick = 1
   local meandering_direction = 1
+  local meandering_target = random(100, 300)
   local color_function_index, color_function = ColorFunctions.choose_random(hq)
+  local color_switch_counter = 0
   local color = { 0, 0, 0 }
+  local stride_offset = 0
 
   return function ()
     -- Return early when no player is active (disconnected or in chart mode).
@@ -332,16 +305,29 @@ function LabOverlayRenderer:get_tick_function()
       current_research_colors = current_research and color_registry:get_colors_for_research(current_research)
     end
 
-    -- `meandering_tick` goes up to 60, then goes down to 0, then repeat.
-    -- On changing the direction, chooses a new color function.
-    if meandering_tick == 60 then
-      meandering_direction = -1
-      color_function_index, color_function = ColorFunctions.choose_random(hq, color_function_index)
-    elseif meandering_tick == 0 then
-      meandering_direction = 1
-      color_function_index, color_function = ColorFunctions.choose_random(hq, color_function_index)
+    -- `meandering_tick` wanders up and down between random turning points.
+    if meandering_tick == meandering_target then
+      if meandering_direction == 1 then
+        -- Reached the top: reverse downward to a random floor.
+        meandering_direction = -1
+        meandering_target = random(0, max(0, meandering_tick - 50))
+      else
+        -- Reached the bottom: reverse upward to a random ceiling.
+        meandering_direction = 1
+        meandering_target = meandering_tick + random(50, 300)
+      end
     end
     meandering_tick = meandering_tick + meandering_direction
+
+    -- Switch color function periodically.
+    color_switch_counter = color_switch_counter + 1
+    if color_switch_counter == COLOR_SWITCH_INTERVAL then
+      color_switch_counter = 0
+      color_function_index, color_function = ColorFunctions.choose_random(hq, color_function_index)
+    end
+
+    stride_offset = stride_offset + 1
+    if stride_offset == STRIDE then stride_offset = 0 end
 
     -- We do this for performance
     local player_force_index = player_force.index
@@ -352,6 +338,7 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                                     --- @diagnostic disable-line: redefined-local
     local STATUS_WORKING = STATUS_WORKING                   --- @diagnostic disable-line: redefined-local
     local STATUS_LOW_POWER = STATUS_LOW_POWER               --- @diagnostic disable-line: redefined-local
+    local stride_offset = stride_offset                     --- @diagnostic disable-line: redefined-local
 
     -- Update overlays in the chunk range visible to the player.
     local surface_chunks = chunk_map_data[player_view[1]]
@@ -367,26 +354,28 @@ function LabOverlayRenderer:get_tick_function()
           for cy = chunk_top, chunk_bottom do
             local chunk = col[cy]
             if chunk then
-              for _, overlay in pairs(chunk) do
-                local entity = overlay[1]
-                local animation = overlay[2]
-                local entity_position = overlay[3]
+              for unit_number, overlay in pairs(chunk) do
+                if unit_number % STRIDE == stride_offset then
+                  local entity = overlay[1]
+                  local animation = overlay[2]
+                  local entity_position = overlay[3]
 
-                local status = entity.status
-                local is_visible = (
-                  (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
-                  current_research_colors ~= nil and
-                  entity.force_index == player_force_index
-                )
+                  local status = entity.status
+                  local is_visible = (
+                    (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+                    current_research_colors ~= nil and
+                    entity.force_index == player_force_index
+                  )
 
-                if animation.visible ~= is_visible then
-                  animation.visible = is_visible
-                end
+                  if animation.visible ~= is_visible then
+                    animation.visible = is_visible
+                  end
 
-                if is_visible then
-                  --- @cast current_research_colors ColorTuple[]
-                  color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
-                  animation.color = color
+                  if is_visible then
+                    --- @cast current_research_colors ColorTuple[]
+                    color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
+                    animation.color = color
+                  end
                 end
               end
             end

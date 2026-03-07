@@ -32,7 +32,7 @@ end
 function ColorRegistry:set_ingredient_color(name, color)
   if self.ingredient_colors == config_ingredient_colors then
     -- We should make a copy for modifying it
-    self.ingredient_colors = table.deepcopy(config_ingredient_colors)
+    self.ingredient_colors = Utils.table_deep_copy(config_ingredient_colors)
   end
   self.ingredient_colors[name] = Utils.color_tuple(color)
 end

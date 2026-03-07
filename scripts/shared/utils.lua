@@ -1,5 +1,29 @@
 local Utils = {}
 
+--- Make a deep copy of a table
+---
+--- This function is copied from util.lua provided by Factorio
+---
+--- @param object table
+--- @return table
+function Utils.table_deep_copy(object)
+  local lookup_table = {}
+  local function _copy(obj)
+    if type(obj) ~= "table" then
+      return obj
+    elseif lookup_table[obj] then
+      return lookup_table[obj]
+    end
+    local new_table = {}
+    lookup_table[obj] = new_table
+    for index, value in pairs(obj) do
+      new_table[_copy(index)] = _copy(value)
+    end
+    return setmetatable(new_table, getmetatable(obj))
+  end
+  return _copy(object)
+end
+
 --- Make a ColorTuple for color
 ---
 --- @param color Color

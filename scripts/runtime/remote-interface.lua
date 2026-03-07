@@ -4,15 +4,15 @@ local RemoteInterface = {
   functions = {},
 }
 
---- @type LabOverlayRenderer|nil
-local renderer = nil
+--- @type TargetLabRegistry|nil
+local target_lab_registry = nil
 --- @type ColorRegistry|nil
 local color_registry = nil
 
 --- @param ds_storage DiscoScienceStorage
 function RemoteInterface.bind_storage(ds_storage)
-  renderer = ds_storage.renderer
-  color_registry = renderer.color_registry
+  target_lab_registry = ds_storage.target_lab_registry
+  color_registry = ds_storage.color_registry
 end
 
 --- @class RemoteInterfaceFunctions
@@ -24,8 +24,8 @@ local RemoteInterfaceFunctions = RemoteInterface.functions
 --- @param animation string AnimationPrototype name for an overlay.
 --- @param scale integer? Scale of the lab. (Default scale is `1`)
 function RemoteInterfaceFunctions.addTargetLab(lab_name, animation, scale)
-  if renderer then
-    renderer:add_target_lab(lab_name, {
+  if target_lab_registry then
+    target_lab_registry:add(lab_name, {
       animation = animation,
       scale = scale or 1,
     })
@@ -39,8 +39,8 @@ end
 --- @param lab_name string LabPrototype name.
 --- @param scale integer Scale of the lab. (Default scale is `1`)
 function RemoteInterfaceFunctions.setLabScale(lab_name, scale)
-  if renderer then
-    renderer:set_lab_scale(lab_name, scale)
+  if target_lab_registry then
+    target_lab_registry:set_scale(lab_name, scale)
   end
 end
 

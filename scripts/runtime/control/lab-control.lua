@@ -1,6 +1,7 @@
 local consts = require("scripts.shared.consts")
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
+local TargetLabRegistry = require("scripts.runtime.target-lab-registry")
 local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
 
 --- @class LabControl : event_handler
@@ -10,35 +11,55 @@ local LabControl = {}
 local renderer
 
 local function setup_event_handlers()
-  script.on_nth_tick(2, renderer:get_tick_function())
+  script.on_event(defines.events.on_tick, renderer:get_tick_function())
   script.on_nth_tick(5, function () renderer:update_player_view() end)
+
+  -- For profiling (must be removed for production)
+  script.on_nth_tick(60 * 30, function ()
+    script.on_nth_tick(60 * 30, nil)
+    remote.call("profiler", "save", "dsl-profile")
+    log("Profile saved")
+  end)
 end
 
 function LabControl.on_init()
-  renderer = LabOverlayRenderer.new(ColorRegistry.new())
-  storage.renderer = renderer
-  RemoteInterface.bind_storage(storage --[[@as DiscoScienceStorage]])
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  ds_storage.color_registry = ColorRegistry.new()
+  ds_storage.target_lab_registry = TargetLabRegistry.new()
+  RemoteInterface.bind_storage(ds_storage)
+
+  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
   renderer:render_overlays_for_all_labs()
+
   setup_event_handlers()
 
   -- Other mods that register ingredient colors via RemoteInterface at the top level of
   -- their control.lua are guaranteed to have registered by this point. However, mods that
   -- register inside their own on_init handler may not have run yet, depending on load order.
-  renderer.color_registry:validate_technology_prototypes()
+  ds_storage.color_registry:validate_technology_prototypes()
 end
 
 function LabControl.on_load()
-  renderer = storage.renderer
-  RemoteInterface.bind_storage(storage --[[@as DiscoScienceStorage]])
-  setup_event_handlers()
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  RemoteInterface.bind_storage(ds_storage)
+
+  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
+
+  -- on_load cannot modify game state, so defer rendering to the first tick.
+  script.on_event(defines.events.on_tick, function ()
+    renderer:render_overlays_for_all_labs()
+    setup_event_handlers() -- overwrites on_tick event handler
+  end)
 end
 
 function LabControl.on_configuration_changed()
   renderer:render_overlays_for_all_labs()
+  setup_event_handlers() -- cancels the deferred render registered in on_load
 
   -- on_configuration_changed fires after all mods' on_init/on_load, so all ingredient
   -- color registrations are guaranteed to be complete at this point.
-  renderer.color_registry:validate_technology_prototypes()
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  ds_storage.color_registry:validate_technology_prototypes()
 end
 
 function LabControl.add_remote_interface()
