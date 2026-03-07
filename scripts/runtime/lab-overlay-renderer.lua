@@ -19,25 +19,41 @@ local MOD_NAME = consts.MOD_NAME
 local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
+
 local VIEW_RECT_MARGIN = 6       -- tiles
 local STRIDE = 6                 -- Number of ticks to spread overlay updates over.
 local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switches.
 
 --- @class LabOverlay
---- @field [1] LuaEntity Lab entity.
---- @field [2] LuaRenderObject Render object for the overlay.
---- @field [3] MapPositionTuple Position of the entity.
---- @field [4] MapPositionRect Rectangle boundaries of the entity.
---- @field [5] boolean Last known visible state of the animation (cached, avoids repeated C bridge reads).
---- @field [6] number Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
+--- @field [2] LuaRenderObject  Render object for the overlay. (OV_ANIMATION)
+--- @field [3] MapPositionTuple Position of the entity. (OV_POSITION)
+--- @field [4] MapPositionRect  Rectangle boundaries of the entity. (OV_RECT)
+--- @field [5] boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads). (OV_VISIBLE)
+--- @field [6] number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal). (OV_UNIT_NUM)
+
+-- LabOverlay field indices
+local OV_ENTITY = 1    -- LuaEntity
+local OV_ANIMATION = 2 -- LuaRenderObject
+local OV_POSITION = 3  -- MapPositionTuple
+local OV_RECT = 4      -- MapPositionRect
+local OV_VISIBLE = 5   -- boolean (cached visible state)
+local OV_UNIT_NUM = 6  -- number (unit_number)
 
 --- The chunk range visible to a single player.
 --- @class PlayerView
---- @field [1] number Surface index.
---- @field [2] number Chunk left boundary.
---- @field [3] number Chunk top boundary.
---- @field [4] number Chunk right boundary.
---- @field [5] number Chunk bottom boundary.
+--- @field [1] number Surface index. (PV_SURFACE)
+--- @field [2] number Chunk left boundary. (PV_LEFT)
+--- @field [3] number Chunk top boundary. (PV_TOP)
+--- @field [4] number Chunk right boundary. (PV_RIGHT)
+--- @field [5] number Chunk bottom boundary. (PV_BOTTOM)
+
+-- PlayerView field indices
+local PV_SURFACE = 1 -- Surface index
+local PV_LEFT = 2    -- Chunk left boundary
+local PV_TOP = 3     -- Chunk top boundary
+local PV_RIGHT = 4   -- Chunk right boundary
+local PV_BOTTOM = 5  -- Chunk bottom boundary
 
 --- Constructor
 ---
@@ -118,13 +134,14 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     visible = false,
   })
 
+  --- @type LabOverlay
   local new_overlay = {
-    lab,
-    animation,
-    map_position_tuple(lab.position),
-    get_entity_rect(lab),
-    false,           -- [5] Cached visible state (matches animation's initial visible=false)
-    lab_unit_number, -- [6] Unit number (required by ChunkMap for swap-and-pop removal)
+    lab,                              -- [OV_ENTITY]   LuaEntity
+    animation,                        -- [OV_ANIMATION] LuaRenderObject
+    map_position_tuple(lab.position), -- [OV_POSITION]  MapPositionTuple
+    get_entity_rect(lab),             -- [OV_RECT]      MapPositionRect
+    false,                            -- [OV_VISIBLE]   Cached visible state (matches animation's initial visible=false)
+    lab_unit_number,                  -- [OV_UNIT_NUM]  Required by ChunkMap for swap-and-pop removal
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -168,7 +185,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  local animation = overlay[2]
+  local animation = overlay[OV_ANIMATION]
   if animation.valid then
     animation.destroy()
   end
@@ -193,8 +210,8 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
     for _, chunk in pairs(col) do
       for i = 1, #chunk do
         local overlay = chunk[i]
-        local unit_number = overlay[6]
-        local animation = overlay[2]
+        local unit_number = overlay[OV_UNIT_NUM]
+        local animation = overlay[OV_ANIMATION]
         if animation.valid then
           animation.destroy()
         end
@@ -217,9 +234,9 @@ function LabOverlayRenderer:update_lab_position(lab)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  overlay[4] = get_entity_rect(lab)
+  overlay[OV_RECT] = get_entity_rect(lab)
 
-  local animation = overlay[2]
+  local animation = overlay[OV_ANIMATION]
   if animation.surface.index == lab.surface_index then
     -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
@@ -280,11 +297,11 @@ function LabOverlayRenderer:update_player_view()
     view = { 0, 0, 0, 0, 0 }
     self.player_view = view
   end
-  view[1] = player.surface_index
-  view[2] = chunk_left
-  view[3] = chunk_top
-  view[4] = chunk_right
-  view[5] = chunk_bottom
+  view[PV_SURFACE] = player.surface_index
+  view[PV_LEFT] = chunk_left
+  view[PV_TOP] = chunk_top
+  view[PV_RIGHT] = chunk_right
+  view[PV_BOTTOM] = chunk_bottom
 end
 
 --- Update overlay states for labs in the player's view.
@@ -305,13 +322,13 @@ function LabOverlayRenderer:update_overlay_states()
   end
   local current_research_colors = self.current_research_colors
 
-  local surface_chunks = self.chunk_map.data[player_view[1]]
+  local surface_chunks = self.chunk_map.data[player_view[PV_SURFACE]]
   if not surface_chunks then return end
 
-  local chunk_left = player_view[2]
-  local chunk_top = player_view[3]
-  local chunk_right = player_view[4]
-  local chunk_bottom = player_view[5]
+  local chunk_left = player_view[PV_LEFT]
+  local chunk_top = player_view[PV_TOP]
+  local chunk_right = player_view[PV_RIGHT]
+  local chunk_bottom = player_view[PV_BOTTOM]
 
   for cx = chunk_left, chunk_right do
     local col = surface_chunks[cx]
@@ -321,14 +338,14 @@ function LabOverlayRenderer:update_overlay_states()
         if chunk then
           for i = 1, #chunk do
             local overlay = chunk[i]
-            local status = overlay[1].status
+            local status = overlay[OV_ENTITY].status
             local is_visible = (
               (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
               current_research_colors ~= nil
             )
-            if overlay[5] ~= is_visible then
-              overlay[5] = is_visible
-              overlay[2].visible = is_visible
+            if overlay[OV_VISIBLE] ~= is_visible then
+              overlay[OV_VISIBLE] = is_visible
+              overlay[OV_ANIMATION].visible = is_visible
             end
           end
         end
@@ -398,20 +415,24 @@ function LabOverlayRenderer:get_tick_function()
     stride_offset = stride_offset + 1
     if stride_offset > STRIDE then stride_offset = 1 end
 
-    -- We do this for performance
-    local player_position = player_position --- @diagnostic disable-line: redefined-local
-    local meandering_tick = meandering_tick --- @diagnostic disable-line: redefined-local
-    local color_function = color_function   --- @diagnostic disable-line: redefined-local
-    local color = color                     --- @diagnostic disable-line: redefined-local
-    local stride_offset = stride_offset     --- @diagnostic disable-line: redefined-local
-
     -- Update overlays in the chunk range visible to the player.
-    local surface_chunks = chunk_map_data[player_view[1]]
+    local surface_chunks = chunk_map_data[player_view[PV_SURFACE]]
     if surface_chunks then
-      local chunk_left = player_view[2]
-      local chunk_top = player_view[3]
-      local chunk_right = player_view[4]
-      local chunk_bottom = player_view[5]
+      local chunk_left = player_view[PV_LEFT]
+      local chunk_top = player_view[PV_TOP]
+      local chunk_right = player_view[PV_RIGHT]
+      local chunk_bottom = player_view[PV_BOTTOM]
+
+      -- We do this for performance
+      local player_position = player_position --- @diagnostic disable-line: redefined-local
+      local meandering_tick = meandering_tick --- @diagnostic disable-line: redefined-local
+      local color_function = color_function   --- @diagnostic disable-line: redefined-local
+      local color = color                     --- @diagnostic disable-line: redefined-local
+      local stride_offset = stride_offset     --- @diagnostic disable-line: redefined-local
+      local STRIDE = STRIDE                   --- @diagnostic disable-line: redefined-local
+      local OV_VISIBLE = OV_VISIBLE           --- @diagnostic disable-line: redefined-local
+      local OV_ANIMATION = OV_ANIMATION       --- @diagnostic disable-line: redefined-local
+      local OV_POSITION = OV_POSITION         --- @diagnostic disable-line: redefined-local
 
       for cx = chunk_left, chunk_right do
         local col = surface_chunks[cx]
@@ -421,10 +442,10 @@ function LabOverlayRenderer:get_tick_function()
             if chunk then
               for i = stride_offset, #chunk, STRIDE do
                 local overlay = chunk[i]
-                -- overlay[5] is updated by update_overlay_states() every 30 ticks.
-                if overlay[5] then
-                  local animation = overlay[2]
-                  local entity_position = overlay[3]
+                -- overlay[OV_VISIBLE] is updated by update_overlay_states() every 30 ticks.
+                if overlay[OV_VISIBLE] then
+                  local animation = overlay[OV_ANIMATION]
+                  local entity_position = overlay[OV_POSITION]
                   color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
                   animation.color = color
                 end
