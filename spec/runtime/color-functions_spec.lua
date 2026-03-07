@@ -102,8 +102,8 @@ describe("ColorFunctions", function ()
           assert.are.equal(out1[3], out2[3])
         end)
 
-        it("produces a different result at a different tick", function ()
-          -- pos = {4, 3}: chosen so that tick=0 and tick=1000 land in different
+        it("produces a different result at a different phase", function ()
+          -- pos = {4, 3}: chosen so that phase=0 and phase=1000 land in different
           -- color segments for all 6 functions (avoids mod-3 period coincidences).
           local pos = { 4, 3 }
           local out1, out2 = {}, {}
@@ -127,10 +127,10 @@ describe("ColorFunctions", function ()
 
     -- Function-specific behaviour
     describe("[1] Radial", function ()
-      it("at the same position as the player, depends only on tick", function ()
-        -- distance=0, t = tick * inv_40
-        -- tick=0  => t=0.0 => red
-        -- tick=40 => t=1.0 => green  (integer t, f=0)
+      it("at the same position as the player, depends only on phase", function ()
+        -- distance=0, t = phase * inv_40
+        -- phase=0  => t=0.0 => red
+        -- phase=40 => t=1.0 => green  (integer t, f=0)
         local out1 = {}
         ColorFunctions.functions[1](out1, 0, colors, origin, origin)
         assert.are.equal(1, out1[1])
@@ -146,7 +146,7 @@ describe("ColorFunctions", function ()
     end)
 
     describe("[2] Angular", function ()
-      it("gives opposite-angle labs different colors at the same tick", function ()
+      it("gives opposite-angle labs different colors at the same phase", function ()
         local lab_east = { 10, 0 }  -- theta = 0
         local lab_west = { -10, 0 } -- theta = pi
         local out1, out2 = {}, {}

@@ -8,7 +8,6 @@ local PlayerViewTracker = require("scripts.runtime.player-view-tracker")
 local LabOverlayRenderer = {}
 LabOverlayRenderer.__index = LabOverlayRenderer
 
-local max = math.max
 local random = math.random
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
@@ -25,8 +24,8 @@ local PV_TOP = PlayerViewTracker.PV_TOP
 local PV_RIGHT = PlayerViewTracker.PV_RIGHT
 local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
 
-local STRIDE = 6                 -- Number of ticks to spread overlay updates over.
-local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switches.
+local STRIDE = 6                  -- Number of ticks to spread overlay updates over.
+local COLOR_SWITCH_INTERVAL = 180 -- Number of ticks between color function switches.
 
 --- @class LabOverlay
 --- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
@@ -301,16 +300,17 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid access to the same outer-scope variable (upvalue) multiple times.
   -- * Avoid function calls. Make it inline.
   -- * Avoid creating a new object.
-  -- * Avoid access to native objects provided by Factorio. Lua-C-bridge is expensive.
+  -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
   local chunk_map_data = self.chunk_map.data
   local player_tracker = self.player_tracker
   local view = player_tracker.view
   local player_position = player_tracker.position
 
-  local meandering_tick = 1
-  local meandering_direction = 1
-  local meandering_target = random(100, 300)
+  -- `phase` is a continuously drifting value passed to the color function.
+  -- It drives animation by shifting the color cycle position over time.
+  local phase = 0
+  local phase_speed = ((random() * 5 + 3.5) % 6) - 3 -- [-3.0, -0.5) or [0.5, 3.0)
   local color_function, color_function_index = ColorFunctions.choose_random()
   local color_switch_counter = 0
   local color = { 0, 0, 0 }
@@ -325,25 +325,14 @@ function LabOverlayRenderer:get_tick_function()
     local current_research_colors = self.current_research_colors
     if not current_research_colors then return end
 
-    -- `meandering_tick` wanders up and down between random turning points.
-    if meandering_tick == meandering_target then
-      if meandering_direction == 1 then
-        -- Reached the top: reverse downward to a random floor.
-        meandering_direction = -1
-        meandering_target = random(0, max(0, meandering_tick - 50))
-      else
-        -- Reached the bottom: reverse upward to a random ceiling.
-        meandering_direction = 1
-        meandering_target = meandering_tick + random(50, 300)
-      end
-    end
-    meandering_tick = meandering_tick + meandering_direction
+    phase = phase + phase_speed
 
-    -- Switch color function periodically.
+    -- Switch color function periodically. Also update phase_speed.
     color_switch_counter = color_switch_counter + 1
     if color_switch_counter == COLOR_SWITCH_INTERVAL then
       color_switch_counter = 0
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
+      phase_speed = ((random() * 5 + 3.5) % 6) - 3
     end
 
     stride_offset = stride_offset + 1
@@ -359,7 +348,7 @@ function LabOverlayRenderer:get_tick_function()
 
       -- We do this for performance
       local player_position = player_position --- @diagnostic disable-line: redefined-local
-      local meandering_tick = meandering_tick --- @diagnostic disable-line: redefined-local
+      local phase = phase                     --- @diagnostic disable-line: redefined-local
       local color_function = color_function   --- @diagnostic disable-line: redefined-local
       local color = color                     --- @diagnostic disable-line: redefined-local
       local stride_offset = stride_offset     --- @diagnostic disable-line: redefined-local
@@ -380,7 +369,7 @@ function LabOverlayRenderer:get_tick_function()
                 if overlay[OV_VISIBLE] then
                   local animation = overlay[OV_ANIMATION]
                   local entity_position = overlay[OV_POSITION]
-                  color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
+                  color_function(color, phase, current_research_colors, player_position, entity_position)
                   animation.color = color
                 end
               end

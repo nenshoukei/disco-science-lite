@@ -30,6 +30,12 @@ local INV_40 = 1 / 40
 local function loop_interpolate(output, t, colors, n_colors, transition_sharpness)
   local base_index, f = modf(t)
 
+  -- Normalize negative fractional part so that f is always in [0, 1).
+  if f < 0 then
+    base_index = base_index - 1
+    f = f + 1
+  end
+
   -- Scale and clamp the interpolation factor without calling math.min.
   f = f * transition_sharpness
   if f > 1 then f = 1 end
@@ -49,55 +55,55 @@ ColorFunctions.loop_interpolate = loop_interpolate
 ---
 --- Paramters:
 --- - `output` - Output color tuple.
---- - `tick` - Tick count provided by `on_tick` event.
+--- - `phase` - Continuously drifting value that shifts the color cycle position over time.
 --- - `colors` - An array of ColorTuple for picking from.
 --- - `player_position` - Position of the player. (`LuaPlayer::position`)
 --- - `lab_position` - Position of the lab entity. (`LuaEntity::position`)
 ---
---- @alias ColorFunction fun(output: ColorTuple, tick: number, colors: ColorTuple[], player_position: MapPositionTuple, lab_position: MapPositionTuple)
+--- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], player_position: MapPositionTuple, lab_position: MapPositionTuple)
 
 --- @type ColorFunction[]
 local functions = {
   -- [1] Radial: color cycles based on the distance between the player and the lab.
-  function (output, tick, colors, player_position, lab_position)
+  function (output, phase, colors, player_position, lab_position)
     local dx = lab_position[1] - player_position[1]
     local dy = lab_position[2] - player_position[2]
-    local t = sqrt(dx * dx + dy * dy) * INV_8 + tick * INV_40
-    return loop_interpolate(output, t, colors, #colors, 1.5)
+    local t = sqrt(dx * dx + dy * dy) * INV_8 + phase * INV_40
+    return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
-  function (output, tick, colors, player_position, lab_position)
+  function (output, phase, colors, player_position, lab_position)
     local theta = atan2(lab_position[2] - player_position[2], lab_position[1] - player_position[1])
     local n_colors = #colors
     -- Map angle [-pi, pi] to [0, 1], then scale to the color array length.
-    local t = (theta * INV_PI * 0.5 + 0.5) * n_colors + tick * INV_30
+    local t = (theta * INV_PI * 0.5 + 0.5) * n_colors + phase * INV_30
     return loop_interpolate(output, t, colors, n_colors, 2)
   end,
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
-  function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[1] - player_position[1]) * INV_10 + tick * INV_30
+  function (output, phase, colors, player_position, lab_position)
+    local t = abs(lab_position[1] - player_position[1]) * INV_10 + phase * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [4] Vertical: color cycles based on vertical separation only.
-  function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[2] - player_position[2]) * INV_10 + tick * INV_30
+  function (output, phase, colors, player_position, lab_position)
+    local t = abs(lab_position[2] - player_position[2]) * INV_10 + phase * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
-  function (output, tick, colors, player_position, lab_position)
-    local t = abs(lab_position[1] - player_position[1] + lab_position[2] - player_position[2]) * INV_10 + tick * INV_30
+  function (output, phase, colors, player_position, lab_position)
+    local t = abs(lab_position[1] - player_position[1] + lab_position[2] - player_position[2]) * INV_10 + phase * INV_30
     return loop_interpolate(output, t, colors, #colors, 2)
   end,
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
-  function (output, tick, colors, player_position, lab_position)
+  function (output, phase, colors, player_position, lab_position)
     local t = abs(floor((lab_position[1] - player_position[1]) * INV_9)
         + floor((lab_position[2] - player_position[2]) * INV_8))
-      + tick * INV_10
+      + phase * INV_10
     return loop_interpolate(output, t, colors, #colors, 5)
   end,
 }
