@@ -19,8 +19,8 @@ local MOD_NAME = consts.MOD_NAME
 local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
-local VIEW_RECT_MARGIN = 6 -- tiles
-local STRIDE = 6           -- Number of ticks to spread overlay updates over.
+local VIEW_RECT_MARGIN = 6       -- tiles
+local STRIDE = 6                 -- Number of ticks to spread overlay updates over.
 local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switches.
 
 --- @class LabOverlay
@@ -28,6 +28,7 @@ local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switc
 --- @field [2] LuaRenderObject Render object for the overlay.
 --- @field [3] MapPositionTuple Position of the entity.
 --- @field [4] MapPositionRect Rectangle boundaries of the entity.
+--- @field [5] boolean Last known visible state of the animation (cached, avoids repeated C bridge reads).
 
 --- The chunk range visible to a single player.
 --- @class PlayerView
@@ -69,6 +70,15 @@ function LabOverlayRenderer.new(color_registry, target_lab_registry)
     --- Updated to the first active player's force.
     --- @type LuaForce|nil
     player_force = nil,
+
+    --- Current research being tracked. Updated by update_overlay_states().
+    --- @type LuaTechnology|nil
+    current_research = nil,
+
+    --- Colors for the current research. Updated by update_overlay_states() when research changes.
+    --- nil when no research is active or no player is connected.
+    --- @type ColorTuple[]|nil
+    current_research_colors = nil,
   }
   return setmetatable(self, LabOverlayRenderer)
 end
@@ -89,6 +99,11 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local overlay = self.overlays[lab_unit_number]
   if overlay and not force_render then return overlay end
 
+  -- Only create overlays for labs belonging to the player's force.
+  -- player_force is nil in multiplayer (or before first update_player_view), so skip all.
+  local player_force = self.player_force
+  if not player_force or lab.force_index ~= player_force.index then return nil end
+
   local target_lab = self.target_lab_registry:get(lab.name)
   if not target_lab then return nil end
 
@@ -107,6 +122,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     animation,
     map_position_tuple(lab.position),
     get_entity_rect(lab),
+    false, -- [5] Cached visible state (matches animation's initial visible=false)
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -119,9 +135,18 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
 end
 
 --- Render overlays for all lab entities.
+---
+--- The tick function returned by `get_tick_function()` should be refreshed afterwards.
 function LabOverlayRenderer:render_overlays_for_all_labs()
-  -- Destroy all rendering objects by this mod.
+  -- Update player view so render_overlay_for_lab can filter by the current player force.
+  self:update_player_view()
+
+  -- Destroy all rendering objects and reset data structures.
+  -- This is necessary because the force filter may exclude labs that were previously included
+  -- (e.g. after on_player_changed_force), leaving stale entries with invalid animations.
   rendering_clear(MOD_NAME)
+  self.overlays = {}
+  self.chunk_map = ChunkMap.new()
 
   local entity_filter = { type = "lab" }
   local render_overlay_for_lab = self.render_overlay_for_lab
@@ -261,6 +286,55 @@ function LabOverlayRenderer:update_player_view()
   view[5] = chunk_bottom
 end
 
+--- Update overlay states for labs in the player's view.
+---
+--- Called periodically (not every tick) to avoid expensive C bridge calls on every tick:
+---   - Tracks current research and updates current_research_colors when it changes.
+---   - Checks entity.status and updates overlay[5] (cached visible state) and animation.visible.
+function LabOverlayRenderer:update_overlay_states()
+  local player_view = self.player_view
+  if not player_view then return end
+
+  -- player_force is always set when player_view is non-nil.
+  local player_force = self.player_force --[[@as LuaForce]]
+  local current_research = player_force.current_research
+  if current_research ~= self.current_research then
+    self.current_research = current_research
+    self.current_research_colors = current_research and self.color_registry:get_colors_for_research(current_research)
+  end
+  local current_research_colors = self.current_research_colors
+
+  local surface_chunks = self.chunk_map.data[player_view[1]]
+  if not surface_chunks then return end
+
+  local chunk_left = player_view[2]
+  local chunk_top = player_view[3]
+  local chunk_right = player_view[4]
+  local chunk_bottom = player_view[5]
+
+  for cx = chunk_left, chunk_right do
+    local col = surface_chunks[cx]
+    if col then
+      for cy = chunk_top, chunk_bottom do
+        local chunk = col[cy]
+        if chunk then
+          for _, overlay in pairs(chunk) do
+            local status = overlay[1].status
+            local is_visible = (
+              (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+              current_research_colors ~= nil
+            )
+            if overlay[5] ~= is_visible then
+              overlay[5] = is_visible
+              overlay[2].visible = is_visible
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
 --- Get a tick function to be called by on_tick event.
 ---
 --- The function updates overlays in the chunk range visible to the player.
@@ -275,15 +349,11 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid function calls. Make it inline.
   -- * Avoid creating a new object.
 
-  local color_registry = self.color_registry
   local chunk_map_data = self.chunk_map.data
   local player_position = self.player_position
 
   -- For temporary. This will go into settings.
   local hq = true
-
-  local current_research = self.player_force and self.player_force.current_research
-  local current_research_colors = current_research and color_registry:get_colors_for_research(current_research)
 
   local meandering_tick = 1
   local meandering_direction = 1
@@ -298,12 +368,9 @@ function LabOverlayRenderer:get_tick_function()
     local player_view = self.player_view
     if not player_view then return end
 
-    -- `self.player_force` is always set when player_view is non-nil.
-    local player_force = self.player_force --[[@as LuaForce]]
-    if player_force.current_research ~= current_research then
-      current_research = player_force.current_research
-      current_research_colors = current_research and color_registry:get_colors_for_research(current_research)
-    end
+    -- Return early when no research is active. All overlays are invisible, nothing to update.
+    local current_research_colors = self.current_research_colors
+    if not current_research_colors then return end
 
     -- `meandering_tick` wanders up and down between random turning points.
     if meandering_tick == meandering_target then
@@ -330,15 +397,11 @@ function LabOverlayRenderer:get_tick_function()
     if stride_offset == STRIDE then stride_offset = 0 end
 
     -- We do this for performance
-    local player_force_index = player_force.index
-    local current_research_colors = current_research_colors --- @diagnostic disable-line: redefined-local
-    local player_position = player_position                 --- @diagnostic disable-line: redefined-local
-    local meandering_tick = meandering_tick                 --- @diagnostic disable-line: redefined-local
-    local color_function = color_function                   --- @diagnostic disable-line: redefined-local
-    local color = color                                     --- @diagnostic disable-line: redefined-local
-    local STATUS_WORKING = STATUS_WORKING                   --- @diagnostic disable-line: redefined-local
-    local STATUS_LOW_POWER = STATUS_LOW_POWER               --- @diagnostic disable-line: redefined-local
-    local stride_offset = stride_offset                     --- @diagnostic disable-line: redefined-local
+    local player_position = player_position --- @diagnostic disable-line: redefined-local
+    local meandering_tick = meandering_tick --- @diagnostic disable-line: redefined-local
+    local color_function = color_function   --- @diagnostic disable-line: redefined-local
+    local color = color                     --- @diagnostic disable-line: redefined-local
+    local stride_offset = stride_offset     --- @diagnostic disable-line: redefined-local
 
     -- Update overlays in the chunk range visible to the player.
     local surface_chunks = chunk_map_data[player_view[1]]
@@ -356,23 +419,10 @@ function LabOverlayRenderer:get_tick_function()
             if chunk then
               for unit_number, overlay in pairs(chunk) do
                 if unit_number % STRIDE == stride_offset then
-                  local entity = overlay[1]
-                  local animation = overlay[2]
-                  local entity_position = overlay[3]
-
-                  local status = entity.status
-                  local is_visible = (
-                    (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
-                    current_research_colors ~= nil and
-                    entity.force_index == player_force_index
-                  )
-
-                  if animation.visible ~= is_visible then
-                    animation.visible = is_visible
-                  end
-
-                  if is_visible then
-                    --- @cast current_research_colors ColorTuple[]
+                  -- overlay[5] is updated by update_overlay_states() every 30 ticks.
+                  if overlay[5] then
+                    local animation = overlay[2]
+                    local entity_position = overlay[3]
                     color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
                     animation.color = color
                   end

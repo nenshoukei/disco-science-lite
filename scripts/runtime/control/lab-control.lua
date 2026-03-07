@@ -13,13 +13,15 @@ local renderer
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
   script.on_nth_tick(5, function () renderer:update_player_view() end)
+  script.on_nth_tick(30, function () renderer:update_overlay_states() end)
+end
 
-  -- For profiling (must be removed for production)
-  script.on_nth_tick(60 * 30, function ()
-    script.on_nth_tick(60 * 30, nil)
-    remote.call("profiler", "save", "dsl-profile")
-    log("Profile saved")
-  end)
+--- Rebuild all overlays and refresh event handlers.
+--- render_overlays_for_all_labs() resets chunk_map, so setup_event_handlers() must always
+--- follow to give the tick function a fresh reference to the new chunk_map data.
+local function rebuild_overlays()
+  renderer:render_overlays_for_all_labs()
+  setup_event_handlers()
 end
 
 function LabControl.on_init()
@@ -29,13 +31,8 @@ function LabControl.on_init()
   RemoteInterface.bind_storage(ds_storage)
 
   renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
-  renderer:render_overlays_for_all_labs()
+  rebuild_overlays()
 
-  setup_event_handlers()
-
-  -- Other mods that register ingredient colors via RemoteInterface at the top level of
-  -- their control.lua are guaranteed to have registered by this point. However, mods that
-  -- register inside their own on_init handler may not have run yet, depending on load order.
   ds_storage.color_registry:validate_technology_prototypes()
 end
 
@@ -47,17 +44,13 @@ function LabControl.on_load()
 
   -- on_load cannot modify game state, so defer rendering to the first tick.
   script.on_event(defines.events.on_tick, function ()
-    renderer:render_overlays_for_all_labs()
-    setup_event_handlers() -- overwrites on_tick event handler
+    rebuild_overlays() -- overwrites on_tick event handler
   end)
 end
 
 function LabControl.on_configuration_changed()
-  renderer:render_overlays_for_all_labs()
-  setup_event_handlers() -- cancels the deferred render registered in on_load
+  rebuild_overlays() -- cancels the deferred render registered in on_load
 
-  -- on_configuration_changed fires after all mods' on_init/on_load, so all ingredient
-  -- color registrations are guaranteed to be complete at this point.
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_registry:validate_technology_prototypes()
 end
@@ -77,12 +70,17 @@ local LAB_CREATED_EFFECT_ID = consts.LAB_CREATED_EFFECT_ID
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
-  [defines.events.on_player_changed_force] = renderer_update_player_view,
   [defines.events.on_player_changed_position] = renderer_update_player_view,
   [defines.events.on_player_changed_surface] = renderer_update_player_view,
   [defines.events.on_player_display_resolution_changed] = renderer_update_player_view,
   [defines.events.on_player_created] = renderer_update_player_view,
   [defines.events.on_player_removed] = renderer_update_player_view,
+
+  [defines.events.on_player_changed_force] = function ()
+    -- Rebuild overlays because the force filter in render_overlay_for_lab depends on the
+    -- player's force. Labs belonging to the old force must be removed and new ones added.
+    rebuild_overlays()
+  end,
 
   --- @param event EventData.on_surface_cleared
   [defines.events.on_surface_cleared] = function (event)
