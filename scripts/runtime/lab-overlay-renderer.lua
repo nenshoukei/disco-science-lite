@@ -29,6 +29,7 @@ local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switc
 --- @field [3] MapPositionTuple Position of the entity.
 --- @field [4] MapPositionRect Rectangle boundaries of the entity.
 --- @field [5] boolean Last known visible state of the animation (cached, avoids repeated C bridge reads).
+--- @field [6] number Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
 
 --- The chunk range visible to a single player.
 --- @class PlayerView
@@ -54,7 +55,7 @@ function LabOverlayRenderer.new(color_registry, target_lab_registry)
     overlays = {},
 
     --- Spatial map for efficient view-range iteration.
-    --- @type ChunkMap<LabOverlay>
+    --- @type ChunkMap
     chunk_map = ChunkMap.new(),
 
     --- Chunk range visible to the player. nil when no player is active.
@@ -122,7 +123,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     animation,
     map_position_tuple(lab.position),
     get_entity_rect(lab),
-    false, -- [5] Cached visible state (matches animation's initial visible=false)
+    false,           -- [5] Cached visible state (matches animation's initial visible=false)
+    lab_unit_number, -- [6] Unit number (required by ChunkMap for swap-and-pop removal)
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -189,15 +191,14 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
   local entries = self.chunk_map.entries
   for _, col in pairs(surface_chunks) do
     for _, chunk in pairs(col) do
-      for unit_number in pairs(chunk) do
-        local overlay = overlays[unit_number]
-        if overlay then
-          local animation = overlay[2]
-          if animation.valid then
-            animation.destroy()
-          end
-          overlays[unit_number] = nil
+      for i = 1, #chunk do
+        local overlay = chunk[i]
+        local unit_number = overlay[6]
+        local animation = overlay[2]
+        if animation.valid then
+          animation.destroy()
         end
+        overlays[unit_number] = nil
         entries[unit_number] = nil
       end
     end
@@ -318,7 +319,8 @@ function LabOverlayRenderer:update_overlay_states()
       for cy = chunk_top, chunk_bottom do
         local chunk = col[cy]
         if chunk then
-          for _, overlay in pairs(chunk) do
+          for i = 1, #chunk do
+            local overlay = chunk[i]
             local status = overlay[1].status
             local is_visible = (
               (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
@@ -361,7 +363,7 @@ function LabOverlayRenderer:get_tick_function()
   local color_function_index, color_function = ColorFunctions.choose_random(hq)
   local color_switch_counter = 0
   local color = { 0, 0, 0 }
-  local stride_offset = 0
+  local stride_offset = 1
 
   return function ()
     -- Return early when no player is active (disconnected or in chart mode).
@@ -394,7 +396,7 @@ function LabOverlayRenderer:get_tick_function()
     end
 
     stride_offset = stride_offset + 1
-    if stride_offset == STRIDE then stride_offset = 0 end
+    if stride_offset > STRIDE then stride_offset = 1 end
 
     -- We do this for performance
     local player_position = player_position --- @diagnostic disable-line: redefined-local
@@ -417,15 +419,14 @@ function LabOverlayRenderer:get_tick_function()
           for cy = chunk_top, chunk_bottom do
             local chunk = col[cy]
             if chunk then
-              for unit_number, overlay in pairs(chunk) do
-                if unit_number % STRIDE == stride_offset then
-                  -- overlay[5] is updated by update_overlay_states() every 30 ticks.
-                  if overlay[5] then
-                    local animation = overlay[2]
-                    local entity_position = overlay[3]
-                    color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
-                    animation.color = color
-                  end
+              for i = stride_offset, #chunk, STRIDE do
+                local overlay = chunk[i]
+                -- overlay[5] is updated by update_overlay_states() every 30 ticks.
+                if overlay[5] then
+                  local animation = overlay[2]
+                  local entity_position = overlay[3]
+                  color_function(color, meandering_tick, current_research_colors, player_position, entity_position)
+                  animation.color = color
                 end
               end
             end
