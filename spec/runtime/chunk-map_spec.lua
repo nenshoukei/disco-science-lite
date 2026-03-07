@@ -1,7 +1,7 @@
 local ChunkMap = require("scripts.runtime.chunk-map")
 
 --- Create a minimal LabOverlay-like value for ChunkMap tests.
---- ChunkMap.remove() checks overlay[6] for the unit_number.
+--- ChunkMap.remove() checks overlay[OVERLAY_UNIT_NUM] (= [6]) for the unit_number.
 --- @param unit_number number
 --- @return LabOverlay
 local function make_overlay(unit_number)
@@ -23,66 +23,6 @@ local function make_entity(unit_number, surface_index, x, y)
 end
 
 describe("ChunkMap", function ()
-  -- -------------------------------------------------------------------
-  describe("position_to_chunk", function ()
-    it("maps origin to chunk (0,0)", function ()
-      local cx, cy = ChunkMap.position_to_chunk(0, 0)
-      assert.are.equal(0, cx)
-      assert.are.equal(0, cy)
-    end)
-
-    it("maps position inside first chunk to (0,0)", function ()
-      local cx, cy = ChunkMap.position_to_chunk(31.9, 31.9)
-      assert.are.equal(0, cx)
-      assert.are.equal(0, cy)
-    end)
-
-    it("maps position at exactly CHUNK_SIZE boundary to (1,1)", function ()
-      local cx, cy = ChunkMap.position_to_chunk(32, 32)
-      assert.are.equal(1, cx)
-      assert.are.equal(1, cy)
-    end)
-
-    it("handles negative positions", function ()
-      local cx, cy = ChunkMap.position_to_chunk(-1, -1)
-      assert.are.equal(-1, cx)
-      assert.are.equal(-1, cy)
-    end)
-
-    it("handles negative position at exact negative boundary", function ()
-      local cx, cy = ChunkMap.position_to_chunk(-32, -32)
-      assert.are.equal(-1, cx)
-      assert.are.equal(-1, cy)
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("rect_to_chunk_range", function ()
-    it("returns correct chunk range for a rect within a single chunk", function ()
-      local l, t, r, b = ChunkMap.rect_to_chunk_range({ 0, 0, 10, 10 })
-      assert.are.equal(0, l)
-      assert.are.equal(0, t)
-      assert.are.equal(0, r)
-      assert.are.equal(0, b)
-    end)
-
-    it("returns correct chunk range spanning multiple chunks", function ()
-      local l, t, r, b = ChunkMap.rect_to_chunk_range({ 0, 0, 64, 64 })
-      assert.are.equal(0, l)
-      assert.are.equal(0, t)
-      assert.are.equal(2, r)
-      assert.are.equal(2, b)
-    end)
-
-    it("handles negative coordinates", function ()
-      local l, t, r, b = ChunkMap.rect_to_chunk_range({ -32, -32, 0, 0 })
-      assert.are.equal(-1, l)
-      assert.are.equal(-1, t)
-      assert.are.equal(0, r)
-      assert.are.equal(0, b)
-    end)
-  end)
-
   -- -------------------------------------------------------------------
   describe("new", function ()
     it("creates an empty map", function ()

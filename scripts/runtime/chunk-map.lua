@@ -9,41 +9,27 @@
 local ChunkMap = {}
 ChunkMap.__index = ChunkMap
 
---- An entry stored in the chunk map for a single entity.
---- @class ChunkMapEntry
---- @field [1] number Surface index of the entity.
---- @field [2] number Chunk X coordinate of the entity.
---- @field [3] number Chunk Y coordinate of the entity.
---- @field [4] LabOverlay The overlay value.
-
-if script then
-  script.register_metatable("ChunkMap", ChunkMap)
-end
-
 local floor = math.floor
 
---- Size of each chunk in tiles.
+--- An entry stored in the chunk map for a single entity.
+--- @class ChunkMapEntry
+--- @field [1] number Surface index of the entity. (CE_SURFACE)
+--- @field [2] number Chunk X coordinate of the entity. (CE_CX)
+--- @field [3] number Chunk Y coordinate of the entity. (CE_CY)
+--- @field [4] LabOverlay The lab overlay. (CE_OVERLAY)
+
+-- ChunkMapEntry field indices
+local CE_SURFACE = 1 -- Surface index
+local CE_CX = 2      -- Chunk X coordinate
+local CE_CY = 3      -- Chunk Y coordinate
+local CE_OVERLAY = 4 -- LabOverlay
+
+-- Index of the unit_number field in LabOverlay (OV_UNIT_NUM in lab-overlay-renderer.lua).
+-- Used by swap-and-pop removal to identify which overlay to remove from a chunk.
+local OVERLAY_UNIT_NUM = 6
+
 local CHUNK_SIZE = 32
 local INV_CHUNK_SIZE = 1 / CHUNK_SIZE
-ChunkMap.CHUNK_SIZE = CHUNK_SIZE
-
---- Compute chunk coordinates for a world position.
----
---- @param pos_x number
---- @param pos_y number
---- @return number cx, number cy
-function ChunkMap.position_to_chunk(pos_x, pos_y)
-  return floor(pos_x * INV_CHUNK_SIZE), floor(pos_y * INV_CHUNK_SIZE)
-end
-
---- Compute the chunk coordinate range that fully covers a world rect.
----
---- @param rect MapPositionRect
---- @return number chunk_left, number chunk_top, number chunk_right, number chunk_bottom
-function ChunkMap.rect_to_chunk_range(rect)
-  return floor(rect[1] * INV_CHUNK_SIZE), floor(rect[2] * INV_CHUNK_SIZE),
-    floor(rect[3] * INV_CHUNK_SIZE), floor(rect[4] * INV_CHUNK_SIZE)
-end
 
 --- Constructor.
 ---
@@ -68,8 +54,8 @@ end
 --- If an entry for `entity.unit_number` already exists, it is removed first.
 ---
 --- @param entity LuaEntity
---- @param value LabOverlay The overlay to store for the entity.
-function ChunkMap:insert(entity, value)
+--- @param overlay LabOverlay The overlay to store for the entity.
+function ChunkMap:insert(entity, overlay)
   local unit_number = entity.unit_number
   if not unit_number then return end
 
@@ -98,9 +84,14 @@ function ChunkMap:insert(entity, value)
     chunk = {}
     col[cy] = chunk
   end
-  chunk[#chunk + 1] = value
+  chunk[#chunk + 1] = overlay
 
-  self.entries[unit_number] = { surface_index, cx, cy, value }
+  self.entries[unit_number] = {
+    surface_index, -- [CE_SURFACE]
+    cx,            -- [CE_CX]
+    cy,            -- [CE_CY]
+    overlay,       -- [CE_OVERLAY]
+  }
 end
 
 --- Remove an entity from the map.
@@ -111,17 +102,17 @@ function ChunkMap:remove(unit_number)
   if not entry then return end
 
   local data = self.data
-  local surface_chunks = data[entry[1]]
+  local surface_chunks = data[entry[CE_SURFACE]]
   if surface_chunks then
-    local col = surface_chunks[entry[2]]
+    local col = surface_chunks[entry[CE_CX]]
     if col then
-      local chunk = col[entry[3]]
+      local chunk = col[entry[CE_CY]]
       if chunk then
         -- Linear scan + swap-and-pop (n is small per chunk).
         -- [A, B, C, D] → remove(B) → [A, D, C]
         local n = #chunk
         for i = 1, n do
-          if chunk[i][6] == unit_number then
+          if chunk[i][OVERLAY_UNIT_NUM] == unit_number then
             if i ~= n then
               chunk[i] = chunk[n]
             end
@@ -130,11 +121,11 @@ function ChunkMap:remove(unit_number)
           end
         end
         if not chunk[1] then
-          col[entry[3]] = nil
+          col[entry[CE_CY]] = nil
           if not next(col) then
-            surface_chunks[entry[2]] = nil
+            surface_chunks[entry[CE_CX]] = nil
             if not next(surface_chunks) then
-              data[entry[1]] = nil
+              data[entry[CE_SURFACE]] = nil
             end
           end
         end
@@ -163,11 +154,11 @@ function ChunkMap:move(entity)
   local new_cx = floor((position.x or position[1]) * INV_CHUNK_SIZE)
   local new_cy = floor((position.y or position[2]) * INV_CHUNK_SIZE)
 
-  if entry[1] == new_surface_index and entry[2] == new_cx and entry[3] == new_cy then return end
+  if entry[CE_SURFACE] == new_surface_index and entry[CE_CX] == new_cx and entry[CE_CY] == new_cy then return end
 
-  local value = entry[4]
+  local overlay = entry[CE_OVERLAY]
   self:remove(unit_number)
-  self:insert(entity, value)
+  self:insert(entity, overlay)
 end
 
 --- Return the raw surface chunks table for direct iteration in hot paths.

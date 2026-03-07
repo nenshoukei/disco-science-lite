@@ -2,25 +2,29 @@ local consts = require("scripts.shared.consts")
 local Utils = require("scripts.shared.utils")
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
+local PlayerViewTracker = require("scripts.runtime.player-view-tracker")
 
 --- @class LabOverlayRenderer
 local LabOverlayRenderer = {}
 LabOverlayRenderer.__index = LabOverlayRenderer
 
-local ceil = math.ceil
 local max = math.max
 local random = math.random
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local map_position_tuple = Utils.map_position_tuple
 local get_entity_rect = Utils.get_entity_rect
-local rect_to_chunk_range = ChunkMap.rect_to_chunk_range
 local MOD_NAME = consts.MOD_NAME
-local RENDER_MODE_CHART = defines.render_mode.chart
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 
-local VIEW_RECT_MARGIN = 6       -- tiles
+local PV_VALID = PlayerViewTracker.PV_VALID
+local PV_SURFACE = PlayerViewTracker.PV_SURFACE
+local PV_LEFT = PlayerViewTracker.PV_LEFT
+local PV_TOP = PlayerViewTracker.PV_TOP
+local PV_RIGHT = PlayerViewTracker.PV_RIGHT
+local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
+
 local STRIDE = 6                 -- Number of ticks to spread overlay updates over.
 local COLOR_SWITCH_INTERVAL = 60 -- Number of ticks between color function switches.
 
@@ -39,21 +43,6 @@ local OV_POSITION = 3  -- MapPositionTuple
 local OV_RECT = 4      -- MapPositionRect
 local OV_VISIBLE = 5   -- boolean (cached visible state)
 local OV_UNIT_NUM = 6  -- number (unit_number)
-
---- The chunk range visible to a single player.
---- @class PlayerView
---- @field [1] number Surface index. (PV_SURFACE)
---- @field [2] number Chunk left boundary. (PV_LEFT)
---- @field [3] number Chunk top boundary. (PV_TOP)
---- @field [4] number Chunk right boundary. (PV_RIGHT)
---- @field [5] number Chunk bottom boundary. (PV_BOTTOM)
-
--- PlayerView field indices
-local PV_SURFACE = 1 -- Surface index
-local PV_LEFT = 2    -- Chunk left boundary
-local PV_TOP = 3     -- Chunk top boundary
-local PV_RIGHT = 4   -- Chunk right boundary
-local PV_BOTTOM = 5  -- Chunk bottom boundary
 
 --- Constructor
 ---
@@ -74,19 +63,9 @@ function LabOverlayRenderer.new(color_registry, target_lab_registry)
     --- @type ChunkMap
     chunk_map = ChunkMap.new(),
 
-    --- Chunk range visible to the player. nil when no player is active.
-    --- @type PlayerView|nil
-    player_view = nil,
-
-    --- Player's position. Used by the color function.
-    --- Updated to the first active player's position.
-    --- @type MapPositionTuple
-    player_position = { 0, 0 },
-
-    --- Player's force. Used for research tracking.
-    --- Updated to the first active player's force.
-    --- @type LuaForce|nil
-    player_force = nil,
+    --- Tracks the single connected player's view and position.
+    --- @type PlayerViewTracker
+    player_tracker = PlayerViewTracker.new(),
 
     --- Current research being tracked. Updated by update_overlay_states().
     --- @type LuaTechnology|nil
@@ -117,8 +96,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   if overlay and not force_render then return overlay end
 
   -- Only create overlays for labs belonging to the player's force.
-  -- player_force is nil in multiplayer (or before first update_player_view), so skip all.
-  local player_force = self.player_force
+  -- force is nil in multiplayer (or before first player_tracker:update()), so skip all.
+  local player_force = self.player_tracker.force
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
   local target_lab = self.target_lab_registry:get(lab.name)
@@ -158,7 +137,7 @@ end
 --- The tick function returned by `get_tick_function()` should be refreshed afterwards.
 function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Update player view so render_overlay_for_lab can filter by the current player force.
-  self:update_player_view()
+  self.player_tracker:update(game.connected_players)
 
   -- Destroy all rendering objects and reset data structures.
   -- This is necessary because the force filter may exclude labs that were previously included
@@ -250,58 +229,11 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
---- Rebuild the view data from the single connected player.
+--- Update the player view from `game.connected_players`.
 ---
---- Call this whenever the player's position, zoom, or surface changes.
---- Does nothing if multiplayer (more than one connected player).
+--- Called by event handlers (position/zoom/surface changes).
 function LabOverlayRenderer:update_player_view()
-  local players = game.connected_players
-
-  -- This mod is single-player only. Do not update in multiplayer.
-  if #players ~= 1 then
-    self.player_view = nil
-    return
-  end
-
-  local player = players[1]
-  if player.render_mode == RENDER_MODE_CHART then
-    self.player_view = nil
-    return
-  end
-
-  self.player_force = player.force --[[@as LuaForce]]
-
-  local player_position = player.position
-  local pos_x = player_position.x
-  local pos_y = player_position.y
-  local self_player_position = self.player_position
-  self_player_position[1] = pos_x
-  self_player_position[2] = pos_y
-
-  local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
-  local display_resolution = player.display_resolution
-  local half_view_width = ceil(display_resolution.width / f)
-  local half_view_height = ceil(display_resolution.height / f)
-
-  local view_rect = {
-    pos_x - half_view_width - VIEW_RECT_MARGIN,
-    pos_y - half_view_height - VIEW_RECT_MARGIN,
-    pos_x + half_view_width + VIEW_RECT_MARGIN,
-    pos_y + half_view_height + VIEW_RECT_MARGIN,
-  }
-  local chunk_left, chunk_top, chunk_right, chunk_bottom = rect_to_chunk_range(view_rect)
-
-  -- Update in-place
-  local view = self.player_view
-  if not view then
-    view = { 0, 0, 0, 0, 0 }
-    self.player_view = view
-  end
-  view[PV_SURFACE] = player.surface_index
-  view[PV_LEFT] = chunk_left
-  view[PV_TOP] = chunk_top
-  view[PV_RIGHT] = chunk_right
-  view[PV_BOTTOM] = chunk_bottom
+  self.player_tracker:update(game.connected_players)
 end
 
 --- Update overlay states for labs in the player's view.
@@ -310,11 +242,12 @@ end
 ---   - Tracks current research and updates current_research_colors when it changes.
 ---   - Checks entity.status and updates overlay[5] (cached visible state) and animation.visible.
 function LabOverlayRenderer:update_overlay_states()
-  local player_view = self.player_view
-  if not player_view then return end
+  local player_tracker = self.player_tracker
+  local view = player_tracker.view
+  if not view[PV_VALID] then return end
 
-  -- player_force is always set when player_view is non-nil.
-  local player_force = self.player_force --[[@as LuaForce]]
+  -- player_tracker.force is always set when view[PV_VALID] is true.
+  local player_force = player_tracker.force --[[@as LuaForce]]
   local current_research = player_force.current_research
   if current_research ~= self.current_research then
     self.current_research = current_research
@@ -322,13 +255,13 @@ function LabOverlayRenderer:update_overlay_states()
   end
   local current_research_colors = self.current_research_colors
 
-  local surface_chunks = self.chunk_map.data[player_view[PV_SURFACE]]
+  local surface_chunks = self.chunk_map.data[view[PV_SURFACE]]
   if not surface_chunks then return end
 
-  local chunk_left = player_view[PV_LEFT]
-  local chunk_top = player_view[PV_TOP]
-  local chunk_right = player_view[PV_RIGHT]
-  local chunk_bottom = player_view[PV_BOTTOM]
+  local chunk_left = view[PV_LEFT]
+  local chunk_top = view[PV_TOP]
+  local chunk_right = view[PV_RIGHT]
+  local chunk_bottom = view[PV_BOTTOM]
 
   for cx = chunk_left, chunk_right do
     local col = surface_chunks[cx]
@@ -369,7 +302,9 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
 
   local chunk_map_data = self.chunk_map.data
-  local player_position = self.player_position
+  local player_tracker = self.player_tracker
+  local view = player_tracker.view
+  local player_position = player_tracker.position
 
   -- For temporary. This will go into settings.
   local hq = true
@@ -384,8 +319,8 @@ function LabOverlayRenderer:get_tick_function()
 
   return function ()
     -- Return early when no player is active (disconnected or in chart mode).
-    local player_view = self.player_view
-    if not player_view then return end
+    -- `view` is captured once at closure creation; it is mutated in-place by player_tracker:update().
+    if not view[PV_VALID] then return end
 
     -- Return early when no research is active. All overlays are invisible, nothing to update.
     local current_research_colors = self.current_research_colors
@@ -416,12 +351,12 @@ function LabOverlayRenderer:get_tick_function()
     if stride_offset > STRIDE then stride_offset = 1 end
 
     -- Update overlays in the chunk range visible to the player.
-    local surface_chunks = chunk_map_data[player_view[PV_SURFACE]]
+    local surface_chunks = chunk_map_data[view[PV_SURFACE]]
     if surface_chunks then
-      local chunk_left = player_view[PV_LEFT]
-      local chunk_top = player_view[PV_TOP]
-      local chunk_right = player_view[PV_RIGHT]
-      local chunk_bottom = player_view[PV_BOTTOM]
+      local chunk_left = view[PV_LEFT]
+      local chunk_top = view[PV_TOP]
+      local chunk_right = view[PV_RIGHT]
+      local chunk_bottom = view[PV_BOTTOM]
 
       -- We do this for performance
       local player_position = player_position --- @diagnostic disable-line: redefined-local

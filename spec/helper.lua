@@ -37,6 +37,10 @@ local function reset_mocks()
   }
 
   _G.defines = {
+    render_mode = {
+      chart = 1,
+      game = 2,
+    },
     events = setmetatable({
       on_gui_click = 1,
       on_gui_closed = 2,
