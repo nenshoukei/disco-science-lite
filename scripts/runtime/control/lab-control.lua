@@ -10,6 +10,9 @@ local LabControl = {}
 --- @type LabOverlayRenderer
 local renderer
 
+-- Compatible with original DiscoScience interface
+remote.add_interface("DiscoScience", RemoteInterface.functions)
+
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
   script.on_nth_tick(10, function () renderer:update_players() end)
@@ -58,11 +61,6 @@ function LabControl.on_configuration_changed()
   rebuild_overlays() -- cancels the deferred render registered in on_load
 
   ds_storage.color_registry:validate_technology_prototypes()
-end
-
-function LabControl.add_remote_interface()
-  -- Compatible with original DiscoScience interface
-  remote.add_interface("DiscoScience", RemoteInterface.functions)
 end
 
 local function renderer_update_players()

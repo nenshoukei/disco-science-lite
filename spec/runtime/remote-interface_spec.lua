@@ -41,12 +41,18 @@ describe("RemoteInterface", function ()
       assert.is_nil(settings.scale)
     end)
 
-    it("does nothing when not bound", function ()
+    it("queues the call when not bound and applies it after bind_storage", function ()
       --- @diagnostic disable-next-line: missing-fields
       RemoteInterface.bind_storage({})
-      assert.no_error(function ()
-        RemoteInterface.functions.registerLab("my-lab", { animation = "my-anim" })
-      end)
+      RemoteInterface.functions.registerLab("my-lab", { animation = "my-anim", scale = 2 })
+      -- Not applied yet
+      assert.is_nil(lab_reg:get_overlay_settings("my-lab"))
+      -- Bind storage — queued call should be replayed
+      RemoteInterface.bind_storage({ color_registry = color_reg, lab_registry = lab_reg })
+      local settings = lab_reg:get_overlay_settings("my-lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.are.equal("my-anim", settings.animation)
+      assert.are.equal(2, settings.scale)
     end)
 
     -- -------------------------------------------------------------------
@@ -109,6 +115,15 @@ describe("RemoteInterface", function ()
           RemoteInterface.functions.registerLab("my-lab", { scale = "big" })
         end)
       end)
+
+      it("errors immediately even when not bound", function ()
+        --- @diagnostic disable-next-line: missing-fields
+        RemoteInterface.bind_storage({})
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          RemoteInterface.functions.registerLab(123, { animation = "my-anim" })
+        end)
+      end)
     end)
   end)
 
@@ -128,12 +143,17 @@ describe("RemoteInterface", function ()
       assert.are.equal(5, settings.scale)
     end)
 
-    it("does nothing when not bound", function ()
+    it("queues the call when not bound and applies it after bind_storage", function ()
       --- @diagnostic disable-next-line: missing-fields
       RemoteInterface.bind_storage({})
-      assert.no_error(function ()
-        RemoteInterface.functions.setLabScale("lab", 3)
-      end)
+      RemoteInterface.functions.setLabScale("lab", 3)
+      -- Not applied yet
+      assert.is_nil(lab_reg:get_overlay_settings("lab"))
+      -- Bind storage — queued call should be replayed
+      RemoteInterface.bind_storage({ color_registry = color_reg, lab_registry = lab_reg })
+      local settings = lab_reg:get_overlay_settings("lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.are.equal(3, settings.scale)
     end)
 
     -- -------------------------------------------------------------------
@@ -169,6 +189,15 @@ describe("RemoteInterface", function ()
           RemoteInterface.functions.setLabScale("lab", "big")
         end)
       end)
+
+      it("errors immediately even when not bound", function ()
+        --- @diagnostic disable-next-line: missing-fields
+        RemoteInterface.bind_storage({})
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          RemoteInterface.functions.setLabScale(123, 1)
+        end)
+      end)
     end)
   end)
 
@@ -199,12 +228,17 @@ describe("RemoteInterface", function ()
       assert.are.equal(0.5, color.r)
     end)
 
-    it("does nothing when not bound", function ()
+    it("queues the call when not bound and applies it after bind_storage", function ()
       --- @diagnostic disable-next-line: missing-fields
       RemoteInterface.bind_storage({})
-      assert.no_error(function ()
-        RemoteInterface.functions.setIngredientColor("custom-pack", { 0, 0, 0 })
-      end)
+      RemoteInterface.functions.setIngredientColor("custom-pack", { 0.5, 0.6, 0.7 })
+      -- Not applied yet
+      assert.is_nil(color_reg:get_ingredient_color("custom-pack"))
+      -- Bind storage — queued call should be replayed
+      RemoteInterface.bind_storage({ color_registry = color_reg, lab_registry = lab_reg })
+      local color = color_reg:get_ingredient_color("custom-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.5, color.r)
     end)
 
     -- -------------------------------------------------------------------
@@ -240,6 +274,15 @@ describe("RemoteInterface", function ()
           RemoteInterface.functions.setIngredientColor("custom-pack", { r = 0.1, g = 0.2 } --[[@as any]])
         end)
       end)
+
+      it("errors immediately even when not bound", function ()
+        --- @diagnostic disable-next-line: missing-fields
+        RemoteInterface.bind_storage({})
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          RemoteInterface.functions.setIngredientColor(123, { 0, 0, 0 })
+        end)
+      end)
     end)
   end)
 
@@ -256,7 +299,7 @@ describe("RemoteInterface", function ()
       assert.is_nil(color)
     end)
 
-    it("does nothing when not bound", function ()
+    it("returns nil when not bound", function ()
       --- @diagnostic disable-next-line: missing-fields
       RemoteInterface.bind_storage({})
       local color = RemoteInterface.functions.getIngredientColor("automation-science-pack")
