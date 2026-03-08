@@ -24,9 +24,6 @@ local PV_TOP = PlayerViewTracker.PV_TOP
 local PV_RIGHT = PlayerViewTracker.PV_RIGHT
 local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
 
-local STRIDE = 6                  -- Number of ticks to spread overlay updates over.
-local COLOR_SWITCH_INTERVAL = 180 -- Number of ticks between color function switches.
-
 --- @class LabOverlay
 --- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
 --- @field [2] LuaRenderObject  Render object for the overlay. (OV_ANIMATION)
@@ -110,6 +107,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     y_scale = target_lab.scale,
     render_layer = "higher-object-under",
     visible = false,
+    animation_offset = settings.global[consts.RANDOM_FLICKER_NAME].value and random() * 300 or 0,
   })
 
   --- @type LabOverlay
@@ -302,6 +300,10 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
+  local global_settings = settings.global
+  local color_pattern_duration = global_settings[consts.COLOR_PATTERN_DURATION_NAME].value --[[@as integer]]
+  local lab_update_interval = global_settings[consts.LAB_UPDATE_INTERVAL_NAME].value --[[@as integer]]
+
   local chunk_map_data = self.chunk_map.data
   local player_tracker = self.player_tracker
   local view = player_tracker.view
@@ -312,9 +314,9 @@ function LabOverlayRenderer:get_tick_function()
   local phase = 0
   local phase_speed = ((random() * 5 + 3.5) % 6) - 3 -- [-3.0, -0.5) or [0.5, 3.0)
   local color_function, color_function_index = ColorFunctions.choose_random()
-  local color_switch_counter = 0
+  local color_pattern_counter = 0
   local color = { 0, 0, 0 }
-  local stride_offset = 1
+  local lab_update_offset = 1
 
   return function ()
     -- Return early when no player is active (disconnected or in chart mode).
@@ -328,15 +330,15 @@ function LabOverlayRenderer:get_tick_function()
     phase = phase + phase_speed
 
     -- Switch color function periodically. Also update phase_speed.
-    color_switch_counter = color_switch_counter + 1
-    if color_switch_counter == COLOR_SWITCH_INTERVAL then
-      color_switch_counter = 0
+    color_pattern_counter = color_pattern_counter + 1
+    if color_pattern_counter >= color_pattern_duration then
+      color_pattern_counter = 0
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
       phase_speed = ((random() * 5 + 3.5) % 6) - 3
     end
 
-    stride_offset = stride_offset + 1
-    if stride_offset > STRIDE then stride_offset = 1 end
+    lab_update_offset = lab_update_offset + 1
+    if lab_update_offset > lab_update_interval then lab_update_offset = 1 end
 
     -- Update overlays in the chunk range visible to the player.
     local surface_chunks = chunk_map_data[view[PV_SURFACE]]
@@ -347,15 +349,15 @@ function LabOverlayRenderer:get_tick_function()
       local chunk_bottom = view[PV_BOTTOM]
 
       -- We do this for performance
-      local player_position = player_position --- @diagnostic disable-line: redefined-local
-      local phase = phase                     --- @diagnostic disable-line: redefined-local
-      local color_function = color_function   --- @diagnostic disable-line: redefined-local
-      local color = color                     --- @diagnostic disable-line: redefined-local
-      local stride_offset = stride_offset     --- @diagnostic disable-line: redefined-local
-      local STRIDE = STRIDE                   --- @diagnostic disable-line: redefined-local
-      local OV_VISIBLE = OV_VISIBLE           --- @diagnostic disable-line: redefined-local
-      local OV_ANIMATION = OV_ANIMATION       --- @diagnostic disable-line: redefined-local
-      local OV_POSITION = OV_POSITION         --- @diagnostic disable-line: redefined-local
+      local player_position = player_position         --- @diagnostic disable-line: redefined-local
+      local phase = phase                             --- @diagnostic disable-line: redefined-local
+      local color_function = color_function           --- @diagnostic disable-line: redefined-local
+      local color = color                             --- @diagnostic disable-line: redefined-local
+      local lab_update_offset = lab_update_offset     --- @diagnostic disable-line: redefined-local
+      local LAB_UPDATE_INTERVAL = lab_update_interval --- @diagnostic disable-line: redefined-local
+      local OV_VISIBLE = OV_VISIBLE                   --- @diagnostic disable-line: redefined-local
+      local OV_ANIMATION = OV_ANIMATION               --- @diagnostic disable-line: redefined-local
+      local OV_POSITION = OV_POSITION                 --- @diagnostic disable-line: redefined-local
 
       for cx = chunk_left, chunk_right do
         local col = surface_chunks[cx]
@@ -363,7 +365,7 @@ function LabOverlayRenderer:get_tick_function()
           for cy = chunk_top, chunk_bottom do
             local chunk = col[cy]
             if chunk then
-              for i = stride_offset, #chunk, STRIDE do
+              for i = lab_update_offset, #chunk, LAB_UPDATE_INTERVAL do
                 local overlay = chunk[i]
                 -- overlay[OV_VISIBLE] is updated by update_overlay_states() every 30 ticks.
                 if overlay[OV_VISIBLE] then

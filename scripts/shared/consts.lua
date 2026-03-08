@@ -14,6 +14,10 @@ local consts = {
   LAB_CREATED_EFFECT_ID = "ds-create-lab", -- For compatibility with DS
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",
   BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
+
+  COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
+  LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
+  RANDOM_FLICKER_NAME = NAME_PREFIX .. "random-flicker",
 }
 
 return consts

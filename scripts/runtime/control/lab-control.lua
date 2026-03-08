@@ -17,8 +17,6 @@ local function setup_event_handlers()
 end
 
 --- Rebuild all overlays and refresh event handlers.
---- render_overlays_for_all_labs() resets chunk_map, so setup_event_handlers() must always
---- follow to give the tick function a fresh reference to the new chunk_map data.
 local function rebuild_overlays()
   renderer:render_overlays_for_all_labs()
   setup_event_handlers()
@@ -114,6 +112,15 @@ LabControl.events = {
   [defines.events.script_raised_teleported] = function (event)
     if renderer then
       renderer:update_lab_position(event.entity)
+    end
+  end,
+
+  --- @param event EventData.on_runtime_mod_setting_changed
+  [defines.events.on_runtime_mod_setting_changed] = function (event)
+    if event.setting == consts.RANDOM_FLICKER_NAME then
+      rebuild_overlays()
+    else
+      setup_event_handlers()
     end
   end,
 }
