@@ -1,3 +1,4 @@
+local consts = require("scripts.shared.consts")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 
 --- @param created_effect data.Trigger|nil
@@ -71,6 +72,10 @@ describe("LabPrototypeModifier", function ()
 
   -- -------------------------------------------------------------------
   describe("modify_target_labs", function ()
+    before_each(function ()
+      _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME] = { value = true }
+    end)
+
     it("modifies lab prototype when present", function ()
       local lab = make_lab(nil)
       local off = lab.off_animation
@@ -101,10 +106,16 @@ describe("LabPrototypeModifier", function ()
       end)
     end)
 
-    it("ignores non-target labs in lab_prototypes", function ()
+    it("modifies non-target labs when fallback is enabled", function ()
       local other = make_lab(nil)
       LabPrototypeModifier.modify_target_labs({ ["other-lab"] = other })
-      -- on_animation should remain unchanged
+      assert_is_dsl_trigger(other.created_effect)
+    end)
+
+    it("ignores non-target labs when fallback is disabled", function ()
+      _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value = false
+      local other = make_lab(nil)
+      LabPrototypeModifier.modify_target_labs({ ["other-lab"] = other })
       assert.are.equal("on.png", other.on_animation.filename)
       assert.is_nil(other.created_effect)
     end)

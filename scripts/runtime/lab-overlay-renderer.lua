@@ -97,6 +97,9 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
   local target_lab = self.target_lab_registry:get(lab.name)
+  if not target_lab and not settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value then
+    return nil
+  end
 
   --- @type LuaRenderObject
   local render_object

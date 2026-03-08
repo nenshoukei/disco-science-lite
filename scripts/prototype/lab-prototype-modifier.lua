@@ -1,4 +1,5 @@
 local consts = require("scripts.shared.consts")
+local config_target_labs = require("scripts.shared.config.target-labs")
 
 local LabPrototypeModifier = {}
 
@@ -33,8 +34,11 @@ end
 ---
 --- @param lab_prototypes { [string]: data.LabPrototype }
 function LabPrototypeModifier.modify_target_labs(lab_prototypes)
-  for _, proto in pairs(lab_prototypes) do
-    LabPrototypeModifier.modify_lab(proto)
+  local fallback_enabled = settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value
+  for name, proto in pairs(lab_prototypes) do
+    if config_target_labs[name] or fallback_enabled then
+      LabPrototypeModifier.modify_lab(proto)
+    end
   end
 end
 

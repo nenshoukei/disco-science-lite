@@ -15,7 +15,7 @@ local consts = {
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",
   BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
   FALLBACK_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "fallback-overlay",
-
+  FALLBACK_OVERLAY_ENABLED_NAME = NAME_PREFIX .. "fallback-overlay-enabled",
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
   UNISON_FLICKER_NAME = NAME_PREFIX .. "unison-flicker",

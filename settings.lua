@@ -2,12 +2,19 @@ local consts = require("scripts.shared.consts")
 
 data:extend({
   {
+    type = "bool-setting",
+    name = consts.FALLBACK_OVERLAY_ENABLED_NAME,
+    setting_type = "startup",
+    default_value = true,
+    order = "su-a[visual]-a",
+  },
+  {
     type = "int-setting",
     name = consts.COLOR_PATTERN_DURATION_NAME,
     setting_type = "runtime-global",
     default_value = 180,
     minimum_value = 1,
-    order = "a[visual]-a",
+    order = "rg-a[visual]-a",
   },
   {
     type = "int-setting",
@@ -16,14 +23,14 @@ data:extend({
     default_value = 100,
     minimum_value = 1,
     maximum_value = 100,
-    order = "a[visual]-b",
+    order = "rg-a[visual]-b",
   },
   {
     type = "bool-setting",
     name = consts.UNISON_FLICKER_NAME,
     setting_type = "runtime-global",
     default_value = false,
-    order = "a[visual]-c",
+    order = "rg-a[visual]-c",
   },
   {
     type = "int-setting",
@@ -31,6 +38,6 @@ data:extend({
     setting_type = "runtime-global",
     default_value = 6,
     minimum_value = 1,
-    order = "b[performance]-a",
+    order = "rg-b[performance]-a",
   },
 })
