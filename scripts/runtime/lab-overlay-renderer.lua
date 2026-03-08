@@ -24,7 +24,7 @@ local PV_TOP = PlayerViewTracker.PV_TOP
 local PV_RIGHT = PlayerViewTracker.PV_RIGHT
 local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
 
---- @class LabOverlay
+--- @class (exact) LabOverlay
 --- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
 --- @field [2] LuaRenderObject  Render object for the overlay. (OV_ANIMATION)
 --- @field [3] MapPositionTuple Position of the entity. (OV_POSITION)

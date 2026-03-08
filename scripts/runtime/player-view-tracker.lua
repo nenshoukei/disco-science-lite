@@ -17,7 +17,7 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 local VIEW_RECT_MARGIN = 6 -- tiles
 
 --- The chunk range visible to a single player.
---- @class PlayerView
+--- @class (exact) PlayerView
 --- @field [1] boolean Whether the view is currently active (player connected and not in chart mode). (PV_VALID)
 --- @field [2] number Surface index. (PV_SURFACE)
 --- @field [3] number Chunk left boundary. (PV_LEFT)
@@ -46,12 +46,12 @@ PlayerViewTracker.PV_BOTTOM = PV_BOTTOM
 --- @return PlayerViewTracker
 function PlayerViewTracker.new()
   --- @class PlayerViewTracker
-  --- @field view PlayerView
-  --- @field force LuaForce|nil
-  --- @field position MapPositionTuple
   local self = {
+    --- @type PlayerView
     view = { false, 0, 0, 0, 0, 0 }, -- [PV_VALID], [PV_SURFACE], [PV_LEFT], [PV_TOP], [PV_RIGHT], [PV_BOTTOM]
+    --- @type LuaForce|nil
     force = nil,
+    --- @type MapPositionTuple
     position = { 0, 0 },
   }
   return setmetatable(self, PlayerViewTracker)

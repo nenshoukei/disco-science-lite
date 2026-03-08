@@ -225,7 +225,7 @@ describe("ColorFunctions", function ()
       it("labs at equal distance but different angles have different colors", function ()
         -- Both at distance 8 from player, but at different angles.
         -- Spiral combines radial and angular, so equal distance != equal color.
-        local lab_east  = {  8, 0 } -- theta = 0
+        local lab_east = { 8, 0 }   -- theta = 0
         local lab_north = { 0, -8 } -- theta = -pi/2
         local out1, out2 = {}, {}
         ColorFunctions.functions[7](out1, 0, colors, origin, lab_east)
@@ -260,7 +260,7 @@ describe("ColorFunctions", function ()
       end)
 
       it("returns a different color for labs in adjacent grid cells", function ()
-        local lab_cell0 = {  1, 0 } -- cell (0, 0), gx+gy=0
+        local lab_cell0 = { 1, 0 }  -- cell (0, 0), gx+gy=0
         local lab_cell1 = { 10, 0 } -- cell (1, 0), gx+gy=1
         local out1, out2 = {}, {}
         ColorFunctions.functions[9](out1, 0, colors, origin, lab_cell0)
@@ -271,9 +271,9 @@ describe("ColorFunctions", function ()
 
     describe("[10] Kaleidoscope", function ()
       it("labs mirrored across both axes have the same color (4-fold symmetry)", function ()
-        local lab_ne = {  5,  3 }
-        local lab_nw = { -5,  3 }
-        local lab_se = {  5, -3 }
+        local lab_ne = { 5, 3 }
+        local lab_nw = { -5, 3 }
+        local lab_se = { 5, -3 }
         local lab_sw = { -5, -3 }
         local out_ne, out_nw, out_se, out_sw = {}, {}, {}, {}
         ColorFunctions.functions[10](out_ne, 0, colors, origin, lab_ne)

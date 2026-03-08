@@ -12,7 +12,7 @@ ChunkMap.__index = ChunkMap
 local floor = math.floor
 
 --- An entry stored in the chunk map for a single entity.
---- @class ChunkMapEntry
+--- @class (exact) ChunkMapEntry
 --- @field [1] number Surface index of the entity. (CE_SURFACE)
 --- @field [2] number Chunk X coordinate of the entity. (CE_CX)
 --- @field [3] number Chunk Y coordinate of the entity. (CE_CY)
