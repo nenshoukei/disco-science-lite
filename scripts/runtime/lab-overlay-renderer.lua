@@ -377,6 +377,7 @@ function LabOverlayRenderer:get_tick_function()
       local chunk_bottom = view[PV_BOTTOM]
 
       -- We do this for performance
+      -- luacheck: push ignore
       local player_position = player_position         --- @diagnostic disable-line: redefined-local
       local phase = phase                             --- @diagnostic disable-line: redefined-local
       local color_function = color_function           --- @diagnostic disable-line: redefined-local
@@ -386,6 +387,7 @@ function LabOverlayRenderer:get_tick_function()
       local OV_VISIBLE = OV_VISIBLE                   --- @diagnostic disable-line: redefined-local
       local OV_ANIMATION = OV_ANIMATION               --- @diagnostic disable-line: redefined-local
       local OV_POSITION = OV_POSITION                 --- @diagnostic disable-line: redefined-local
+      -- luacheck: pop
 
       for cx = chunk_left, chunk_right do
         local col = surface_chunks[cx]

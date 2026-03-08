@@ -3,6 +3,12 @@ max_line_length = false
 max_code_line_length  = false
 unused_args = false
 
+include_files = {
+    "*.lua",
+    "scripts/**/*.lua",
+    "spec/**/*.lua"
+}
+
 std = "lua52c"
 files["spec/**/*_spec.lua"] = { std = "lua52+busted" }
 
@@ -17,4 +23,6 @@ globals = {
     "storage",
     "helpers",
     "log",
+    "remote",
+    "rendering"
 }
