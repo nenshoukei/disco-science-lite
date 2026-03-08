@@ -40,6 +40,16 @@ paths: ["**/*.lua"]
 - Factorio supports multi-players, so all state in the game must be deterministic. Otherwise desync of state among players will happen.
 - To print debug logs, use `log()` that prints logs to log files and debug console.
 
+# Testing
+
+- Always write unit tests, excpet for ones heavily depending on Factorio API.
+- Use `busted` for unit testing.
+- Use `spec/helper.lua` for helper functions.
+- Write tests in `spec/` as `<file_name>_spec.lua`.
+- Run tests with `make test`.
+- Use `assert.no_error(function () ... end)` for success pattern.
+- Use `assert.is_not_nil(var) --- @cast var -nil` idiom for nil check.
+
 ## Performance
 
 - Performance is always over readability. Especially for `on_tick` event.
