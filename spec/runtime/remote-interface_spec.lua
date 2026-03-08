@@ -1,20 +1,20 @@
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
-local TargetLabRegistry = require("scripts.runtime.target-lab-registry")
+local LabRegistrationRegistry = require("scripts.runtime.lab-registration-registry")
 
 describe("RemoteInterface", function ()
   --- @type DiscoScienceStorage
   local empty_storage = {}
 
   local color_reg
-  local target_lab_reg
+  local lab_reg
 
   before_each(function ()
     color_reg = ColorRegistry.new()
-    target_lab_reg = TargetLabRegistry.new()
+    lab_reg = LabRegistrationRegistry.new()
     RemoteInterface.bind_storage({
       color_registry = color_reg,
-      target_lab_registry = target_lab_reg,
+      lab_registration_registry = lab_reg,
     })
   end)
 
@@ -22,7 +22,7 @@ describe("RemoteInterface", function ()
   describe("addTargetLab", function ()
     it("registers the lab with animation and scale", function ()
       RemoteInterface.functions.addTargetLab("my-lab", "my-anim", 2)
-      local target = target_lab_reg:get("my-lab")
+      local target = lab_reg:get("my-lab")
       assert.is_not_nil(target) --- @cast target -nil
       assert.are.equal("my-anim", target.animation)
       assert.are.equal(2, target.scale)
@@ -30,7 +30,7 @@ describe("RemoteInterface", function ()
 
     it("defaults scale to 1 when omitted", function ()
       RemoteInterface.functions.addTargetLab("my-lab", "my-anim")
-      local target = target_lab_reg:get("my-lab")
+      local target = lab_reg:get("my-lab")
       assert.is_not_nil(target) --- @cast target -nil
       assert.are.equal(1, target.scale)
     end)
@@ -45,14 +45,14 @@ describe("RemoteInterface", function ()
   describe("setLabScale", function ()
     it("updates scale for a registered lab", function ()
       RemoteInterface.functions.setLabScale("lab", 3)
-      local target = target_lab_reg:get("lab")
+      local target = lab_reg:get("lab")
       assert.is_not_nil(target) --- @cast target -nil
       assert.are.equal(3, target.scale)
     end)
 
     it("auto-registers an unknown lab with the given scale", function ()
       RemoteInterface.functions.setLabScale("new-lab", 5)
-      local target = target_lab_reg:get("new-lab")
+      local target = lab_reg:get("new-lab")
       assert.is_not_nil(target) --- @cast target -nil
       assert.are.equal(5, target.scale)
     end)

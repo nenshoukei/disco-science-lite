@@ -1,7 +1,7 @@
 local consts = require("scripts.shared.consts")
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
-local TargetLabRegistry = require("scripts.runtime.target-lab-registry")
+local LabRegistrationRegistry = require("scripts.runtime.lab-registration-registry")
 local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
 
 --- @class LabControl : event_handler
@@ -25,11 +25,11 @@ end
 function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_registry = ColorRegistry.new()
-  ds_storage.target_lab_registry = TargetLabRegistry.new()
-  ds_storage.target_lab_registry:apply_prototype_registrations()
+  ds_storage.lab_registration_registry = LabRegistrationRegistry.new()
+  ds_storage.lab_registration_registry:apply_prototype_registrations()
   RemoteInterface.bind_storage(ds_storage)
 
-  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
+  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.lab_registration_registry)
   rebuild_overlays()
 
   ds_storage.color_registry:validate_technology_prototypes()
@@ -39,7 +39,7 @@ function LabControl.on_load()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   RemoteInterface.bind_storage(ds_storage)
 
-  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
+  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.lab_registration_registry)
 
   -- on_load cannot modify game state, so defer rendering to the first tick.
   script.on_event(defines.events.on_tick, function ()
@@ -50,7 +50,7 @@ end
 function LabControl.on_configuration_changed()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   -- Re-apply prototype registrations first in case mods were added/removed
-  ds_storage.target_lab_registry:apply_prototype_registrations()
+  ds_storage.lab_registration_registry:apply_prototype_registrations()
 
   rebuild_overlays() -- cancels the deferred render registered in on_load
 

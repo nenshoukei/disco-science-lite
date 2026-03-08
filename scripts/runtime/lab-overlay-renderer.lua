@@ -43,13 +43,13 @@ local OV_UNIT_NUM = 6  -- number (unit_number)
 --- Constructor
 ---
 --- @param color_registry ColorRegistry
---- @param target_lab_registry TargetLabRegistry
+--- @param lab_registration_registry LabRegistrationRegistry
 --- @return LabOverlayRenderer
-function LabOverlayRenderer.new(color_registry, target_lab_registry)
+function LabOverlayRenderer.new(color_registry, lab_registration_registry)
   --- @class LabOverlayRenderer
   local self = {
     color_registry = color_registry,
-    target_lab_registry = target_lab_registry,
+    lab_registration_registry = lab_registration_registry,
 
     --- Overlays for lab entities. Key is LuaEntity unit_number.
     --- @type table<number, LabOverlay>
@@ -96,7 +96,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local player_force = self.player_tracker.force
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
-  local target_lab = self.target_lab_registry:get(lab.name)
+  local target_lab = self.lab_registration_registry:get(lab.name)
   if not target_lab and not settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value then
     return nil
   end

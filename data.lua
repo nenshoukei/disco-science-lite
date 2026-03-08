@@ -7,9 +7,9 @@ local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 LabPrototypeModifier.modify_target_labs(data.raw["lab"])
 
 -- Single mod-data prototype that stores all external lab registrations.
--- Other mods mutate this table via DiscoScience.prepareLab / registerLab,
+-- Other mods mutate this table via DiscoScience.prepareLab,
 -- and the runtime reads it back through apply_prototype_registrations().
---- @type table<string, AnyBasic>
+--- @type table<string, LabRegistration>
 local lab_registrations = {}
 data:extend({
   {
@@ -20,33 +20,31 @@ data:extend({
 })
 
 --- @class DiscoScienceLabOptions
---- @field animation string Name of AnimationPrototype to use as an overlay.
+--- @field animation string? Name of AnimationPrototype to use as an overlay. (Default: the standard lab overlay is used)
 --- @field scale integer? Scale of the lab. (Default: `1`)
 
 -- Interface compatible with original DiscoScience
 _G.DiscoScience = {
   --- Prepare a lab prototype for disco-science colorization.
   ---
-  --- Use this together with remote.call("DiscoScience", "addTargetLab", ...) at runtime
-  --- to specify the overlay animation. For a single-step registration, use registerLab instead.
+  --- `options` can be used for specifying the lab scale and the overlay animation.
+  --- If not passed, the default scale (1) and the standard lab overlay are used.
+  --- You can override these settings at runtime by `remote.call()`. See API documents.
   ---
   --- @param lab data.LabPrototype
-  prepareLab = function(lab)
-    LabPrototypeModifier.modify_lab(lab)
-    -- Store a marker so runtime can enumerate all prepared labs if needed.
-    -- No animation is set here; use addTargetLab remote call to specify one.
-    lab_registrations[lab.name] = {}
-  end,
+  --- @param options DiscoScienceLabOptions?
+  prepareLab = function (lab, options)
+    options = options or {}
+    assert(type(lab) == "table" and lab.type == "lab", "DiscoScience.prepareLab: lab must be a LabPrototype table")
+    assert(type(lab.name) == "string" and lab.name ~= "", "DiscoScience.prepareLab: lab.name must be a non-empty string")
+    assert(type(options) == "table", "DiscoScience.prepareLab: options must be a table")
+    assert(options.animation == nil or (type(options.animation) == "string" and options.animation ~= ""),
+      "DiscoScience.prepareLab: options.animation must be a non-empty string")
+    assert(options.scale == nil or (type(options.scale) == "number" and options.scale > 0),
+      "DiscoScience.prepareLab: options.scale must be a positive number")
 
-  --- Register a lab for disco-science colorization in a single prototype-stage call.
-  ---
-  --- No runtime remote.call needed. The overlay animation and scale are stored
-  --- in a mod-data prototype and picked up automatically at runtime.
-  ---
-  --- @param lab data.LabPrototype
-  --- @param options DiscoScienceLabOptions
-  registerLab = function(lab, options)
     LabPrototypeModifier.modify_lab(lab)
+
     lab_registrations[lab.name] = {
       animation = options.animation,
       scale = options.scale or 1,
