@@ -97,23 +97,41 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
   local target_lab = self.target_lab_registry:get(lab.name)
-  if not target_lab then return nil end
 
-  local animation = draw_animation({
-    animation = target_lab.animation,
-    surface = lab.surface,
-    target = lab,
-    x_scale = target_lab.scale,
-    y_scale = target_lab.scale,
-    render_layer = "higher-object-under",
-    visible = false,
+  --- @type LuaRenderObject
+  local render_object
+  if target_lab then
+    render_object = draw_animation({
+      animation = target_lab.animation,
+      surface = lab.surface,
+      target = lab,
+      x_scale = target_lab.scale,
+      y_scale = target_lab.scale,
+      render_layer = "higher-object-under",
+      visible = false,
       animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,
-  })
+    })
+  else
+    -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
+    -- Scale the overlay to fit the lab's tile size. The fallback sprite covers 2 tiles at scale=1.
+    local prototype = lab.prototype
+    local scale = math.max(prototype.tile_width, prototype.tile_height) / 2
+    render_object = draw_animation({
+      animation = consts.FALLBACK_OVERLAY_ANIMATION_NAME,
+      surface = lab.surface,
+      target = lab,
+      x_scale = scale,
+      y_scale = scale,
+      render_layer = "higher-object-under",
+      visible = false,
+      animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,
+    })
+  end
 
   --- @type LabOverlay
   local new_overlay = {
-    lab,                              -- [OV_ENTITY]   LuaEntity
-    animation,                        -- [OV_ANIMATION] LuaRenderObject
+    lab,                              -- [OV_ENTITY]    LuaEntity
+    render_object,                    -- [OV_ANIMATION] LuaRenderObject (animation or light)
     map_position_tuple(lab.position), -- [OV_POSITION]  MapPositionTuple
     get_entity_rect(lab),             -- [OV_RECT]      MapPositionRect
     false,                            -- [OV_VISIBLE]   Cached visible state (matches animation's initial visible=false)
