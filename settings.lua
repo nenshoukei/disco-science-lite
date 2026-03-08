@@ -20,7 +20,7 @@ data:extend({
   },
   {
     type = "bool-setting",
-    name = consts.RANDOM_FLICKER_NAME,
+    name = consts.UNISON_FLICKER_NAME,
     setting_type = "runtime-global",
     default_value = false,
     order = "a[visual]-c",

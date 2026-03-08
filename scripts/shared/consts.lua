@@ -17,7 +17,7 @@ local consts = {
 
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
-  RANDOM_FLICKER_NAME = NAME_PREFIX .. "random-flicker",
+  UNISON_FLICKER_NAME = NAME_PREFIX .. "unison-flicker",
   LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
 }
 

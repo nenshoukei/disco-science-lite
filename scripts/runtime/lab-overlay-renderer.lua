@@ -107,7 +107,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     y_scale = target_lab.scale,
     render_layer = "higher-object-under",
     visible = false,
-    animation_offset = settings.global[consts.RANDOM_FLICKER_NAME].value and random() * 300 or 0,
+      animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,
   })
 
   --- @type LabOverlay
