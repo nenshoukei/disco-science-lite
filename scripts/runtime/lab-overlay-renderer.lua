@@ -96,20 +96,20 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   local player_force = self.player_tracker.force
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
-  local target_lab = self.lab_registry:get(lab.name)
-  if not target_lab and not settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value then
+  local overlay_settings = self.lab_registry:get_overlay_settings(lab.name)
+  if not overlay_settings and not settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value then
     return nil
   end
 
   --- @type LuaRenderObject
   local render_object
-  if target_lab then
+  if overlay_settings then
     render_object = draw_animation({
-      animation = target_lab.animation,
+      animation = overlay_settings.animation,
       surface = lab.surface,
       target = lab,
-      x_scale = target_lab.scale,
-      y_scale = target_lab.scale,
+      x_scale = overlay_settings.scale,
+      y_scale = overlay_settings.scale,
       render_layer = "higher-object-under",
       visible = false,
       animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,

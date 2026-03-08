@@ -6,7 +6,9 @@ describe("RemoteInterface", function ()
   --- @type DiscoScienceStorage
   local empty_storage = {}
 
+  --- @type ColorRegistry
   local color_reg
+  --- @type LabRegistry
   local lab_reg
 
   before_each(function ()
@@ -19,25 +21,27 @@ describe("RemoteInterface", function ()
   end)
 
   -- -------------------------------------------------------------------
-  describe("addTargetLab", function ()
+  describe("registerLab", function ()
     it("registers the lab with animation and scale", function ()
-      RemoteInterface.functions.addTargetLab("my-lab", "my-anim", 2)
-      local target = lab_reg:get("my-lab")
-      assert.is_not_nil(target) --- @cast target -nil
-      assert.are.equal("my-anim", target.animation)
-      assert.are.equal(2, target.scale)
+      RemoteInterface.functions.registerLab("my-lab", { animation = "my-anim", scale = 2 })
+      local settings = lab_reg:get_overlay_settings("my-lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.are.equal("my-anim", settings.animation)
+      assert.are.equal(2, settings.scale)
     end)
 
-    it("defaults scale to 1 when omitted", function ()
-      RemoteInterface.functions.addTargetLab("my-lab", "my-anim")
-      local target = lab_reg:get("my-lab")
-      assert.is_not_nil(target) --- @cast target -nil
-      assert.are.equal(1, target.scale)
+    it("defaults scale to nil when omitted", function ()
+      RemoteInterface.functions.registerLab("my-lab", { animation = "my-anim" })
+      local settings = lab_reg:get_overlay_settings("my-lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.is_nil(settings.scale)
     end)
 
     it("does nothing when not bound", function ()
       RemoteInterface.bind_storage(empty_storage)
-      RemoteInterface.functions.addTargetLab("my-lab", "my-anim") -- should not error
+      assert.no_error(function ()
+        RemoteInterface.functions.registerLab("my-lab", { animation = "my-anim" })
+      end)
     end)
   end)
 
@@ -45,21 +49,23 @@ describe("RemoteInterface", function ()
   describe("setLabScale", function ()
     it("updates scale for a registered lab", function ()
       RemoteInterface.functions.setLabScale("lab", 3)
-      local target = lab_reg:get("lab")
-      assert.is_not_nil(target) --- @cast target -nil
-      assert.are.equal(3, target.scale)
+      local settings = lab_reg:get_overlay_settings("lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.are.equal(3, settings.scale)
     end)
 
     it("auto-registers an unknown lab with the given scale", function ()
       RemoteInterface.functions.setLabScale("new-lab", 5)
-      local target = lab_reg:get("new-lab")
-      assert.is_not_nil(target) --- @cast target -nil
-      assert.are.equal(5, target.scale)
+      local settings = lab_reg:get_overlay_settings("new-lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.are.equal(5, settings.scale)
     end)
 
     it("does nothing when not bound", function ()
       RemoteInterface.bind_storage(empty_storage)
-      RemoteInterface.functions.setLabScale("lab", 3) -- should not error
+      assert.no_error(function ()
+        RemoteInterface.functions.setLabScale("lab", 3)
+      end)
     end)
   end)
 

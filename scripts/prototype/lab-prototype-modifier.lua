@@ -1,7 +1,11 @@
 local consts = require("scripts.shared.consts")
-local config_lab_registrations = require("scripts.shared.config.lab-registrations")
+local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
 
-local LabPrototypeModifier = {}
+local LabPrototypeModifier = {
+  --- Modified lab prototypes
+  --- @type table<data.LabPrototype, boolean>
+  modified_labs = {},
+}
 
 --- Add the lab creation trigger to the lab prototype.
 ---
@@ -30,29 +34,40 @@ local function add_lab_trigger(lab)
   end
 end
 
---- Modify all lab prototypes to support colorization.
+--- Modify all lab prototypes registered by `DiscoScienceInterface.prepareLab()`,
+--- including Factorio's basic lab prototypes.
+---
+--- If `fallback_overlay_enabled` setting is `true`, all lab prototypes without registration
+--- will also be modified for colorization.
 ---
 --- @param lab_prototypes { [string]: data.LabPrototype }
-function LabPrototypeModifier.modify_target_labs(lab_prototypes)
+function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
+  local registered_labs = LabPrototypeRegistry.registered_labs
   local fallback_enabled = settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value
   for name, proto in pairs(lab_prototypes) do
-    if config_lab_registrations[name] or fallback_enabled then
+    if fallback_enabled or registered_labs[name] then
       LabPrototypeModifier.modify_lab(proto)
     end
   end
 end
 
---- Modify LabPrototype for this mod (for labs with a registered overlay sprite).
+--- Modify LabPrototype for this mod.
 ---
 --- Disables the default working animation so the overlay can replace it,
 --- then adds the lab creation trigger.
 ---
+--- If the prototype is already modified, it does nothing.
+---
 --- @param lab data.LabPrototype
 function LabPrototypeModifier.modify_lab(lab)
+  if LabPrototypeModifier.modified_labs[lab] then return end
+
   -- Disable the default working animation (the dedicated overlay replaces it)
   lab.on_animation = lab.off_animation
 
   add_lab_trigger(lab)
+
+  LabPrototypeModifier.modified_labs[lab] = true
 end
 
 return LabPrototypeModifier

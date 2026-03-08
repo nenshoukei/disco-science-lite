@@ -9,7 +9,7 @@
 
 --- @alias data.AnyTriggerItem (data.DirectTriggerItem)|(data.AreaTriggerItem)|(data.LineTriggerItem)|(data.ClusterTriggerItem)
 
---- A lab registration defining the overlay animation and scale.
---- @class LabRegistration
---- @field animation string? Name of AnimationPrototype to be used as an overlay. If `nil`, the default lab overlay is used.
---- @field scale integer? Scale of the lab. Default scale is `1`.
+--- Settings for rendering a lab overlay.
+--- @class (exact) LabOverlaySettings
+--- @field animation string? Name of AnimationPrototype to be used as an overlay. (Default: the standard lab overlay is used)
+--- @field scale integer? Scale of the lab. (Default: `1`)

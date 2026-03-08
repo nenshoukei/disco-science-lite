@@ -1,6 +1,4 @@
 local consts = require("scripts.shared.consts")
-local config_lab_registrations = require("scripts.shared.config.lab-registrations")
-local Utils = require("scripts.shared.utils")
 
 --- @class LabRegistry
 local LabRegistry = {}
@@ -16,62 +14,68 @@ end
 function LabRegistry.new()
   --- @class LabRegistry
   local self = {
-    --- Lab registrations by LabPrototype name.
-    --- @type table<string, LabRegistration>
-    labs = Utils.table_deep_copy(config_lab_registrations),
+    --- Lab overlay settings by LabPrototype name.
+    --- @type table<string, LabOverlaySettings>
+    overlay_settings = {},
   }
   return setmetatable(self, LabRegistry)
 end
 
---- Add a new lab registration.
+--- Register a lab type to be colorized by this mod.
+---
+--- If `settings` is passed, it will override the existing settings with the same name.
+---
+--- If `settings` is not passed, the default overlay settings are used. (See [LabOverlaySettings](lua://LabOverlaySettings))
 ---
 --- @param lab_name string LabPrototype name.
---- @param registration LabRegistration
-function LabRegistry:add(lab_name, registration)
-  self.labs[lab_name] = registration
+--- @param settings LabOverlaySettings? Settings for the lab overlay.
+function LabRegistry:register(lab_name, settings)
+  self.overlay_settings[lab_name] = settings or {}
 end
 
---- Set scale of a lab registration.
+--- Set scale of a lab overlay.
 ---
---- If the given lab has no registration yet, it will be registered with the default overlay.
+--- If the given lab has not been registered yet, it will be registered with the default lab overlay settings.
+--- (See [LabOverlaySettings](lua://LabOverlaySettings))
 ---
 --- @param lab_name string LabPrototype name.
 --- @param scale integer Scale of the lab. (Default scale is `1`)
 function LabRegistry:set_scale(lab_name, scale)
-  local registration = self.labs[lab_name]
-  if registration then
-    registration.scale = scale
+  local settings = self.overlay_settings[lab_name]
+  if settings then
+    settings.scale = scale
   else
-    -- Automatically creates a registration with the default overlay.
-    self.labs[lab_name] = {
-      animation = consts.LAB_OVERLAY_ANIMATION_NAME,
+    -- Automatically creates a LabOverlaySettings with the default values (nil).
+    self.overlay_settings[lab_name] = {
       scale = scale,
     }
   end
 end
 
---- Get the registration for the given lab name.
+--- Get the LabOverlaySettings for the given lab name.
 ---
 --- @param lab_name string LabPrototype name.
---- @return LabRegistration|nil
-function LabRegistry:get(lab_name)
-  return self.labs[lab_name]
+--- @return LabOverlaySettings|nil
+function LabRegistry:get_overlay_settings(lab_name)
+  return self.overlay_settings[lab_name]
 end
 
---- Load lab registrations from the mod-data prototype written by DiscoScience.prepareLab().
+--- Load lab settings from the mod-data prototype.
 ---
---- Does not overwrite any existing values since they are set by remote calls for overriding the prototype values.
-function LabRegistry:apply_prototype_registrations()
-  local mod_data = prototypes["mod-data"][consts.LAB_REGISTRATIONS_MOD_DATA_NAME]
+--- If `overwrites` is `false`, it does not overwrite any existing entries.
+---
+--- @param overwrites boolean
+function LabRegistry:load_prototype_settings(overwrites)
+  local mod_data = prototypes.mod_data[consts.LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]
   if not mod_data then return end
-  local registrations = mod_data.data --[[@as table<string, LabRegistration>]]
+  local loaded_settings = mod_data.data --[[@as table<string, LabOverlaySettings>]]
 
-  local labs = self.labs
-  for lab_name, reg in pairs(registrations) do
-    if not labs[lab_name] then
+  local labs = self.overlay_settings
+  for lab_name, settings in pairs(loaded_settings) do
+    if overwrites or not labs[lab_name] then
       labs[lab_name] = {
-        animation = reg.animation,
-        scale = reg.scale or 1,
+        animation = settings.animation,
+        scale = settings.scale,
       }
     end
   end

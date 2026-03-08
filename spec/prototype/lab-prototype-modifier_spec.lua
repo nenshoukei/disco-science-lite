@@ -1,10 +1,13 @@
 local consts = require("scripts.shared.consts")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
 
 --- @param created_effect data.Trigger|nil
 --- @return data.LabPrototype
 local function make_lab(created_effect)
   return ({
+    type = "lab",
+    name = "test-lab",
     on_animation = { filename = "on.png" },
     off_animation = { filename = "off.png" },
     created_effect = created_effect,
@@ -22,6 +25,10 @@ local function assert_is_dsl_trigger(trigger)
 end
 
 describe("LabPrototypeModifier", function ()
+  before_each(function ()
+    LabPrototypeModifier.modified_labs = {}
+  end)
+
   -- -------------------------------------------------------------------
   describe("modify_lab", function ()
     it("replaces on_animation with off_animation", function ()
@@ -29,6 +36,14 @@ describe("LabPrototypeModifier", function ()
       local off = lab.off_animation
       LabPrototypeModifier.modify_lab(lab)
       assert.are.equal(off, lab.on_animation)
+    end)
+
+    it("does nothing when the lab prototype is already modified", function ()
+      local lab = make_lab(nil)
+      LabPrototypeModifier.modify_lab(lab)
+      lab.on_animation = { filename = "on2.png" }
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal("on2.png", lab.on_animation.filename)
     end)
 
     describe("created_effect handling", function ()
@@ -71,53 +86,51 @@ describe("LabPrototypeModifier", function ()
   end)
 
   -- -------------------------------------------------------------------
-  describe("modify_target_labs", function ()
+  describe("modify_registered_labs", function ()
     before_each(function ()
       _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME] = { value = true }
+      LabPrototypeRegistry.reset()
     end)
 
-    it("modifies lab prototype when present", function ()
+    it("modifies registered lab prototype", function ()
       local lab = make_lab(nil)
       local off = lab.off_animation
-      LabPrototypeModifier.modify_target_labs({ lab = lab })
+      LabPrototypeRegistry.register(lab.name)
+      LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.are.equal(off, lab.on_animation)
       assert_is_dsl_trigger(lab.created_effect)
     end)
 
-    it("modifies biolab prototype when present", function ()
-      local biolab = make_lab(nil)
-      local off = biolab.off_animation
-      LabPrototypeModifier.modify_target_labs({ biolab = biolab })
-      assert.are.equal(off, biolab.on_animation)
-      assert_is_dsl_trigger(biolab.created_effect)
-    end)
-
-    it("modifies all target labs present", function ()
-      local lab = make_lab(nil)
-      local biolab = make_lab(nil)
-      LabPrototypeModifier.modify_target_labs({ lab = lab, biolab = biolab })
-      assert_is_dsl_trigger(lab.created_effect)
-      assert_is_dsl_trigger(biolab.created_effect)
+    it("modifies all registered labs", function ()
+      local lab1 = make_lab(nil)
+      lab1.name = "test-lab1"
+      local lab2 = make_lab(nil)
+      lab2.name = "test-lab2"
+      LabPrototypeRegistry.register(lab1.name)
+      LabPrototypeRegistry.register(lab2.name)
+      LabPrototypeModifier.modify_registered_labs({ [lab1.name] = lab1, [lab2.name] = lab2 })
+      assert_is_dsl_trigger(lab1.created_effect)
+      assert_is_dsl_trigger(lab2.created_effect)
     end)
 
     it("does nothing when lab_prototypes is empty", function ()
       assert.no_error(function ()
-        LabPrototypeModifier.modify_target_labs({})
+        LabPrototypeModifier.modify_registered_labs({})
       end)
     end)
 
     it("modifies non-target labs when fallback is enabled", function ()
-      local other = make_lab(nil)
-      LabPrototypeModifier.modify_target_labs({ ["other-lab"] = other })
-      assert_is_dsl_trigger(other.created_effect)
+      local lab = make_lab(nil)
+      LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
+      assert_is_dsl_trigger(lab.created_effect)
     end)
 
     it("ignores non-target labs when fallback is disabled", function ()
       _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value = false
-      local other = make_lab(nil)
-      LabPrototypeModifier.modify_target_labs({ ["other-lab"] = other })
-      assert.are.equal("on.png", other.on_animation.filename)
-      assert.is_nil(other.created_effect)
+      local lab = make_lab(nil)
+      LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
+      assert.are.equal("on.png", lab.on_animation.filename)
+      assert.is_nil(lab.created_effect)
     end)
   end)
 end)

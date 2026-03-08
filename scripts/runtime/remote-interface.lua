@@ -18,27 +18,33 @@ end
 --- @class RemoteInterfaceFunctions
 local RemoteInterfaceFunctions = RemoteInterface.functions
 
---- Add a new lab registration.
+--- Register a lab type for Disco-Science colorization.
+---
+--- `settings` can be used for specifying the rendering settings for the lab overlay.
+--- If not passed, the default settings are used. (See [LabOverlaySettings](lua://LabOverlaySettings))
+---
+--- This overrides the existing settings with the same name registered by DiscoScience.prepareLab() at prototype stage.
 ---
 --- @param lab_name string LabPrototype name.
---- @param animation string AnimationPrototype name for an overlay.
---- @param scale integer? Scale of the lab. (Default scale is `1`)
-function RemoteInterfaceFunctions.addTargetLab(lab_name, animation, scale)
+--- @param settings LabOverlaySettings? Settings for the lab overlay.
+function RemoteInterfaceFunctions.registerLab(lab_name, settings)
   if not lab_registry then return end
-  assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.addTargetLab: lab_name must be a non-empty string")
-  assert(type(animation) == "string" and animation ~= "",
-    "DiscoScience.addTargetLab: animation must be a non-empty string")
-  assert(scale == nil or (type(scale) == "number" and scale > 0),
-    "DiscoScience.addTargetLab: scale must be a positive number")
-  lab_registry:add(lab_name, {
-    animation = animation,
-    scale = scale or 1,
+  assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.registerLab: lab_name must be a non-empty string")
+  assert(type(settings) == "table", "DiscoScience.registerLab: settings must be a table")
+  assert(settings.animation == nil or (type(settings.animation) == "string" and settings.animation ~= ""),
+    "DiscoScience.registerLab: settings.animation must be a non-empty string")
+  assert(settings.scale == nil or (type(settings.scale) == "number" and settings.scale > 0),
+    "DiscoScience.registerLab: settings.scale must be a positive number")
+  lab_registry:register(lab_name, {
+    animation = settings.animation,
+    scale = settings.scale,
   })
 end
 
---- Set scale of a lab registration.
+--- Set scale of a lab overlay.
 ---
---- If the given lab has no registration yet, it will be registered with the default overlay.
+--- If the given lab has not been registered yet, it will be registered with the default lab overlay settings.
+--- (See [LabOverlaySettings](lua://LabOverlaySettings))
 ---
 --- @param lab_name string LabPrototype name.
 --- @param scale integer Scale of the lab. (Default scale is `1`)

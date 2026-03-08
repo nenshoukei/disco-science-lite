@@ -1,11 +1,11 @@
 local consts = require("scripts.shared.consts")
 
---- Default lab registrations provided by this mod.
+--- Default lab overlay settings.
 ---
 --- Key is LabPrototype name.
 ---
---- @type table<string, LabRegistration>
-local config_lab_registrations = {
+--- @type table<string, LabOverlaySettings>
+local config_lab_overlay_settings = {
   lab = {
     animation = consts.LAB_OVERLAY_ANIMATION_NAME,
     scale = 1,
@@ -16,4 +16,4 @@ local config_lab_registrations = {
   },
 }
 
-return config_lab_registrations
+return config_lab_overlay_settings
