@@ -13,8 +13,8 @@ test:
 
 graphics:
 	convert "$(FACTORIO_DATA)/base/graphics/entity/lab/lab-light.png" \
-		-colorspace Gray -auto-level \
+		-colorspace Gray -level "0,80%,1.5" \
 		graphics/lab-overlay.png
 	convert "$(FACTORIO_DATA)/space-age/graphics/entity/biolab/biolab-lights.png" \
-		-colorspace Gray -level "0,50%,2.0" \
+		-colorspace Gray -level "0,80%,6.0" \
 		graphics/biolab-overlay.png
