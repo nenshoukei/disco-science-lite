@@ -88,19 +88,25 @@ end
 --- If calling on the same technology multiple times, the result should be cached by the caller.
 ---
 --- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
+--- @param intensity number? Intensity multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return ColorTuple[]
-function ColorRegistry:get_colors_for_research(technology)
+function ColorRegistry:get_colors_for_research(technology, intensity)
+  intensity = intensity or 1.0
   --- @type ColorTuple[]
   local colors = {}
   local ingredient_colors = self.ingredient_colors
   for _, ingredient in ipairs(technology.research_unit_ingredients) do
     local color = ingredient_colors[ingredient.name]
     if color then
-      colors[#colors + 1] = color
+      colors[#colors + 1] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
     end
   end
   if #colors == 0 then
-    colors = self.default_research_colors
+    local dc = self.default_research_colors
+    for i = 1, #dc do
+      local c = dc[i]
+      colors[#colors + 1] = { c[1] * intensity, c[2] * intensity, c[3] * intensity }
+    end
   end
   return colors
 end

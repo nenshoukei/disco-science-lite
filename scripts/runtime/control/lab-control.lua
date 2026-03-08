@@ -115,13 +115,8 @@ LabControl.events = {
     end
   end,
 
-  --- @param event EventData.on_runtime_mod_setting_changed
-  [defines.events.on_runtime_mod_setting_changed] = function (event)
-    if event.setting == consts.RANDOM_FLICKER_NAME then
-      rebuild_overlays()
-    else
-      setup_event_handlers()
-    end
+  [defines.events.on_runtime_mod_setting_changed] = function ()
+    rebuild_overlays()
   end,
 }
 

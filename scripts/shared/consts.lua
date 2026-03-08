@@ -16,8 +16,9 @@ local consts = {
   BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
 
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
-  LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
+  COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
   RANDOM_FLICKER_NAME = NAME_PREFIX .. "random-flicker",
+  LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
 }
 
 return consts

@@ -142,6 +142,8 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   rendering_clear(MOD_NAME)
   self.overlays = {}
   self.chunk_map = ChunkMap.new()
+  self.current_research = nil
+  self.current_research_colors = nil
 
   local entity_filter = { type = "lab" }
   local render_overlay_for_lab = self.render_overlay_for_lab
@@ -248,7 +250,12 @@ function LabOverlayRenderer:update_overlay_states()
   local current_research = player_force.current_research
   if current_research ~= self.current_research then
     self.current_research = current_research
-    self.current_research_colors = current_research and self.color_registry:get_colors_for_research(current_research)
+    if current_research then
+      local intensity = settings.global[consts.COLOR_INTENSITY_NAME].value * 0.01 --[[@as number]]
+      self.current_research_colors = self.color_registry:get_colors_for_research(current_research, intensity)
+    else
+      self.current_research_colors = nil
+    end
   end
   local current_research_colors = self.current_research_colors
 

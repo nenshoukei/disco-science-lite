@@ -10,11 +10,20 @@ data:extend({
     order = "a[visual]-a",
   },
   {
+    type = "int-setting",
+    name = consts.COLOR_INTENSITY_NAME,
+    setting_type = "runtime-global",
+    default_value = 100,
+    minimum_value = 1,
+    maximum_value = 100,
+    order = "a[visual]-b",
+  },
+  {
     type = "bool-setting",
     name = consts.RANDOM_FLICKER_NAME,
     setting_type = "runtime-global",
     default_value = false,
-    order = "a[visual]-b",
+    order = "a[visual]-c",
   },
   {
     type = "int-setting",
