@@ -26,6 +26,7 @@ function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_registry = ColorRegistry.new()
   ds_storage.target_lab_registry = TargetLabRegistry.new()
+  ds_storage.target_lab_registry:apply_prototype_registrations()
   RemoteInterface.bind_storage(ds_storage)
 
   renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.target_lab_registry)
@@ -47,9 +48,12 @@ function LabControl.on_load()
 end
 
 function LabControl.on_configuration_changed()
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  -- Re-apply prototype registrations first in case mods were added/removed
+  ds_storage.target_lab_registry:apply_prototype_registrations()
+
   rebuild_overlays() -- cancels the deferred render registered in on_load
 
-  local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_registry:validate_technology_prototypes()
 end
 

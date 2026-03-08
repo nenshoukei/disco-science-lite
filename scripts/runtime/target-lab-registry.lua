@@ -11,6 +11,7 @@ if script then
 end
 
 local LAB_OVERLAY_ANIMATION_NAME = consts.LAB_OVERLAY_ANIMATION_NAME
+local LAB_REGISTRATIONS_MOD_DATA_NAME = consts.LAB_REGISTRATIONS_MOD_DATA_NAME
 
 --- Constructor
 ---
@@ -58,6 +59,29 @@ end
 --- @return TargetLab|nil
 function TargetLabRegistry:get(lab_name)
   return self.labs[lab_name]
+end
+
+--- Load lab registrations from the mod-data prototype written by DiscoScience.registerLab().
+---
+--- Only entries that include an animation field are applied (i.e. registerLab registrations).
+--- Entries written by prepareLab (which have no animation) are skipped so they do not
+--- overwrite animation values already set in the registry by addTargetLab remote calls.
+--- Existing entries not present in the mod-data are preserved.
+function TargetLabRegistry:apply_prototype_registrations()
+  local mod_data = prototypes["mod-data"][LAB_REGISTRATIONS_MOD_DATA_NAME]
+  if not mod_data then return end
+  local labs = self.labs
+  --- @type table<string, {animation: string, scale: integer}>
+  local registrations = mod_data.data --[[@as table<string, {animation: string, scale: integer}>]]
+  for lab_name, reg in pairs(registrations) do
+    local animation = reg.animation
+    if animation then
+      labs[lab_name] = {
+        animation = animation,
+        scale = reg.scale or 1,
+      }
+    end
+  end
 end
 
 return TargetLabRegistry

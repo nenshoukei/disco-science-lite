@@ -12,6 +12,7 @@ local consts = {
   GRAPHICS_DIR = GRAPHICS_DIR,
 
   LAB_CREATED_EFFECT_ID = "ds-create-lab", -- For compatibility with DS
+  LAB_REGISTRATIONS_MOD_DATA_NAME = NAME_PREFIX .. "lab-registrations",
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",
   BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
   FALLBACK_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "fallback-overlay",
