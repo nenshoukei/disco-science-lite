@@ -7,8 +7,8 @@ This project is to create a mod for Factorio, a game about factories. Written in
 This mod provides users with:
 
 - Colorization of science labs
-    - A science lab is an entity that researches technologies by consuming science packs.
-    - The color is chosen from the color of science packs, so that the user can distinguish the science pack being consumed.
+    - A science lab is a facility for researching technologies by consuming science packs.
+    - The color is chosen from the color of science packs, so that the user can distinguish which science pack is being consumed.
     - Also, the color will change dynamically like a "disco", calculated by color functions.
 
 ## Special Terms
