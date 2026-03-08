@@ -1,6 +1,6 @@
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
-local LabRegistrationRegistry = require("scripts.runtime.lab-registration-registry")
+local LabRegistry = require("scripts.runtime.lab-registry")
 
 describe("RemoteInterface", function ()
   --- @type DiscoScienceStorage
@@ -11,10 +11,10 @@ describe("RemoteInterface", function ()
 
   before_each(function ()
     color_reg = ColorRegistry.new()
-    lab_reg = LabRegistrationRegistry.new()
+    lab_reg = LabRegistry.new()
     RemoteInterface.bind_storage({
       color_registry = color_reg,
-      lab_registration_registry = lab_reg,
+      lab_registry = lab_reg,
     })
   end)
 

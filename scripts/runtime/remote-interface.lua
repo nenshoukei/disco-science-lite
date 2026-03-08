@@ -4,14 +4,14 @@ local RemoteInterface = {
   functions = {},
 }
 
---- @type LabRegistrationRegistry|nil
-local lab_registration_registry = nil
+--- @type LabRegistry|nil
+local lab_registry = nil
 --- @type ColorRegistry|nil
 local color_registry = nil
 
 --- @param ds_storage DiscoScienceStorage
 function RemoteInterface.bind_storage(ds_storage)
-  lab_registration_registry = ds_storage.lab_registration_registry
+  lab_registry = ds_storage.lab_registry
   color_registry = ds_storage.color_registry
 end
 
@@ -24,13 +24,13 @@ local RemoteInterfaceFunctions = RemoteInterface.functions
 --- @param animation string AnimationPrototype name for an overlay.
 --- @param scale integer? Scale of the lab. (Default scale is `1`)
 function RemoteInterfaceFunctions.addTargetLab(lab_name, animation, scale)
-  if not lab_registration_registry then return end
+  if not lab_registry then return end
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.addTargetLab: lab_name must be a non-empty string")
   assert(type(animation) == "string" and animation ~= "",
     "DiscoScience.addTargetLab: animation must be a non-empty string")
   assert(scale == nil or (type(scale) == "number" and scale > 0),
     "DiscoScience.addTargetLab: scale must be a positive number")
-  lab_registration_registry:add(lab_name, {
+  lab_registry:add(lab_name, {
     animation = animation,
     scale = scale or 1,
   })
@@ -43,10 +43,10 @@ end
 --- @param lab_name string LabPrototype name.
 --- @param scale integer Scale of the lab. (Default scale is `1`)
 function RemoteInterfaceFunctions.setLabScale(lab_name, scale)
-  if not lab_registration_registry then return end
+  if not lab_registry then return end
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.setLabScale: lab_name must be a non-empty string")
   assert(type(scale) == "number" and scale > 0, "DiscoScience.setLabScale: scale must be a positive number")
-  lab_registration_registry:set_scale(lab_name, scale)
+  lab_registry:set_scale(lab_name, scale)
 end
 
 --- Set color for an ingredient (science pack)

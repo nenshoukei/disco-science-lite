@@ -1,22 +1,22 @@
-local LabRegistrationRegistry = require("scripts.runtime.lab-registration-registry")
+local LabRegistry = require("scripts.runtime.lab-registry")
 local consts = require("scripts.shared.consts")
 
-describe("LabRegistrationRegistry", function ()
+describe("LabRegistry", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
     it("creates an instance with default lab registrations", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       -- vanilla lab is always registered by default
       assert.is_not_nil(r:get("lab"))
     end)
 
     it("includes biolab by default", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       assert.is_not_nil(r:get("biolab"))
     end)
 
     it("returns nil for unknown lab", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       assert.is_nil(r:get("nonexistent-lab"))
     end)
   end)
@@ -24,7 +24,7 @@ describe("LabRegistrationRegistry", function ()
   -- -------------------------------------------------------------------
   describe("add", function ()
     it("registers a new lab", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       r:add("my-lab", { animation = "my-anim", scale = 2 })
       local reg = r:get("my-lab")
       assert.is_not_nil(reg) --- @cast reg -nil
@@ -33,7 +33,7 @@ describe("LabRegistrationRegistry", function ()
     end)
 
     it("overwrites an existing registration", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       r:add("lab", { animation = "custom-anim", scale = 3 })
       local reg = r:get("lab")
       assert.is_not_nil(reg) --- @cast reg -nil
@@ -45,7 +45,7 @@ describe("LabRegistrationRegistry", function ()
   -- -------------------------------------------------------------------
   describe("set_scale", function ()
     it("updates scale for an existing lab", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       r:set_scale("lab", 2)
       local reg = r:get("lab")
       assert.is_not_nil(reg) --- @cast reg -nil
@@ -53,14 +53,14 @@ describe("LabRegistrationRegistry", function ()
     end)
 
     it("preserves animation when updating scale of an existing lab", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       local original_animation = r:get("lab").animation
       r:set_scale("lab", 3)
       assert.are.equal(original_animation, r:get("lab").animation)
     end)
 
     it("auto-registers unknown lab with default overlay and given scale", function ()
-      local r = LabRegistrationRegistry.new()
+      local r = LabRegistry.new()
       r:set_scale("new-lab", 4)
       local reg = r:get("new-lab")
       assert.is_not_nil(reg) --- @cast reg -nil
@@ -72,8 +72,8 @@ describe("LabRegistrationRegistry", function ()
   -- -------------------------------------------------------------------
   describe("isolation between instances", function ()
     it("changes in one registry do not affect another", function ()
-      local r1 = LabRegistrationRegistry.new()
-      local r2 = LabRegistrationRegistry.new()
+      local r1 = LabRegistry.new()
+      local r2 = LabRegistry.new()
       r1:set_scale("lab", 5)
       assert.are_not.equal(5, r2:get("lab").scale)
     end)
