@@ -1,4 +1,5 @@
 local consts = require("scripts.shared.consts")
+local Utils = require("scripts.shared.utils")
 
 --- @class LabRegistry
 local LabRegistry = {}
@@ -68,15 +69,19 @@ end
 function LabRegistry:load_prototype_settings(overwrites)
   local mod_data = prototypes.mod_data[consts.LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]
   if not mod_data then return end
-  local loaded_settings = mod_data.data --[[@as table<string, LabOverlaySettings>]]
+  local prototype_settings = mod_data.data --[[@as table<string, LabOverlaySettings>]]
 
-  local labs = self.overlay_settings
-  for lab_name, settings in pairs(loaded_settings) do
-    if overwrites or not labs[lab_name] then
-      labs[lab_name] = {
-        animation = settings.animation,
-        scale = settings.scale,
-      }
+  if overwrites then
+    self.overlay_settings = Utils.table_deep_copy(prototype_settings)
+  else
+    local labs = self.overlay_settings
+    for lab_name, settings in pairs(prototype_settings) do
+      if not labs[lab_name] then
+        labs[lab_name] = {
+          animation = settings.animation,
+          scale = settings.scale,
+        }
+      end
     end
   end
 end

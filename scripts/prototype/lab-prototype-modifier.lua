@@ -1,5 +1,5 @@
 local consts = require("scripts.shared.consts")
-local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 local LabPrototypeModifier = {
   --- Modified lab prototypes
@@ -42,7 +42,7 @@ end
 ---
 --- @param lab_prototypes { [string]: data.LabPrototype }
 function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
-  local registered_labs = LabPrototypeRegistry.registered_labs
+  local registered_labs = PrototypeLabRegistry.registered_labs
   local fallback_enabled = settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value
   for name, proto in pairs(lab_prototypes) do
     if fallback_enabled or registered_labs[name] then

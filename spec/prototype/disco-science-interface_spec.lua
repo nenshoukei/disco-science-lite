@@ -1,5 +1,5 @@
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
-local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local DiscoScienceInterface = require("scripts.prototype.disco-science-interface")
 
 --- @return data.LabPrototype
@@ -15,7 +15,7 @@ end
 describe("DiscoScienceInterface", function ()
   before_each(function ()
     LabPrototypeModifier.modified_labs = {}
-    LabPrototypeRegistry.reset()
+    PrototypeLabRegistry.reset()
   end)
 
   -- -------------------------------------------------------------------
@@ -27,16 +27,16 @@ describe("DiscoScienceInterface", function ()
       assert.are.equal(off, lab.on_animation)
     end)
 
-    it("registers the lab name in LabPrototypeRegistry", function ()
+    it("registers the lab name in PrototypeLabRegistry", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab)
-      assert.is_not_nil(LabPrototypeRegistry.registered_labs["my-lab"])
+      assert.is_not_nil(PrototypeLabRegistry.registered_labs["my-lab"])
     end)
 
     it("stores animation setting in the registry", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
-      local settings = LabPrototypeRegistry.registered_labs["my-lab"]
+      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("my-anim", settings.animation)
     end)
@@ -44,7 +44,7 @@ describe("DiscoScienceInterface", function ()
     it("stores scale setting in the registry", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab, { scale = 2.5 })
-      local settings = LabPrototypeRegistry.registered_labs["my-lab"]
+      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal(2.5, settings.scale)
     end)
@@ -52,7 +52,7 @@ describe("DiscoScienceInterface", function ()
     it("registers with empty settings when no settings are passed", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab)
-      local settings = LabPrototypeRegistry.registered_labs["my-lab"]
+      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.is_nil(settings.animation)
       assert.is_nil(settings.scale)
@@ -61,7 +61,7 @@ describe("DiscoScienceInterface", function ()
     it("registers with empty settings when empty table is passed", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab, {})
-      local settings = LabPrototypeRegistry.registered_labs["my-lab"]
+      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.is_nil(settings.animation)
       assert.is_nil(settings.scale)
@@ -72,8 +72,8 @@ describe("DiscoScienceInterface", function ()
       local lab_b = make_lab("lab-b")
       DiscoScienceInterface.prepareLab(lab_a, { animation = "anim-a" })
       DiscoScienceInterface.prepareLab(lab_b, { animation = "anim-b" })
-      assert.are.equal("anim-a", LabPrototypeRegistry.registered_labs["lab-a"].animation)
-      assert.are.equal("anim-b", LabPrototypeRegistry.registered_labs["lab-b"].animation)
+      assert.are.equal("anim-a", PrototypeLabRegistry.registered_labs["lab-a"].animation)
+      assert.are.equal("anim-b", PrototypeLabRegistry.registered_labs["lab-b"].animation)
     end)
 
     -- -------------------------------------------------------------------

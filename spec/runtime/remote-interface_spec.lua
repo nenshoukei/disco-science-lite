@@ -246,6 +246,7 @@ describe("RemoteInterface", function ()
   -- -------------------------------------------------------------------
   describe("getIngredientColor", function ()
     it("returns the color for a registered ingredient", function ()
+      RemoteInterface.functions.setIngredientColor("automation-science-pack", { 0.91, 0.16, 0.20 })
       local color = RemoteInterface.functions.getIngredientColor("automation-science-pack")
       assert.is_not_nil(color)
     end)

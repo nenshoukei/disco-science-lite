@@ -1,5 +1,7 @@
+local Utils = require("scripts.shared.utils")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
-local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
 --- Public interface `_G.DiscoScience` for other mods on prototype stage.
 ---
@@ -27,10 +29,25 @@ function DiscoScienceInterface.prepareLab(lab, settings)
     "DiscoScience.prepareLab: settings.scale must be a positive number")
 
   LabPrototypeModifier.modify_lab(lab)
-  LabPrototypeRegistry.register(lab.name, {
+  PrototypeLabRegistry.register(lab.name, {
     animation = settings.animation,
     scale = settings.scale,
   })
+end
+
+--- Set color for an ingredient (science pack) at prototype stage.
+---
+--- These colors can be overridden at runtime by `remote.call()`. See API documents for details.
+---
+--- @param name string Name of ItemPrototype of the ingredient
+--- @param color Color Color for the ingredient.
+function DiscoScienceInterface.setIngredientColor(name, color)
+  assert(type(name) == "string" and name ~= "", "DiscoScience.setIngredientColor: name must be a non-empty string")
+  assert(type(color) == "table" and (
+    (type(color[1]) == "number" and type(color[2]) == "number" and type(color[3]) == "number") or
+    (type(color.r) == "number" and type(color.g) == "number" and type(color.b) == "number")
+  ), "DiscoScience.setIngredientColor: color must be a Color table")
+  PrototypeColorRegistry.set(name, Utils.color_tuple(color))
 end
 
 return DiscoScienceInterface

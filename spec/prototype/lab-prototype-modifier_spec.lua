@@ -1,6 +1,6 @@
 local consts = require("scripts.shared.consts")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
-local LabPrototypeRegistry = require("scripts.prototype.lab-prototype-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 --- @param created_effect data.Trigger|nil
 --- @return data.LabPrototype
@@ -89,13 +89,13 @@ describe("LabPrototypeModifier", function ()
   describe("modify_registered_labs", function ()
     before_each(function ()
       _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME] = { value = true }
-      LabPrototypeRegistry.reset()
+      PrototypeLabRegistry.reset()
     end)
 
     it("modifies registered lab prototype", function ()
       local lab = make_lab(nil)
       local off = lab.off_animation
-      LabPrototypeRegistry.register(lab.name)
+      PrototypeLabRegistry.register(lab.name)
       LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.are.equal(off, lab.on_animation)
       assert_is_dsl_trigger(lab.created_effect)
@@ -106,8 +106,8 @@ describe("LabPrototypeModifier", function ()
       lab1.name = "test-lab1"
       local lab2 = make_lab(nil)
       lab2.name = "test-lab2"
-      LabPrototypeRegistry.register(lab1.name)
-      LabPrototypeRegistry.register(lab2.name)
+      PrototypeLabRegistry.register(lab1.name)
+      PrototypeLabRegistry.register(lab2.name)
       LabPrototypeModifier.modify_registered_labs({ [lab1.name] = lab1, [lab2.name] = lab2 })
       assert_is_dsl_trigger(lab1.created_effect)
       assert_is_dsl_trigger(lab2.created_effect)

@@ -25,6 +25,7 @@ end
 function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_registry = ColorRegistry.new()
+  ds_storage.color_registry:load_prototype_colors(true)
   ds_storage.lab_registry = LabRegistry.new()
   ds_storage.lab_registry:load_prototype_settings(true)
   RemoteInterface.bind_storage(ds_storage)
@@ -49,8 +50,9 @@ end
 
 function LabControl.on_configuration_changed()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
-  -- Reload prototype settings first in case mods were added/removed
-  -- This does not overwrites any existing settings set by remote calls at runtime.
+  -- Reload prototype settings first in case mods were added/removed.
+  -- These do not overwrite any existing values set by remote calls at runtime.
+  ds_storage.color_registry:load_prototype_colors(false)
   ds_storage.lab_registry:load_prototype_settings(false)
 
   rebuild_overlays() -- cancels the deferred render registered in on_load

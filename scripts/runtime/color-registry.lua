@@ -1,5 +1,5 @@
 local Utils = require("scripts.shared.utils")
-local config_ingredient_colors = require("scripts.shared.config.ingredient-colors")
+local consts = require("scripts.shared.consts")
 
 --- Registry for colors of ingredients
 ---
@@ -20,7 +20,8 @@ function ColorRegistry.new()
   --- @class ColorRegistry
   local self = {
     --- Dictionary of ingredient colors. Key is ingredient's ItemPrototype name.
-    ingredient_colors = config_ingredient_colors,
+    --- @type table<string, ColorTuple>
+    ingredient_colors = {},
   }
   return setmetatable(self, ColorRegistry)
 end
@@ -30,10 +31,6 @@ end
 --- @param name string Name of ItemPrototype of the ingredient
 --- @param color Color Color for the ingredient.
 function ColorRegistry:set_ingredient_color(name, color)
-  if self.ingredient_colors == config_ingredient_colors then
-    -- We should make a copy for modifying it
-    self.ingredient_colors = Utils.table_deep_copy(config_ingredient_colors)
-  end
   self.ingredient_colors[name] = Utils.color_tuple(color)
 end
 
@@ -80,6 +77,29 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
     return names
   else
     return nil
+  end
+end
+
+--- Load ingredient colors from the prototype stage mod-data.
+---
+--- If `overwrites` is `true`, replaces all existing colors with the prototype data.
+--- If `overwrites` is `false`, only adds colors for ingredients not yet registered.
+---
+--- @param overwrites boolean Whether to overwrite existing colors.
+function ColorRegistry:load_prototype_colors(overwrites)
+  local mod_data = prototypes.mod_data[consts.INGREDIENT_COLORS_MOD_DATA_NAME]
+  if not mod_data then return end
+  local prototype_colors = mod_data.data --[[@as table<string, ColorTuple>]]
+
+  if overwrites then
+    self.ingredient_colors = Utils.table_deep_copy(prototype_colors)
+  else
+    local colors = self.ingredient_colors
+    for name, color in pairs(prototype_colors) do
+      if not colors[name] then
+        colors[name] = color
+      end
+    end
   end
 end
 

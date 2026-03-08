@@ -25,11 +25,11 @@ end
 describe("ColorRegistry", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
-    it("creates an instance with default ingredient colors", function ()
+    it("creates an instance with empty ingredient colors", function ()
       local r = ColorRegistry.new()
-      -- automation-science-pack is always registered by default
+      -- ingredient_colors starts empty; colors are loaded via load_prototype_colors()
       local color = r:get_ingredient_color("automation-science-pack")
-      assert.is_not_nil(color)
+      assert.is_nil(color)
     end)
   end)
 
@@ -42,6 +42,7 @@ describe("ColorRegistry", function ()
 
     it("returns a color struct with r,g,b fields", function ()
       local r = ColorRegistry.new()
+      r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
       local color = r:get_ingredient_color("automation-science-pack")
       assert.is_not_nil(color) --- @cast color -nil
       assert.is_number(color.r)
@@ -79,14 +80,13 @@ describe("ColorRegistry", function ()
       assert.are.equal(0.1, color.r)
     end)
 
-    it("does not mutate the shared config table", function ()
+    it("instances are independent from each other", function ()
       local r1 = ColorRegistry.new()
       local r2 = ColorRegistry.new()
       r1:set_ingredient_color("automation-science-pack", { 0, 0, 0 })
-      -- r2 should still return the original config color
+      -- r2 should not be affected by r1's changes
       local color = r2:get_ingredient_color("automation-science-pack")
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are_not.equal(0, color.r)
+      assert.is_nil(color)
     end)
   end)
 
@@ -94,6 +94,8 @@ describe("ColorRegistry", function ()
   describe("get_colors_for_research", function ()
     it("returns colors for registered ingredients", function ()
       local r = ColorRegistry.new()
+      r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+      r:set_ingredient_color("logistic-science-pack", { 0.29, 0.97, 0.31 })
       local tech = make_tech("automation-science-pack", "logistic-science-pack")
       local colors = r:get_colors_for_research(tech)
       assert.are.equal(2, #colors)
@@ -189,6 +191,8 @@ describe("ColorRegistry", function ()
   describe("validate_technology_prototypes", function ()
     it("returns nil when all ingredients are registered", function ()
       local r = ColorRegistry.new()
+      r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+      r:set_ingredient_color("logistic-science-pack", { 0.29, 0.97, 0.31 })
       local protos = make_prototypes({
         make_tech("automation-science-pack"),
         make_tech("logistic-science-pack"),
@@ -198,6 +202,7 @@ describe("ColorRegistry", function ()
 
     it("returns sorted list of unregistered ingredient names", function ()
       local r = ColorRegistry.new()
+      r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
       local protos = make_prototypes({
         make_tech("unknown-z"),
         make_tech("unknown-a", "automation-science-pack"),
