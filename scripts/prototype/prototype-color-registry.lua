@@ -15,6 +15,15 @@ function PrototypeColorRegistry.reset()
   PrototypeColorRegistry.registered_colors = Utils.table_deep_copy(config_ingredient_colors)
 end
 
+--- Get color for an ingredient (science pack).
+---
+--- @param name string Name of ItemPrototype of the ingredient
+--- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
+function PrototypeColorRegistry.get(name)
+  local color = PrototypeColorRegistry.registered_colors[name]
+  return color and Utils.color_struct(color)
+end
+
 --- Set color for an ingredient (science pack).
 ---
 --- This overwrites the existing color with the same name.

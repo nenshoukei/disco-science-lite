@@ -1,5 +1,6 @@
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local DiscoScienceInterface = require("scripts.prototype.disco-science-interface")
 
 --- @return data.LabPrototype
@@ -16,6 +17,7 @@ describe("DiscoScienceInterface", function ()
   before_each(function ()
     LabPrototypeModifier.modified_labs = {}
     PrototypeLabRegistry.reset()
+    PrototypeColorRegistry.reset()
   end)
 
   -- -------------------------------------------------------------------
@@ -173,6 +175,71 @@ describe("DiscoScienceInterface", function ()
         local lab = make_lab()
         assert.no_error(function ()
           DiscoScienceInterface.prepareLab(lab, { scale = 0.5 })
+        end)
+      end)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("setIngredientColor", function ()
+    it("stores the color for later retrieval", function ()
+      DiscoScienceInterface.setIngredientColor("custom-pack", { 0.1, 0.2, 0.3 })
+      local color = PrototypeColorRegistry.get("custom-pack")
+      assert.is_not_nil(color)
+    end)
+
+    -- -------------------------------------------------------------------
+    describe("validation", function ()
+      it("errors when name is not a string", function ()
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.setIngredientColor(123, { 0.1, 0.2, 0.3 })
+        end)
+      end)
+
+      it("errors when name is an empty string", function ()
+        assert.has_error(function ()
+          DiscoScienceInterface.setIngredientColor("", { 0.1, 0.2, 0.3 })
+        end)
+      end)
+
+      it("errors when color is not a table", function ()
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.setIngredientColor("custom-pack", "red")
+        end)
+      end)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("getIngredientColor", function ()
+    it("returns the color for a registered ingredient", function ()
+      DiscoScienceInterface.setIngredientColor("custom-pack", { 0.1, 0.2, 0.3 })
+      local color = DiscoScienceInterface.getIngredientColor("custom-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.1, color.r)
+      assert.are.equal(0.2, color.g)
+      assert.are.equal(0.3, color.b)
+    end)
+
+    it("returns nil for an unregistered ingredient", function ()
+      local color = DiscoScienceInterface.getIngredientColor("unknown-pack")
+      assert.is_nil(color)
+    end)
+
+    -- -------------------------------------------------------------------
+    describe("validation", function ()
+      it("errors when name is not a string", function ()
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.getIngredientColor(123)
+        end)
+      end)
+
+      it("errors when name is an empty string", function ()
+        assert.has_error(function ()
+          DiscoScienceInterface.getIngredientColor("")
         end)
       end)
     end)

@@ -50,4 +50,13 @@ function DiscoScienceInterface.setIngredientColor(name, color)
   PrototypeColorRegistry.set(name, Utils.color_tuple(color))
 end
 
+--- Get color for an ingredient (science pack) at prototype stage.
+---
+--- @param name string Name of ItemPrototype of the ingredient
+--- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
+function DiscoScienceInterface.getIngredientColor(name)
+  assert(type(name) == "string" and name ~= "", "DiscoScience.getIngredientColor: name must be a non-empty string")
+  return PrototypeColorRegistry.get(name)
+end
+
 return DiscoScienceInterface

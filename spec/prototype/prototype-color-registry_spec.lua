@@ -49,6 +49,37 @@ describe("PrototypeColorRegistry", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("get", function ()
+    it("returns the color for a registered ingredient as ColorStruct", function ()
+      local color = PrototypeColorRegistry.get("automation-science-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.91, color.r)
+      assert.are.equal(0.16, color.g)
+      assert.are.equal(0.20, color.b)
+    end)
+
+    it("returns nil for an unregistered ingredient", function ()
+      local color = PrototypeColorRegistry.get("unknown-pack")
+      assert.is_nil(color)
+    end)
+
+    it("returns the updated color after set", function ()
+      PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
+      local color = PrototypeColorRegistry.get("custom-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.1, color.r)
+      assert.are.equal(0.2, color.g)
+      assert.are.equal(0.3, color.b)
+    end)
+
+    it("returns nil after reset removes a custom color", function ()
+      PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
+      PrototypeColorRegistry.reset()
+      assert.is_nil(PrototypeColorRegistry.get("custom-pack"))
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("reset", function ()
     it("removes custom colors", function ()
       PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
