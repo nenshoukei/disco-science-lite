@@ -10,5 +10,8 @@ README.md export-ignore
 .* export-ignore
 Makefile export-ignore
 mod-portal export-ignore
+docs export-ignore
 spec export-ignore
+types-test export-ignore
 *.sh export-ignore
+*.rockspec export-ignore
