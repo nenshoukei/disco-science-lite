@@ -20,8 +20,10 @@ This mod provides users with:
 
 ## Directory Structure
 
-- `locale/` - Localization files.
+- `docs/` - Documentation.
 - `graphics/` - Graphic files.
+- `locale/` - Localization files.
+- `mod-portal/` - Files for Factorio mod portal.
 - `scripts/` - Lua scripts.
     - `prototype/` - For Prototype stage.
     - `runtime/` - For Runtime stage.
@@ -29,30 +31,12 @@ This mod provides users with:
     - `shared/` - Shared scripts used by multiple stages.
 - `migrations/` - Migration files.
 - `spec/` - Unit tests.
+- `types-test/` - Test files for `make typecheck`.
 - `*.lua` - Entrypoints of Factorio mod.
 
 ## Commands
 
-To run unit tests:
-
-```
-make test
-```
-
-To lint:
-
-```
-make lint
-```
-
-To type-check `disco-science-lite.d.ts`:
-
-```
-make typecheck
-```
-
-To update graphics:
-
-```
-make graphics
-```
+- To run unit tests: `make test`
+- To lint: `make lint`
+- To type-check `disco-science-lite.d.ts`: `make typecheck`
+- To update graphics: `make graphics`
