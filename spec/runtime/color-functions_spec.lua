@@ -7,13 +7,13 @@ describe("ColorFunctions", function ()
     { 0, 1, 0 }, -- green
     { 0, 0, 1 }, -- blue
   }
-  local n = #colors
+  local n_colors = #colors
 
   -- -------------------------------------------------------------------
   describe("loop_interpolate", function ()
     it("returns the first color exactly at t=0", function ()
       local out = {}
-      ColorFunctions.loop_interpolate(out, 0, colors, n, 1.0)
+      ColorFunctions.loop_interpolate(out, 0, colors, n_colors, 1.0)
       assert.are.equal(1, out[1])
       assert.are.equal(0, out[2])
       assert.are.equal(0, out[3])
@@ -21,7 +21,7 @@ describe("ColorFunctions", function ()
 
     it("returns the second color exactly at t=1", function ()
       local out = {}
-      ColorFunctions.loop_interpolate(out, 1, colors, n, 1.0)
+      ColorFunctions.loop_interpolate(out, 1, colors, n_colors, 1.0)
       assert.are.equal(0, out[1])
       assert.are.equal(1, out[2])
       assert.are.equal(0, out[3])
@@ -29,7 +29,7 @@ describe("ColorFunctions", function ()
 
     it("linearly interpolates halfway between two colors at t=0.5, sharpness=1", function ()
       local out = {}
-      ColorFunctions.loop_interpolate(out, 0.5, colors, n, 1.0)
+      ColorFunctions.loop_interpolate(out, 0.5, colors, n_colors, 1.0)
       assert.are.equal(0.5, out[1])
       assert.are.equal(0.5, out[2])
       assert.are.equal(0, out[3])
@@ -38,7 +38,7 @@ describe("ColorFunctions", function ()
     it("clamps f to 1 when sharpness * f exceeds 1", function ()
       -- t=0.5, sharpness=2.0 => f=1.0 (clamped) => returns second color
       local out = {}
-      ColorFunctions.loop_interpolate(out, 0.5, colors, n, 2.0)
+      ColorFunctions.loop_interpolate(out, 0.5, colors, n_colors, 2.0)
       assert.are.equal(0, out[1])
       assert.are.equal(1, out[2])
       assert.are.equal(0, out[3])
@@ -47,7 +47,7 @@ describe("ColorFunctions", function ()
     it("scales f by sharpness when below 1", function ()
       -- t=0.5, sharpness=0.5 => f=0.25 => 25% from red toward green
       local out = {}
-      ColorFunctions.loop_interpolate(out, 0.5, colors, n, 0.5)
+      ColorFunctions.loop_interpolate(out, 0.5, colors, n_colors, 0.5)
       assert.are.equal(0.75, out[1])
       assert.are.equal(0.25, out[2])
       assert.are.equal(0, out[3])
@@ -57,7 +57,7 @@ describe("ColorFunctions", function ()
       -- t=2.5 => between colors[3] (blue) and colors[1] (red)
       -- f=0.5, sharpness=1.0 => midpoint
       local out = {}
-      ColorFunctions.loop_interpolate(out, 2.5, colors, n, 1.0)
+      ColorFunctions.loop_interpolate(out, 2.5, colors, n_colors, 1.0)
       assert.are.equal(0.5, out[1])
       assert.are.equal(0, out[2])
       assert.are.equal(0.5, out[3])
@@ -77,16 +77,16 @@ describe("ColorFunctions", function ()
   describe("functions", function ()
     local origin = { 0, 0 }
 
-    it("provides exactly 10 color functions", function ()
-      assert.are.equal(10, #ColorFunctions.functions)
+    it("provides exactly 15 color functions", function ()
+      assert.are.equal(15, #ColorFunctions.functions)
     end)
 
-    -- Generic properties shared by all 10 functions
-    for i = 1, 10 do
+    -- Generic properties shared by all 15 functions
+    for i = 1, 15 do
       describe(string.format("[%d]", i), function ()
         it("writes three numeric values into output", function ()
           local out = {}
-          ColorFunctions.functions[i](out, 0, colors, origin, origin)
+          ColorFunctions.functions[i](out, 0, colors, n_colors, origin, origin, 0, 0)
           assert.is_number(out[1])
           assert.is_number(out[2])
           assert.is_number(out[3])
@@ -95,35 +95,41 @@ describe("ColorFunctions", function ()
         it("is deterministic for identical inputs", function ()
           local pos = { 5, 3 }
           local out1, out2 = {}, {}
-          ColorFunctions.functions[i](out1, 100, colors, origin, pos)
-          ColorFunctions.functions[i](out2, 100, colors, origin, pos)
+          ColorFunctions.functions[i](out1, 100, colors, n_colors, origin, pos, 0, 0)
+          ColorFunctions.functions[i](out2, 100, colors, n_colors, origin, pos, 0, 0)
           assert.are.equal(out1[1], out2[1])
           assert.are.equal(out1[2], out2[2])
           assert.are.equal(out1[3], out2[3])
         end)
 
         it("produces a different result at a different phase", function ()
-          -- pos = {4, 3}: chosen so that phase=0 and phase=1000 land in different
-          -- color segments for all 10 functions (avoids mod-3 period coincidences).
+          -- pos = {4, 3}: chosen so that phase=0 and phase=40 land in different
+          -- color segments for all functions (avoids mod-3 period coincidences).
+          -- phase=40 (not 1000) is used so that [13] Random's floor(phase/10)
+          -- step boundary is also crossed, giving a distinct color.
           local pos = { 4, 3 }
           local out1, out2 = {}, {}
-          ColorFunctions.functions[i](out1, 0, colors, origin, pos)
-          ColorFunctions.functions[i](out2, 1000, colors, origin, pos)
+          ColorFunctions.functions[i](out1, 0, colors, n_colors, origin, pos, 0, 0)
+          ColorFunctions.functions[i](out2, 40, colors, n_colors, origin, pos, 0, 0)
           assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
         end)
 
-        it("produces a different result at a different lab position", function ()
-          -- pos1/pos2 are chosen so that all 10 functions produce distinct colors.
-          -- {5, 0} and {4, 8} differ in both x and y, land in different color segments
-          -- for each function (including the 4-fold Kaleidoscope which was sensitive to
-          -- positions that map to the same clamped segment via |dx|/|dy| folding).
-          local pos1 = { 5, 0 }
-          local pos2 = { 4, 8 }
-          local out1, out2 = {}, {}
-          ColorFunctions.functions[i](out1, 0, colors, origin, pos1)
-          ColorFunctions.functions[i](out2, 0, colors, origin, pos2)
-          assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
-        end)
+        -- [12] Pulse ignores position entirely; skip this test for it.
+        if i == 12 then
+          it("produces a different result at a different lab position", pending)
+        else
+          it("produces a different result at a different lab position", function ()
+            -- pos1={5,0} is in chunk (0,0); pos2={0,33} is in chunk (0,1).
+            -- Using positions in different chunks ensures chunk-based functions
+            -- [14] and [15] also produce distinct colors.
+            -- All other functions produce distinct colors for these two positions as well.
+            local pos1, pos2 = { 5, 0 }, { 0, 33 }
+            local out1, out2 = {}, {}
+            ColorFunctions.functions[i](out1, 0, colors, n_colors, origin, pos1, 0, 0)
+            ColorFunctions.functions[i](out2, 0, colors, n_colors, origin, pos2, 0, 1)
+            assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+          end)
+        end
       end)
     end
 
@@ -134,13 +140,13 @@ describe("ColorFunctions", function ()
         -- phase=0  => t=0.0 => red
         -- phase=40 => t=1.0 => green  (integer t, f=0)
         local out1 = {}
-        ColorFunctions.functions[1](out1, 0, colors, origin, origin)
+        ColorFunctions.functions[1](out1, 0, colors, n_colors, origin, origin, 0, 0)
         assert.are.equal(1, out1[1])
         assert.are.equal(0, out1[2])
         assert.are.equal(0, out1[3])
 
         local out2 = {}
-        ColorFunctions.functions[1](out2, 40, colors, origin, origin)
+        ColorFunctions.functions[1](out2, 40, colors, n_colors, origin, origin, 0, 0)
         assert.are.equal(0, out2[1])
         assert.are.equal(1, out2[2])
         assert.are.equal(0, out2[3])
@@ -152,8 +158,8 @@ describe("ColorFunctions", function ()
         local lab_east = { 10, 0 }  -- theta = 0
         local lab_west = { -10, 0 } -- theta = pi
         local out1, out2 = {}, {}
-        ColorFunctions.functions[2](out1, 0, colors, origin, lab_east)
-        ColorFunctions.functions[2](out2, 0, colors, origin, lab_west)
+        ColorFunctions.functions[2](out1, 0, colors, n_colors, origin, lab_east, 0, 0)
+        ColorFunctions.functions[2](out2, 0, colors, n_colors, origin, lab_west, 0, 0)
         assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
       end)
     end)
@@ -163,8 +169,8 @@ describe("ColorFunctions", function ()
         local lab_up = { 10, 5 }
         local lab_down = { 10, -5 }
         local out1, out2 = {}, {}
-        ColorFunctions.functions[3](out1, 0, colors, origin, lab_up)
-        ColorFunctions.functions[3](out2, 0, colors, origin, lab_down)
+        ColorFunctions.functions[3](out1, 0, colors, n_colors, origin, lab_up, 0, 0)
+        ColorFunctions.functions[3](out2, 0, colors, n_colors, origin, lab_down, 0, 0)
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])
@@ -176,8 +182,8 @@ describe("ColorFunctions", function ()
         local lab_left = { -5, 10 }
         local lab_right = { 5, 10 }
         local out1, out2 = {}, {}
-        ColorFunctions.functions[4](out1, 0, colors, origin, lab_left)
-        ColorFunctions.functions[4](out2, 0, colors, origin, lab_right)
+        ColorFunctions.functions[4](out1, 0, colors, n_colors, origin, lab_left, 0, 0)
+        ColorFunctions.functions[4](out2, 0, colors, n_colors, origin, lab_right, 0, 0)
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])
@@ -190,8 +196,8 @@ describe("ColorFunctions", function ()
         local lab_a = { 10, 0 } -- |10+0| = 10
         local lab_b = { 0, 10 } -- |0+10| = 10
         local out1, out2 = {}, {}
-        ColorFunctions.functions[5](out1, 0, colors, origin, lab_a)
-        ColorFunctions.functions[5](out2, 0, colors, origin, lab_b)
+        ColorFunctions.functions[5](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[5](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])
@@ -204,8 +210,8 @@ describe("ColorFunctions", function ()
         local lab_a = { 1, 1 } -- cell (0, 0)
         local lab_b = { 4, 3 } -- cell (0, 0)
         local out1, out2 = {}, {}
-        ColorFunctions.functions[6](out1, 0, colors, origin, lab_a)
-        ColorFunctions.functions[6](out2, 0, colors, origin, lab_b)
+        ColorFunctions.functions[6](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[6](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])
@@ -215,8 +221,8 @@ describe("ColorFunctions", function ()
         local lab_cell0 = { 1, 0 }  -- cell (0, 0), sum=0
         local lab_cell1 = { 10, 0 } -- cell (1, 0), sum=1
         local out1, out2 = {}, {}
-        ColorFunctions.functions[6](out1, 0, colors, origin, lab_cell0)
-        ColorFunctions.functions[6](out2, 0, colors, origin, lab_cell1)
+        ColorFunctions.functions[6](out1, 0, colors, n_colors, origin, lab_cell0, 0, 0)
+        ColorFunctions.functions[6](out2, 0, colors, n_colors, origin, lab_cell1, 0, 0)
         assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
       end)
     end)
@@ -228,8 +234,8 @@ describe("ColorFunctions", function ()
         local lab_east = { 8, 0 }   -- theta = 0
         local lab_north = { 0, -8 } -- theta = -pi/2
         local out1, out2 = {}, {}
-        ColorFunctions.functions[7](out1, 0, colors, origin, lab_east)
-        ColorFunctions.functions[7](out2, 0, colors, origin, lab_north)
+        ColorFunctions.functions[7](out1, 0, colors, n_colors, origin, lab_east, 0, 0)
+        ColorFunctions.functions[7](out2, 0, colors, n_colors, origin, lab_north, 0, 0)
         assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
       end)
     end)
@@ -239,47 +245,25 @@ describe("ColorFunctions", function ()
         local lab_a = { 8, 0 } -- |dx|+|dy| = 8
         local lab_b = { 4, 4 } -- |dx|+|dy| = 8
         local out1, out2 = {}, {}
-        ColorFunctions.functions[8](out1, 0, colors, origin, lab_a)
-        ColorFunctions.functions[8](out2, 0, colors, origin, lab_b)
+        ColorFunctions.functions[8](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[8](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])
       end)
     end)
 
-    describe("[9] Checkerboard", function ()
-      it("returns the same color for labs in the same grid cell", function ()
-        local lab_a = { 1, 1 } -- cell (0, 0)
-        local lab_b = { 4, 3 } -- cell (0, 0)
-        local out1, out2 = {}, {}
-        ColorFunctions.functions[9](out1, 0, colors, origin, lab_a)
-        ColorFunctions.functions[9](out2, 0, colors, origin, lab_b)
-        assert.are.equal(out1[1], out2[1])
-        assert.are.equal(out1[2], out2[2])
-        assert.are.equal(out1[3], out2[3])
-      end)
-
-      it("returns a different color for labs in adjacent grid cells", function ()
-        local lab_cell0 = { 1, 0 }  -- cell (0, 0), gx+gy=0
-        local lab_cell1 = { 10, 0 } -- cell (1, 0), gx+gy=1
-        local out1, out2 = {}, {}
-        ColorFunctions.functions[9](out1, 0, colors, origin, lab_cell0)
-        ColorFunctions.functions[9](out2, 0, colors, origin, lab_cell1)
-        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
-      end)
-    end)
-
-    describe("[10] Kaleidoscope", function ()
+    describe("[9] Kaleidoscope", function ()
       it("labs mirrored across both axes have the same color (4-fold symmetry)", function ()
         local lab_ne = { 5, 3 }
         local lab_nw = { -5, 3 }
         local lab_se = { 5, -3 }
         local lab_sw = { -5, -3 }
         local out_ne, out_nw, out_se, out_sw = {}, {}, {}, {}
-        ColorFunctions.functions[10](out_ne, 0, colors, origin, lab_ne)
-        ColorFunctions.functions[10](out_nw, 0, colors, origin, lab_nw)
-        ColorFunctions.functions[10](out_se, 0, colors, origin, lab_se)
-        ColorFunctions.functions[10](out_sw, 0, colors, origin, lab_sw)
+        ColorFunctions.functions[9](out_ne, 0, colors, n_colors, origin, lab_ne, 0, 0)
+        ColorFunctions.functions[9](out_nw, 0, colors, n_colors, origin, lab_nw, 0, 0)
+        ColorFunctions.functions[9](out_se, 0, colors, n_colors, origin, lab_se, 0, 0)
+        ColorFunctions.functions[9](out_sw, 0, colors, n_colors, origin, lab_sw, 0, 0)
         assert.are.equal(out_ne[1], out_nw[1])
         assert.are.equal(out_ne[2], out_nw[2])
         assert.are.equal(out_ne[3], out_nw[3])
@@ -289,6 +273,119 @@ describe("ColorFunctions", function ()
         assert.are.equal(out_ne[1], out_sw[1])
         assert.are.equal(out_ne[2], out_sw[2])
         assert.are.equal(out_ne[3], out_sw[3])
+      end)
+    end)
+
+    describe("[10] Square", function ()
+      it("returns the same color for labs on the same Chebyshev ring", function ()
+        -- max(|dx|, |dy|) = 8 for both
+        local lab_a = { 8, 0 } -- max(8, 0) = 8
+        local lab_b = { 4, 8 } -- max(4, 8) = 8
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[10](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[10](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[11] Lattice", function ()
+      it("returns the same color for labs 32 tiles apart (repeating tile)", function ()
+        local lab_a = { 4, 3 }
+        local lab_b = { 36, 3 } -- 4 + 32
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[11](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[11](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("returns the same color for labs mirrored within a 32-tile cell", function ()
+        -- fx=5 and fx=32-5=27 fold to the same distance from the nearest grid corner
+        local lab_a = { 5, 3 }
+        local lab_b = { 27, 3 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[11](out1, 0, colors, n_colors, origin, lab_a, 0, 0)
+        ColorFunctions.functions[11](out2, 0, colors, n_colors, origin, lab_b, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[12] Pulse", function ()
+      it("all labs produce the same color regardless of position", function ()
+        local pos_a = { 5, 0 }
+        local pos_b = { 1, 10 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[12](out1, 0, colors, n_colors, origin, pos_a, 0, 0)
+        ColorFunctions.functions[12](out2, 0, colors, n_colors, origin, pos_b, 3, 7)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[13] Random", function ()
+      it("returns the same color for the same lab position at the same phase step", function ()
+        -- Phase steps change every 10 ticks; the same step => same color.
+        local pos = { 5, 3 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[13](out1, 5, colors, n_colors, origin, pos, 0, 0)
+        ColorFunctions.functions[13](out2, 9, colors, n_colors, origin, pos, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[14] Chunk Diagonal", function ()
+      it("returns the same color for labs in the same chunk", function ()
+        -- pos_a={1,1} and pos_b={5,7} are both in chunk (0,0)
+        local pos_a = { 1, 1 }
+        local pos_b = { 5, 7 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[14](out1, 0, colors, n_colors, origin, pos_a, 0, 0)
+        ColorFunctions.functions[14](out2, 0, colors, n_colors, origin, pos_b, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("returns a different color for labs in chunks with different diagonal sum", function ()
+        -- pos1={1,1} is in chunk (0,0); pos2={33,1} is in chunk (1,0)
+        local pos1 = { 1, 1 }
+        local pos2 = { 33, 1 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[14](out1, 0, colors, n_colors, origin, pos1, 0, 0)
+        ColorFunctions.functions[14](out2, 0, colors, n_colors, origin, pos2, 1, 0)
+        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+      end)
+    end)
+
+    describe("[15] Chunk Random", function ()
+      it("returns the same color for labs in the same chunk", function ()
+        -- pos_a={1,1} and pos_b={5,7} are both in chunk (0,0)
+        local pos_a = { 1, 1 }
+        local pos_b = { 5, 7 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[15](out1, 0, colors, n_colors, origin, pos_a, 0, 0)
+        ColorFunctions.functions[15](out2, 0, colors, n_colors, origin, pos_b, 0, 0)
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("returns a different color for labs in different chunks", function ()
+        -- pos1={1,1} is in chunk (0,0); pos2={33,1} is in chunk (1,0)
+        local pos1 = { 1, 1 }
+        local pos2 = { 33, 1 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[15](out1, 0, colors, n_colors, origin, pos1, 0, 0)
+        ColorFunctions.functions[15](out2, 0, colors, n_colors, origin, pos2, 1, 0)
+        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
       end)
     end)
   end)

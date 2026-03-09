@@ -352,8 +352,9 @@ function LabOverlayRenderer:get_tick_function()
     if not view[PV_VALID] then return end
 
     -- Return early when no research is active. All overlays are invisible, nothing to update.
-    local current_research_colors = self.current_research_colors
-    if not current_research_colors then return end
+    local colors = self.current_research_colors
+    if not colors then return end
+    local n_colors = #colors
 
     phase = phase + phase_speed
 
@@ -401,7 +402,7 @@ function LabOverlayRenderer:get_tick_function()
                 if overlay[OV_VISIBLE] then
                   local animation = overlay[OV_ANIMATION]
                   local entity_position = overlay[OV_POSITION]
-                  color_function(color, phase, current_research_colors, player_position, entity_position)
+                  color_function(color, phase, colors, n_colors, player_position, entity_position, cx, cy)
                   animation.color = color
                 end
               end
