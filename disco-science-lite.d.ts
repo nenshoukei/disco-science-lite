@@ -1,31 +1,8 @@
 /**
- * Type definitions for the public API of Disco Science Lite for TypescriptToLua users.
+ * Type definitions for the public API of Disco Science Lite for TypeScriptToLua users.
  *
  * Works with both `typed-factorio` and `factorio-types` packages through structural compatibility
  * — no direct dependency on either package is required.
- *
- * ## Setup
- *
- * **Option A**: Copy this file into your project.
- * This file is licensed under the MIT License — you don't need to include the LICENSE file.
- *
- * **Option B**: Reference this file from the disco-science-lite mod directory via `tsconfig.json`:
- *
- * ```jsonc
- * // tsconfig.json
- * {
- *   "include": [
- *     "src/**\/*",
- *     "../disco-science-lite/disco-science-lite.d.ts"  // adjust path as needed
- *   ]
- * }
- * ```
- *
- * Or add a triple-slash reference in one of your `.d.ts` files:
- *
- * ```typescript
- * /// <reference path="../disco-science-lite/disco-science-lite.d.ts" />
- * ```
  *
  * ## MIT License
  *
