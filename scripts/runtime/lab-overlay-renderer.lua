@@ -120,7 +120,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     local prototype = lab.prototype
     local scale = math.max(prototype.tile_width, prototype.tile_height) / 2
     render_object = draw_animation({
-      animation = consts.FALLBACK_OVERLAY_ANIMATION_NAME,
+      animation = consts.GENERAL_OVERLAY_ANIMATION_NAME,
       surface = lab.surface,
       target = lab,
       x_scale = scale,

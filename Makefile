@@ -35,4 +35,4 @@ graphics:
 		\( -size 128x128 radial-gradient:white-black -evaluate multiply 0.05 \) \
 		\( -size 128x128 radial-gradient:white-black -evaluate multiply 0.65 \) \
 		\( -size 128x128 radial-gradient:white-black -evaluate multiply 0.55 \) \
-		+append graphics/fallback-overlay.png
+		+append graphics/general-overlay.png
