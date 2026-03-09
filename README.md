@@ -4,7 +4,7 @@
 
 ## API for Mod Authors
 
-Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. Compatible with the original Disco Science mod.
+Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. Compatible with the runtime API of the original Disco Science mod.
 
 ### Quick Start
 
@@ -31,9 +31,20 @@ if _G.DiscoScience then
 end
 ```
 
+The `if _G.DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `_G.DiscoScience` will be `nil`.
+
 Disco Science Lite colorizes the lab based on the science packs it consumes.
 
-If your lab has a **different shape from the vanilla lab**, provide a custom overlay animation so the glow aligns correctly:
+If your lab is **larger or smaller than the vanilla lab**, adjust the scale so the overlay fits:
+
+```lua
+-- data.lua
+if _G.DiscoScience then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale = 1.5 })
+end
+```
+
+If your lab has a **fundamentally different shape** from the vanilla lab (not just a different size), provide a custom overlay animation so the glow aligns correctly:
 
 ```lua
 -- data.lua
@@ -82,11 +93,16 @@ DiscoScience.getIngredientColor(item_name)
 
 ```lua
 -- data.lua
-local my_lab = data.raw["lab"]["my-lab"]
-DiscoScience.prepareLab(my_lab)
-DiscoScience.prepareLab(my_lab, { animation = "my-lab-overlay-animation", scale = 2 })
-DiscoScience.setIngredientColor("my-science-pack", { r = 1, g = 0.5, b = 0 })
-local color = DiscoScience.getIngredientColor("my-science-pack")
+if _G.DiscoScience then
+    local my_lab = data.raw["lab"]["my-lab"]
+    -- Register with default settings:
+    DiscoScience.prepareLab(my_lab)
+    -- Or with custom overlay settings:
+    DiscoScience.prepareLab(my_lab, { animation = "my-lab-overlay-animation", scale = 2 })
+
+    DiscoScience.setIngredientColor("my-science-pack", { r = 1, g = 0.5, b = 0 })
+    local color = DiscoScience.getIngredientColor("my-science-pack")
+end
 ```
 
 **Parameters:**
@@ -100,10 +116,10 @@ local color = DiscoScience.getIngredientColor("my-science-pack")
 
 **`LabOverlaySettings`:**
 
-| Field       | Type       | Default          | Description                                                                                                                |
-| ----------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `animation` | `string?`  | built-in overlay | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to use as the overlay |
-| `scale`     | `number?`  | `1`              | Scale of the overlay                                                                                                       |
+| Field       | Type      | Default          | Description                                                                                                                |
+| ----------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `animation` | `string?` | built-in overlay | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to use as the overlay |
+| `scale`     | `number?` | `1`              | Scales the overlay (multiplies with the animation prototype's `scale`)                                                     |
 
 **About the `animation` field:**
 
@@ -132,9 +148,9 @@ data:extend({
 })
 ```
 
-If `animation` is omitted, Disco Science Lite uses its built-in overlay animation, which is designed for the vanilla Factorio lab shape. For custom labs with a different shape or size, this may look misaligned — it is recommended to always provide a custom animation for such labs.
+If `animation` is omitted, Disco Science Lite uses its built-in overlay animation, which is designed for the vanilla Factorio lab shape. If your lab is a different size, use the `scale` field to compensate. If your lab has a fundamentally different shape, provide a custom animation instead.
 
-For labs that are **not registered** via `prepareLab()` or `registerLab()` at all, Disco Science Lite will use a generic grow animation as a fallback overlay when the fallback option is enabled in mod settings. If you want to explicitly use this generic animation for your labs, specify `animation = "mks-dsl-general-overlay"`. (The `mks-dsl-` prefix is used to avoid name collisions with other mods: `mks` is the author's identifier and `dsl` stands for Disco Science Lite.)
+For labs that are **not registered** via `prepareLab()` at all, Disco Science Lite will use a generic glow animation as a fallback overlay when the fallback option is enabled in mod settings. If you want to explicitly use this generic animation for your labs, specify `animation = "mks-dsl-general-overlay"`. (The `mks-dsl-` prefix is used to avoid name collisions with other mods.)
 
 ### Runtime Stage — `remote.call("DiscoScience", ...)`
 
