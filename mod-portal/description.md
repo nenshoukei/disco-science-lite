@@ -16,9 +16,9 @@ Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with lar
 
 Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
 
-### Colorize Labs from Other Mods
+### Colorize any labs added by unsupported mods
 
-Labs added by other mods are automatically colorized too, even without explicit support. This can be toggled in mod settings.
+Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
 ### Color Customization
 
