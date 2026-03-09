@@ -26,7 +26,7 @@ On runtime, the global `storage` is a table which is automatically persisted by 
 
 At game startup, including loading a game, Factorio runs following steps:
 
-1. Run `control.lua`, `control-updates.lua`, `control-final-fixes.lua` for every mods.
+1. Run `control.lua` for every mods.
 2. Is the mod new to the save?
     - Yes:
         - `on_init` event fires.

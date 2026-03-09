@@ -78,7 +78,7 @@ _G.DiscoScience = {
 
 --- Runtime interface via `remote.call("DiscoScience", ...)`.
 ---
---- Available in `control.lua`, `control-updates.lua` and `control-final-fixes.lua`.
+--- Available in `control.lua`.
 ---
 --- Factorio Modding Tool Kit Extension for VS Code supports [typings on remote calls](https://github.com/justarandomgeek/vscode-factoriomod-debug/blob/current/doc/language-lua.md#remote-interfaces).
 ---

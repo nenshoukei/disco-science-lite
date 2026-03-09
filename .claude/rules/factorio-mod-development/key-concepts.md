@@ -4,13 +4,15 @@
 
 Factorio has three stages at game startup and during game.
 
-On each stage, top-level lua files for that stage (`[stage].lua`, `[stage]-updates.lua`, `[stage]-final-fixes.lua`) are loaded and run by Factorio.
+On each stage, top-level lua files for that stage are loaded and run by Factorio.
 
-- Settings stage: `settings.lua` or `settings-*.lua` to define the mod's settings by `data:extend()`.
-- Prototype stage: `data.lua` or `data-*.lua` to define the mod's prototypes by `data:extend()`.
-- Runtime stage: `control.lua` or `control-*.lua` to control the mod's behavior on the game runtime.
+- Settings stage: Runs `settings.lua`, `settings-updates.lua` then `settings-final-fixes.lua` to define the mod's settings by `data:extend()`.
+- Prototype stage: Runs `data.lua`, `data-updates.lua` then `data-final-fixes.lua` to define the mod's prototypes by `data:extend()`.
+- Runtime stage: Runs `control.lua` to control the mod's behavior on the game runtime.
 
-Each file on every mod runs in order of dependency or mod name sort. So, other mod's data at the same stage can be modified by using `[stage]-updates.lua` or `[stage]-final-fixes.lua`.
+Each file on every mod runs in order of dependency or mod name sort.
+
+To modify other mod's definitions, adding the mod to `dependencies` in `info.json` ensures correct load order. If no specific mod is a target, use `[stage]-updates.lua` or `[stage]-final-fixes.lua` to delay the modification.
 
 ## Settings
 

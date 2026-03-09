@@ -63,7 +63,7 @@ declare namespace DiscoScience {
   /**
    * Runtime interface via `remote.call("DiscoScience", ...)`.
    *
-   * Available in `control.lua`, `control-updates.lua` and `control-final-fixes.lua`.
+   * Available in `control.lua`.
    *
    * For `typed-factorio` users, this interface is automatically registered via the
    * `declare module "factorio:runtime"` augmentation below.
