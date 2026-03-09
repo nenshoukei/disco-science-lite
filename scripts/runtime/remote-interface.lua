@@ -10,6 +10,9 @@ local lab_registry = nil
 --- @type ColorRegistry|nil
 local color_registry = nil
 
+--- @type (fun())|nil
+local rebuild_callback = nil
+
 --- @type {fname: string, args: any[]}[]
 local pending_calls = {}
 
@@ -24,23 +27,23 @@ function RemoteInterface.bind_storage(ds_storage)
   pending_calls = {}
 end
 
-function DiscoScienceRemote.registerLab(lab_name, settings)
-  assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.registerLab: lab_name must be a non-empty string")
-  assert(type(settings) == "table", "DiscoScience.registerLab: settings must be a table")
-  assert(settings.animation == nil or (type(settings.animation) == "string" and settings.animation ~= ""),
-    "DiscoScience.registerLab: settings.animation must be a non-empty string")
-  assert(settings.scale == nil or (type(settings.scale) == "number" and settings.scale > 0),
-    "DiscoScience.registerLab: settings.scale must be a positive number")
-  if not lab_registry then
-    pending_calls[#pending_calls + 1] = { fname = "registerLab", args = { lab_name, settings } }
-    return
-  end
-  lab_registry:register(lab_name, {
-    animation = settings.animation,
-    scale = settings.scale,
-  })
+--- Bind the rebuild callback for setLabScale full world scan.
+--- Must be called after the renderer is ready and the initial render is complete.
+--- Pass nil to unbind.
+---
+--- @param callback (fun())|nil
+function RemoteInterface.bind_rebuild_callback(callback)
+  rebuild_callback = callback
 end
 
+--- Set the scale of a lab overlay.
+---
+--- @deprecated Use `DiscoScience.prepareLab()` at the prototype stage instead.
+--- This function is kept for compatibility with the original DiscoScience mod.
+--- It scans all surfaces to apply the scale to existing lab entities.
+---
+--- @param lab_name string
+--- @param scale number
 function DiscoScienceRemote.setLabScale(lab_name, scale)
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.setLabScale: lab_name must be a non-empty string")
   assert(type(scale) == "number" and scale > 0, "DiscoScience.setLabScale: scale must be a positive number")
@@ -49,6 +52,9 @@ function DiscoScienceRemote.setLabScale(lab_name, scale)
     return
   end
   lab_registry:set_scale(lab_name, scale)
+  if rebuild_callback then
+    rebuild_callback()
+  end
 end
 
 function DiscoScienceRemote.setIngredientColor(item_name, color)

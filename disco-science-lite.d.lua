@@ -37,7 +37,7 @@
 --- @class (exact) LabOverlaySettings
 --- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
 ---                          If omitted, the built-in overlay for the standard lab shape is used.
---- @field scale integer? Scale of the overlay. (Default: `1`)
+--- @field scale number? Scale of the overlay. (Default: `1`)
 
 --- Public interface `_G.DiscoScience` for other mods on prototype stage.
 ---
@@ -89,29 +89,13 @@ _G.DiscoScience = {
 --- @class DiscoScienceRemote
 local DiscoScienceRemote = {
 
-  --- Register (or re-register) a lab type for Disco Science colorization.
-  ---
-  --- `settings` can be used to specify the overlay animation and scale.
-  --- If not passed, the default settings are used.
-  --- This overrides settings registered by `DiscoScience.prepareLab()` at prototype stage.
-  ---
-  --- Settings:
-  --- - `animation` -
-  ---     Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
-  ---     If omitted, the built-in overlay for the standard lab shape is used.
-  --- - `scale` -
-  ---     Scale of the overlay. (Default: `1`)
-  ---
-  --- @param lab_name string Lab prototype name.
-  --- @param settings LabOverlaySettings? Settings for the lab overlay.
-  registerLab = function (lab_name, settings) end,
-
   --- Set the scale of a lab overlay.
   ---
-  --- If the lab has not been registered yet, it will be registered with default settings.
+  --- @deprecated Use `DiscoScience.prepareLab()` at the prototype stage instead.
+  --- This function is kept for compatibility with the original DiscoScience mod.
   ---
   --- @param lab_name string Lab prototype name.
-  --- @param scale integer Scale of the overlay. Must be a positive number.
+  --- @param scale number Scale of the overlay. Must be a positive number.
   setLabScale = function (lab_name, scale) end,
 
   --- Set the color of an ingredient (science pack) at runtime.

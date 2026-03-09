@@ -35,6 +35,7 @@ function LabControl.on_init()
 
   renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.lab_registry)
   rebuild_overlays()
+  RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
   ds_storage.color_registry:validate_technology_prototypes()
 end
@@ -48,6 +49,7 @@ function LabControl.on_load()
   -- on_load cannot modify game state, so defer rendering to the first tick.
   script.on_event(defines.events.on_tick, function ()
     rebuild_overlays() -- overwrites on_tick event handler
+    RemoteInterface.bind_rebuild_callback(rebuild_overlays)
   end)
 end
 
@@ -59,6 +61,7 @@ function LabControl.on_configuration_changed()
   ds_storage.lab_registry:load_prototype_settings(false)
 
   rebuild_overlays() -- cancels the deferred render registered in on_load
+  RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
   ds_storage.color_registry:validate_technology_prototypes()
 end
