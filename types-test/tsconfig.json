@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "esnext",
+    "lib": ["ESNext"]
+  },
+  "include": ["../disco-science-lite.d.ts", "test.ts"]
+}

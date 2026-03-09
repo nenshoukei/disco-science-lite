@@ -192,11 +192,17 @@ end
 
 ---
 
-### Type Definitions for Lua Language Server
+### Type Definitions
+
+#### For Lua Language Server
 
 `disco-science-lite.d.lua` is a type definition file for [Lua Language Server (LuaLS)](https://luals.github.io/). It provides type-safe access to `DiscoScience.*` and `remote.call("DiscoScience", ...)` in your editor.
 
-**Option 1: Add to `workspace.library`**
+**Option 1: Copy into your project**
+
+Copy `disco-science-lite.d.lua` directly into your mod project. The file is licensed under the MIT License — no need to include a separate LICENSE file.
+
+**Option 2: Add to `workspace.library`**
 
 Add the path to this file in your LuaLS settings. For VS Code, add to `.vscode/settings.json`:
 
@@ -210,9 +216,35 @@ Add the path to this file in your LuaLS settings. For VS Code, add to `.vscode/s
 
 See the [LuaLS documentation](https://luals.github.io/wiki/settings/#workspacelibrary) for details.
 
-**Option 2: Copy into your project**
+#### For TypeScriptToLua
 
-Copy `disco-science-lite.d.lua` directly into your mod project. The file is licensed under the MIT License — no need to include a separate LICENSE file.
+`disco-science-lite.d.ts` is a type definition file for [TypeScriptToLua](https://typescripttolua.github.io/) users. It works with both `typed-factorio` and `factorio-types` packages through structural compatibility — no direct dependency on either package is required.
+
+**Option 1: Copy into your project**
+
+Copy `disco-science-lite.d.ts` directly into your mod project. The file is licensed under the MIT License — no need to include a separate LICENSE file.
+
+**Option 2: Reference from the disco-science-lite mod directory**
+
+Add the path to this file in your `tsconfig.json`:
+
+```jsonc
+// tsconfig.json
+{
+    "include": [
+        "src/**/*",
+        "../disco-science-lite/disco-science-lite.d.ts", // adjust path as needed
+    ],
+}
+```
+
+Or add a triple-slash reference in one of your `.d.ts` files:
+
+```typescript
+/// <reference path="../disco-science-lite/disco-science-lite.d.ts" />
+```
+
+---
 
 ## Development
 
@@ -234,6 +266,12 @@ To run unit tests:
 
 ```
 make test
+```
+
+To type-check `disco-science-lite.d.ts` (requires Node.js / TypeScript):
+
+```
+make typecheck
 ```
 
 To update image files (requires ImageMagick, Factorio, Space-Age DLC):

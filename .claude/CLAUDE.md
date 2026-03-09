@@ -45,6 +45,12 @@ To lint:
 make lint
 ```
 
+To type-check `disco-science-lite.d.ts`:
+
+```
+make typecheck
+```
+
 To update graphics:
 
 ```

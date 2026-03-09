@@ -1,6 +1,6 @@
 FACTORIO_DATA := $(HOME)/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents/data
 
-.PHONY: dev lint test graphics
+.PHONY: dev lint test typecheck graphics
 
 dev:
 	luarocks install --deps-only disco-science-lite-dev-1.rockspec
@@ -10,6 +10,9 @@ lint:
 
 test:
 	busted
+
+typecheck:
+	tsc -p types-test/tsconfig.json
 
 graphics:
 	convert "$(FACTORIO_DATA)/base/graphics/entity/lab/lab-light.png" \
