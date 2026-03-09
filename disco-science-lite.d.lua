@@ -2,6 +2,9 @@
 ---
 --- This file contains type definitions of public API of Disco Science Lite for Lua Language Server.
 ---
+--- This file depends on Factorio API type definitions provided by the Factorio Modding Tool Kit
+--- VS Code extension: https://marketplace.visualstudio.com/items?itemName=justarandomgeek.factoriomod-debug
+---
 --- Add this file's path to your LuaLS `workspace.library` settings to use the public API type-safely.
 --- (For VS Code, `"Lua.workspace.library": ["<path to this file>"]` in `.vscode/settings.json`)
 --- https://luals.github.io/wiki/settings/#workspacelibrary
