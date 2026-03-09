@@ -51,23 +51,25 @@ function DiscoScienceRemote.setLabScale(lab_name, scale)
   lab_registry:set_scale(lab_name, scale)
 end
 
-function DiscoScienceRemote.setIngredientColor(name, color)
-  assert(type(name) == "string" and name ~= "", "DiscoScience.setIngredientColor: name must be a non-empty string")
+function DiscoScienceRemote.setIngredientColor(item_name, color)
+  assert(type(item_name) == "string" and item_name ~= "",
+    "DiscoScience.setIngredientColor: item_name must be a non-empty string")
   assert(type(color) == "table" and (
     (type(color[1]) == "number" and type(color[2]) == "number" and type(color[3]) == "number") or
     (type(color.r) == "number" and type(color.g) == "number" and type(color.b) == "number")
   ), "DiscoScience.setIngredientColor: color must be a Color table")
   if not color_registry then
-    pending_calls[#pending_calls + 1] = { fname = "setIngredientColor", args = { name, color } }
+    pending_calls[#pending_calls + 1] = { fname = "setIngredientColor", args = { item_name, color } }
     return
   end
-  color_registry:set_ingredient_color(name, color)
+  color_registry:set_ingredient_color(item_name, color)
 end
 
-function DiscoScienceRemote.getIngredientColor(name)
+function DiscoScienceRemote.getIngredientColor(item_name)
   if not color_registry then return end
-  assert(type(name) == "string" and name ~= "", "DiscoScience.getIngredientColor: name must be a non-empty string")
-  return color_registry:get_ingredient_color(name)
+  assert(type(item_name) == "string" and item_name ~= "",
+    "DiscoScience.getIngredientColor: item_name must be a non-empty string")
+  return color_registry:get_ingredient_color(item_name)
 end
 
 return RemoteInterface

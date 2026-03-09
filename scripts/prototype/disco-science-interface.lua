@@ -27,18 +27,20 @@ function DiscoScienceInterface.prepareLab(lab, settings)
   })
 end
 
-function DiscoScienceInterface.setIngredientColor(name, color)
-  assert(type(name) == "string" and name ~= "", "DiscoScience.setIngredientColor: name must be a non-empty string")
+function DiscoScienceInterface.setIngredientColor(item_name, color)
+  assert(type(item_name) == "string" and item_name ~= "",
+    "DiscoScience.setIngredientColor: item_name must be a non-empty string")
   assert(type(color) == "table" and (
     (type(color[1]) == "number" and type(color[2]) == "number" and type(color[3]) == "number") or
     (type(color.r) == "number" and type(color.g) == "number" and type(color.b) == "number")
   ), "DiscoScience.setIngredientColor: color must be a Color table")
-  PrototypeColorRegistry.set(name, Utils.color_tuple(color))
+  PrototypeColorRegistry.set(item_name, Utils.color_tuple(color))
 end
 
-function DiscoScienceInterface.getIngredientColor(name)
-  assert(type(name) == "string" and name ~= "", "DiscoScience.getIngredientColor: name must be a non-empty string")
-  return PrototypeColorRegistry.get(name)
+function DiscoScienceInterface.getIngredientColor(item_name)
+  assert(type(item_name) == "string" and item_name ~= "",
+    "DiscoScience.getIngredientColor: item_name must be a non-empty string")
+  return PrototypeColorRegistry.get(item_name)
 end
 
 return DiscoScienceInterface

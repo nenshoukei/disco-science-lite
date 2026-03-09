@@ -6,7 +6,11 @@
 
 Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. Compatible with the original Disco Science mod.
 
-To use these APIs, add `"? disco-science-lite"` to your mod's [dependencies](https://lua-api.factorio.com/latest/auxiliary/mod-structure.html#dependencies) in `info.json`. Without this, load order is not guaranteed and your `data.lua` or `control.lua` may be executed before Disco Science Lite is loaded.
+### Quick Start
+
+#### Add dependency to your mod
+
+To use the APIs, add `"? disco-science-lite"` to your mod's [dependencies](https://lua-api.factorio.com/latest/auxiliary/mod-structure.html#dependencies) in `info.json` to ensure correct load order.
 
 ```json
 {
@@ -15,6 +19,45 @@ To use these APIs, add `"? disco-science-lite"` to your mod's [dependencies](htt
 ```
 
 Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide Disco Science Lite from your dependency list.
+
+#### If your mod adds a custom lab
+
+Register your lab in `data.lua`:
+
+```lua
+-- data.lua
+if _G.DiscoScience then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"])
+end
+```
+
+That's it — Disco Science Lite colorizes the lab based on the science packs it consumes.
+
+If your lab has a **different shape from the vanilla lab**, provide a custom overlay animation so the glow aligns correctly:
+
+```lua
+-- data.lua
+if _G.DiscoScience then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { animation = "my-lab-overlay-animation" })
+end
+```
+
+Without a custom animation, the built-in overlay designed for the vanilla lab shape is used, which may look misaligned on differently-shaped labs. See [Prototype Stage API](#prototype-stage--_gdiscoscience) below for how to define a custom animation.
+
+#### If your mod adds custom science packs
+
+Register the color of each science pack in `data.lua`:
+
+```lua
+-- data.lua
+if _G.DiscoScience then
+    DiscoScience.setIngredientColor("my-science-pack", { r = 1, g = 0.5, b = 0 })
+end
+```
+
+Labs that consume this science pack will be tinted with this color.
+
+---
 
 ### Prototype Stage — `_G.DiscoScience`
 
@@ -28,11 +71,11 @@ DiscoScience.prepareLab(lab, settings)
 
 -- Set the color of an ingredient (science pack).
 -- Can be overridden at runtime via remote.call().
-DiscoScience.setIngredientColor(name, color)
+DiscoScience.setIngredientColor(item_name, color)
 
 -- Get the color of an ingredient registered so far.
 -- Returns nil if not registered.
-DiscoScience.getIngredientColor(name)
+DiscoScience.getIngredientColor(item_name)
 ```
 
 **Example:**
@@ -48,12 +91,12 @@ local color = DiscoScience.getIngredientColor("my-science-pack")
 
 **Parameters:**
 
-| Parameter  | Type                                                                                  | Description                                    |
-| ---------- | ------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `lab`      | [data.LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize                  |
-| `settings` | `LabOverlaySettings?`                                                                 | Optional overlay settings (see below)          |
-| `name`     | `string`                                                                              | Item prototype name of the ingredient          |
-| `color`    | [Color](https://lua-api.factorio.com/latest/types/Color.html)                         | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
+| Parameter   | Type                                                                                  | Description                                    |
+| ----------- | ------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `lab`       | [data.LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize                  |
+| `settings`  | `LabOverlaySettings?`                                                                 | Optional overlay settings (see below)          |
+| `item_name` | `string`                                                                              | Item prototype name of the ingredient          |
+| `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html)                         | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
 
 **`LabOverlaySettings`:**
 
@@ -89,13 +132,15 @@ data:extend({
 })
 ```
 
-If `animation` is omitted, Disco Science Lite assumes the lab has the same shape as the vanilla Factorio lab and uses its built-in overlay animation for that lab.
+If `animation` is omitted, Disco Science Lite uses its built-in overlay animation, which is designed for the vanilla Factorio lab shape. For custom labs with a different shape or size, this may look misaligned — it is recommended to always provide a custom animation for such labs.
 
-For labs that are **not registered** via `prepareLab()` or `registerLab()` at all, Disco Science Lite will use a generic grow animation as a fallback overlay when the fallback option is enabled in mod settings. If you want to use the generic grow animation for your labs, specify `animation = "mks-dsl-general-overlay"`.
+For labs that are **not registered** via `prepareLab()` or `registerLab()` at all, Disco Science Lite will use a generic grow animation as a fallback overlay when the fallback option is enabled in mod settings. If you want to explicitly use this generic animation for your labs, specify `animation = "mks-dsl-general-overlay"`. (The `mks-dsl-` prefix is used to avoid name collisions with other mods: `mks` is the author's identifier and `dsl` stands for Disco Science Lite.)
 
 ### Runtime Stage — `remote.call("DiscoScience", ...)`
 
 Available in `control.lua` and other runtime scripts.
+
+**When to use `registerLab` vs `prepareLab`:** Prefer `prepareLab` at the prototype stage when possible — it runs earlier and is available in `data.lua`. Use `registerLab` at runtime only when registration cannot happen at the prototype stage, for example when lab settings depend on runtime state or other runtime conditions.
 
 ```lua
 -- Register (or re-register) a lab type for colorization.
@@ -108,32 +153,34 @@ remote.call("DiscoScience", "setLabScale", lab_name, scale)
 
 -- Set the color of an ingredient (science pack).
 -- Overrides colors set at prototype stage.
-remote.call("DiscoScience", "setIngredientColor", name, color)
+remote.call("DiscoScience", "setIngredientColor", item_name, color)
 
 -- Get the color of an ingredient.
 -- Returns nil if not registered.
-remote.call("DiscoScience", "getIngredientColor", name)
+remote.call("DiscoScience", "getIngredientColor", item_name)
 ```
 
 **Example:**
 
 ```lua
 -- control.lua
-remote.call("DiscoScience", "registerLab", "my-lab", { scale = 2 })
-remote.call("DiscoScience", "setLabScale", "my-lab", 3)
-remote.call("DiscoScience", "setIngredientColor", "my-science-pack", { r = 1, g = 0.5, b = 0 })
-local color = remote.call("DiscoScience", "getIngredientColor", "my-science-pack")
+if remote.interfaces["DiscoScience"] then
+    remote.call("DiscoScience", "registerLab", "my-lab", { scale = 2 })
+    remote.call("DiscoScience", "setLabScale", "my-lab", 3)
+    remote.call("DiscoScience", "setIngredientColor", "my-science-pack", { r = 1, g = 0.5, b = 0 })
+    local color = remote.call("DiscoScience", "getIngredientColor", "my-science-pack")
+end
 ```
 
 **Parameters:**
 
-| Parameter  | Type                                                          | Description                                    |
-| ---------- | ------------------------------------------------------------- | ---------------------------------------------- |
-| `lab_name` | `string`                                                      | Lab prototype name                             |
-| `settings` | `LabOverlaySettings`                                          | Overlay settings table (same fields as above)  |
-| `scale`    | `number`                                                      | Positive number for overlay scale              |
-| `name`     | `string`                                                      | Item prototype name of the ingredient          |
-| `color`    | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
+| Parameter   | Type                                                          | Description                                                                                     |
+| ----------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `lab_name`  | `string`                                                      | Lab prototype name                                                                              |
+| `settings`  | `LabOverlaySettings`                                          | Overlay settings table (same fields as above); must be a table — use `{}` to apply all defaults |
+| `scale`     | `number`                                                      | Positive number for overlay scale (Default scale is `1`)                                        |
+| `item_name` | `string`                                                      | Item prototype name of the ingredient                                                           |
+| `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`)                                                  |
 
 ---
 

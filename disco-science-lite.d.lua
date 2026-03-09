@@ -68,15 +68,15 @@ _G.DiscoScience = {
   ---
   --- These colors can be overridden at runtime via `remote.call()`.
   ---
-  --- @param name string Item prototype name of the ingredient.
+  --- @param item_name string Item prototype name of the ingredient.
   --- @param color Color
-  setIngredientColor = function (name, color) end,
+  setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack) registered so far.
   ---
-  --- @param name string Item prototype name of the ingredient.
+  --- @param item_name string Item prototype name of the ingredient.
   --- @return Color|nil color Color for the ingredient, or `nil` if not registered.
-  getIngredientColor = function (name) end,
+  getIngredientColor = function (item_name) end,
 
 }
 
@@ -118,15 +118,15 @@ local DiscoScienceRemote = {
   ---
   --- Overrides colors set at prototype stage.
   ---
-  --- @param name string Item prototype name of the ingredient.
+  --- @param item_name string Item prototype name of the ingredient.
   --- @param color Color
-  setIngredientColor = function (name, color) end,
+  setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack).
   ---
-  --- @param name string Item prototype name of the ingredient.
+  --- @param item_name string Item prototype name of the ingredient.
   --- @return Color|nil color Color for the ingredient, or `nil` if not registered.
-  getIngredientColor = function (name) end,
+  getIngredientColor = function (item_name) end,
 
 }
 

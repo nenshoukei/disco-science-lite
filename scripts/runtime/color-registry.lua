@@ -28,18 +28,18 @@ end
 
 --- Set color for an ingredient (science pack)
 ---
---- @param name string Name of ItemPrototype of the ingredient
+--- @param item_name string Name of ItemPrototype of the ingredient
 --- @param color Color Color for the ingredient.
-function ColorRegistry:set_ingredient_color(name, color)
-  self.ingredient_colors[name] = Utils.color_tuple(color)
+function ColorRegistry:set_ingredient_color(item_name, color)
+  self.ingredient_colors[item_name] = Utils.color_tuple(color)
 end
 
 --- Get color for an ingredient (science pack)
 ---
---- @param name string Name of ItemPrototype of the ingredient
+--- @param item_name string Name of ItemPrototype of the ingredient
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
-function ColorRegistry:get_ingredient_color(name)
-  local color = self.ingredient_colors[name]
+function ColorRegistry:get_ingredient_color(item_name)
+  local color = self.ingredient_colors[item_name]
   return color and Utils.color_struct(color)
 end
 

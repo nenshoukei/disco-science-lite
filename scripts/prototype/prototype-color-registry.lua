@@ -17,10 +17,10 @@ end
 
 --- Get color for an ingredient (science pack).
 ---
---- @param name string Name of ItemPrototype of the ingredient
+--- @param item_name string Name of ItemPrototype of the ingredient
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
-function PrototypeColorRegistry.get(name)
-  local color = PrototypeColorRegistry.registered_colors[name]
+function PrototypeColorRegistry.get(item_name)
+  local color = PrototypeColorRegistry.registered_colors[item_name]
   return color and Utils.color_struct(color)
 end
 
@@ -28,10 +28,10 @@ end
 ---
 --- This overwrites the existing color with the same name.
 ---
---- @param name string Name of ItemPrototype of the ingredient
+--- @param item_name string Name of ItemPrototype of the ingredient
 --- @param color ColorTuple Color for the ingredient.
-function PrototypeColorRegistry.set(name, color)
-  PrototypeColorRegistry.registered_colors[name] = color
+function PrototypeColorRegistry.set(item_name, color)
+  PrototypeColorRegistry.registered_colors[item_name] = color
 end
 
 return PrototypeColorRegistry
