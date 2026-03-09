@@ -40,7 +40,7 @@ paths: ["**/*.lua"]
 - Factorio supports multi-players, so all state in the game must be deterministic. Otherwise desync of state among players will happen.
 - To print debug logs, use `log()` that prints logs to log files and debug console.
 
-# Testing
+## Testing
 
 - Always write unit tests, excpet for ones heavily depending on Factorio API.
 - Use `busted` for unit testing.
