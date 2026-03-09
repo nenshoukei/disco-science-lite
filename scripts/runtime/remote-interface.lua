@@ -1,8 +1,9 @@
 --- @class RemoteInterface
-local RemoteInterface = {
-  --- @type RemoteInterfaceFunctions
-  functions = {},
-}
+local RemoteInterface = {}
+
+--- @class DiscoScienceRemote
+local DiscoScienceRemote = {}
+RemoteInterface.functions = DiscoScienceRemote
 
 --- @type LabRegistry|nil
 local lab_registry = nil
@@ -23,19 +24,7 @@ function RemoteInterface.bind_storage(ds_storage)
   pending_calls = {}
 end
 
---- @class RemoteInterfaceFunctions
-local RemoteInterfaceFunctions = RemoteInterface.functions
-
---- Register a lab type for Disco-Science colorization.
----
---- `settings` can be used for specifying the rendering settings for the lab overlay.
---- If not passed, the default settings are used. (See [LabOverlaySettings](lua://LabOverlaySettings))
----
---- This overrides the existing settings with the same name registered by DiscoScience.prepareLab() at prototype stage.
----
---- @param lab_name string LabPrototype name.
---- @param settings LabOverlaySettings? Settings for the lab overlay.
-function RemoteInterfaceFunctions.registerLab(lab_name, settings)
+function DiscoScienceRemote.registerLab(lab_name, settings)
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.registerLab: lab_name must be a non-empty string")
   assert(type(settings) == "table", "DiscoScience.registerLab: settings must be a table")
   assert(settings.animation == nil or (type(settings.animation) == "string" and settings.animation ~= ""),
@@ -52,14 +41,7 @@ function RemoteInterfaceFunctions.registerLab(lab_name, settings)
   })
 end
 
---- Set scale of a lab overlay.
----
---- If the given lab has not been registered yet, it will be registered with the default lab overlay settings.
---- (See [LabOverlaySettings](lua://LabOverlaySettings))
----
---- @param lab_name string LabPrototype name.
---- @param scale integer Scale of the lab. (Default scale is `1`)
-function RemoteInterfaceFunctions.setLabScale(lab_name, scale)
+function DiscoScienceRemote.setLabScale(lab_name, scale)
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.setLabScale: lab_name must be a non-empty string")
   assert(type(scale) == "number" and scale > 0, "DiscoScience.setLabScale: scale must be a positive number")
   if not lab_registry then
@@ -69,11 +51,7 @@ function RemoteInterfaceFunctions.setLabScale(lab_name, scale)
   lab_registry:set_scale(lab_name, scale)
 end
 
---- Set color for an ingredient (science pack)
----
---- @param name string Name of ItemPrototype of the ingredient
---- @param color Color Color for the ingredient.
-function RemoteInterfaceFunctions.setIngredientColor(name, color)
+function DiscoScienceRemote.setIngredientColor(name, color)
   assert(type(name) == "string" and name ~= "", "DiscoScience.setIngredientColor: name must be a non-empty string")
   assert(type(color) == "table" and (
     (type(color[1]) == "number" and type(color[2]) == "number" and type(color[3]) == "number") or
@@ -86,11 +64,7 @@ function RemoteInterfaceFunctions.setIngredientColor(name, color)
   color_registry:set_ingredient_color(name, color)
 end
 
---- Get color for an ingredient (science pack)
----
---- @param name string Name of ItemPrototype of the ingredient
---- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
-function RemoteInterfaceFunctions.getIngredientColor(name)
+function DiscoScienceRemote.getIngredientColor(name)
   if not color_registry then return end
   assert(type(name) == "string" and name ~= "", "DiscoScience.getIngredientColor: name must be a non-empty string")
   return color_registry:get_ingredient_color(name)
