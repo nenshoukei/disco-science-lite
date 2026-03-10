@@ -42,11 +42,12 @@ paths: ["**/*.lua"]
 
 ## Special Syntax for Constants
 
-- In order to maximize performance, we use special syntax for constants which allows to embed the constants as literal values like: `"abc"`, `123`, `true`, `false`.
+- In order to maximize performance, we use special syntax which allows to embed constants as literal values like: `"abc"`, `123`, `true`, `false`.
 - Special syntax is `value --[[$CONST_NAME]]` where `value` is the literal value of the constant and `CONST_NAME` is the name of the constant.
 - These constants are defined in `scripts/shared/consts.lua` as `consts.CONST_NAME = 123`.
 - For example, `print("xyz" --[[$ABC]])` uses `consts.ABC = "xyz"`.
-- To update constant value, change the value in `consts.lua`, and run `make consts`. All referrences to that constant will be updated idempotently.
+- To use a constant, write `consts.CONST_NAME` to where you want (no require needed), and run `make consts`. It will be replaced by `value --[[$CONST_NAME]]`.
+- To update a constant, change its value in `consts.lua`, and run `make consts`. All referrences to that constant will be updated idempotently.
 
 ## Testing
 

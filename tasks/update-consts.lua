@@ -21,10 +21,10 @@ end
 
 local STRING_LITERAL = [["(?:\\"|[^"])*"|'(?:\\'|[^'])*']]
 local NUMERIC_LITERAL = "[+-]?[0-9]+(?:\\.[0-9]+)?" -- don't support `0xABC` or `123e-5`
-local BOOLEAN_LITERAL = "true|false"
+local BOOLEAN_LITERAL = "\\b(?:true|false)\\b"
 local LITERAL = "(?:" .. STRING_LITERAL .. "|" .. NUMERIC_LITERAL .. "|" .. BOOLEAN_LITERAL .. ")"
 
-local NAKED_CONST = "consts\\.([A-Z0-9_]+)"
+local NAKED_CONST = "\\b(?:consts\\.([A-Z0-9_]+))"
 local TAGGED_LITERAL = LITERAL .. "\\s*--\\s*\\[\\[\\s*\\$([A-Z0-9_]+)\\s*\\]\\]"
 
 --- For `expr --[[$CONST_NAME]]`, captures: [1] = CONST_NAME
