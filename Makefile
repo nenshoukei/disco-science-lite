@@ -12,7 +12,7 @@ test:
 	busted
 
 typecheck:
-	tsc -p types-test/tsconfig.json
+	tsc -p tasks/typecheck/tsconfig.json
 
 consts:
 	lua tasks/update-consts.lua

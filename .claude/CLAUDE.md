@@ -30,8 +30,7 @@ This mod provides users with:
     - `shared/` - Shared scripts used by multiple stages.
 - `migrations/` - Migration files.
 - `spec/` - Unit tests.
-- `tasks/` - Executables for tasks.
-- `types-test/` - Test files for `make typecheck`.
+- `tasks/` - Executables and configurations for make tasks.
 - `*.lua` - Entrypoints of Factorio mod.
 
 ## Commands

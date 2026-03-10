@@ -5,5 +5,5 @@
     "target": "esnext",
     "lib": ["ESNext"]
   },
-  "include": ["../disco-science-lite.d.ts", "test.ts"]
+  "include": ["../../disco-science-lite.d.ts", "test.ts"]
 }

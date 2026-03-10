@@ -13,4 +13,3 @@ Makefile export-ignore
 README.md export-ignore
 spec export-ignore
 tasks export-ignore
-types-test export-ignore
