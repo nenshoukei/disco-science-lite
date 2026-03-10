@@ -53,6 +53,9 @@ local COLOR_FUNCTION_TEMPLATE = [[
   return function (output, phase, colors, n_colors, px, py, lx, ly)
     local t
     %s
+
+    -- Extract integer part (base_index) and fractional part (f) from `t`.
+    -- `base_index` is for color index and `f` is for interpolation factor.
     local base_index, f = modf(t)
 
     -- Normalize negative fractional part so that f is always in [0, 1).
