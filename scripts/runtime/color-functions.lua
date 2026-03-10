@@ -39,8 +39,8 @@ local CONSTANTS = {
 --- `CONSTANTS` like `INV_PI` are embedded as numeric literals into the body.
 ---
 --- Placeholders:
----   1: Function body - The function body to calculate 't'.
----   2: Transition sharpness - The sharpness value for interpolation.
+---   %s: Function body - The function body to calculate 't'.
+---   %f: Transition sharpness - The sharpness value for interpolation.
 local COLOR_FUNCTION_TEMPLATE = [[
   local modf = math.modf
   local abs = math.abs

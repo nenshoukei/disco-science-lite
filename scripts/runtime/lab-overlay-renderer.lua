@@ -377,7 +377,7 @@ function LabOverlayRenderer:get_tick_function()
     -- Return early when no research is active. All overlays are invisible, nothing to update.
     local colors = self.current_research_colors
     if not colors then return end
-    local n_colors = #colors
+    local n_colors = #colors -- caching n_colors in `self` will be slower.
 
     phase = phase + phase_speed
 
