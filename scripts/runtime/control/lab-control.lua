@@ -1,4 +1,3 @@
-local consts = require("scripts.shared.consts")
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
 local LabRegistry = require("scripts.runtime.lab-registry")
@@ -103,7 +102,7 @@ LabControl.events = {
 
   --- @param event EventData.on_script_trigger_effect
   [defines.events.on_script_trigger_effect] = function (event)
-    if renderer and event.effect_id == consts.LAB_CREATED_EFFECT_ID and event.target_entity then
+    if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and event.target_entity then
       renderer:render_overlay_for_lab(event.target_entity)
     end
   end,

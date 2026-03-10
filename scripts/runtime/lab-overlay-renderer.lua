@@ -1,4 +1,3 @@
-local consts = require("scripts.shared.consts")
 local Utils = require("scripts.shared.utils")
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
@@ -106,7 +105,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
   if not player_force or lab.force_index ~= player_force.index then return nil end
 
   local overlay_settings = self.lab_registry:get_overlay_settings(lab.name)
-  if not overlay_settings and not settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value then
+  if not overlay_settings and not settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value then
     return nil
   end
 
@@ -121,7 +120,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
       y_scale = overlay_settings.scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,
+      animation_offset = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value and
+        random() * 300 or 0,
     })
   else
     -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
@@ -129,14 +129,15 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     local prototype = lab.prototype
     local scale = math.max(prototype.tile_width, prototype.tile_height) / 2
     render_object = draw_animation({
-      animation = consts.GENERAL_OVERLAY_ANIMATION_NAME,
+      animation = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]],
       surface = lab.surface,
       target = lab,
       x_scale = scale,
       y_scale = scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = not settings.global[consts.UNISON_FLICKER_NAME].value and random() * 300 or 0,
+      animation_offset = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value and
+        random() * 300 or 0,
     })
   end
 
@@ -176,7 +177,7 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Destroy all rendering objects and reset data structures.
   -- This is necessary because the force filter may exclude labs that were previously included
   -- (e.g. after on_player_changed_force), leaving stale entries with invalid animations.
-  rendering_clear(consts.MOD_NAME)
+  rendering_clear("disco-science-lite" --[[$MOD_NAME]])
   self.overlays = {}
   self.chunk_map = ChunkMap.new()
   self.visible_overlays = {}
@@ -301,7 +302,8 @@ function LabOverlayRenderer:update_overlay_states()
   if current_research ~= self.current_research then
     self.current_research = current_research
     if current_research then
-      local intensity = settings.global[consts.COLOR_INTENSITY_NAME].value * 0.01 --[[@as number]]
+      local intensity = settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value *
+        0.01 --[[@as number]]
       self.current_research_colors = self.color_registry:get_colors_for_research(current_research, intensity)
     else
       self.current_research_colors = nil
@@ -373,8 +375,10 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
   local global_settings = settings.global
-  local color_pattern_duration = global_settings[consts.COLOR_PATTERN_DURATION_NAME].value --[[@as integer]]
-  local lab_update_interval = global_settings[consts.LAB_UPDATE_INTERVAL_NAME].value --[[@as integer]]
+  local color_pattern_duration = global_settings[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ]
+    .value --[[@as integer]]
+  local lab_update_interval = global_settings[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ]
+    .value --[[@as integer]]
 
   local player_tracker = self.player_tracker
   local view = player_tracker.view

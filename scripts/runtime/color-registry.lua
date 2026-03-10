@@ -1,5 +1,4 @@
 local Utils = require("scripts.shared.utils")
-local consts = require("scripts.shared.consts")
 
 --- Registry for colors of ingredients
 ---
@@ -87,7 +86,7 @@ end
 ---
 --- @param overwrites boolean Whether to overwrite existing colors.
 function ColorRegistry:load_prototype_colors(overwrites)
-  local mod_data = prototypes.mod_data[consts.INGREDIENT_COLORS_MOD_DATA_NAME]
+  local mod_data = prototypes.mod_data[ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ]
   if not mod_data then return end
   local prototype_colors = mod_data.data --[[@as table<string, ColorTuple>]]
 

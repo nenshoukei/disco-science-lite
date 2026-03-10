@@ -1,4 +1,3 @@
-local consts = require("scripts.shared.consts")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 local LabPrototypeModifier = {
@@ -18,7 +17,7 @@ local function add_lab_trigger(lab)
       type = "instant",
       source_effects = {
         type = "script",
-        effect_id = consts.LAB_CREATED_EFFECT_ID,
+        effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]],
       },
     },
   }
@@ -43,7 +42,8 @@ end
 --- @param lab_prototypes { [string]: data.LabPrototype }
 function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
   local registered_labs = PrototypeLabRegistry.registered_labs
-  local fallback_enabled = settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value
+  local fallback_enabled = settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ]
+    .value
   for name, proto in pairs(lab_prototypes) do
     if fallback_enabled or registered_labs[name] then
       LabPrototypeModifier.modify_lab(proto)

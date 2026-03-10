@@ -1,4 +1,3 @@
-local consts = require("scripts.shared.consts")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -88,7 +87,7 @@ describe("LabPrototypeModifier", function ()
   -- -------------------------------------------------------------------
   describe("modify_registered_labs", function ()
     before_each(function ()
-      _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME] = { value = true }
+      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true }
       PrototypeLabRegistry.reset()
     end)
 
@@ -126,7 +125,7 @@ describe("LabPrototypeModifier", function ()
     end)
 
     it("ignores non-target labs when fallback is disabled", function ()
-      _G.settings.startup[consts.FALLBACK_OVERLAY_ENABLED_NAME].value = false
+      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value = false
       local lab = make_lab(nil)
       LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.are.equal("on.png", lab.on_animation.filename)

@@ -4,6 +4,12 @@ local MOD_NAME = "disco-science-lite"
 local MOD_DIR = "__" .. MOD_NAME .. "__/"
 local GRAPHICS_DIR = MOD_DIR .. "graphics/"
 
+--- Constants embedded as literals.
+---
+--- Special syntax `123 --[[$CONST_NAME]]` where `consts.CONST_NAME = 123`, keeps it updated with the current value.
+---
+--- Run `make consts` every time after changing any constant value.
+---
 local consts = {
   PREFIX = PREFIX,
   NAME_PREFIX = NAME_PREFIX,

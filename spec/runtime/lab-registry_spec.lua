@@ -1,13 +1,12 @@
-local consts = require("scripts.shared.consts")
 local LabRegistry = require("scripts.runtime.lab-registry")
 
 --- Set up mock mod_data for load_prototype_settings tests.
 --- @param settings table<string, LabOverlaySettings>|nil nil to remove mod_data
 local function set_mod_data(settings)
   if settings then
-    _G.prototypes.mod_data[consts.LAB_OVERLAY_SETTINGS_MOD_DATA_NAME] = ({ data = settings }) --[[@as LuaModData]]
+    _G.prototypes.mod_data[ "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]] ] = ({ data = settings }) --[[@as LuaModData]]
   else
-    _G.prototypes.mod_data[consts.LAB_OVERLAY_SETTINGS_MOD_DATA_NAME] = nil
+    _G.prototypes.mod_data[ "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]] ] = nil
   end
 end
 
@@ -151,7 +150,8 @@ describe("LabRegistry", function ()
       set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 2 } })
       local r = LabRegistry.new()
       r:load_prototype_settings(true)
-      local proto_data = _G.prototypes.mod_data[consts.LAB_OVERLAY_SETTINGS_MOD_DATA_NAME].data
+      local proto_data = _G.prototypes.mod_data
+        [ "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]] ].data
       assert.are_not.equal(proto_data["my-lab"], r:get_overlay_settings("my-lab"))
     end)
   end)

@@ -1,10 +1,8 @@
-local consts = require("scripts.shared.consts")
-
 data:extend({
   {
     type = "animation",
-    name = consts.LAB_OVERLAY_ANIMATION_NAME,
-    filename = consts.LAB_OVERLAY_GRAPHIC_FILE_NAME,
+    name = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
+    filename = "__disco-science-lite__/graphics/lab-overlay.png" --[[$LAB_OVERLAY_GRAPHIC_FILE_NAME]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 216,
@@ -16,8 +14,8 @@ data:extend({
   },
   {
     type = "animation",
-    name = consts.BIOLAB_OVERLAY_ANIMATION_NAME,
-    filename = consts.BIOLAB_OVERLAY_GRAPHIC_FILE_NAME,
+    name = "mks-dsl-biolab-overlay" --[[$BIOLAB_OVERLAY_ANIMATION_NAME]],
+    filename = "__disco-science-lite__/graphics/biolab-overlay.png" --[[$BIOLAB_OVERLAY_GRAPHIC_FILE_NAME]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 326,
@@ -30,8 +28,8 @@ data:extend({
   },
   {
     type = "animation",
-    name = consts.GENERAL_OVERLAY_ANIMATION_NAME,
-    filename = consts.GENERAL_OVERLAY_GRAPHIC_FILE_NAME,
+    name = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]],
+    filename = "__disco-science-lite__/graphics/general-overlay.png" --[[$GENERAL_OVERLAY_GRAPHIC_FILE_NAME]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 128,
