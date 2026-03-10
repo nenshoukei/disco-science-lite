@@ -1,7 +1,7 @@
 --- @class RemoteInterface
 local RemoteInterface = {}
 
---- @class DiscoScienceRemote
+--- @type DiscoScienceRemote
 local DiscoScienceRemote = {}
 RemoteInterface.functions = DiscoScienceRemote
 
@@ -16,6 +16,8 @@ local rebuild_callback = nil
 --- @type {fname: string, args: any[]}[]
 local pending_calls = {}
 
+--- Bind the storage for registries.
+---
 --- @param ds_storage DiscoScienceStorage
 function RemoteInterface.bind_storage(ds_storage)
   lab_registry = ds_storage.lab_registry
@@ -36,14 +38,6 @@ function RemoteInterface.bind_rebuild_callback(callback)
   rebuild_callback = callback
 end
 
---- Set the scale of a lab overlay.
----
---- @deprecated Use `DiscoScience.prepareLab()` at the prototype stage instead.
---- This function is kept for compatibility with the original DiscoScience mod.
---- It scans all surfaces to apply the scale to existing lab entities.
----
---- @param lab_name string
---- @param scale number
 function DiscoScienceRemote.setLabScale(lab_name, scale)
   assert(type(lab_name) == "string" and lab_name ~= "", "DiscoScience.setLabScale: lab_name must be a non-empty string")
   assert(type(scale) == "number" and scale > 0, "DiscoScience.setLabScale: scale must be a positive number")

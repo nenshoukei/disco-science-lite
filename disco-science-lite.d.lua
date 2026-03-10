@@ -40,6 +40,8 @@
 --- You can use it like `DiscoScience.prepareLab(...)`.
 ---
 --- Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
+---
+--- Compatible with the original DiscoScience mod interface.
 --- @class DiscoScienceInterface
 _G.DiscoScience = {
 
@@ -80,8 +82,7 @@ _G.DiscoScience = {
 ---
 --- Available in `control.lua`.
 ---
---- Factorio Modding Tool Kit Extension for VS Code supports [typings on remote calls](https://github.com/justarandomgeek/vscode-factoriomod-debug/blob/current/doc/language-lua.md#remote-interfaces).
----
+--- Compatible with the original DiscoScience mod interface.
 --- @class DiscoScienceRemote
 local DiscoScienceRemote = {
 
@@ -110,4 +111,6 @@ local DiscoScienceRemote = {
 
 }
 
+-- For Factorio Modding Tool Kit Extension for VS Code
+-- https://github.com/justarandomgeek/vscode-factoriomod-debug/blob/current/doc/language-lua.md#remote-interfaces
 remote.add_interface("DiscoScience", DiscoScienceRemote)

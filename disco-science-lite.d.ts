@@ -1,5 +1,5 @@
 /**
- * Type definitions for the public API of Disco Science Lite for TypeScriptToLua users.
+ * Type definitions for the public API of Disco Science Lite for TypeScriptToLua.
  *
  * Works with both `typed-factorio` and `factorio-types` packages through structural compatibility
  * — no direct dependency on either package is required.
@@ -47,13 +47,9 @@ declare namespace DiscoScience {
   }
 
   /**
-   * A color in RGBA format. Structurally compatible with `typed-factorio`'s `Color` and
-   * `factorio-types`'s `Color`, so you can pass values of those types directly.
+   * A color in RGBA format.
    *
-   * Can be specified as a struct or as a 3- or 4-element tuple `[r, g, b]` / `[r, g, b, a]`.
-   * Values are floats; can be 0–1 or 0–255 (interpreted as 0–255 if any value exceeds 1).
-   *
-   * See: https://lua-api.factorio.com/latest/types/Color.html
+   * @see https://lua-api.factorio.com/latest/types/Color.html
    */
   type Color =
     | { r?: number; g?: number; b?: number; a?: number }
@@ -70,6 +66,8 @@ declare namespace DiscoScience {
    *
    * For `factorio-types` users, register manually following your package's convention
    * for typing remote interfaces.
+   *
+   * Compatible with the original DiscoScience mod interface.
    */
   interface Remote {
     /**
@@ -109,6 +107,8 @@ declare namespace DiscoScience {
  * Usage: `DiscoScience.prepareLab(...)`
  *
  * Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
+ *
+ * Compatible with the original DiscoScience mod interface.
  */
 declare const DiscoScience: {
   /**
@@ -150,8 +150,7 @@ declare const DiscoScience: {
  *
  * This allows `remote.call("DiscoScience", "setIngredientColor", ...)` to be type-checked.
  *
- * If you are using `factorio-types`, this block is harmless — it is treated as an ambient
- * module declaration and has no effect on your project.
+ * If you are using `factorio-types`, this block is harmless.
  */
 declare module "factorio:runtime" {
   interface RemoteInterfaceTypes {
