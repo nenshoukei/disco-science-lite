@@ -72,7 +72,6 @@ local function renderer_update_players()
   end
 end
 
-local LAB_CREATED_EFFECT_ID = consts.LAB_CREATED_EFFECT_ID
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
@@ -104,7 +103,7 @@ LabControl.events = {
 
   --- @param event EventData.on_script_trigger_effect
   [defines.events.on_script_trigger_effect] = function (event)
-    if renderer and event.effect_id == LAB_CREATED_EFFECT_ID and event.target_entity then
+    if renderer and event.effect_id == consts.LAB_CREATED_EFFECT_ID and event.target_entity then
       renderer:render_overlay_for_lab(event.target_entity)
     end
   end,

@@ -4,7 +4,7 @@ data:extend({
   {
     type = "animation",
     name = consts.LAB_OVERLAY_ANIMATION_NAME,
-    filename = consts.GRAPHICS_DIR .. "lab-overlay.png",
+    filename = consts.LAB_OVERLAY_GRAPHIC_FILE_NAME,
     blend_mode = "additive",
     draw_as_glow = true,
     width = 216,
@@ -17,7 +17,7 @@ data:extend({
   {
     type = "animation",
     name = consts.BIOLAB_OVERLAY_ANIMATION_NAME,
-    filename = consts.GRAPHICS_DIR .. "biolab-overlay.png",
+    filename = consts.BIOLAB_OVERLAY_GRAPHIC_FILE_NAME,
     blend_mode = "additive",
     draw_as_glow = true,
     width = 326,
@@ -31,7 +31,7 @@ data:extend({
   {
     type = "animation",
     name = consts.GENERAL_OVERLAY_ANIMATION_NAME,
-    filename = consts.GRAPHICS_DIR .. "general-overlay.png",
+    filename = consts.GENERAL_OVERLAY_GRAPHIC_FILE_NAME,
     blend_mode = "additive",
     draw_as_glow = true,
     width = 128,

@@ -13,7 +13,6 @@ local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local position_to_chunk = Utils.position_to_chunk
 local get_entity_rect = Utils.get_entity_rect
-local MOD_NAME = consts.MOD_NAME
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 
@@ -177,7 +176,7 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Destroy all rendering objects and reset data structures.
   -- This is necessary because the force filter may exclude labs that were previously included
   -- (e.g. after on_player_changed_force), leaving stale entries with invalid animations.
-  rendering_clear(MOD_NAME)
+  rendering_clear(consts.MOD_NAME)
   self.overlays = {}
   self.chunk_map = ChunkMap.new()
   self.visible_overlays = {}
