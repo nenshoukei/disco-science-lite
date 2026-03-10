@@ -9,7 +9,6 @@
 README.md export-ignore
 .* export-ignore
 Makefile export-ignore
-mod-portal export-ignore
 docs export-ignore
 spec export-ignore
 tasks export-ignore

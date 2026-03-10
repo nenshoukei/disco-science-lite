@@ -23,7 +23,6 @@ This mod provides users with:
 - `docs/` - Documentation.
 - `graphics/` - Graphic files.
 - `locale/` - Localization files.
-- `mod-portal/` - Files for Factorio mod portal.
 - `scripts/` - Lua scripts.
     - `prototype/` - For Prototype stage.
     - `runtime/` - For Runtime stage.
