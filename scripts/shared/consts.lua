@@ -71,8 +71,6 @@ local consts = {
   OV_RECT = 5,
   OV_VISIBLE = 6,
   OV_UNIT_NUM = 7,
-  OV_CHUNK_X = 8,
-  OV_CHUNK_Y = 9,
 }
 
 return consts

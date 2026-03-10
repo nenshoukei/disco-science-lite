@@ -3,7 +3,6 @@ local ColorFunctions = {}
 
 local format = string.format
 local random = math.random
-local PI = math.pi
 
 --- A function to calculate a color for a lab entity.
 ---
@@ -14,15 +13,14 @@ local PI = math.pi
 --- - `n_colors` - #colors
 --- - `px`, `py` - Coordinates of the player. (`LuaPlayer::position`)
 --- - `lx`, `ly` - Coordinates of the lab entity. (`LuaEntity::position`)
---- - `cx`, `cy` - Coordinates of the chunk where the lab entity locates at.
 ---
---- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], n_colors: integer, px: number, py: number, lx: number, ly: number, cx: integer, cy: integer)
+--- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], n_colors: integer, px: number, py: number, lx: number, ly: number)
 
 -- Constants for pre-processing. These will be embedded as numeric literals.
 -- Inversed for folding constant divisions into multiplications. (much faster in Lua 5.2)
 local CONSTANTS = {
-  INV_PI     = format("%.18f", 1 / PI),
-  INV_TWO_PI = format("%.18f", 1 / (2 * PI)),
+  INV_PI     = format("%.18f", 1 / math.pi),
+  INV_TWO_PI = format("%.18f", 1 / (2 * math.pi)),
   INV_8      = format("%.18f", 1 / 8),
   INV_9      = format("%.18f", 1 / 9),
   INV_10     = format("%.18f", 1 / 10),
@@ -52,7 +50,7 @@ local COLOR_FUNCTION_TEMPLATE = [[
   local max = math.max
 
   --- @type ColorFunction
-  return function (output, phase, colors, n_colors, px, py, lx, ly, cx, cy)
+  return function (output, phase, colors, n_colors, px, py, lx, ly)
     local t
     %s
     local base_index, f = modf(t)
@@ -184,16 +182,6 @@ local functions = {
     local r = (floor(lx) * 137 + floor(ly) * 149 + phase_step * 163) % 1024 * INV_1024
     t = r * n_colors
   ]], 20),
-
-  -- [14] Chunk Diagonal: color cycles based on 45-degree diagonal axis by chunk size.
-  compile_function("ChunkDiagonal", [[
-    t = (cx + cy) * 0.5 + phase * INV_30
-  ]], 10),
-
-  -- [15] Chunk Random: color chages at random periodically by chunk size.
-  compile_function("ChunkRandom", [[
-    t = (cx * 7 + cy * 13) + phase * INV_40
-  ]], 20),
 }
 ColorFunctions.functions = functions
 local n_functions = #functions
@@ -229,7 +217,7 @@ end
 --- @param transition_sharpness number Transition sharpness.
 function ColorFunctions.test_inlined_interpolation(output, t, colors, n_colors, transition_sharpness)
   local f = compile_function("inlined_interpolation", format("t = %.18f", t), transition_sharpness)
-  return f(output, 0, colors, n_colors, 0, 0, 0, 0, 0, 0)
+  return f(output, 0, colors, n_colors, 0, 0, 0, 0)
 end
 
 return ColorFunctions
