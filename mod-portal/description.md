@@ -2,6 +2,8 @@ Get those biolabs on the dance floor — with a performance twist.
 
 Disco Science Lite is a variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age support.
 
+**Note: This mod is for single-player only and does not support multiplayer.**
+
 ## What It Does
 
 Your science labs glow with the color of the science packs they're consuming — and the colors shift and pulse dynamically, disco-style. One glance at your factory floor tells you exactly what's being researched.
