@@ -2,18 +2,13 @@ local Utils = {}
 
 local floor = math.floor
 
---- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
-local CHUNK_SIZE = 32
-local INV_CHUNK_SIZE = 1 / CHUNK_SIZE
-Utils.CHUNK_SIZE = CHUNK_SIZE
-
 --- Compute chunk coordinates for a world position.
 ---
 --- @param pos_x number
 --- @param pos_y number
 --- @return number cx, number cy
 function Utils.position_to_chunk(pos_x, pos_y)
-  return floor(pos_x * INV_CHUNK_SIZE), floor(pos_y * INV_CHUNK_SIZE)
+  return floor(pos_x * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(pos_y * 0.03125 --[[$INV_CHUNK_SIZE]])
 end
 
 --- Compute the chunk coordinate range that fully covers a world rect.
@@ -21,8 +16,8 @@ end
 --- @param rect MapPositionRect
 --- @return number chunk_left, number chunk_top, number chunk_right, number chunk_bottom
 function Utils.rect_to_chunk_range(rect)
-  return floor(rect[1] * INV_CHUNK_SIZE), floor(rect[2] * INV_CHUNK_SIZE),
-    floor(rect[3] * INV_CHUNK_SIZE), floor(rect[4] * INV_CHUNK_SIZE)
+  return floor(rect[1] * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(rect[2] * 0.03125 --[[$INV_CHUNK_SIZE]]),
+    floor(rect[3] * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(rect[4] * 0.03125 --[[$INV_CHUNK_SIZE]])
 end
 
 --- Make a deep copy of a table

@@ -1,4 +1,8 @@
 --- @meta
+error("This file cannot be executed")
+
+--- @type consts
+_G.consts = {}
 
 --- @alias ColorTuple [number, number, number]
 --- @alias ColorStruct Color.0

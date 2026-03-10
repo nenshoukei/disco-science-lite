@@ -10,6 +10,7 @@ local GRAPHICS_DIR = MOD_DIR .. "graphics/"
 ---
 --- Run `make consts` every time after changing any constant value.
 ---
+--- @class consts
 local consts = {
   PREFIX = PREFIX,
   NAME_PREFIX = NAME_PREFIX,
@@ -40,6 +41,38 @@ local consts = {
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
   UNISON_FLICKER_NAME = NAME_PREFIX .. "unison-flicker",
   LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
+
+  -- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
+  CHUNK_SIZE = 32,
+  INV_CHUNK_SIZE = 1 / 32,
+
+  -- Margin of PlayerView boundaries
+  VIEW_RECT_MARGIN = 6, -- tiles
+
+  -- ChunkMapEntry filed indices
+  CE_SURFACE = 1,
+  CE_CX = 2,
+  CE_CY = 3,
+  CE_OVERLAY = 4,
+
+  -- PlayerView field indices
+  PV_VALID = 1,
+  PV_SURFACE = 2,
+  PV_LEFT = 3,
+  PV_TOP = 4,
+  PV_RIGHT = 5,
+  PV_BOTTOM = 6,
+
+  -- LabOverlay field indices
+  OV_ENTITY = 1,
+  OV_ANIMATION = 2,
+  OV_X = 3,
+  OV_Y = 4,
+  OV_RECT = 5,
+  OV_VISIBLE = 6,
+  OV_UNIT_NUM = 7,
+  OV_CHUNK_X = 8,
+  OV_CHUNK_Y = 9,
 }
 
 return consts

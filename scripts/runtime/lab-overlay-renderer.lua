@@ -15,34 +15,16 @@ local get_entity_rect = Utils.get_entity_rect
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 
-local PV_VALID = PlayerViewTracker.PV_VALID
-local PV_SURFACE = PlayerViewTracker.PV_SURFACE
-local PV_LEFT = PlayerViewTracker.PV_LEFT
-local PV_TOP = PlayerViewTracker.PV_TOP
-local PV_RIGHT = PlayerViewTracker.PV_RIGHT
-local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
-
 --- @class (exact) LabOverlay
---- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
---- @field [2] LuaRenderObject  Render object for the overlay. (OV_ANIMATION)
---- @field [3] number           X coordinate. (OV_X)
---- @field [4] number           Y coordinate. (OV_Y)
---- @field [5] MapPositionRect  Rectangle boundaries of the entity. (OV_RECT)
---- @field [6] boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads). (OV_VISIBLE)
---- @field [7] number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal). (OV_UNIT_NUM)
---- @field [8] integer          Chunk X coordinate. (OV_CHUNK_X)
---- @field [9] integer          Chunk Y coordinate. (OV_CHUNK_Y)
-
--- LabOverlay field indices
-local OV_ENTITY = 1
-local OV_ANIMATION = 2
-local OV_X = 3
-local OV_Y = 4
-local OV_RECT = 5
-local OV_VISIBLE = 6
-local OV_UNIT_NUM = 7
-local OV_CHUNK_X = 8
-local OV_CHUNK_Y = 9
+--- @field [1] LuaEntity        [OV_ENTITY]    Lab entity.
+--- @field [2] LuaRenderObject  [OV_ANIMATION] Render object for the overlay.
+--- @field [3] number           [OV_X]         X coordinate.
+--- @field [4] number           [OV_Y]         Y coordinate.
+--- @field [5] MapPositionRect  [OV_RECT]      Rectangle boundaries of the entity.
+--- @field [6] boolean          [OV_VISIBLE]   Last known visible state of the animation (cached, avoids repeated C bridge reads).
+--- @field [7] number           [OV_UNIT_NUM]  Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field [8] integer          [OV_CHUNK_X]   Chunk X coordinate.
+--- @field [9] integer          [OV_CHUNK_Y]   Chunk Y coordinate.
 
 --- Constructor
 ---
@@ -109,6 +91,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     return nil
   end
 
+  local is_randomized_flicker = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value
+
   --- @type LuaRenderObject
   local render_object
   if overlay_settings then
@@ -120,14 +104,13 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
       y_scale = overlay_settings.scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value and
-        random() * 300 or 0,
+      animation_offset = is_randomized_flicker and random() * 300 or 0,
     })
   else
     -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
     -- Scale the overlay to fit the lab's tile size. The fallback sprite covers 2 tiles at scale=1.
     local prototype = lab.prototype
-    local scale = math.max(prototype.tile_width, prototype.tile_height) / 2
+    local scale = math.max(prototype.tile_width, prototype.tile_height) * 0.5
     render_object = draw_animation({
       animation = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]],
       surface = lab.surface,
@@ -136,8 +119,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
       y_scale = scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value and
-        random() * 300 or 0,
+      animation_offset = is_randomized_flicker and random() * 300 or 0,
     })
   end
 
@@ -147,15 +129,15 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
 
   --- @type LabOverlay
   local new_overlay = {
-    lab,                  -- [OV_ENTITY]
-    render_object,        -- [OV_ANIMATION]
-    lab_x,                -- [OV_X]
-    lab_y,                -- [OV_Y]
-    get_entity_rect(lab), -- [OV_RECT]
-    false,                -- [OV_VISIBLE]
-    lab_unit_number,      -- [OV_UNIT_NUM]
-    chunk_x,              -- [OV_CHUNK_X]
-    chunk_y,              -- [OV_CHUNK_Y]
+    [ 1 --[[$OV_ENTITY]] ]    = lab,
+    [ 2 --[[$OV_ANIMATION]] ] = render_object,
+    [ 3 --[[$OV_X]] ]         = lab_x,
+    [ 4 --[[$OV_Y]] ]         = lab_y,
+    [ 5 --[[$OV_RECT]] ]      = get_entity_rect(lab),
+    [ 6 --[[$OV_VISIBLE]] ]   = false,
+    [ 7 --[[$OV_UNIT_NUM]] ]  = lab_unit_number,
+    [ 8 --[[$OV_CHUNK_X]] ]   = chunk_x,
+    [ 9 --[[$OV_CHUNK_Y]] ]   = chunk_y,
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -202,7 +184,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  local animation = overlay[OV_ANIMATION]
+  local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
   if animation.valid then
     animation.destroy()
   end
@@ -238,8 +220,8 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
     for _, chunk in pairs(col) do
       for i = 1, #chunk do
         local overlay = chunk[i]
-        local unit_number = overlay[OV_UNIT_NUM]
-        local animation = overlay[OV_ANIMATION]
+        local unit_number = overlay[ 7 --[[$OV_UNIT_NUM]] ]
+        local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
         if animation.valid then
           animation.destroy()
         end
@@ -262,9 +244,9 @@ function LabOverlayRenderer:update_lab_position(lab)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  overlay[OV_RECT] = get_entity_rect(lab)
+  overlay[ 5 --[[$OV_RECT]] ] = get_entity_rect(lab)
 
-  local animation = overlay[OV_ANIMATION]
+  local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
   if animation.surface.index == lab.surface_index then
     -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
@@ -294,7 +276,7 @@ end
 function LabOverlayRenderer:update_overlay_states()
   local player_tracker = self.player_tracker
   local view = player_tracker.view
-  if not view[PV_VALID] then return end
+  if not view[ 1 --[[$PV_VALID]] ] then return end
 
   -- player_tracker.force is always set when view[PV_VALID] is true.
   local player_force = player_tracker.force --[[@as LuaForce]]
@@ -311,15 +293,15 @@ function LabOverlayRenderer:update_overlay_states()
   end
   local current_research_colors = self.current_research_colors
 
-  local surface_chunks = self.chunk_map.data[view[PV_SURFACE]]
+  local surface_chunks = self.chunk_map.data[view[ 2 --[[$PV_SURFACE]] ]]
   local visible_overlays = self.visible_overlays
   local count = 0
 
   if surface_chunks then
-    local chunk_left = view[PV_LEFT]
-    local chunk_top = view[PV_TOP]
-    local chunk_right = view[PV_RIGHT]
-    local chunk_bottom = view[PV_BOTTOM]
+    local chunk_left = view[ 3 --[[$PV_LEFT]] ]
+    local chunk_top = view[ 4 --[[$PV_TOP]] ]
+    local chunk_right = view[ 5 --[[$PV_RIGHT]] ]
+    local chunk_bottom = view[ 6 --[[$PV_BOTTOM]] ]
 
     for cx = chunk_left, chunk_right do
       local col = surface_chunks[cx]
@@ -329,14 +311,14 @@ function LabOverlayRenderer:update_overlay_states()
           if chunk then
             for i = 1, #chunk do
               local overlay = chunk[i]
-              local status = overlay[OV_ENTITY].status
+              local status = overlay[ 1 --[[$OV_ENTITY]] ].status
               local is_visible = (
                 (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
                 current_research_colors ~= nil
               )
-              if overlay[OV_VISIBLE] ~= is_visible then
-                overlay[OV_VISIBLE] = is_visible
-                overlay[OV_ANIMATION].visible = is_visible
+              if overlay[ 6 --[[$OV_VISIBLE]] ] ~= is_visible then
+                overlay[ 6 --[[$OV_VISIBLE]] ] = is_visible
+                overlay[ 2 --[[$OV_ANIMATION]] ].visible = is_visible
               end
 
               if is_visible then
@@ -397,7 +379,7 @@ function LabOverlayRenderer:get_tick_function()
   return function ()
     -- Return early when no player is active (disconnected or in chart mode).
     -- `view` is captured once at closure creation; it is mutated in-place by player_tracker:update().
-    if not view[PV_VALID] then return end
+    if not view[ 1 --[[$PV_VALID]] ] then return end
 
     -- Return early when no research is active. All overlays are invisible, nothing to update.
     local colors = self.current_research_colors
@@ -427,21 +409,16 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                             --- @diagnostic disable-line: redefined-local
     local lab_update_offset = lab_update_offset     --- @diagnostic disable-line: redefined-local
     local lab_update_interval = lab_update_interval --- @diagnostic disable-line: redefined-local
-    local OV_ANIMATION = OV_ANIMATION               --- @diagnostic disable-line: redefined-local
-    local OV_X = OV_X                               --- @diagnostic disable-line: redefined-local
-    local OV_Y = OV_Y                               --- @diagnostic disable-line: redefined-local
-    local OV_CHUNK_X = OV_CHUNK_X                   --- @diagnostic disable-line: redefined-local
-    local OV_CHUNK_Y = OV_CHUNK_Y                   --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
     -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, lab_update_interval do
       local overlay = visible_overlays[i]
       color_function(
-        color, phase, colors, n_colors, player_x, player_y, overlay[OV_X], overlay[OV_Y],
-        overlay[OV_CHUNK_X], overlay[OV_CHUNK_Y]
+        color, phase, colors, n_colors, player_x, player_y, overlay[ 3 --[[$OV_X]] ], overlay[ 4 --[[$OV_Y]] ],
+        overlay[ 8 --[[$OV_CHUNK_X]] ], overlay[ 9 --[[$OV_CHUNK_Y]] ]
       )
-      overlay[OV_ANIMATION].color = color
+      overlay[ 2 --[[$OV_ANIMATION]] ].color = color
     end
   end
 end

@@ -1,11 +1,11 @@
 local ChunkMap = require("scripts.runtime.chunk-map")
 
 --- Create a minimal LabOverlay-like value for ChunkMap tests.
---- ChunkMap.remove() checks overlay[OVERLAY_UNIT_NUM] (= [6]) for the unit_number.
+--- ChunkMap.remove() checks overlay[OVERLAY_UNIT_NUM] for the unit_number.
 --- @param unit_number number
 --- @return LabOverlay
 local function make_overlay(unit_number)
-  return ({ nil, nil, nil, nil, nil, unit_number }) --[[@as LabOverlay]]
+  return ({ [ 7 --[[$OV_UNIT_NUM]] ] = unit_number }) --[[@as LabOverlay]]
 end
 
 --- Create a mock LuaEntity.
@@ -58,14 +58,14 @@ describe("ChunkMap", function ()
 
     it("stores surface_index, cx, cy, overlay in the entry", function ()
       local m = ChunkMap.new()
-      local e = make_entity(5, 2, 0, 0)
+      local e = make_entity(5, 10, 40, 80) -- chunk at (1, 2)
       local v = make_overlay(5)
       m:insert(e, v)
       local entry = m.entries[5]
-      assert.are.equal(2, entry[1]) -- surface_index
-      assert.are.equal(0, entry[2]) -- cx
-      assert.are.equal(0, entry[3]) -- cy
-      assert.are.equal(v, entry[4]) -- overlay
+      assert.are.equal(10, entry[ 1 --[[$CE_SURFACE]] ])
+      assert.are.equal(1, entry[ 2 --[[$CE_CX]] ])
+      assert.are.equal(2, entry[ 3 --[[$CE_CY]] ])
+      assert.are.equal(v, entry[ 4 --[[$CE_OVERLAY]] ])
     end)
 
     it("re-inserts (remove then add) if unit_number already exists", function ()

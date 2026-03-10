@@ -14,32 +14,14 @@ local ceil = math.ceil
 local rect_to_chunk_range = Utils.rect_to_chunk_range
 local RENDER_MODE_CHART = defines.render_mode.chart
 
-local VIEW_RECT_MARGIN = 6 -- tiles
-
 --- The chunk range visible to a single player.
 --- @class (exact) PlayerView
---- @field [1] boolean Whether the view is currently active (player connected and not in chart mode). (PV_VALID)
---- @field [2] number Surface index. (PV_SURFACE)
---- @field [3] number Chunk left boundary. (PV_LEFT)
---- @field [4] number Chunk top boundary. (PV_TOP)
---- @field [5] number Chunk right boundary. (PV_RIGHT)
---- @field [6] number Chunk bottom boundary. (PV_BOTTOM)
-
--- PlayerView field indices (also exported as module constants).
-local PV_VALID = 1   -- boolean: whether the view is currently active
-local PV_SURFACE = 2 -- Surface index
-local PV_LEFT = 3    -- Chunk left boundary
-local PV_TOP = 4     -- Chunk top boundary
-local PV_RIGHT = 5   -- Chunk right boundary
-local PV_BOTTOM = 6  -- Chunk bottom boundary
-
--- Export field indices for callers that index into the view table directly.
-PlayerViewTracker.PV_VALID = PV_VALID
-PlayerViewTracker.PV_SURFACE = PV_SURFACE
-PlayerViewTracker.PV_LEFT = PV_LEFT
-PlayerViewTracker.PV_TOP = PV_TOP
-PlayerViewTracker.PV_RIGHT = PV_RIGHT
-PlayerViewTracker.PV_BOTTOM = PV_BOTTOM
+--- @field [1] boolean [PV_VALID]   Whether the view is currently active (player connected and not in chart mode).
+--- @field [2] number  [PV_SURFACE] Surface index.
+--- @field [3] number  [PV_LEFT]    Chunk left boundary.
+--- @field [4] number  [PV_TOP]     Chunk top boundary.
+--- @field [5] number  [PV_RIGHT]   Chunk right boundary.
+--- @field [6] number  [PV_BOTTOM]  Chunk bottom boundary.
 
 --- Constructor.
 ---
@@ -48,7 +30,14 @@ function PlayerViewTracker.new()
   --- @class PlayerViewTracker
   local self = {
     --- @type PlayerView
-    view = { false, 0, 0, 0, 0, 0 }, -- [PV_VALID], [PV_SURFACE], [PV_LEFT], [PV_TOP], [PV_RIGHT], [PV_BOTTOM]
+    view = {
+      [ 1 --[[$PV_VALID]] ]   = false,
+      [ 2 --[[$PV_SURFACE]] ] = 0,
+      [ 3 --[[$PV_LEFT]] ]    = 0,
+      [ 4 --[[$PV_TOP]] ]     = 0,
+      [ 5 --[[$PV_RIGHT]] ]   = 0,
+      [ 6 --[[$PV_BOTTOM]] ]  = 0,
+    },
     --- @type LuaForce|nil
     force = nil,
     --- @type MapPositionTuple
@@ -66,13 +55,13 @@ end
 function PlayerViewTracker:update(players)
   -- This mod is single-player only. Do not update in multiplayer.
   if #players ~= 1 then
-    self.view[PV_VALID] = false
+    self.view[ 1 --[[$PV_VALID]] ] = false
     return
   end
 
   local player = players[1]
   if player.render_mode == RENDER_MODE_CHART then
-    self.view[PV_VALID] = false
+    self.view[ 1 --[[$PV_VALID]] ] = false
     return
   end
 
@@ -91,20 +80,20 @@ function PlayerViewTracker:update(players)
   local half_view_height = ceil(display_resolution.height / f)
 
   local view_rect = {
-    pos_x - half_view_width - VIEW_RECT_MARGIN,
-    pos_y - half_view_height - VIEW_RECT_MARGIN,
-    pos_x + half_view_width + VIEW_RECT_MARGIN,
-    pos_y + half_view_height + VIEW_RECT_MARGIN,
+    pos_x - half_view_width - 6 --[[$VIEW_RECT_MARGIN]],
+    pos_y - half_view_height - 6 --[[$VIEW_RECT_MARGIN]],
+    pos_x + half_view_width + 6 --[[$VIEW_RECT_MARGIN]],
+    pos_y + half_view_height + 6 --[[$VIEW_RECT_MARGIN]],
   }
   local chunk_left, chunk_top, chunk_right, chunk_bottom = rect_to_chunk_range(view_rect)
 
   local view = self.view
-  view[PV_VALID] = true
-  view[PV_SURFACE] = player.surface_index
-  view[PV_LEFT] = chunk_left
-  view[PV_TOP] = chunk_top
-  view[PV_RIGHT] = chunk_right
-  view[PV_BOTTOM] = chunk_bottom
+  view[ 1 --[[$PV_VALID]] ] = true
+  view[ 2 --[[$PV_SURFACE]] ] = player.surface_index
+  view[ 3 --[[$PV_LEFT]] ] = chunk_left
+  view[ 4 --[[$PV_TOP]] ] = chunk_top
+  view[ 5 --[[$PV_RIGHT]] ] = chunk_right
+  view[ 6 --[[$PV_BOTTOM]] ] = chunk_bottom
 end
 
 return PlayerViewTracker
