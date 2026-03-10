@@ -6,12 +6,11 @@
 *.blend binary export-ignore
 
 # files that should not get included in a release zip
-README.md export-ignore
 .* export-ignore
-Makefile export-ignore
+*.rockspec export-ignore
 docs export-ignore
+Makefile export-ignore
+README.md export-ignore
 spec export-ignore
 tasks export-ignore
 types-test export-ignore
-*.sh export-ignore
-*.rockspec export-ignore
