@@ -86,7 +86,7 @@ To type-check `disco-science-lite.d.ts` (requires `tcs`):
 make typecheck
 ```
 
-To update image files (requires ImageMagick, Factorio, Space-Age DLC):
+To update image files (requires `python` with Anaconda, Factorio, Space-Age DLC):
 
 ```
 make graphics

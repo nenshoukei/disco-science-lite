@@ -18,4 +18,4 @@ consts:
 	lua tasks/update-consts.lua
 
 graphics:
-	sh tasks/update-graphics.sh
+	python tasks/update-graphics.py
