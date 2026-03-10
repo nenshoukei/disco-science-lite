@@ -12,7 +12,6 @@ local random = math.random
 local rendering_clear = rendering.clear
 local draw_animation = rendering.draw_animation
 local position_to_chunk = Utils.position_to_chunk
-local map_position_tuple = Utils.map_position_tuple
 local get_entity_rect = Utils.get_entity_rect
 local MOD_NAME = consts.MOD_NAME
 local STATUS_WORKING = defines.entity_status.working
@@ -28,22 +27,24 @@ local PV_BOTTOM = PlayerViewTracker.PV_BOTTOM
 --- @class (exact) LabOverlay
 --- @field [1] LuaEntity        Lab entity. (OV_ENTITY)
 --- @field [2] LuaRenderObject  Render object for the overlay. (OV_ANIMATION)
---- @field [3] MapPositionTuple Position of the entity. (OV_POSITION)
---- @field [4] MapPositionRect  Rectangle boundaries of the entity. (OV_RECT)
---- @field [5] boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads). (OV_VISIBLE)
---- @field [6] number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal). (OV_UNIT_NUM)
---- @field [7] integer          Last known chunk X coordinate. (OV_CHUNK_X)
---- @field [8] integer          Last known chunk Y coordinate. (OV_CHUNK_Y)
+--- @field [3] number           X coordinate. (OV_X)
+--- @field [4] number           Y coordinate. (OV_Y)
+--- @field [5] MapPositionRect  Rectangle boundaries of the entity. (OV_RECT)
+--- @field [6] boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads). (OV_VISIBLE)
+--- @field [7] number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal). (OV_UNIT_NUM)
+--- @field [8] integer          Chunk X coordinate. (OV_CHUNK_X)
+--- @field [9] integer          Chunk Y coordinate. (OV_CHUNK_Y)
 
 -- LabOverlay field indices
-local OV_ENTITY = 1    -- LuaEntity
-local OV_ANIMATION = 2 -- LuaRenderObject
-local OV_POSITION = 3  -- MapPositionTuple
-local OV_RECT = 4      -- MapPositionRect
-local OV_VISIBLE = 5   -- boolean (cached visible state)
-local OV_UNIT_NUM = 6  -- number (unit_number)
-local OV_CHUNK_X = 7   -- integer
-local OV_CHUNK_Y = 8   -- integer
+local OV_ENTITY = 1
+local OV_ANIMATION = 2
+local OV_X = 3
+local OV_Y = 4
+local OV_RECT = 5
+local OV_VISIBLE = 6
+local OV_UNIT_NUM = 7
+local OV_CHUNK_X = 8
+local OV_CHUNK_Y = 9
 
 --- Constructor
 ---
@@ -140,19 +141,21 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     })
   end
 
-  local lab_position = map_position_tuple(lab.position)
-  local chunk_x, chunk_y = position_to_chunk(lab_position[1], lab_position[2])
+  local lab_position = lab.position
+  local lab_x, lab_y = lab_position.x or lab_position[1], lab_position.y or lab_position[2]
+  local chunk_x, chunk_y = position_to_chunk(lab_x, lab_y)
 
   --- @type LabOverlay
   local new_overlay = {
-    lab,                              -- [OV_ENTITY]    LuaEntity
-    render_object,                    -- [OV_ANIMATION] LuaRenderObject (animation or light)
-    map_position_tuple(lab_position), -- [OV_POSITION]  MapPositionTuple
-    get_entity_rect(lab),             -- [OV_RECT]      MapPositionRect
-    false,                            -- [OV_VISIBLE]   Cached visible state (matches animation's initial visible=false)
-    lab_unit_number,                  -- [OV_UNIT_NUM]  Required by ChunkMap for swap-and-pop removal
-    chunk_x,                          -- [OV_CHUNK_X]   Chunk X coordinate
-    chunk_y,                          -- [OV_CHUNK_Y]   Chunk Y coordinate
+    lab,                  -- [OV_ENTITY]
+    render_object,        -- [OV_ANIMATION]
+    lab_x,                -- [OV_X]
+    lab_y,                -- [OV_Y]
+    get_entity_rect(lab), -- [OV_RECT]
+    false,                -- [OV_VISIBLE]
+    lab_unit_number,      -- [OV_UNIT_NUM]
+    chunk_x,              -- [OV_CHUNK_X]
+    chunk_y,              -- [OV_CHUNK_Y]
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -207,8 +210,8 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   self.chunk_map:remove(lab_unit_number)
   self.overlays[lab_unit_number] = nil
 
-  -- Removing the overlay from the flattened visible_overlays list is necessary to prevent
-  -- a potential crash in the hot-path tick function if it tries to color a destroyed animation.
+  -- Removing the overlay from the visible_overlays list is necessary to prevent
+  -- a potential crash in the tick function if it tries to color a destroyed animation.
   -- This is O(N) but only happens when a lab is destroyed (rare).
   local visible_overlays = self.visible_overlays
   for i = 1, #visible_overlays do
@@ -338,8 +341,6 @@ function LabOverlayRenderer:update_overlay_states()
               if is_visible then
                 count = count + 1
                 visible_overlays[count] = overlay
-                overlay[OV_CHUNK_X] = cx
-                overlay[OV_CHUNK_Y] = cy
               end
             end
           end
@@ -413,9 +414,10 @@ function LabOverlayRenderer:get_tick_function()
     lab_update_offset = lab_update_offset + 1
     if lab_update_offset > lab_update_interval then lab_update_offset = 1 end
 
-    -- Update overlays in the flattened list of visible lab overlays.
+    local player_x, player_y = player_position[1], player_position[2]
+
+    -- Bind upvalues to local variables for performance
     -- luacheck: push ignore
-    local player_position = player_position         --- @diagnostic disable-line: redefined-local
     local visible_overlays = visible_overlays       --- @diagnostic disable-line: redefined-local
     local phase = phase                             --- @diagnostic disable-line: redefined-local
     local color_function = color_function           --- @diagnostic disable-line: redefined-local
@@ -423,20 +425,20 @@ function LabOverlayRenderer:get_tick_function()
     local lab_update_offset = lab_update_offset     --- @diagnostic disable-line: redefined-local
     local lab_update_interval = lab_update_interval --- @diagnostic disable-line: redefined-local
     local OV_ANIMATION = OV_ANIMATION               --- @diagnostic disable-line: redefined-local
-    local OV_POSITION = OV_POSITION                 --- @diagnostic disable-line: redefined-local
+    local OV_X = OV_X                               --- @diagnostic disable-line: redefined-local
+    local OV_Y = OV_Y                               --- @diagnostic disable-line: redefined-local
     local OV_CHUNK_X = OV_CHUNK_X                   --- @diagnostic disable-line: redefined-local
     local OV_CHUNK_Y = OV_CHUNK_Y                   --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
+    -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, lab_update_interval do
       local overlay = visible_overlays[i]
-      local animation = overlay[OV_ANIMATION]
-      local entity_position = overlay[OV_POSITION]
       color_function(
-        color, phase, colors, n_colors, player_position, entity_position,
+        color, phase, colors, n_colors, player_x, player_y, overlay[OV_X], overlay[OV_Y],
         overlay[OV_CHUNK_X], overlay[OV_CHUNK_Y]
       )
-      animation.color = color
+      overlay[OV_ANIMATION].color = color
     end
   end
 end
