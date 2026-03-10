@@ -44,7 +44,7 @@ paths: ["**/*.lua"]
 
 - In order to maximize performance, we use special syntax which allows to embed constants as literal values like: `"abc"`, `123`, `true`, `false`.
 - Special syntax is `value --[[$CONST_NAME]]` where `value` is the literal value of the constant and `CONST_NAME` is the name of the constant.
-- These constants are defined in `scripts/shared/consts.lua` as `consts.CONST_NAME = 123`.
+- These constants are defined in [consts.lua](../../scripts/shared/consts.lua) as `consts.CONST_NAME = 123`.
 - For example, `print("xyz" --[[$ABC]])` uses `consts.ABC = "xyz"`.
 - To use a constant, write `consts.CONST_NAME` to where you want (no require needed), and run `make consts`. It will be replaced by `value --[[$CONST_NAME]]`.
 - To update a constant, change its value in `consts.lua`, and run `make consts`. All referrences to that constant will be updated idempotently.
@@ -53,7 +53,7 @@ paths: ["**/*.lua"]
 
 - Always write unit tests, excpet for ones heavily depending on Factorio API.
 - Use `busted` for unit testing.
-- Use `spec/helper.lua` for helper functions.
+- Use [spec/helper.lua](../../spec/helper.lua) for helper functions.
 - Write tests in `spec/` as `<file_name>_spec.lua`.
 - Run tests with `make test`.
 - Use `assert.no_error(function () ... end)` for success pattern.

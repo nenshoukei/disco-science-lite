@@ -46,12 +46,20 @@ See [docs/api.md](docs/api.md) for the full API reference, including quick start
 
 ## Development
 
-Requirements: `lua`, `luarocks`
+[Code Style Guide](/.claude/rules/code-style-guide.md)
+
+Requirements: `lua`, `luarocks`, `pcre2`
 
 To install dependencies by luarocks:
 
 ```
 make dev
+```
+
+If you have installed `pcre2` with Homebrew:
+
+```
+make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
 ```
 
 To lint:
@@ -66,7 +74,13 @@ To run unit tests:
 make test
 ```
 
-To type-check `disco-science-lite.d.ts` (requires Node.js / TypeScript):
+To update the constants defined in [consts.lua](./scripts/shared/consts.lua):
+
+```
+make consts
+```
+
+To type-check `disco-science-lite.d.ts` (requires `tcs`):
 
 ```
 make typecheck
