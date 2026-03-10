@@ -40,6 +40,14 @@ paths: ["**/*.lua"]
 - Factorio supports multi-players, so all state in the game must be deterministic. Otherwise desync of state among players will happen.
 - To print debug logs, use `log()` that prints logs to log files and debug console.
 
+## Special Syntax for Constants
+
+- In order to maximize performance, we use special syntax for constants which allows to embed the constants as literal values like: `"abc"`, `123`, `true`, `false`.
+- Special syntax is `value --[[$CONST_NAME]]` where `value` is the literal value of the constant and `CONST_NAME` is the name of the constant.
+- These constants are defined in `scripts/shared/consts.lua` as `consts.CONST_NAME = 123`.
+- For example, `print("xyz" --[[$ABC]])` uses `consts.ABC = "xyz"`.
+- To update constant value, change the value in `consts.lua`, and run `make consts`. All referrences to that constant will be updated idempotently.
+
 ## Testing
 
 - Always write unit tests, excpet for ones heavily depending on Factorio API.

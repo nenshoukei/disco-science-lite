@@ -7,7 +7,8 @@ dependencies = {
    "lua >= 5.2",
    "busted >= 2.3",
    "lua-cjson >= 2.1",
-   "serpent >= 0.30"
+   "serpent >= 0.30",
+   "regkex == master-1"
 }
 build = {
    type = "none"

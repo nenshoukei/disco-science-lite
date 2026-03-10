@@ -1,8 +1,10 @@
 FACTORIO_DATA := $(HOME)/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents/data
 
-.PHONY: dev lint test typecheck graphics
+.PHONY: dev lint test typecheck consts graphics
 
 dev:
+	# If pcre2 is installed by Homebrew
+	# make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
 	luarocks install --deps-only disco-science-lite-dev-1.rockspec
 
 lint:
@@ -13,6 +15,9 @@ test:
 
 typecheck:
 	tsc -p types-test/tsconfig.json
+
+consts:
+	lua tasks/update-consts.lua
 
 graphics:
 	convert "$(FACTORIO_DATA)/base/graphics/entity/lab/lab-light.png" \

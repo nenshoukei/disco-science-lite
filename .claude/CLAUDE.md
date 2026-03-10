@@ -31,6 +31,7 @@ This mod provides users with:
     - `shared/` - Shared scripts used by multiple stages.
 - `migrations/` - Migration files.
 - `spec/` - Unit tests.
+- `tasks/` - Executables for tasks.
 - `types-test/` - Test files for `make typecheck`.
 - `*.lua` - Entrypoints of Factorio mod.
 
@@ -40,3 +41,4 @@ This mod provides users with:
 - To lint: `make lint`
 - To type-check `disco-science-lite.d.ts`: `make typecheck`
 - To update graphics: `make graphics`
+- To update constants in `consts.lua`: `make consts`

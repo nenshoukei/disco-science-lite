@@ -12,6 +12,7 @@ Makefile export-ignore
 mod-portal export-ignore
 docs export-ignore
 spec export-ignore
+tasks export-ignore
 types-test export-ignore
 *.sh export-ignore
 *.rockspec export-ignore
