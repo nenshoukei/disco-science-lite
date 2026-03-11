@@ -11,5 +11,6 @@
 docs export-ignore
 Makefile export-ignore
 README.md export-ignore
+requirements.txt export-ignore
 spec export-ignore
 tasks export-ignore

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+import oxipng
 
 # https://wiki.factorio.com/Application_directory#Application_directory
 _FACTORIO_CANDIDATES = [
@@ -42,6 +43,10 @@ BIOLAB_SRC = FACTORIO_DATA / "space-age/graphics/entity/biolab/biolab-lights.png
 BIOLAB_FRAME_W, BIOLAB_FRAME_H = 326, 362
 BIOLAB_COLS, BIOLAB_FRAMES = 8, 32
 
+LAB_OVERLAY_DST = GRAPHICS_DIR / "lab-overlay.png"
+BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "biolab-overlay.png"
+GENERAL_OVERLAY_DST = GRAPHICS_DIR / "general-overlay.png"
+
 def apply_level(arr: np.ndarray, white_point: float = 0.8, gamma: float = 1.5) -> np.ndarray:
     """Apply ImageMagick-style -level "0,white_point*100%,gamma" to a uint8 grayscale array.
 
@@ -78,8 +83,9 @@ for i in range(LAB_FRAMES):
     lab_frame_brightness.append(float(frame.mean()))
     lab_frames.append(apply_level(frame, white_point=0.8, gamma=1.5))
 
-assemble_grid(lab_frames, LAB_COLS).save(GRAPHICS_DIR / "lab-overlay.png")
-print("Generated lab-overlay.png")
+assemble_grid(lab_frames, LAB_COLS).save(LAB_OVERLAY_DST)
+oxipng.optimize(LAB_OVERLAY_DST)
+print("Generated", LAB_OVERLAY_DST)
 
 # --- Biolab overlay ---
 # Resample lab's flicker pattern (33 frames) to 32 frames and apply it as a
@@ -107,8 +113,9 @@ for i in range(BIOLAB_FRAMES):
     result = np.clip(leveled * brightness, 0, 255).round().astype(np.uint8)
     biolab_frames.append(result)
 
-assemble_grid(biolab_frames, BIOLAB_COLS).save(GRAPHICS_DIR / "biolab-overlay.png")
-print("Generated biolab-overlay.png")
+assemble_grid(biolab_frames, BIOLAB_COLS).save(BIOLAB_OVERLAY_DST)
+oxipng.optimize(BIOLAB_OVERLAY_DST)
+print("Generated", BIOLAB_OVERLAY_DST)
 
 # --- General overlay ---
 # 33 frames of radial gradients (white center → black edge) using lab's flicker
@@ -129,5 +136,6 @@ for m in lab_brightness_norm:
     frame = np.clip(base_gradient * m, 0.0, 1.0)
     general_frames.append((frame * 255.0).round().astype(np.uint8))
 
-assemble_grid(general_frames, LAB_COLS).save(GRAPHICS_DIR / "general-overlay.png")
-print("Generated general-overlay.png")
+assemble_grid(general_frames, LAB_COLS).save(GENERAL_OVERLAY_DST)
+oxipng.optimize(GENERAL_OVERLAY_DST)
+print("Generated", GENERAL_OVERLAY_DST)
