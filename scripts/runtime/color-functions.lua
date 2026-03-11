@@ -9,8 +9,8 @@ local random = math.random
 --- Parameters:
 --- - `output`   - Output color tuple.
 --- - `phase`    - Continuously drifting value that shifts the color cycle position over time.
---- - `colors`   - An array of ColorTuple for picking from.
---- - `n_colors` - #colors
+--- - `colors`   - A flattened array of colors for picking from in format: `{ r, g, b, r, g, b, ... }`
+--- - `n_colors` - Number of colors. `#colors / 3`.
 --- - `px`, `py` - Coordinates of the player. (`LuaPlayer::position`)
 --- - `lx`, `ly` - Coordinates of the lab entity. (`LuaEntity::position`)
 ---
@@ -21,6 +21,7 @@ local random = math.random
 local CONSTANTS = {
   INV_PI     = format("%.18f", 1 / math.pi),
   INV_TWO_PI = format("%.18f", 1 / (2 * math.pi)),
+  INV_4      = format("%.18f", 1 / 4),
   INV_8      = format("%.18f", 1 / 8),
   INV_9      = format("%.18f", 1 / 9),
   INV_10     = format("%.18f", 1 / 10),
@@ -53,22 +54,25 @@ local COLOR_FUNCTION_TEMPLATE = [[
     local t
     %s
 
-    -- Extract floor (base_index) and fractional part (f) from t.
-    -- base_index is for color index and f is for interpolation factor.
+    -- Extract floor (i) and fractional part (f) from t.
+    -- i is for color index and f is for interpolation factor.
     -- f is scaled by sharpness and clamped to [0, 1].
-    local base_index = floor(t)
-    local f = (t - base_index) * %.18f
+    local i = floor(t)
+    local f = (t - i) * %.18f
     if f > 1 then f = 1 end
 
     -- Choose the colors to interpolate between.
-    -- base_index can be negative but modulo (%%) always returns positive numbers.
-    local start_color = colors[base_index %% n_colors + 1]
-    local end_color = colors[(base_index + 1) %% n_colors + 1]
+    -- i can be negative but modulo (%%) always returns positive numbers.
+    local i1 = (i %% n_colors) * 3
+    local i2 = ((i + 1) %% n_colors) * 3
 
-    local sc1, sc2, sc3 = start_color[1], start_color[2], start_color[3]
-    output[1] = sc1 + (end_color[1] - sc1) * f
-    output[2] = sc2 + (end_color[2] - sc2) * f
-    output[3] = sc3 + (end_color[3] - sc3) * f
+    local r1 = colors[i1 + 1]
+    local g1 = colors[i1 + 2]
+    local b1 = colors[i1 + 3]
+
+    output[1] = r1 + (colors[i2 + 1] - r1) * f
+    output[2] = g1 + (colors[i2 + 2] - g1) * f
+    output[3] = b1 + (colors[i2 + 3] - b1) * f
   end
 ]]
 
@@ -100,8 +104,20 @@ local functions = {
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
   compile_function("Angular", [[
-    local theta = atan2(ly - py, lx - px)
-    t = (theta * INV_TWO_PI + 0.5) * n_colors + phase * INV_30
+    local dx = lx - px
+    local dy = ly - py
+
+    -- Use diamond-angle approximation to avoid expensive atan2(dx, dy).
+    local adx = abs(dx)
+    local ady = abs(dy)
+    local q = ady / (adx + ady + 1e-9)
+    if dx < 0 then
+      if dy < 0 then q = 2 + q else q = 2 - q end
+    elseif dy < 0 then
+      q = 4 - q
+    end
+
+    t = q * INV_4 * n_colors + phase * INV_30
   ]], 2),
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
@@ -128,10 +144,19 @@ local functions = {
   compile_function("Spiral", [[
     local dx = lx - px
     local dy = ly - py
+
+    -- Use diamond-angle approximation to avoid expensive atan2(dx, dy).
+    local adx = abs(dx)
+    local ady = abs(dy)
     local dist = sqrt(dx * dx + dy * dy)
-    local theta = atan2(dy, dx)
-    -- Radial distance expands outward; subtracting the normalized angle winds it into a spiral.
-    t = dist * INV_8 - (theta * INV_TWO_PI + 0.5) * n_colors + phase * INV_50
+    local q = ady / (adx + ady + 1e-9)
+    if dx < 0 then
+      if dy < 0 then q = 2 + q else q = 2 - q end
+    elseif dy < 0 then
+      q = 4 - q
+    end
+
+    t = dist * INV_8 - q * INV_4 * n_colors + phase * INV_50
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
@@ -144,8 +169,11 @@ local functions = {
     local dx = abs(lx - px)
     local dy = abs(ly - py)
     local dist = sqrt(dx * dx + dy * dy)
-    local theta = atan2(dy, dx)
-    t = dist * INV_8 + theta * 2 * INV_PI * n_colors + phase * INV_40
+
+    -- Use diamond-angle approximation in the first quadrant.
+    local q = dy / (dx + dy + 1e-9)
+
+    t = dist * INV_8 + q * n_colors + phase * INV_40
   ]], 3),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
@@ -153,15 +181,10 @@ local functions = {
     t = max(abs(lx - px), abs(ly - py)) * INV_8 + phase * INV_40
   ]], 2),
 
-  -- [11] Lattice: concentric rings emanate from a regular grid of source points fixed to the world,
-  --   creating a repeating tiled pattern of circular rings across the map.
+  -- [11] Lattice: repeating tiled pattern of circular rings across the map.
   compile_function("Lattice", [[
-    -- Source grid: one ring center every 32 tiles.
-    -- Fold lab coordinates into [0, 16] to find the distance to the nearest grid corner.
-    local fx = lx % 32
-    local fy = ly % 32
-    if fx > 16 then fx = 32 - fx end
-    if fy > 16 then fy = 32 - fy end
+    local fx = abs((lx + 16) % 32 - 16)
+    local fy = abs((ly + 16) % 32 - 16)
     t = sqrt(fx * fx + fy * fy) * INV_8 - phase * INV_40
   ]], 2),
 

@@ -72,6 +72,13 @@ local consts = {
   OV_VISIBLE = 6,
   OV_UNIT_NUM = 7,
   OV_FORCE_INDEX = 8,
+
+  -- ForceState field indices
+  FS_CURRENT_RESEARCH = 1,
+  FS_COLORS = 2,
+  FS_N_COLORS = 3,
+  FS_PX = 4,
+  FS_PY = 5,
 }
 
 return consts

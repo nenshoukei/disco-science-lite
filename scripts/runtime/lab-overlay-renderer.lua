@@ -24,6 +24,13 @@ local STATUS_LOW_POWER = defines.entity_status.low_power
 --- @field [7] number           [OV_UNIT_NUM]    Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
 --- @field [8] number           [OV_FORCE_INDEX] Force index of the lab entity (cached, avoids C bridge read in tick function).
 
+--- @class (exact) ForceState
+--- @field [1] LuaTechnology|nil [FS_CURRENT_RESEARCH] Current researching technology.
+--- @field [2] number[]|nil      [FS_COLORS]           Flattened colors array in format: `{ r, g, b, r, g, b... }`
+--- @field [3] integer           [FS_N_COLORS]         Number of colors.
+--- @field [4] number            [FS_PX]               First valid player's X position.
+--- @field [5] number            [FS_PY]               First valid player's Y position.
+
 --- Constructor
 ---
 --- @param color_registry ColorRegistry
@@ -47,21 +54,13 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- @type table<number, PlayerViewTracker>
     player_trackers = {},
 
-    --- Player positions by force index for color functions. Updated from the first valid tracker for each force.
-    --- @type table<number, MapPositionTuple>
-    force_player_positions = {},
+    --- Per-force state for the tick function. Key is force.index.
+    --- @type table<number, ForceState>
+    force_state = {},
 
-    --- Flattened list of lab overlays currently in any player's view. Updated by get_state_update_function().
+    --- Flattened list of lab overlays currently in any player's view.
     --- @type LabOverlay[]
     visible_overlays = {},
-
-    --- Colors by force index. Only forces with active research are present.
-    --- @type table<number, ColorTuple[]>
-    force_research_colors = {},
-
-    --- Tracks current_research per force to detect changes in get_state_update_function().
-    --- @type table<number, LuaTechnology|nil>
-    force_current_research = {},
   }
   return setmetatable(self, LabOverlayRenderer)
 end
@@ -146,17 +145,12 @@ end
 ---
 --- The tick function returned by `get_tick_function()` should be refreshed afterwards.
 function LabOverlayRenderer:render_overlays_for_all_labs()
-  -- Update player trackers so force_research_colors can be refreshed on next state update.
-  self:update_players()
-
   -- Destroy all rendering objects and reset data structures.
   rendering_clear("disco-science-lite" --[[$MOD_NAME]])
   self.overlays = {}
   self.chunk_map = ChunkMap.new()
   self.visible_overlays = {}
-  self.force_research_colors = {}
-  self.force_current_research = {}
-  self.force_player_positions = {}
+  self.force_state = {}
 
   local entity_filter = { type = "lab" }
   local render_overlay_for_lab = self.render_overlay_for_lab
@@ -258,7 +252,7 @@ end
 function LabOverlayRenderer:update_players()
   local connected_players = game.connected_players
   local player_trackers = self.player_trackers
-  local force_player_positions = self.force_player_positions
+  local force_state = self.force_state
   local force_seen = {}
 
   -- Update existing trackers and create new ones for newly connected players.
@@ -273,19 +267,17 @@ function LabOverlayRenderer:update_players()
     end
     tracker:update(player)
 
-    -- Update force_player_positions from the first valid tracker for each force.
+    -- Update force_state position from the first valid tracker for each force.
     if tracker.view[ 1 --[[$PV_VALID]] ] then
-      local fi = tracker.force.index
-      if not force_seen[fi] then
-        force_seen[fi] = true
-        local force_pos = force_player_positions[fi]
-        if not force_pos then
-          force_pos = { 0, 0 }
-          force_player_positions[fi] = force_pos
+      local force_index = tracker.force.index
+      if not force_seen[force_index] then
+        force_seen[force_index] = true
+        local fs = force_state[force_index]
+        if fs then
+          local pos = tracker.position
+          fs[ 4 --[[$FS_PX]] ] = pos[1]
+          fs[ 5 --[[$FS_PY]] ] = pos[2]
         end
-        local pos = tracker.position
-        force_pos[1] = pos[1]
-        force_pos[2] = pos[2]
       end
     end
   end
@@ -301,7 +293,7 @@ end
 --- Get a state update function to be called periodically (not every tick).
 ---
 --- The returned function:
----   - Tracks current_research per force and updates force_research_colors when it changes.
+---   - Tracks current_research per force and updates force_state when it changes.
 ---   - Checks entity.status and updates overlay[OV_VISIBLE] and animation.visible.
 ---   - Rebuilds self.visible_overlays for the tick function to iterate.
 ---
@@ -312,8 +304,7 @@ function LabOverlayRenderer:get_state_update_function()
   local intensity = settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value *
     0.01 --[[@as number]]
   local player_trackers = self.player_trackers
-  local force_research_colors = self.force_research_colors
-  local force_current_research = self.force_current_research
+  local force_state = self.force_state
   local color_registry = self.color_registry
   local chunk_map = self.chunk_map
   local visible_overlays = self.visible_overlays
@@ -341,16 +332,45 @@ function LabOverlayRenderer:get_state_update_function()
       local view = tracker.view
       if not view[ 1 --[[$PV_VALID]] ] then goto continue end
 
-      -- Update force_research_colors for this player's force.
       local force = tracker.force --[[@as LuaForce]]
-      local fi = force.index
-      local current_research = force.current_research
-      if current_research ~= force_current_research[fi] then
-        force_current_research[fi] = current_research
-        if current_research then
-          force_research_colors[fi] = color_registry:get_colors_for_research(current_research, intensity)
+      local force_index = force.index
+      local force_current_research = force.current_research
+
+      -- Update force_state for this player's force.
+      local fs = force_state[force_index]
+      if not fs then
+        local tracker_position = tracker.position
+        fs = {
+          nil,                 -- FS_CURRENT_RESEARCH
+          nil,                 -- FS_COLORS
+          0,                   -- FS_N_COLORS
+          tracker_position[1], -- FS_PX
+          tracker_position[2], -- FS_PY
+        }
+        force_state[force_index] = fs
+      end
+      if force_current_research ~= fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] then
+        fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] = force_current_research
+        if force_current_research then
+          local colors = color_registry:get_colors_for_research(force_current_research, intensity)
+          local n_colors = #colors
+
+          -- Flatten the color tuples into a single array for performance in the hot tick function.
+          local flat_colors = {}
+          local color_index = 1
+          for i = 1, n_colors do
+            local c = colors[i]
+            flat_colors[color_index] = c[1]
+            flat_colors[color_index + 1] = c[2]
+            flat_colors[color_index + 2] = c[3]
+            color_index = color_index + 3
+          end
+
+          fs[ 2 --[[$FS_COLORS]] ] = flat_colors
+          fs[ 3 --[[$FS_N_COLORS]] ] = n_colors
         else
-          force_research_colors[fi] = nil
+          fs[ 2 --[[$FS_COLORS]] ] = nil
+          fs[ 3 --[[$FS_N_COLORS]] ] = 0
         end
       end
 
@@ -375,7 +395,8 @@ function LabOverlayRenderer:get_state_update_function()
                 for i = 1, #chunk do
                   local overlay = chunk[i]
                   local status = overlay[ 1 --[[$OV_ENTITY]] ].status
-                  local colors = force_research_colors[overlay[ 8 --[[$OV_FORCE_INDEX]] ]]
+                  local lab_fs = force_state[overlay[ 8 --[[$OV_FORCE_INDEX]] ]]
+                  local colors = lab_fs and lab_fs[ 2 --[[$FS_COLORS]] ]
                   local is_visible = (
                     (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
                     colors ~= nil
@@ -432,9 +453,8 @@ function LabOverlayRenderer:get_tick_function()
   local lab_update_interval = global_settings[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ]
     .value --[[@as integer]]
 
-  local force_research_colors = self.force_research_colors
-  local force_player_positions = self.force_player_positions
   local visible_overlays = self.visible_overlays
+  local force_state = self.force_state
 
   -- `phase` is a continuously drifting value passed to the color function.
   -- It drives animation by shifting the color cycle position over time.
@@ -466,6 +486,7 @@ function LabOverlayRenderer:get_tick_function()
     -- Bind frequently used upvalues to local variables for performance
     -- luacheck: push ignore
     local visible_overlays = visible_overlays --- @diagnostic disable-line: redefined-local
+    local force_state = force_state           --- @diagnostic disable-line: redefined-local
     local phase = phase                       --- @diagnostic disable-line: redefined-local
     local color_function = color_function     --- @diagnostic disable-line: redefined-local
     local color = color                       --- @diagnostic disable-line: redefined-local
@@ -481,16 +502,17 @@ function LabOverlayRenderer:get_tick_function()
     -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, lab_update_interval do
       local overlay = visible_overlays[i]
-      local fi = overlay[ 8 --[[$OV_FORCE_INDEX]] ]
-      if fi ~= last_force_index then
-        last_force_index = fi
-        colors = force_research_colors[fi]
-        n_colors = colors and #colors or 0
-        local pos = force_player_positions[fi]
-        if pos then
-          player_x, player_y = pos[1], pos[2]
+      local force_index = overlay[ 8 --[[$OV_FORCE_INDEX]] ]
+      if force_index ~= last_force_index then
+        last_force_index = force_index
+        local fs = force_state[force_index]
+        if fs then
+          colors = fs[ 2 --[[$FS_COLORS]] ]
+          n_colors = fs[ 3 --[[$FS_N_COLORS]] ]
+          player_x = fs[ 4 --[[$FS_PX]] ]
+          player_y = fs[ 5 --[[$FS_PY]] ]
         else
-          player_x, player_y = 0, 0
+          colors = nil
         end
       end
       if colors then

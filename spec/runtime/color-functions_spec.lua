@@ -3,11 +3,11 @@ local ColorFunctions = require("scripts.runtime.color-functions")
 describe("ColorFunctions", function ()
   -- Three primary colors as test fixtures
   local colors = {
-    { 1, 0, 0 }, -- red
-    { 0, 1, 0 }, -- green
-    { 0, 0, 1 }, -- blue
+    1, 0, 0, -- red
+    0, 1, 0, -- green
+    0, 0, 1, -- blue
   }
-  local n_colors = #colors
+  local n_colors = 3
 
   -- -------------------------------------------------------------------
   describe("inlined interpolation", function ()
@@ -64,7 +64,7 @@ describe("ColorFunctions", function ()
     end)
 
     it("works with a single color (no interpolation partner)", function ()
-      local single = { { 0.5, 0.3, 0.8 } }
+      local single = { 0.5, 0.3, 0.8 }
       local out = {}
       ColorFunctions.test_inlined_interpolation(out, 0, single, 1, 1.0)
       assert.are.equal(0.5, out[1])
