@@ -8,7 +8,8 @@ local LabOverlayRenderer = {}
 LabOverlayRenderer.__index = LabOverlayRenderer
 
 local random = math.random
-local rendering_clear = rendering.clear
+local max = math.max
+local rendering_get_all_objects = rendering.get_all_objects
 local draw_animation = rendering.draw_animation
 local get_entity_rect = Utils.get_entity_rect
 local STATUS_WORKING = defines.entity_status.working
@@ -67,47 +68,46 @@ end
 
 --- Render an overlay for a lab entity.
 ---
---- If the overlay already exists and `force_render` is `false`, skip rendering and returns the existing overlay.
----
 --- @param lab LuaEntity The lab entity.
---- @param force_render boolean? If `true`, it renders the overlay even if it already exists.
+--- @param existing_object LuaRenderObject? An existing render object to reuse (optional, used when rebuilding all). Must be valid.
 --- @return LabOverlay|nil # The rendered overlay. `nil` if the lab is not target.
-function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
+function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   if not lab.valid or lab.type ~= "lab" then return nil end
 
   local lab_unit_number = lab.unit_number
   if not lab_unit_number then return nil end
-
-  local overlay = self.overlays[lab_unit_number]
-  if overlay and not force_render then return overlay end
 
   local overlay_settings = self.lab_registry:get_overlay_settings(lab.name)
   if not overlay_settings and not settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value then
     return nil
   end
 
-  local is_randomized_flicker = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value
-
-  --- @type LuaRenderObject
-  local render_object
+  local animation
+  local scale
   if overlay_settings then
-    render_object = draw_animation({
-      animation = overlay_settings.animation,
-      surface = lab.surface,
-      target = lab,
-      x_scale = overlay_settings.scale,
-      y_scale = overlay_settings.scale,
-      render_layer = "higher-object-under",
-      visible = false,
-      animation_offset = is_randomized_flicker and random() * 300 or 0,
-    })
+    -- If lab is registered but no overlay animation specified, use animation for the standard Factorio lab.
+    animation = overlay_settings.animation or "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]]
+    scale = overlay_settings.scale or 1
   else
     -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
     -- Scale the overlay to fit the lab's tile size. The fallback sprite covers 2 tiles at scale=1.
     local prototype = lab.prototype
-    local scale = math.max(prototype.tile_width, prototype.tile_height) * 0.5
+    animation = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]]
+    scale = max(prototype.tile_width, prototype.tile_height) * 0.5
+  end
+
+  --- @type LuaRenderObject
+  local render_object
+  if existing_object then
+    -- If existing rendering object given, just update it with the overlay settings.
+    render_object = existing_object
+    render_object.animation = animation
+    render_object.x_scale = scale
+    render_object.y_scale = scale
+  else
+    local is_randomized_flicker = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value
     render_object = draw_animation({
-      animation = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]],
+      animation = animation,
       surface = lab.surface,
       target = lab,
       x_scale = scale,
@@ -127,7 +127,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
     lab_position.x or lab_position[1], -- OV_X
     lab_position.y or lab_position[2], -- OV_Y
     get_entity_rect(lab),              -- OV_RECT
-    false,                             -- OV_VISIBLE
+    render_object.visible,             -- OV_VISIBLE
     lab_unit_number,                   -- OV_UNIT_NUM
     lab.force_index,                   -- OV_FORCE_INDEX
   }
@@ -145,19 +145,46 @@ end
 ---
 --- The tick function returned by `get_tick_function()` should be refreshed afterwards.
 function LabOverlayRenderer:render_overlays_for_all_labs()
-  -- Destroy all rendering objects and reset data structures.
-  rendering_clear("disco-science-lite" --[[$MOD_NAME]])
+  -- Collect all existing valid render objects from the mod.
+  -- Index them by their target unit_number for fast lookup.
+  local existing_render_objects = {}
+  for _, object in ipairs(rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])) do
+    local target = object.target -- lab entity
+    if target and target.valid then
+      existing_render_objects[target.unit_number] = object
+    else
+      -- Destroy objects with no valid lab target.
+      object.destroy()
+    end
+  end
+
+  -- Reset data structures.
   self.overlays = {}
   self.chunk_map = ChunkMap.new()
   self.visible_overlays = {}
   self.force_state = {}
 
   local entity_filter = { type = "lab" }
-  local render_overlay_for_lab = self.render_overlay_for_lab
   for _, surface in pairs(game.surfaces) do
     for _, lab in ipairs(surface.find_entities_filtered(entity_filter)) do
-      render_overlay_for_lab(self, lab, true) -- Force re-render
+      local unit_number = lab.unit_number
+      if unit_number then
+        local existing_object = existing_render_objects[unit_number]
+
+        -- Rebuild the overlay, reusing the existing render object if found.
+        local new_overlay = self:render_overlay_for_lab(lab, existing_object)
+
+        if new_overlay then
+          -- Successfully reused or created. Remove from the map so it's not destroyed.
+          existing_render_objects[unit_number] = nil
+        end
+      end
     end
+  end
+
+  -- Destroy any remaining render objects that were not reused.
+  for _, object in pairs(existing_render_objects) do
+    object.destroy()
   end
 end
 
@@ -240,9 +267,7 @@ function LabOverlayRenderer:update_lab_position(lab)
   else
     -- The entity is teleported to another surface!
     animation.destroy()
-    self.chunk_map:remove(lab_unit_number)
-    self.overlays[lab_unit_number] = nil
-    self:render_overlay_for_lab(lab, true) -- Force re-render
+    self:render_overlay_for_lab(lab)
   end
 end
 
@@ -431,7 +456,7 @@ end
 
 --- Get a tick function to be called by on_tick event.
 ---
---- The function updates overlay colors for overlays in visible_overlays.
+--- The function updates colors of overlays in self.visible_overlays.
 ---
 --- @return fun()
 function LabOverlayRenderer:get_tick_function()
@@ -490,12 +515,13 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                       --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
-    -- Cache the last force's colors and position to avoid repeated table lookups.
+    -- Cache the last force's colors and player position to avoid repeated table lookups.
     -- In the common case (all labs on the same force), this avoids all but the first lookup.
     local last_force_index = -1
     local colors = nil
     local n_colors = 0
-    local player_x, player_y = 0, 0
+    local player_x = 0
+    local player_y = 0
 
     -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, lab_update_interval do

@@ -7,17 +7,39 @@ local reset_mocks = require("spec.helper").reset_mocks
 --- Rendering mock: draw_animation returns a mock LuaRenderObject.
 --- @diagnostic disable-next-line: missing-fields
 _G.rendering = {
-  clear          = function () end,
+  objects = {},
+  next_id = 1,
+  clear = function ()
+    _G.rendering.objects = {}
+  end,
+  get_all_objects = function (mod_name)
+    local objects = {}
+    for _, obj in pairs(_G.rendering.objects) do
+      objects[#objects + 1] = obj
+    end
+    return objects
+  end,
   draw_animation = function (params)
+    local id = _G.rendering.next_id
+    _G.rendering.next_id = id + 1
     --- destroy() is called without self (dot notation), so use a closure.
     local obj = {
-      valid   = true,
-      visible = false,
-      color   = { 0, 0, 0 },
-      surface = params.surface,
-      target  = params.target,
+      id               = id,
+      valid            = true,
+      visible          = false,
+      color            = { 0, 0, 0 },
+      surface          = params.surface,
+      target           = params.target,
+      animation        = params.animation,
+      x_scale          = params.x_scale,
+      y_scale          = params.y_scale,
+      animation_offset = params.animation_offset,
     }
-    obj.destroy = function () obj.valid = false end
+    obj.destroy = function ()
+      obj.valid = false
+      _G.rendering.objects[id] = nil
+    end
+    _G.rendering.objects[id] = obj
     return obj --[[@as LuaRenderObject]]
   end,
 }
@@ -140,6 +162,8 @@ end
 describe("LabOverlayRenderer", function ()
   before_each(function ()
     reset_mocks()
+    _G.rendering.objects = {}
+    _G.rendering.next_id = 1
   end)
 
   -- -------------------------------------------------------------------
@@ -244,19 +268,11 @@ describe("LabOverlayRenderer", function ()
       assert.is_false(ov[ 6 --[[$OV_VISIBLE]] ])
     end)
 
-    it("returns existing overlay without re-rendering when force_render is false", function ()
+    it("always creates a new overlay", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
-      local ov2 = r:render_overlay_for_lab(lab, false)
-      assert.are.equal(ov1, ov2)
-    end)
-
-    it("creates a new overlay when force_render is true", function ()
-      local r = make_renderer()
-      local lab = make_entity(1, 1, 0, 0)
-      local ov1 = r:render_overlay_for_lab(lab)
-      local ov2 = r:render_overlay_for_lab(lab, true)
+      local ov2 = r:render_overlay_for_lab(lab)
       assert.is_not_nil(ov1) --- @cast ov1 -nil
       assert.is_not_nil(ov2) --- @cast ov2 -nil
       -- New overlay means a new animation object
@@ -269,6 +285,72 @@ describe("LabOverlayRenderer", function ()
       local ov_f2 = r:render_overlay_for_lab(make_entity(2, 1, 32, 0, 2))
       assert.is_not_nil(ov_f1)
       assert.is_not_nil(ov_f2)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("render_overlays_for_all_labs", function ()
+    it("reuses existing render objects", function ()
+      local r = make_renderer()
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      -- Initial render
+      r:render_overlays_for_all_labs()
+      local ov1 = r.overlays[1]
+      assert.is_not_nil(ov1)
+      local anim1 = ov1[ 2 --[[$OV_ANIMATION]] ]
+      local anim1_id = anim1.id
+
+      -- Second render (rebuild)
+      r:render_overlays_for_all_labs()
+      local ov2 = r.overlays[1]
+      assert.is_not_nil(ov2)
+      local anim2 = ov2[ 2 --[[$OV_ANIMATION]] ]
+
+      assert.are.equal(anim1_id, anim2.id)
+      assert.is_true(anim2.valid)
+    end)
+
+    it("destroys orphaned render objects", function ()
+      local r = make_renderer()
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      -- Create an orphaned render object (e.g. manually or from a deleted lab)
+      local orphan = _G.rendering.draw_animation({
+        animation = "lab-anim",
+        surface = lab.surface,
+        target = { valid = false }, -- Invalid target
+      })
+      local orphan_id = orphan.id
+
+      r:render_overlays_for_all_labs()
+
+      assert.is_nil(_G.rendering.objects[orphan_id])
+    end)
+
+    it("destroys render objects for removed labs", function ()
+      local r = make_renderer()
+      local lab1 = make_entity(1, 1, 0, 0)
+      local lab2 = make_entity(2, 1, 32, 0)
+      _G.game.surfaces = { [1] = lab1.surface }
+
+      -- Initially two labs
+      --- @diagnostic disable-next-line: duplicate-set-field
+      lab1.surface.find_entities_filtered = function () return { lab1, lab2 } end
+      r:render_overlays_for_all_labs()
+      local anim2_id = r.overlays[2][ 2 --[[$OV_ANIMATION]] ].id
+
+      -- Now only lab1 remains
+      --- @diagnostic disable-next-line: duplicate-set-field
+      lab1.surface.find_entities_filtered = function () return { lab1 } end
+      r:render_overlays_for_all_labs()
+
+      assert.is_nil(r.overlays[2])
+      assert.is_nil(_G.rendering.objects[anim2_id])
     end)
   end)
 
