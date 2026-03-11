@@ -15,7 +15,7 @@ remote.add_interface("DiscoScience", RemoteInterface.functions)
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
   script.on_nth_tick(10, function () renderer:update_players() end)
-  script.on_nth_tick(30, function () renderer:update_overlay_states() end)
+  script.on_nth_tick(30, renderer:get_state_update_function())
 end
 
 --- Rebuild all overlays and refresh event handlers.
@@ -80,11 +80,7 @@ LabControl.events = {
   [defines.events.on_player_created] = renderer_update_players,
   [defines.events.on_player_removed] = renderer_update_players,
 
-  [defines.events.on_player_changed_force] = function ()
-    -- Rebuild overlays because the force filter in render_overlay_for_lab depends on the
-    -- player's force. Labs belonging to the old force must be removed and new ones added.
-    rebuild_overlays()
-  end,
+  [defines.events.on_player_changed_force] = renderer_update_players,
 
   --- @param event EventData.on_surface_cleared
   [defines.events.on_surface_cleared] = function (event)

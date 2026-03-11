@@ -71,6 +71,7 @@ local consts = {
   OV_RECT = 5,
   OV_VISIBLE = 6,
   OV_UNIT_NUM = 7,
+  OV_FORCE_INDEX = 8,
 }
 
 return consts

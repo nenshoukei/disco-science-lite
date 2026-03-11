@@ -46,20 +46,12 @@ function PlayerViewTracker.new()
   return setmetatable(self, PlayerViewTracker)
 end
 
---- Rebuild the view data from the given list of connected players.
+--- Rebuild the view data from a single connected player.
 ---
---- Pass `game.connected_players` in production. In tests, pass a mock array.
---- Sets `view[PV_VALID] = false` when in multiplayer or chart mode.
+--- Sets `view[PV_VALID] = false` when the player is in chart mode.
 ---
---- @param players LuaPlayer[]
-function PlayerViewTracker:update(players)
-  -- This mod is single-player only. Do not update in multiplayer.
-  if #players ~= 1 then
-    self.view[ 1 --[[$PV_VALID]] ] = false
-    return
-  end
-
-  local player = players[1]
+--- @param player LuaPlayer
+function PlayerViewTracker:update(player)
   if player.render_mode == RENDER_MODE_CHART then
     self.view[ 1 --[[$PV_VALID]] ] = false
     return
