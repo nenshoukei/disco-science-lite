@@ -56,7 +56,9 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
   --- @type table<string, boolean>
   local not_found = {}
   for _, tech in pairs(all_prototypes.technology) do
-    for _, ingredient in ipairs(tech.research_unit_ingredients) do
+    local ingredients = tech.research_unit_ingredients
+    for i = 1, #ingredients do
+      local ingredient = ingredients[i]
       if not ingredient_colors[ingredient.name] then
         not_found[ingredient.name] = true
       end
@@ -114,8 +116,9 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
   --- @type ColorTuple[]
   local colors = {}
   local ingredient_colors = self.ingredient_colors
-  for _, ingredient in ipairs(technology.research_unit_ingredients) do
-    local color = ingredient_colors[ingredient.name]
+  local ingredients = technology.research_unit_ingredients
+  for i = 1, #ingredients do
+    local color = ingredient_colors[ingredients[i].name]
     if color then
       colors[#colors + 1] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
     end

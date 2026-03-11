@@ -147,11 +147,13 @@ end
 function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Collect all existing valid render objects from the mod.
   -- Index them by their target unit_number for fast lookup.
-  local existing_render_objects = {}
-  for _, object in ipairs(rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])) do
+  local existing_objects = {}
+  local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+  for i = 1, #all_objects do
+    local object = all_objects[i]
     local target = object.target -- lab entity
     if target and target.valid then
-      existing_render_objects[target.unit_number] = object
+      existing_objects[target.unit_number] = object
     else
       -- Destroy objects with no valid lab target.
       object.destroy()
@@ -166,24 +168,26 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
 
   local entity_filter = { type = "lab" }
   for _, surface in pairs(game.surfaces) do
-    for _, lab in ipairs(surface.find_entities_filtered(entity_filter)) do
+    local entities = surface.find_entities_filtered(entity_filter)
+    for i = 1, #entities do
+      local lab = entities[i]
       local unit_number = lab.unit_number
       if unit_number then
-        local existing_object = existing_render_objects[unit_number]
+        local existing_object = existing_objects[unit_number]
 
         -- Rebuild the overlay, reusing the existing render object if found.
         local new_overlay = self:render_overlay_for_lab(lab, existing_object)
 
         if new_overlay then
           -- Successfully reused or created. Remove from the map so it's not destroyed.
-          existing_render_objects[unit_number] = nil
+          existing_objects[unit_number] = nil
         end
       end
     end
   end
 
   -- Destroy any remaining render objects that were not reused.
-  for _, object in pairs(existing_render_objects) do
+  for _, object in pairs(existing_objects) do
     object.destroy()
   end
 end

@@ -56,8 +56,8 @@ local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
 local function make_tech(ingredients)
   local research_unit_ingredients = {}
   if ingredients then
-    for i, name in ipairs(ingredients) do
-      research_unit_ingredients[i] = { name = name }
+    for i = 1, #ingredients do
+      research_unit_ingredients[i] = { name = ingredients[i] }
     end
   end
   return ({ research_unit_ingredients = research_unit_ingredients }) --[[@as LuaTechnology]]
