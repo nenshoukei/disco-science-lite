@@ -296,13 +296,6 @@ function LabOverlayRenderer:update_players()
       player_trackers[idx] = nil
     end
   end
-
-  -- Remove force positions for forces that no longer have valid trackers.
-  for fi in pairs(force_player_positions) do
-    if not force_seen[fi] then
-      force_player_positions[fi] = nil
-    end
-  end
 end
 
 --- Get a state update function to be called periodically (not every tick).
