@@ -534,7 +534,7 @@ describe("LabOverlayRenderer", function ()
         display_resolution = { width = 1920, height = 1080 },
       }) --[[@as LuaPlayer]]
       _G.game.forces = {
-        [1] = {
+        player = {
           index = 1,
           connected_players = { player1 },
         },
@@ -559,7 +559,7 @@ describe("LabOverlayRenderer", function ()
         display_resolution = { width = 1920, height = 1080 },
       }) --[[@as LuaPlayer]]
       _G.game.forces = {
-        [1] = {
+        player = {
           index = 1,
           connected_players = { player1 },
         },
@@ -568,6 +568,7 @@ describe("LabOverlayRenderer", function ()
       update_trackers()
 
       local fs = r.force_state[1]
+      assert.is_not_nil(fs) --- @cast fs -nil
       assert.are.equal(10, fs[ 4 --[[$FS_PX]] ])
       assert.are.equal(20, fs[ 5 --[[$FS_PY]] ])
     end)
@@ -701,7 +702,7 @@ describe("LabOverlayRenderer", function ()
       update_states()
 
       local fs = r.force_state[1]
-      assert.is_not_nil(fs)
+      assert.is_not_nil(fs) --- @cast fs -nil
       assert.are.equal(tech, fs[ 1 --[[$FS_CURRENT_RESEARCH]] ])
       assert.are.same({ 0.9, 0.1, 0.2 }, fs[ 2 --[[$FS_COLORS]] ])
       assert.are.equal(1, fs[ 3 --[[$FS_N_COLORS]] ])
@@ -725,7 +726,7 @@ describe("LabOverlayRenderer", function ()
       update_states()
 
       local fs = r.force_state[1]
-      assert.is_not_nil(fs)
+      assert.is_not_nil(fs) --- @cast fs -nil
       assert.are.equal(new_tech, fs[ 1 --[[$FS_CURRENT_RESEARCH]] ])
       assert.are.same({ 0.9, 0.1, 0.2 }, fs[ 2 --[[$FS_COLORS]] ])
       assert.are.equal(1, fs[ 3 --[[$FS_N_COLORS]] ])
@@ -747,7 +748,7 @@ describe("LabOverlayRenderer", function ()
       update_states()
 
       local fs = r.force_state[1]
-      assert.is_not_nil(fs)
+      assert.is_not_nil(fs) --- @cast fs -nil
       assert.is_nil(fs[ 1 --[[$FS_CURRENT_RESEARCH]] ])
       assert.are.equal(0, #{ fs[ 2 --[[$FS_COLORS]] ] })
       assert.are.equal(0, fs[ 3 --[[$FS_N_COLORS]] ])

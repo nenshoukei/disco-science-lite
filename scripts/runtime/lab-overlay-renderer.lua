@@ -52,11 +52,11 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     chunk_map = ChunkMap.new(),
 
     --- Tracks connected players' views. Key is player.index.
-    --- @type table<number, PlayerViewTracker>
+    --- @type table<number, PlayerViewTracker|nil>
     player_trackers = {},
 
     --- Per-force state for the tick function. Key is force.index.
-    --- @type table<number, ForceState>
+    --- @type table<number, ForceState|nil>
     force_state = {},
 
     --- Flattened list of lab overlays currently in any player's view.
@@ -290,23 +290,28 @@ function LabOverlayRenderer:get_tracker_update_function()
   local force_state = self.force_state
 
   return function ()
-    for force_index, force in pairs(game.forces) do
-      local fs = force_state[force_index]
-      for _, player in ipairs(force.connected_players) do
-        local player_index = player.index
-        local tracker = player_trackers[player_index]
-        if not tracker then
-          tracker = PlayerViewTracker.new()
-          player_trackers[player_index] = tracker
-        end
-        tracker:update(player)
+    for _, force in pairs(game.forces) do
+      local connected_players = force.connected_players
+      local n_connected_players = #connected_players
+      if n_connected_players > 0 then
+        local fs = force_state[force.index]
+        for i = 1, n_connected_players do
+          local player = connected_players[i]
+          local player_index = player.index
+          local tracker = player_trackers[player_index]
+          if not tracker then
+            tracker = PlayerViewTracker.new()
+            player_trackers[player_index] = tracker
+          end
+          tracker:update(player)
 
-        -- Update force_state position from the first valid tracker for each force.
-        if fs and tracker.view[ 1 --[[$PV_VALID]] ] then
-          local pos = tracker.position
-          fs[ 4 --[[$FS_PX]] ] = pos[1]
-          fs[ 5 --[[$FS_PY]] ] = pos[2]
-          fs = nil -- Only update for the first valid player.
+          -- Update force_state position from the first valid tracker for each force.
+          if fs and tracker.view[ 1 --[[$PV_VALID]] ] then
+            local pos = tracker.position
+            fs[ 4 --[[$FS_PX]] ] = pos[1]
+            fs[ 5 --[[$FS_PY]] ] = pos[2]
+            fs = nil -- Only update for the first valid player.
+          end
         end
       end
     end
