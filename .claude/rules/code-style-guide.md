@@ -48,6 +48,7 @@ paths: ["**/*.lua"]
 - For example, `print("xyz" --[[$ABC]])` uses `consts.ABC = "xyz"`.
 - To use a constant, write `consts.CONST_NAME` to where you want (no require needed), and run `make consts`. It will be replaced by `value --[[$CONST_NAME]]`.
 - To update a constant, change its value in `consts.lua`, and run `make consts`. All referrences to that constant will be updated idempotently.
+- `make consts` targets all lua files in `scripts/` and `spec/`, and lua files on top-level such as `data.lua`.
 
 ## Testing
 
