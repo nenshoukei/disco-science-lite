@@ -422,6 +422,93 @@ describe("LabOverlayRenderer", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("get_tracker_update_function", function ()
+    it("returns a function", function ()
+      local r = make_renderer()
+      assert.is_function(r:get_tracker_update_function())
+    end)
+
+    it("creates trackers for connected players", function ()
+      local r = make_renderer()
+      local update_trackers = r:get_tracker_update_function()
+
+      local player1 = {
+        index = 1,
+        force = { index = 1 },
+        position = { x = 10, y = 20 },
+        surface_index = 1,
+        render_mode = defines.render_mode.game,
+        zoom = 1,
+        display_resolution = { width = 1920, height = 1080 },
+      }
+      _G.game.forces = {
+        ["player"] = {
+          index = 1,
+          connected_players = { player1 },
+        },
+      }
+
+      update_trackers()
+      assert.is_not_nil(r.player_trackers[1])
+    end)
+
+    it("removes trackers for disconnected players", function ()
+      local r = make_renderer()
+      local update_trackers = r:get_tracker_update_function()
+
+      local player1 = {
+        index = 1,
+        force = { index = 1 },
+        position = { x = 10, y = 20 },
+        surface_index = 1,
+        render_mode = defines.render_mode.game,
+        zoom = 1,
+        display_resolution = { width = 1920, height = 1080 },
+      }
+      _G.game.forces = {
+        ["player"] = {
+          index = 1,
+          connected_players = { player1 },
+        },
+      }
+      update_trackers()
+      assert.is_not_nil(r.player_trackers[1])
+
+      _G.game.forces["player"].connected_players = {}
+      update_trackers()
+      assert.is_nil(r.player_trackers[1])
+    end)
+
+    it("updates force_state positions", function ()
+      local r = make_renderer()
+      r.force_state[1] = { nil, nil, 0, 0, 0 }
+      local update_trackers = r:get_tracker_update_function()
+
+      local player1 = {
+        index = 1,
+        force = { index = 1 },
+        position = { x = 10, y = 20 },
+        surface_index = 1,
+        render_mode = defines.render_mode.game,
+        zoom = 1,
+        display_resolution = { width = 1920, height = 1080 },
+      }
+      _G.game.forces = {
+        ["player"] = {
+          index = 1,
+          connected_players = { player1 },
+        },
+      }
+
+      update_trackers()
+
+      local fs = r.force_state[1]
+      assert.are.equal(10, fs[ 4 --[[$FS_PX]] ])
+      assert.are.equal(20, fs[ 5 --[[$FS_PY]] ])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("get_state_update_function", function ()
     it("returns a function", function ()
       local r = make_renderer()

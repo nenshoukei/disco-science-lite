@@ -246,46 +246,53 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
---- Update the player trackers from `game.connected_players`.
+--- Get a tracker update function to be called periodically or by events.
 ---
---- Called by event handlers (position/zoom/surface changes) and from render_overlays_for_all_labs.
-function LabOverlayRenderer:update_players()
-  local connected_players = game.connected_players
+--- The returned function:
+---   - Creates/updates player trackers for every connected players.
+---   - Removes player trackers for disconnected players.
+---   - Updates player positions of self.force_state from the first valid player for each force.
+---
+--- @return fun()
+function LabOverlayRenderer:get_tracker_update_function()
   local player_trackers = self.player_trackers
   local force_state = self.force_state
-  local force_seen = {}
 
-  -- Update existing trackers and create new ones for newly connected players.
-  local seen = {}
-  for _, player in ipairs(connected_players) do
-    local idx = player.index
-    seen[idx] = true
-    local tracker = player_trackers[idx]
-    if not tracker then
-      tracker = PlayerViewTracker.new()
-      player_trackers[idx] = tracker
-    end
-    tracker:update(player)
+  --- @type table<integer, integer> table<player_index, generation> to find disconnected players.
+  local player_seen = {}
+  local generation = 0
 
-    -- Update force_state position from the first valid tracker for each force.
-    if tracker.view[ 1 --[[$PV_VALID]] ] then
-      local force_index = tracker.force.index
-      if not force_seen[force_index] then
-        force_seen[force_index] = true
-        local fs = force_state[force_index]
-        if fs then
+  return function ()
+    generation = generation + 1
+    local gen = generation
+
+    for force_index, force in pairs(game.forces) do
+      local fs = force_state[force_index]
+      for _, player in ipairs(force.connected_players) do
+        local idx = player.index
+        player_seen[idx] = gen
+        local tracker = player_trackers[idx]
+        if not tracker then
+          tracker = PlayerViewTracker.new()
+          player_trackers[idx] = tracker
+        end
+        tracker:update(player)
+
+        -- Update force_state position from the first valid tracker for each force.
+        if fs and tracker.view[ 1 --[[$PV_VALID]] ] then
           local pos = tracker.position
           fs[ 4 --[[$FS_PX]] ] = pos[1]
           fs[ 5 --[[$FS_PY]] ] = pos[2]
+          fs = nil -- Only update for the first valid player.
         end
       end
     end
-  end
 
-  -- Remove trackers for players who have disconnected.
-  for idx in pairs(player_trackers) do
-    if not seen[idx] then
-      player_trackers[idx] = nil
+    -- Remove trackers for players who have disconnected.
+    for idx in pairs(player_trackers) do
+      if player_seen[idx] ~= gen then
+        player_trackers[idx] = nil
+      end
     end
   end
 end

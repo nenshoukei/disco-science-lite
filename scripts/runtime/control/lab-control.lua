@@ -14,8 +14,25 @@ remote.add_interface("DiscoScience", RemoteInterface.functions)
 
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
-  script.on_nth_tick(10, function () renderer:update_players() end)
-  script.on_nth_tick(30, renderer:get_state_update_function())
+
+  local tracker_update_function = renderer:get_tracker_update_function()
+  script.on_nth_tick(10, tracker_update_function)
+  script.on_event({
+    defines.events.on_player_changed_position,
+    defines.events.on_player_changed_surface,
+    defines.events.on_player_changed_force,
+    defines.events.on_player_display_resolution_changed,
+    defines.events.on_player_created,
+    defines.events.on_player_removed,
+  }, tracker_update_function)
+
+  local state_update_function = renderer:get_state_update_function()
+  script.on_nth_tick(30, state_update_function)
+  script.on_event({
+    defines.events.on_research_started,
+    defines.events.on_research_finished,
+    defines.events.on_research_cancelled,
+  }, state_update_function)
 end
 
 --- Rebuild all overlays and refresh event handlers.
@@ -65,23 +82,9 @@ function LabControl.on_configuration_changed()
   ds_storage.color_registry:validate_technology_prototypes()
 end
 
-local function renderer_update_players()
-  if renderer then
-    renderer:update_players()
-  end
-end
-
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
-  [defines.events.on_player_changed_position] = renderer_update_players,
-  [defines.events.on_player_changed_surface] = renderer_update_players,
-  [defines.events.on_player_display_resolution_changed] = renderer_update_players,
-  [defines.events.on_player_created] = renderer_update_players,
-  [defines.events.on_player_removed] = renderer_update_players,
-
-  [defines.events.on_player_changed_force] = renderer_update_players,
-
   --- @param event EventData.on_surface_cleared
   [defines.events.on_surface_cleared] = function (event)
     if renderer then
