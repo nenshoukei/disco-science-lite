@@ -246,11 +246,17 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
+--- Remove the player tracker for the given player index.
+---
+--- @param player_index number
+function LabOverlayRenderer:remove_player_tracker(player_index)
+  self.player_trackers[player_index] = nil
+end
+
 --- Get a tracker update function to be called periodically or by events.
 ---
 --- The returned function:
 ---   - Creates/updates player trackers for every connected players.
----   - Removes player trackers for disconnected players.
 ---   - Updates player positions of self.force_state from the first valid player for each force.
 ---
 --- @return fun()
@@ -258,23 +264,15 @@ function LabOverlayRenderer:get_tracker_update_function()
   local player_trackers = self.player_trackers
   local force_state = self.force_state
 
-  --- @type table<integer, integer> table<player_index, generation> to find disconnected players.
-  local player_seen = {}
-  local generation = 0
-
   return function ()
-    generation = generation + 1
-    local gen = generation
-
     for force_index, force in pairs(game.forces) do
       local fs = force_state[force_index]
       for _, player in ipairs(force.connected_players) do
-        local idx = player.index
-        player_seen[idx] = gen
-        local tracker = player_trackers[idx]
+        local player_index = player.index
+        local tracker = player_trackers[player_index]
         if not tracker then
           tracker = PlayerViewTracker.new()
-          player_trackers[idx] = tracker
+          player_trackers[player_index] = tracker
         end
         tracker:update(player)
 
@@ -285,13 +283,6 @@ function LabOverlayRenderer:get_tracker_update_function()
           fs[ 5 --[[$FS_PY]] ] = pos[2]
           fs = nil -- Only update for the first valid player.
         end
-      end
-    end
-
-    -- Remove trackers for players who have disconnected.
-    for idx in pairs(player_trackers) do
-      if player_seen[idx] ~= gen then
-        player_trackers[idx] = nil
       end
     end
   end

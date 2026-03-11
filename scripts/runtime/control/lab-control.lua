@@ -23,8 +23,15 @@ local function setup_event_handlers()
     defines.events.on_player_changed_force,
     defines.events.on_player_display_resolution_changed,
     defines.events.on_player_created,
-    defines.events.on_player_removed,
   }, tracker_update_function)
+  script.on_event({
+    defines.events.on_player_removed,
+    defines.events.on_player_left_game,
+    defines.events.on_player_kicked,
+  }, function (event)
+    renderer:remove_player_tracker(event.player_index --[[@as integer]])
+    tracker_update_function() -- update for force_state player position
+  end)
 
   local state_update_function = renderer:get_state_update_function()
   script.on_nth_tick(30, state_update_function)

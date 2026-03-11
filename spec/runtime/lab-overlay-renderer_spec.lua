@@ -422,6 +422,16 @@ describe("LabOverlayRenderer", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("remove_player_tracker", function ()
+    it("removes the tracker for the given player index", function ()
+      local r = make_renderer()
+      r.player_trackers[1] = PlayerViewTracker.new()
+      r:remove_player_tracker(1)
+      assert.is_nil(r.player_trackers[1])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("get_tracker_update_function", function ()
     it("returns a function", function ()
       local r = make_renderer()
@@ -432,7 +442,7 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
       local update_trackers = r:get_tracker_update_function()
 
-      local player1 = {
+      local player1 = ({
         index = 1,
         force = { index = 1 },
         position = { x = 10, y = 20 },
@@ -440,9 +450,9 @@ describe("LabOverlayRenderer", function ()
         render_mode = defines.render_mode.game,
         zoom = 1,
         display_resolution = { width = 1920, height = 1080 },
-      }
+      }) --[[@as LuaPlayer]]
       _G.game.forces = {
-        ["player"] = {
+        [1] = {
           index = 1,
           connected_players = { player1 },
         },
@@ -450,33 +460,6 @@ describe("LabOverlayRenderer", function ()
 
       update_trackers()
       assert.is_not_nil(r.player_trackers[1])
-    end)
-
-    it("removes trackers for disconnected players", function ()
-      local r = make_renderer()
-      local update_trackers = r:get_tracker_update_function()
-
-      local player1 = {
-        index = 1,
-        force = { index = 1 },
-        position = { x = 10, y = 20 },
-        surface_index = 1,
-        render_mode = defines.render_mode.game,
-        zoom = 1,
-        display_resolution = { width = 1920, height = 1080 },
-      }
-      _G.game.forces = {
-        ["player"] = {
-          index = 1,
-          connected_players = { player1 },
-        },
-      }
-      update_trackers()
-      assert.is_not_nil(r.player_trackers[1])
-
-      _G.game.forces["player"].connected_players = {}
-      update_trackers()
-      assert.is_nil(r.player_trackers[1])
     end)
 
     it("updates force_state positions", function ()
@@ -484,7 +467,7 @@ describe("LabOverlayRenderer", function ()
       r.force_state[1] = { nil, nil, 0, 0, 0 }
       local update_trackers = r:get_tracker_update_function()
 
-      local player1 = {
+      local player1 = ({
         index = 1,
         force = { index = 1 },
         position = { x = 10, y = 20 },
@@ -492,9 +475,9 @@ describe("LabOverlayRenderer", function ()
         render_mode = defines.render_mode.game,
         zoom = 1,
         display_resolution = { width = 1920, height = 1080 },
-      }
+      }) --[[@as LuaPlayer]]
       _G.game.forces = {
-        ["player"] = {
+        [1] = {
           index = 1,
           connected_players = { player1 },
         },
