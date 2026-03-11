@@ -89,16 +89,16 @@ local function make_overlay(unit_number, surface_index, x, y, force_index)
   local entity = make_entity(unit_number, surface_index, x, y, force_index)
   local anim = { valid = true, visible = false, color = { 0, 0, 0 } }
   anim.destroy = function () anim.valid = false end
-  return ({
-    [ 1 --[[$OV_ENTITY]] ]      = entity,
-    [ 2 --[[$OV_ANIMATION]] ]   = anim --[[@as LuaRenderObject]],
-    [ 3 --[[$OV_X]] ]           = x,
-    [ 4 --[[$OV_Y]] ]           = y,
-    [ 5 --[[$OV_RECT]] ]        = { x, y, x + 3, y + 3 },
-    [ 6 --[[$OV_VISIBLE]] ]     = false,
-    [ 7 --[[$OV_UNIT_NUM]] ]    = unit_number,
-    [ 8 --[[$OV_FORCE_INDEX]] ] = force_index,
-  }) --[[@as LabOverlay]]
+  return {
+    entity,                         -- OV_ENTITY
+    anim --[[@as LuaRenderObject]], -- OV_ANIMATION
+    x,                              -- OV_X
+    y,                              -- OV_Y
+    { x, y, x + 3, y + 3 },         -- OV_RECT
+    false,                          -- OV_VISIBLE
+    unit_number,                    -- OV_UNIT_NUM
+    force_index,                    -- OV_FORCE_INDEX
+  }
 end
 
 --- Build a LabOverlayRenderer with empty registries.

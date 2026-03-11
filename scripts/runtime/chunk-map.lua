@@ -74,10 +74,10 @@ function ChunkMap:insert(entity, overlay)
   chunk[#chunk + 1] = overlay
 
   self.entries[unit_number] = {
-    [ 1 --[[$CE_SURFACE]] ] = surface_index,
-    [ 2 --[[$CE_CX]] ]      = cx,
-    [ 3 --[[$CE_CY]] ]      = cy,
-    [ 4 --[[$CE_OVERLAY]] ] = overlay,
+    surface_index, -- CE_SURFACE
+    cx,            -- CE_CX
+    cy,            -- CE_CY
+    overlay,       -- CE_OVERLAY
   }
 end
 

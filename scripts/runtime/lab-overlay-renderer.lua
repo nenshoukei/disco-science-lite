@@ -122,14 +122,14 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, force_render)
 
   --- @type LabOverlay
   local new_overlay = {
-    [ 1 --[[$OV_ENTITY]] ]      = lab,
-    [ 2 --[[$OV_ANIMATION]] ]   = render_object,
-    [ 3 --[[$OV_X]] ]           = lab_position.x or lab_position[1],
-    [ 4 --[[$OV_Y]] ]           = lab_position.y or lab_position[2],
-    [ 5 --[[$OV_RECT]] ]        = get_entity_rect(lab),
-    [ 6 --[[$OV_VISIBLE]] ]     = false,
-    [ 7 --[[$OV_UNIT_NUM]] ]    = lab_unit_number,
-    [ 8 --[[$OV_FORCE_INDEX]] ] = lab.force_index,
+    lab,                               -- OV_ENTITY
+    render_object,                     -- OV_ANIMATION
+    lab_position.x or lab_position[1], -- OV_X
+    lab_position.y or lab_position[2], -- OV_Y
+    get_entity_rect(lab),              -- OV_RECT
+    false,                             -- OV_VISIBLE
+    lab_unit_number,                   -- OV_UNIT_NUM
+    lab.force_index,                   -- OV_FORCE_INDEX
   }
 
   self.overlays[lab_unit_number] = new_overlay

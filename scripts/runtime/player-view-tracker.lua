@@ -29,12 +29,12 @@ function PlayerViewTracker.new()
   local self = {
     --- @type PlayerView
     view = {
-      [ 1 --[[$PV_VALID]] ]   = false,
-      [ 2 --[[$PV_SURFACE]] ] = 0,
-      [ 3 --[[$PV_LEFT]] ]    = 0,
-      [ 4 --[[$PV_TOP]] ]     = 0,
-      [ 5 --[[$PV_RIGHT]] ]   = 0,
-      [ 6 --[[$PV_BOTTOM]] ]  = 0,
+      false, -- PV_VALID
+      0,     -- PV_SURFACE
+      0,     -- PV_LEFT
+      0,     -- PV_TOP
+      0,     -- PV_RIGHT
+      0,     -- PV_BOTTOM
     },
     --- @type LuaForce|nil
     force = nil,
