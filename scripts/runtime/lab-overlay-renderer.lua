@@ -1,4 +1,3 @@
-local Utils = require("scripts.shared.utils")
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
 local PlayerViewTracker = require("scripts.runtime.player-view-tracker")
@@ -11,7 +10,6 @@ local random = math.random
 local max = math.max
 local rendering_get_all_objects = rendering.get_all_objects
 local draw_animation = rendering.draw_animation
-local get_entity_rect = Utils.get_entity_rect
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
 
@@ -119,17 +117,20 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   end
 
   local lab_position = lab.position
+  local lab_x = lab_position.x or lab_position[1]
+  local lab_y = lab_position.y or lab_position[2]
+  local lab_rect = { lab_x, lab_y, lab_x + lab.tile_width, lab_y + lab.tile_height }
 
   --- @type LabOverlay
   local new_overlay = {
-    lab,                               -- OV_ENTITY
-    render_object,                     -- OV_ANIMATION
-    lab_position.x or lab_position[1], -- OV_X
-    lab_position.y or lab_position[2], -- OV_Y
-    get_entity_rect(lab),              -- OV_RECT
-    render_object.visible,             -- OV_VISIBLE
-    lab_unit_number,                   -- OV_UNIT_NUM
-    lab.force_index,                   -- OV_FORCE_INDEX
+    lab,                   -- OV_ENTITY
+    render_object,         -- OV_ANIMATION
+    lab_x,                 -- OV_X
+    lab_y,                 -- OV_Y
+    lab_rect,              -- OV_RECT
+    render_object.visible, -- OV_VISIBLE
+    lab_unit_number,       -- OV_UNIT_NUM
+    lab.force_index,       -- OV_FORCE_INDEX
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -253,7 +254,7 @@ end
 
 --- Update the lab entity position for updating its overlay.
 ---
---- @param lab LuaEntity
+--- @param lab LuaEntity The lab entity. Must be valid.
 function LabOverlayRenderer:update_lab_position(lab)
   local lab_unit_number = lab.unit_number
   if not lab_unit_number then return end
@@ -261,7 +262,12 @@ function LabOverlayRenderer:update_lab_position(lab)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  overlay[ 5 --[[$OV_RECT]] ] = get_entity_rect(lab)
+  local lab_position = lab.position
+  local lab_x = lab_position.x or lab_position[1]
+  local lab_y = lab_position.y or lab_position[2]
+  overlay[ 3 --[[$OV_X]] ] = lab_x
+  overlay[ 4 --[[$OV_Y]] ] = lab_y
+  overlay[ 5 --[[$OV_RECT]] ] = { lab_x, lab_y, lab_x + lab.tile_width, lab_y + lab.tile_height }
 
   local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
   if animation.surface.index == lab.surface_index then

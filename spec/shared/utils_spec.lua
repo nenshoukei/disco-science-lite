@@ -123,44 +123,4 @@ describe("Utils", function ()
       assert.are.equal(20, s.y)
     end)
   end)
-
-  -- -------------------------------------------------------------------
-  describe("get_entity_rect", function ()
-    local function make_entity(px, py, w, h)
-      return ({
-        position = { x = px, y = py },
-        tile_width = w,
-        tile_height = h,
-      }) --[[@as LuaEntity]]
-    end
-
-    it("returns rect as {left, top, right, bottom}", function ()
-      local rect = Utils.get_entity_rect(make_entity(2, 4, 3, 5))
-      assert.are.equal(2, rect[1])
-      assert.are.equal(4, rect[2])
-      assert.are.equal(5, rect[3])
-      assert.are.equal(9, rect[4])
-    end)
-
-    it("works with indexed position", function ()
-      local entity = ({
-        position = { 6, 8 },
-        tile_width = 2,
-        tile_height = 2,
-      }) --[[@as LuaEntity]]
-      local rect = Utils.get_entity_rect(entity)
-      assert.are.equal(6, rect[1])
-      assert.are.equal(8, rect[2])
-      assert.are.equal(8, rect[3])
-      assert.are.equal(10, rect[4])
-    end)
-
-    it("handles negative positions", function ()
-      local rect = Utils.get_entity_rect(make_entity(-10, -5, 4, 4))
-      assert.are.equal(-10, rect[1])
-      assert.are.equal(-5, rect[2])
-      assert.are.equal(-6, rect[3])
-      assert.are.equal(-1, rect[4])
-    end)
-  end)
 end)

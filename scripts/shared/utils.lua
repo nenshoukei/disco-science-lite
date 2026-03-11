@@ -70,20 +70,4 @@ function Utils.map_position_struct(position)
   }
 end
 
---- Make a MapPositionRect for an entity
----
---- @param entity LuaEntity
---- @return MapPositionRect
-function Utils.get_entity_rect(entity)
-  local position = entity.position
-  local pos_x = position.x or position[1]
-  local pos_y = position.y or position[2]
-  return {
-    pos_x,
-    pos_y,
-    pos_x + entity.tile_width,
-    pos_y + entity.tile_height,
-  }
-end
-
 return Utils
