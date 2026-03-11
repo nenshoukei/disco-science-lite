@@ -35,14 +35,13 @@ local CONSTANTS = {
 --- This template contains inlined circularly interpolation between `colors` at `t` value
 --- with scaling by transition sharpness.
 ---
---- The `t` value should by calculated by each color function's body.
+--- The `t` value should be calculated by each color function's body.
 --- `CONSTANTS` like `INV_PI` are embedded as numeric literals into the body.
 ---
 --- Placeholders:
 ---   %s: Function body - The function body to calculate 't'.
 ---   %f: Transition sharpness - The sharpness value for interpolation.
 local COLOR_FUNCTION_TEMPLATE = [[
-  local modf = math.modf
   local abs = math.abs
   local sqrt = math.sqrt
   local atan2 = math.atan2
@@ -54,21 +53,15 @@ local COLOR_FUNCTION_TEMPLATE = [[
     local t
     %s
 
-    -- Extract integer part (base_index) and fractional part (f) from `t`.
-    -- `base_index` is for color index and `f` is for interpolation factor.
-    local base_index, f = modf(t)
-
-    -- Normalize negative fractional part so that f is always in [0, 1).
-    if f < 0 then
-      base_index = base_index - 1
-      f = f + 1
-    end
-
-    -- Scale and clamp the interpolation factor.
-    f = f * %.18f
+    -- Extract floor (base_index) and fractional part (f) from t.
+    -- base_index is for color index and f is for interpolation factor.
+    -- f is scaled by sharpness and clamped to [0, 1].
+    local base_index = floor(t)
+    local f = (t - base_index) * %.18f
     if f > 1 then f = 1 end
 
     -- Choose the colors to interpolate between.
+    -- base_index can be negative but modulo (%%) always returns positive numbers.
     local start_color = colors[base_index %% n_colors + 1]
     local end_color = colors[(base_index + 1) %% n_colors + 1]
 
