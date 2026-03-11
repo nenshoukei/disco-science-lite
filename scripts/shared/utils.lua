@@ -1,25 +1,5 @@
 local Utils = {}
 
-local floor = math.floor
-
---- Compute chunk coordinates for a world position.
----
---- @param pos_x number
---- @param pos_y number
---- @return number cx, number cy
-function Utils.position_to_chunk(pos_x, pos_y)
-  return floor(pos_x * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(pos_y * 0.03125 --[[$INV_CHUNK_SIZE]])
-end
-
---- Compute the chunk coordinate range that fully covers a world rect.
----
---- @param rect MapPositionRect
---- @return number chunk_left, number chunk_top, number chunk_right, number chunk_bottom
-function Utils.rect_to_chunk_range(rect)
-  return floor(rect[1] * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(rect[2] * 0.03125 --[[$INV_CHUNK_SIZE]]),
-    floor(rect[3] * 0.03125 --[[$INV_CHUNK_SIZE]]), floor(rect[4] * 0.03125 --[[$INV_CHUNK_SIZE]])
-end
-
 --- Make a deep copy of a table
 ---
 --- This function is copied from util.lua provided by Factorio

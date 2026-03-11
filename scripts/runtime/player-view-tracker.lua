@@ -1,5 +1,3 @@
-local Utils = require("scripts.shared.utils")
-
 --- Tracks the single connected player's view state.
 ---
 --- The `view` table is always allocated and mutated in-place, so callers can
@@ -11,7 +9,7 @@ local PlayerViewTracker = {}
 PlayerViewTracker.__index = PlayerViewTracker
 
 local ceil = math.ceil
-local rect_to_chunk_range = Utils.rect_to_chunk_range
+local floor = math.floor
 local RENDER_MODE_CHART = defines.render_mode.chart
 
 --- The chunk range visible to a single player.
@@ -60,32 +58,24 @@ function PlayerViewTracker:update(player)
   self.force = player.force --[[@as LuaForce]]
 
   local player_position = player.position
-  local pos_x = player_position.x
-  local pos_y = player_position.y
+  local px = player_position.x
+  local py = player_position.y
   local self_position = self.position
-  self_position[1] = pos_x
-  self_position[2] = pos_y
+  self_position[1] = px
+  self_position[2] = py
 
   local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
   local display_resolution = player.display_resolution
-  local half_view_width = ceil(display_resolution.width / f)
-  local half_view_height = ceil(display_resolution.height / f)
-
-  local view_rect = {
-    pos_x - half_view_width - 6 --[[$VIEW_RECT_MARGIN]],
-    pos_y - half_view_height - 6 --[[$VIEW_RECT_MARGIN]],
-    pos_x + half_view_width + 6 --[[$VIEW_RECT_MARGIN]],
-    pos_y + half_view_height + 6 --[[$VIEW_RECT_MARGIN]],
-  }
-  local chunk_left, chunk_top, chunk_right, chunk_bottom = rect_to_chunk_range(view_rect)
+  local half_vw = ceil(display_resolution.width / f)
+  local half_vh = ceil(display_resolution.height / f)
 
   local view = self.view
   view[ 1 --[[$PV_VALID]] ] = true
   view[ 2 --[[$PV_SURFACE]] ] = player.surface_index
-  view[ 3 --[[$PV_LEFT]] ] = chunk_left
-  view[ 4 --[[$PV_TOP]] ] = chunk_top
-  view[ 5 --[[$PV_RIGHT]] ] = chunk_right
-  view[ 6 --[[$PV_BOTTOM]] ] = chunk_bottom
+  view[ 3 --[[$PV_LEFT]] ] = floor((px - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  view[ 4 --[[$PV_TOP]] ] = floor((py - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  view[ 5 --[[$PV_RIGHT]] ] = floor((px + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  view[ 6 --[[$PV_BOTTOM]] ] = floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
 end
 
 return PlayerViewTracker
