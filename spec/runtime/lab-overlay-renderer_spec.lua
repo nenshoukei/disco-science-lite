@@ -148,6 +148,11 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
       assert.are.same({}, r.player_trackers)
     end)
+
+    it("starts with empty force_player_positions", function ()
+      local r = make_renderer()
+      assert.are.same({}, r.force_player_positions)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -640,8 +645,7 @@ describe("LabOverlayRenderer", function ()
 
       local r = make_renderer()
       r.force_research_colors[1] = { { 1.0, 0.0, 0.5 } }
-      r.player_position[1] = 0
-      r.player_position[2] = 0
+      r.force_player_positions[1] = { 0, 0 }
 
       local tick = r:get_tick_function()
 
@@ -705,8 +709,7 @@ describe("LabOverlayRenderer", function ()
 
       local r = make_renderer()
       r.force_research_colors[1] = { { 1.0, 0.0, 0.0 } }
-      r.player_position[1] = 0
-      r.player_position[2] = 0
+      r.force_player_positions[1] = { 0, 0 }
 
       local tick = r:get_tick_function()
 
@@ -738,8 +741,7 @@ describe("LabOverlayRenderer", function ()
 
       local r = make_renderer()
       r.force_research_colors[1] = { { 1.0, 0.0, 0.0 } }
-      r.player_position[1] = 0
-      r.player_position[2] = 0
+      r.force_player_positions[1] = { 0, 0 }
 
       local tick = r:get_tick_function()
 
@@ -791,8 +793,7 @@ describe("LabOverlayRenderer", function ()
       local function make_active_tick()
         local r = make_renderer()
         r.force_research_colors[1] = { { 1.0, 0.0, 0.0 } }
-        r.player_position[1] = 0
-        r.player_position[2] = 0
+        r.force_player_positions[1] = { 0, 0 }
         -- Add one visible overlay so the tick function does not early-return.
         r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
         return r:get_tick_function() -- counts as 1 cf_call (initial choose_random)
@@ -833,6 +834,40 @@ describe("LabOverlayRenderer", function ()
         tick()                          -- counter = 1 >= 1, switch → cf_calls = 4
         assert.are.equal(4, cf_calls)
       end)
+    end)
+
+    it("uses different player positions for different forces", function ()
+      _G.settings.global[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ].value = 1
+
+      local r = make_renderer()
+      r.force_research_colors[1] = { { 1.0, 0.0, 0.0 } }
+      r.force_research_colors[2] = { { 0.0, 1.0, 0.0 } }
+      r.force_player_positions[1] = { 100, 100 }
+      r.force_player_positions[2] = { 200, 200 }
+
+      -- Spy on ColorFunctions.choose_random to use a deterministic color function for testing
+      local original_choose_random = ColorFunctions.choose_random
+      local captured_px, captured_py = {}, {}
+      ColorFunctions.choose_random = function ()
+        return function (color, phase, colors, n_colors, px, py, lx, ly)
+          captured_px[#captured_px + 1] = px
+          captured_py[#captured_py + 1] = py
+        end, 1
+      end
+
+      local tick = r:get_tick_function()
+
+      r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+      r.visible_overlays[2] = make_overlay(2, 1, 0, 0, 2)
+
+      tick()
+
+      assert.are.equal(100, captured_px[1])
+      assert.are.equal(100, captured_py[1])
+      assert.are.equal(200, captured_px[2])
+      assert.are.equal(200, captured_py[2])
+
+      ColorFunctions.choose_random = original_choose_random
     end)
   end)
 end)

@@ -47,9 +47,9 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- @type table<number, PlayerViewTracker>
     player_trackers = {},
 
-    --- Single player position for color functions. Updated from the first valid tracker.
-    --- @type MapPositionTuple
-    player_position = { 0, 0 },
+    --- Player positions by force index for color functions. Updated from the first valid tracker for each force.
+    --- @type table<number, MapPositionTuple>
+    force_player_positions = {},
 
     --- Flattened list of lab overlays currently in any player's view. Updated by get_state_update_function().
     --- @type LabOverlay[]
@@ -156,6 +156,7 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   self.visible_overlays = {}
   self.force_research_colors = {}
   self.force_current_research = {}
+  self.force_player_positions = {}
 
   local entity_filter = { type = "lab" }
   local render_overlay_for_lab = self.render_overlay_for_lab
@@ -257,6 +258,8 @@ end
 function LabOverlayRenderer:update_players()
   local connected_players = game.connected_players
   local player_trackers = self.player_trackers
+  local force_player_positions = self.force_player_positions
+  local force_seen = {}
 
   -- Update existing trackers and create new ones for newly connected players.
   local seen = {}
@@ -269,6 +272,22 @@ function LabOverlayRenderer:update_players()
       player_trackers[idx] = tracker
     end
     tracker:update(player)
+
+    -- Update force_player_positions from the first valid tracker for each force.
+    if tracker.view[ 1 --[[$PV_VALID]] ] then
+      local fi = tracker.force.index
+      if not force_seen[fi] then
+        force_seen[fi] = true
+        local force_pos = force_player_positions[fi]
+        if not force_pos then
+          force_pos = { 0, 0 }
+          force_player_positions[fi] = force_pos
+        end
+        local pos = tracker.position
+        force_pos[1] = pos[1]
+        force_pos[2] = pos[2]
+      end
+    end
   end
 
   -- Remove trackers for players who have disconnected.
@@ -278,14 +297,10 @@ function LabOverlayRenderer:update_players()
     end
   end
 
-  -- Update player_position from the first valid tracker, for use in color functions.
-  local player_position = self.player_position
-  for _, tracker in pairs(player_trackers) do
-    if tracker.view[ 1 --[[$PV_VALID]] ] then
-      local pos = tracker.position
-      player_position[1] = pos[1]
-      player_position[2] = pos[2]
-      break
+  -- Remove force positions for forces that no longer have valid trackers.
+  for fi in pairs(force_player_positions) do
+    if not force_seen[fi] then
+      force_player_positions[fi] = nil
     end
   end
 end
@@ -425,7 +440,7 @@ function LabOverlayRenderer:get_tick_function()
     .value --[[@as integer]]
 
   local force_research_colors = self.force_research_colors
-  local player_position = self.player_position
+  local force_player_positions = self.force_player_positions
   local visible_overlays = self.visible_overlays
 
   -- `phase` is a continuously drifting value passed to the color function.
@@ -455,8 +470,6 @@ function LabOverlayRenderer:get_tick_function()
     lab_update_offset = lab_update_offset + 1
     if lab_update_offset > lab_update_interval then lab_update_offset = 1 end
 
-    local player_x, player_y = player_position[1], player_position[2]
-
     -- Bind frequently used upvalues to local variables for performance
     -- luacheck: push ignore
     local visible_overlays = visible_overlays --- @diagnostic disable-line: redefined-local
@@ -465,11 +478,12 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                       --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
-    -- Cache the last force's colors to avoid repeated table lookups.
+    -- Cache the last force's colors and position to avoid repeated table lookups.
     -- In the common case (all labs on the same force), this avoids all but the first lookup.
     local last_force_index = -1
     local colors = nil
     local n_colors = 0
+    local player_x, player_y = 0, 0
 
     -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, lab_update_interval do
@@ -479,6 +493,12 @@ function LabOverlayRenderer:get_tick_function()
         last_force_index = fi
         colors = force_research_colors[fi]
         n_colors = colors and #colors or 0
+        local pos = force_player_positions[fi]
+        if pos then
+          player_x, player_y = pos[1], pos[2]
+        else
+          player_x, player_y = 0, 0
+        end
       end
       if colors then
         color_function(
