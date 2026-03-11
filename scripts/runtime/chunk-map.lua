@@ -148,12 +148,4 @@ function ChunkMap:move(entity)
   self:insert(entity, overlay)
 end
 
---- Return the raw surface chunks table for direct iteration in hot paths.
----
---- @param surface_index number
---- @return table<number, table<number, LabOverlay[]>>|nil
-function ChunkMap:get_surface_chunks(surface_index)
-  return self.data[surface_index]
-end
-
 return ChunkMap

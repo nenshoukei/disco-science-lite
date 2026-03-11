@@ -39,7 +39,7 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- @type table<number, LabOverlay>
     overlays = {},
 
-    --- Spatial map for efficient view-range iteration.
+    --- Spatial chunk-based map for the overlays.
     --- @type ChunkMap
     chunk_map = ChunkMap.new(),
 

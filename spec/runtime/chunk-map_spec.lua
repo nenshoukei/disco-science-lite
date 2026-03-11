@@ -40,7 +40,7 @@ describe("ChunkMap", function ()
       local v = make_overlay(1)
       m:insert(e, v)
       assert.is_not_nil(m.entries[1])
-      local chunks = m:get_surface_chunks(1)
+      local chunks = m.data[1]
       assert.is_not_nil(chunks)
     end)
 
@@ -49,7 +49,7 @@ describe("ChunkMap", function ()
       local e = make_entity(1, 1, 16, 16)
       local v = make_overlay(1)
       m:insert(e, v)
-      local chunks = m:get_surface_chunks(1)
+      local chunks = m.data[1]
       assert.is_not_nil(chunks) --- @cast chunks -nil
       assert.is_not_nil(chunks[0])
       assert.is_not_nil(chunks[0][0])
@@ -75,7 +75,7 @@ describe("ChunkMap", function ()
       local v2 = make_overlay(1)
       m:insert(e, v1)
       m:insert(e, v2)
-      local chunks = m:get_surface_chunks(1)
+      local chunks = m.data[1]
       assert.is_not_nil(chunks) --- @cast chunks -nil
       -- Only one entry should remain in the chunk
       assert.are.equal(1, #chunks[0][0])
@@ -125,7 +125,7 @@ describe("ChunkMap", function ()
 
       m:remove(20) -- remove B
 
-      local chunk = m:get_surface_chunks(1)[0][0]
+      local chunk = m.data[1][0][0]
       assert.are.equal(3, #chunk)
 
       -- All remaining unit numbers must still be present in entries
@@ -161,7 +161,7 @@ describe("ChunkMap", function ()
       m:move(e)
       -- Entry must still be present unchanged
       assert.is_not_nil(m.entries[1])
-      local chunk = m:get_surface_chunks(1)[0][0]
+      local chunk = m.data[1][0][0]
       assert.are.equal(1, #chunk)
     end)
 
@@ -174,7 +174,7 @@ describe("ChunkMap", function ()
       local e_new = make_entity(1, 1, 50, 50) -- chunk (1,1)
       m:move(e_new)
 
-      local old_chunks = m:get_surface_chunks(1)
+      local old_chunks = m.data[1]
       -- Old chunk (0,0) should be gone
       assert.is_nil(old_chunks and old_chunks[0])
       -- New chunk (1,1) should contain the overlay
@@ -185,27 +185,6 @@ describe("ChunkMap", function ()
       local m = ChunkMap.new()
       local e = ({ unit_number = nil, surface_index = 1, position = { x = 0, y = 0 } }) --[[@as LuaEntity]]
       m:move(e) -- should not error
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("get_surface_chunks", function ()
-    it("returns nil for unknown surface", function ()
-      local m = ChunkMap.new()
-      assert.is_nil(m:get_surface_chunks(99))
-    end)
-
-    it("returns the chunk table after insert", function ()
-      local m = ChunkMap.new()
-      m:insert(make_entity(1, 3, 0, 0), make_overlay(1))
-      assert.is_not_nil(m:get_surface_chunks(3))
-    end)
-
-    it("returns nil after the only entity on that surface is removed", function ()
-      local m = ChunkMap.new()
-      m:insert(make_entity(1, 3, 0, 0), make_overlay(1))
-      m:remove(1)
-      assert.is_nil(m:get_surface_chunks(3))
     end)
   end)
 end)
