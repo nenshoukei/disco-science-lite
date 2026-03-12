@@ -585,7 +585,7 @@ describe("LabOverlayRenderer", function ()
     it("sets current_interval to 1 when visible labs fit within max_updates_per_tick", function ()
       local r = make_renderer()
       local force = make_force(1)
-      r.max_updates_per_tick = 200
+      r.max_updates_per_tick = 500
       for i = 1, 10 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end

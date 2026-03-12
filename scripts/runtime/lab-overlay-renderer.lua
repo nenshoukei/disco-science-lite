@@ -74,7 +74,7 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     color_pattern_duration = 180,
 
     --- Maximum number of labs to update per tick. Controls automatic interval scaling.
-    max_updates_per_tick = 200,
+    max_updates_per_tick = 500,
 
     --- Current dynamic interval (throttled based on load).
     current_interval = 1,

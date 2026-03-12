@@ -34,7 +34,7 @@ data:extend({
     type = "int-setting",
     name = "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]],
     setting_type = "runtime-global",
-    default_value = 200,
+    default_value = 500,
     minimum_value = 1,
     order = "rg-b[performance]-b",
   },
