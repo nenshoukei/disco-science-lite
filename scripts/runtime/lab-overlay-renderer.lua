@@ -150,9 +150,9 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
   for i = 1, #all_objects do
     local object = all_objects[i]
-    local target = object.target -- lab entity
-    if target and target.valid then
-      existing_objects[target.unit_number] = object
+    local entity = object.target.entity
+    if entity and entity.valid and entity.unit_number then
+      existing_objects[entity.unit_number] = object
     else
       -- Destroy objects with no valid lab target.
       object.destroy()

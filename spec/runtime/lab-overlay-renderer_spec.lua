@@ -29,7 +29,7 @@ _G.rendering = {
       visible          = false,
       color            = { 0, 0, 0 },
       surface          = params.surface,
-      target           = params.target,
+      target           = { entity = params.target },
       animation        = params.animation,
       x_scale          = params.x_scale,
       y_scale          = params.y_scale,
@@ -309,7 +309,10 @@ describe("LabOverlayRenderer", function ()
       local orphan = _G.rendering.draw_animation({
         animation = "lab-anim",
         surface = lab.surface,
-        target = { valid = false }, -- Invalid target
+        target = {
+          -- Invalid target
+          entity = ({ valid = false }) --[[@as LuaEntity]],
+        },
       })
       local orphan_id = orphan.id
 
