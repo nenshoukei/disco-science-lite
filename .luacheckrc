@@ -25,5 +25,6 @@ globals = {
     "helpers",
     "log",
     "remote",
-    "rendering"
+    "rendering",
+    "commands"
 }
