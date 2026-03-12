@@ -271,7 +271,7 @@ function LabOverlayRenderer:update_lab_position(lab)
   if animation.surface.index == lab.surface_index then
     -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
-    self.chunk_map:move(lab)
+    self.chunk_map:insert(lab, overlay) -- updates the existing entry
   else
     -- The entity is teleported to another surface!
     animation.destroy()

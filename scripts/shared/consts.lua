@@ -53,7 +53,8 @@ local consts = {
   CE_SURFACE = 1,
   CE_CX = 2,
   CE_CY = 3,
-  CE_OVERLAY = 4,
+  CE_INDEX = 4,
+  CE_OVERLAY = 5,
 
   -- PlayerView field indices
   PV_VALID = 1,

@@ -65,10 +65,11 @@ describe("ChunkMap", function ()
       assert.are.equal(10, entry[ 1 --[[$CE_SURFACE]] ])
       assert.are.equal(1, entry[ 2 --[[$CE_CX]] ])
       assert.are.equal(2, entry[ 3 --[[$CE_CY]] ])
-      assert.are.equal(v, entry[ 4 --[[$CE_OVERLAY]] ])
+      assert.are.equal(1, entry[ 4 --[[$CE_INDEX]] ])
+      assert.are.equal(v, entry[ 5 --[[$CE_OVERLAY]] ])
     end)
 
-    it("re-inserts (remove then add) if unit_number already exists", function ()
+    it("updates the entry if it has the same keys as before", function ()
       local m = ChunkMap.new()
       local e = make_entity(1, 1, 0, 0)
       local v1 = make_overlay(1)
@@ -80,6 +81,44 @@ describe("ChunkMap", function ()
       -- Only one entry should remain in the chunk
       assert.are.equal(1, #chunks[0][0])
       assert.are.equal(v2, chunks[0][0][1])
+    end)
+
+    it("re-inserts if chunk coordinates changed", function ()
+      local m = ChunkMap.new()
+      local e = make_entity(1, 1, 0, 0) -- chunk (0,0)
+      local v = make_overlay(1)
+      m:insert(e, v)
+
+      -- Change position to chunk (1,2)
+      e.position = { x = 32, y = 64 }
+      m:insert(e, v)
+
+      -- Old chunk should be empty/nil
+      assert.is_nil(m.data[1][0])
+      -- New chunk should have the entry
+      assert.are.equal(v, m.data[1][1][2][1])
+      -- Entry should be updated
+      local entry = m.entries[1]
+      assert.are.equal(1, entry[ 2 --[[$CE_CX]] ])
+      assert.are.equal(2, entry[ 3 --[[$CE_CY]] ])
+    end)
+
+    it("re-inserts if surface changed", function ()
+      local m = ChunkMap.new()
+      local e = make_entity(1, 1, 0, 0) -- surface 1
+      local v = make_overlay(1)
+      m:insert(e, v)
+
+      -- Change surface
+      e.surface_index = 2
+      m:insert(e, v)
+
+      -- Old surface should be empty/nil
+      assert.is_nil(m.data[1])
+      -- New surface should have the entry
+      assert.are.equal(v, m.data[2][0][0][1])
+      -- Entry should be updated
+      assert.are.equal(2, m.entries[1][ 1 --[[$CE_SURFACE]] ])
     end)
 
     it("does nothing when entity has no unit_number", function ()
@@ -125,14 +164,23 @@ describe("ChunkMap", function ()
 
       m:remove(20) -- remove B
 
+      -- Swap-and-popped: A, B, C, D → A, D, C
       local chunk = m.data[1][0][0]
       assert.are.equal(3, #chunk)
+      assert.are.equal(va, chunk[1])
+      assert.are.equal(vd, chunk[2])
+      assert.are.equal(vc, chunk[3])
 
       -- All remaining unit numbers must still be present in entries
       assert.is_not_nil(m.entries[10])
       assert.is_nil(m.entries[20])
       assert.is_not_nil(m.entries[30])
       assert.is_not_nil(m.entries[40])
+
+      -- CE_INDEX should be updated
+      assert.are.equal(1, m.entries[10][ 4 --[[$CE_INDEX]] ])
+      assert.are.equal(2, m.entries[40][ 4 --[[$CE_INDEX]] ])
+      assert.are.equal(3, m.entries[30][ 4 --[[$CE_INDEX]] ])
     end)
 
     it("removes empty chunk column and surface table", function ()
@@ -141,50 +189,6 @@ describe("ChunkMap", function ()
       m:insert(e, make_overlay(1))
       m:remove(1)
       assert.is_nil(m.data[1]) -- entire surface entry cleaned up
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("move", function ()
-    it("does nothing when unit_number is not in the map", function ()
-      local m = ChunkMap.new()
-      local e = make_entity(1, 1, 0, 0)
-      m:move(e) -- should not error
-      assert.are.same({}, m.data)
-    end)
-
-    it("does nothing when chunk coordinates have not changed", function ()
-      local m = ChunkMap.new()
-      local e = make_entity(1, 1, 5, 5)
-      local v = make_overlay(1)
-      m:insert(e, v)
-      m:move(e)
-      -- Entry must still be present unchanged
-      assert.is_not_nil(m.entries[1])
-      local chunk = m.data[1][0][0]
-      assert.are.equal(1, #chunk)
-    end)
-
-    it("moves the overlay to the new chunk when position changes", function ()
-      local m = ChunkMap.new()
-      local v = make_overlay(1)
-      local e_old = make_entity(1, 1, 5, 5) -- chunk (0,0)
-      m:insert(e_old, v)
-
-      local e_new = make_entity(1, 1, 50, 50) -- chunk (1,1)
-      m:move(e_new)
-
-      local old_chunks = m.data[1]
-      -- Old chunk (0,0) should be gone
-      assert.is_nil(old_chunks and old_chunks[0])
-      -- New chunk (1,1) should contain the overlay
-      assert.is_not_nil(old_chunks and old_chunks[1] and old_chunks[1][1])
-    end)
-
-    it("does nothing when entity has no unit_number", function ()
-      local m = ChunkMap.new()
-      local e = ({ unit_number = nil, surface_index = 1, position = { x = 0, y = 0 } }) --[[@as LuaEntity]]
-      m:move(e) -- should not error
     end)
   end)
 end)
