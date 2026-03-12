@@ -129,28 +129,35 @@ local function make_renderer()
   return LabOverlayRenderer.new(ColorRegistry.new(), LabRegistry.new())
 end
 
+--- Build a mock LuaPlayer.
+--- @param force LuaForce
+--- @param surface_index number
+--- @param px number?
+--- @param py number?
+--- @return LuaPlayer
+local function make_player(force, surface_index, px, py)
+  return ({
+    render_mode = defines.render_mode.game,
+    force = force,
+    surface_index = surface_index,
+    position = { x = px or 0, y = py or 0 },
+    zoom = 1,
+    display_resolution = { width = 640, height = 480 },
+  }) --[[@as LuaPlayer]]
+end
+
 --- Add a player tracker with an active view to the renderer.
+--- The view is computed from a mock player at position (px, py) on the given surface.
 --- @param renderer LabOverlayRenderer
 --- @param surface_index number
 --- @param force LuaForce
---- @param chunk_left number?
---- @param chunk_top number?
---- @param chunk_right number?
---- @param chunk_bottom number?
 --- @param player_index number?
+--- @param px number?
+--- @param py number?
 --- @return PlayerViewTracker
-local function activate_view(renderer, surface_index, force, chunk_left, chunk_top, chunk_right, chunk_bottom,
-                             player_index)
+local function activate_view(renderer, surface_index, force, player_index, px, py)
   player_index = player_index or 1
-  local tracker = PlayerViewTracker.new()
-  local view = tracker.view
-  view[ 1 --[[$PV_VALID]] ] = true
-  view[ 2 --[[$PV_SURFACE]] ] = surface_index
-  view[ 3 --[[$PV_LEFT]] ] = chunk_left or -10
-  view[ 4 --[[$PV_TOP]] ] = chunk_top or -10
-  view[ 5 --[[$PV_RIGHT]] ] = chunk_right or 10
-  view[ 6 --[[$PV_BOTTOM]] ] = chunk_bottom or 10
-  tracker.force = force
+  local tracker = PlayerViewTracker.new(make_player(force, surface_index, px, py))
   renderer.player_trackers[player_index] = tracker
   return tracker
 end
@@ -436,14 +443,14 @@ describe("LabOverlayRenderer", function ()
   describe("remove_player_tracker", function ()
     it("removes the tracker for the given player index", function ()
       local r = make_renderer()
-      r.player_trackers[1] = PlayerViewTracker.new()
+      r.player_trackers[1] = PlayerViewTracker.new(make_player(make_force(1), 1))
       r:remove_player_tracker(1)
       assert.is_nil(r.player_trackers[1])
     end)
   end)
 
   -- -------------------------------------------------------------------
-  describe("get_tracker_update_function", function ()
+  describe("get_position_update_function", function ()
     it("creates trackers and updates force_state positions", function ()
       local r = make_renderer()
       r.force_state[1] = { nil, nil, 0, 0, 0 }
@@ -459,7 +466,7 @@ describe("LabOverlayRenderer", function ()
       }) --[[@as LuaPlayer]]
       _G.game.forces = { player = { index = 1, connected_players = { player1 } } }
 
-      r:get_tracker_update_function()()
+      r:get_position_update_function()()
 
       assert.is_not_nil(r.player_trackers[1])
       assert.are.equal(10, r.force_state[1][ 4 --[[$FS_PX]] ])
@@ -531,7 +538,7 @@ describe("LabOverlayRenderer", function ()
       lab_normal.status = defines.entity_status.normal
       local ov_normal = r:render_overlay_for_lab(lab_normal)
 
-      activate_view(r, 1, force, -1, -1, 1, 1)
+      activate_view(r, 1, force)
       r:get_state_update_function()()
 
       assert.is_not_nil(ov_working) --- @cast ov_working -nil
@@ -548,8 +555,7 @@ describe("LabOverlayRenderer", function ()
       force.current_research = tech
       r.color_registry:set_ingredient_color("automation-science-pack", { 1, 1, 1 })
 
-      local tracker = activate_view(r, 1, force, -1, -1, 1, 1)
-      tracker.position = { 10, 20 }
+      activate_view(r, 1, force, 1, 10, 20)
 
       local update = r:get_state_update_function()
       update()
@@ -573,8 +579,8 @@ describe("LabOverlayRenderer", function ()
       -- Stale entry
       r.visible_overlays[1] = make_overlay(99, 1, 0, 0)
 
-      activate_view(r, 1, force, -1, -1, 1, 1, 1)
-      activate_view(r, 1, force, -1, -1, 1, 1, 2)
+      activate_view(r, 1, force, 1)
+      activate_view(r, 1, force, 2)
 
       r:get_state_update_function()()
 
@@ -589,7 +595,7 @@ describe("LabOverlayRenderer", function ()
       for i = 1, 10 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
-      activate_view(r, 1, force, -100, -100, 100, 100)
+      activate_view(r, 1, force)
 
       r:get_state_update_function()()
 
@@ -603,7 +609,7 @@ describe("LabOverlayRenderer", function ()
       for i = 1, 30 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
-      activate_view(r, 1, force, -100, -100, 100, 100)
+      activate_view(r, 1, force)
 
       r:get_state_update_function()()
 
@@ -618,7 +624,7 @@ describe("LabOverlayRenderer", function ()
       for i = 1, 300 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
-      activate_view(r, 1, force, -100, -100, 100, 100)
+      activate_view(r, 1, force)
 
       r:get_state_update_function()()
 

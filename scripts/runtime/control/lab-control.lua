@@ -15,22 +15,22 @@ remote.add_interface("DiscoScience", RemoteInterface.functions)
 local function setup_event_handlers()
   script.on_event(defines.events.on_tick, renderer:get_tick_function())
 
-  local tracker_update_function = renderer:get_tracker_update_function()
-  script.on_nth_tick(10, tracker_update_function)
+  local position_update_function = renderer:get_position_update_function()
+  script.on_nth_tick(10, position_update_function)
   script.on_event({
     defines.events.on_player_changed_position,
     defines.events.on_player_changed_surface,
     defines.events.on_player_changed_force,
     defines.events.on_player_display_resolution_changed,
     defines.events.on_player_created,
-  }, tracker_update_function)
+  }, position_update_function)
   script.on_event({
     defines.events.on_player_removed,
     defines.events.on_player_left_game,
     defines.events.on_player_kicked,
   }, function (event)
     renderer:remove_player_tracker(event.player_index --[[@as integer]])
-    tracker_update_function() -- update for force_state player position
+    position_update_function()
   end)
 
   local state_update_function = renderer:get_state_update_function()

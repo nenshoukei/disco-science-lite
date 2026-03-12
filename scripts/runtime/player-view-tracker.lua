@@ -23,10 +23,13 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 
 --- Constructor.
 ---
+--- @param player LuaPlayer
 --- @return PlayerViewTracker
-function PlayerViewTracker.new()
+function PlayerViewTracker.new(player)
   --- @class PlayerViewTracker
   local self = {
+    --- @type LuaPlayer
+    player = player,
     --- @type PlayerView
     view = {
       false, -- PV_VALID
@@ -36,33 +39,23 @@ function PlayerViewTracker.new()
       0,     -- PV_RIGHT
       0,     -- PV_BOTTOM
     },
-    --- @type LuaForce|nil
-    force = nil,
-    --- @type MapPositionTuple
-    position = { 0, 0 },
   }
   return setmetatable(self, PlayerViewTracker)
 end
 
---- Rebuild the view data from a single connected player.
+--- Rebuild the view data from self.player.
 ---
 --- Sets `view[PV_VALID] = false` when the player is in chart mode.
----
---- @param player LuaPlayer
-function PlayerViewTracker:update(player)
+function PlayerViewTracker:update()
+  local player = self.player
   if player.render_mode == RENDER_MODE_CHART then
     self.view[ 1 --[[$PV_VALID]] ] = false
     return
   end
 
-  self.force = player.force --[[@as LuaForce]]
-
   local player_position = player.position
-  local px = player_position.x
-  local py = player_position.y
-  local self_position = self.position
-  self_position[1] = px
-  self_position[2] = py
+  local px = player_position.x or player_position[1]
+  local py = player_position.y or player_position[2]
 
   local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
   local display_resolution = player.display_resolution

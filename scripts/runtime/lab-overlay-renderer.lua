@@ -351,14 +351,14 @@ function LabOverlayRenderer:remove_player_tracker(player_index)
   self.player_trackers[player_index] = nil
 end
 
---- Get a tracker update function to be called periodically or by events.
+--- Get a position update function to be called every 10 ticks or by events.
 ---
 --- The returned function:
----   - Creates/updates player trackers for every connected players.
+---   - Creates player trackers for newly connected players.
 ---   - Updates player positions of self.force_state from the first valid player for each force.
 ---
 --- @return fun()
-function LabOverlayRenderer:get_tracker_update_function()
+function LabOverlayRenderer:get_position_update_function()
   local player_trackers = self.player_trackers
   local force_state = self.force_state
 
@@ -373,16 +373,16 @@ function LabOverlayRenderer:get_tracker_update_function()
           local player_index = player.index
           local tracker = player_trackers[player_index]
           if not tracker then
-            tracker = PlayerViewTracker.new()
+            tracker = PlayerViewTracker.new(player)
+            tracker:update()
             player_trackers[player_index] = tracker
           end
-          tracker:update(player)
 
-          -- Update force_state position from the first valid tracker for each force.
+          -- Update force_state position from the first valid player for each force.
           if fs and tracker.view[ 1 --[[$PV_VALID]] ] then
-            local pos = tracker.position
-            fs[ 4 --[[$FS_PX]] ] = pos[1]
-            fs[ 5 --[[$FS_PY]] ] = pos[2]
+            local pos = player.position
+            fs[ 4 --[[$FS_PX]] ] = pos.x or pos[1]
+            fs[ 5 --[[$FS_PY]] ] = pos.y or pos[2]
             fs = nil -- Only update for the first valid player.
           end
         end
@@ -438,7 +438,7 @@ function LabOverlayRenderer:update_all_forces_current_research()
   end
 end
 
---- Get a state update function to be called periodically (not every tick).
+--- Get a state update function to be called every 30 ticks.
 ---
 --- The returned function:
 ---   - Tracks current_research per force and updates force_state when it changes.
@@ -474,22 +474,24 @@ function LabOverlayRenderer:get_state_update_function()
     local chunk_map_data = chunk_map.data
     local count = 0
     for _, tracker in pairs(player_trackers) do
+      tracker:update()
       local view = tracker.view
       if not view[ 1 --[[$PV_VALID]] ] then goto continue end
 
-      local force = tracker.force --[[@as LuaForce]]
+      local player = tracker.player
+      local force = player.force --[[@as LuaForce]]
       local force_index = force.index
 
       -- Update force_state for this player's force.
       local fs = force_state[force_index]
       if not fs then
-        local tracker_position = tracker.position
+        local pos = player.position
         fs = {
-          nil,                 -- FS_CURRENT_RESEARCH
-          nil,                 -- FS_COLORS
-          0,                   -- FS_N_COLORS
-          tracker_position[1], -- FS_PX
-          tracker_position[2], -- FS_PY
+          nil,             -- FS_CURRENT_RESEARCH
+          nil,             -- FS_COLORS
+          0,               -- FS_N_COLORS
+          pos.x or pos[1], -- FS_PX
+          pos.y or pos[2], -- FS_PY
         }
         force_state[force_index] = fs
       end
