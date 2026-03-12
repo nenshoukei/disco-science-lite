@@ -327,11 +327,11 @@ describe("ColorFunctions", function ()
 
     describe("[13] Random", function ()
       it("returns the same color for the same lab position at the same phase step", function ()
-        -- Phase steps change every 10 ticks; the same step => same color.
+        -- Phase is pre-scaled; integer part is the step (bucket size 1.0 phase units).
         local pos = { 5, 3 }
         local out1, out2 = {}, {}
-        ColorFunctions.functions[13](out1, 5, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
-        ColorFunctions.functions[13](out2, 9, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
+        ColorFunctions.functions[13](out1, 0.1, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
+        ColorFunctions.functions[13](out2, 0.9, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])

@@ -15,7 +15,7 @@ commands.add_command("ds-bench", "Run color functions benchmark. Usage: /ds-benc
   event)
   local iterations = 100000
   local output = { 0, 0, 0 }
-  local phase = 123.456
+  local phase = 123.456 -- Simulating a pre-scaled phase
   local colors = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }
   local n_colors = 3
   local px, py = 10.5, 20.5
@@ -36,20 +36,6 @@ commands.add_command("ds-bench", "Run color functions benchmark. Usage: /ds-benc
   for i, name in ipairs(ColorFunctions.function_names) do
     table.insert(all_cases, { name = name, func = ColorFunctions.functions[i] })
   end
-
-  -- [OPTIMIZATION TESTS]
-  -- table.insert(all_cases, {
-  --   name = "Exp: Grid Inline",
-  --   func = ColorFunctions._compile_function("GridInline", [[
-  --     local dx = (lx - px) * INV_9
-  --     local dy = (ly - py) * INV_8
-  --     -- x - x % 1 is equivalent to floor(x) in Lua 5.2
-  --     local fdx = dx - dx % 1
-  --     local fdy = dy - dy % 1
-  --     local val = fdx + fdy
-  --     t = (val < 0 and -val or val) + phase * INV_10
-  --   ]], 5),
-  -- })
 
   -- Filter test cases
   local test_cases = {}

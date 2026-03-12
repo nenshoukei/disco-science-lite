@@ -576,7 +576,7 @@ function LabOverlayRenderer:get_tick_function()
   -- `phase` is a continuously drifting value passed to the color function.
   -- It drives animation by shifting the color cycle position over time.
   local phase = 0
-  local phase_speed = ((random() * 5 + 3.5) % 6) - 3 -- [-3.0, -0.5) or [0.5, 3.0)
+  local phase_speed = (((random() * 5 + 3.5) % 6) - 3) * 0.025 -- { [-3.0, -0.5) or [0.5, 3.0) } / 40
   local color_function, color_function_index = ColorFunctions.choose_random()
   local color_pattern_counter = 0
   local color = { 0, 0, 0 }
@@ -594,7 +594,7 @@ function LabOverlayRenderer:get_tick_function()
     if color_pattern_counter >= color_pattern_duration then
       color_pattern_counter = 0
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-      phase_speed = ((random() * 5 + 3.5) % 6) - 3
+      phase_speed = (((random() * 5 + 3.5) % 6) - 3) * 0.025
     end
 
     lab_update_offset = lab_update_offset + 1

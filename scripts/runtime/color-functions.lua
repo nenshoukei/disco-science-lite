@@ -25,9 +25,6 @@ local CONSTANTS = {
   INV_8      = format("%.18f", 1 / 8),
   INV_9      = format("%.18f", 1 / 9),
   INV_10     = format("%.18f", 1 / 10),
-  INV_30     = format("%.18f", 1 / 30),
-  INV_40     = format("%.18f", 1 / 40),
-  INV_50     = format("%.18f", 1 / 50),
   INV_1024   = format("%.18f", 1 / 1024),
 }
 
@@ -112,30 +109,30 @@ local functions = {
   compile_function("Radial", [[
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) * INV_8 + phase * INV_40
+    t = sqrt(dx * dx + dy * dy) * INV_8 + phase
   ]], 2),
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
   compile_function("Angular", [[
-    t = (atan2(ly - py, lx - px) * INV_TWO_PI + 0.5) * n_colors + phase * INV_30
+    t = (atan2(ly - py, lx - px) * INV_TWO_PI + 0.5) * n_colors + phase
   ]], 2),
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
   compile_function("Horizontal", [[
     local d = lx - px
-    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
+    t = (d < 0 and -d or d) * INV_10 + phase
   ]], 2),
 
   -- [4] Vertical: color cycles based on vertical separation only.
   compile_function("Vertical", [[
     local d = ly - py
-    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
+    t = (d < 0 and -d or d) * INV_10 + phase
   ]], 2),
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
   compile_function("Diagonal", [[
     local d = lx - px + ly - py
-    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
+    t = (d < 0 and -d or d) * INV_10 + phase
   ]], 2),
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
@@ -145,21 +142,21 @@ local functions = {
     local fdx = dx - dx % 1
     local fdy = dy - dy % 1
     local val = fdx + fdy
-    t = (val < 0 and -val or val) + phase * INV_10
+    t = (val < 0 and -val or val) + phase
   ]], 5),
 
   -- [7] Spiral: color follows a clockwise spiral outward from the player; the spiral slowly rotates over time.
   compile_function("Spiral", [[
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) * INV_8 - (atan2(dy, dx) * INV_TWO_PI + 0.5) * n_colors + phase * INV_50
+    t = sqrt(dx * dx + dy * dy) * INV_8 - (atan2(dy, dx) * INV_TWO_PI + 0.5) * n_colors + phase
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
   compile_function("Diamond", [[
     local dx = lx - px
     local dy = ly - py
-    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * INV_8 + phase * INV_40
+    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * INV_8 + phase
   ]], 2),
 
   -- [9] Kaleidoscope: 4-fold mirror symmetry (fold both axes) combined with radial distance bands.
@@ -169,7 +166,7 @@ local functions = {
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
     local dist = dx + dy
-    t = dist * INV_8 + (dy * n_colors) / (dist + 1e-9) + phase * INV_40
+    t = dist * INV_8 + (dy * n_colors) / (dist + 1e-9) + phase
   ]], 3),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
@@ -178,7 +175,7 @@ local functions = {
     local dy = ly - py
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = (dx > dy and dx or dy) * INV_8 + phase * INV_40
+    t = (dx > dy and dx or dy) * INV_8 + phase
   ]], 2),
 
   -- [11] Lattice: repeating tiled pattern of circular rings across the map.
@@ -187,23 +184,20 @@ local functions = {
     local dy = (ly + 16) % 32 - 16
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = sqrt(dx * dx + dy * dy) * INV_8 - phase * INV_40
+    t = sqrt(dx * dx + dy * dy) * INV_8 - phase
   ]], 2),
 
   -- [12] Pulse: all labs change color in unison regardless of position.
   compile_function("Pulse", [[
-    t = phase * INV_40
+    t = phase
   ]], 1.2),
 
   -- [13] Random: color changes at random periodically.
   compile_function("Random", [[
-    -- Discretize phase into steps to control the flicker rate.
-    local ps = phase * INV_10
-    local phase_step = ps - ps % 1
     -- LCG-style pseudo-random number.
     local flx = lx - lx % 1
     local fly = ly - ly % 1
-    local r = (flx * 137 + fly * 149 + phase_step * 163) % 1024 * INV_1024
+    local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 * INV_1024
     t = r * n_colors
   ]], 20),
 }
