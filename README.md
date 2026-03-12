@@ -12,7 +12,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 ### Performance
 
-Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs. Additional performance tuning options are available in mod settings. ([Technical details](docs/tick-function.md))
+Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
 
 ### Space Age Support
 
