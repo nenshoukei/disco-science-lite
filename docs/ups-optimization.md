@@ -6,9 +6,9 @@ This document describes the technical strategies used to minimize the UPS (Updat
 
 The most effective optimization is **not processing what isn't visible**.
 
-Factorio mods often iterate over all entities, which scales poorly ($O(N)$ where $N$ is the total number of labs). Disco Science Lite splits labs into chunks using a custom [ChunkMap](/scripts/runtime/chunk-map.lua) (a three-level table: `surface → chunk_x → chunk_y`).
+The naive approach of iterating over all labs on every tick scales with the total number of labs ($O(N)$). Disco Science Lite splits labs into chunks using a custom [ChunkMap](/scripts/runtime/chunk-map.lua) (a three-level table: `surface → chunk_x → chunk_y`).
 
-- **View-Port Pruning:** Every 30 ticks, the mod calculates the range of chunks visible to the player's current view. Only labs within these chunks are gathered into a flat `visible_overlays` list.
+- **View-Port Pruning:** Every 30 ticks, the mod calculates the range of chunks visible to the player's current view. Only labs within these chunks are gathered into a flat list for updating their colors by `on_tick` function.
 - **Zero Iteration for Off-screen Labs:** Labs in off-screen chunks are never touched during the `on_tick` loop. The performance cost scales with **visible** labs, not total labs.
 - **Multi-Player Deduplication:** When multiple players are connected, a generation counter ensures that a chunk visible to multiple players is only processed once per update cycle.
 
