@@ -2,9 +2,6 @@
 ---
 --- Type definitions for the public API of Disco Science Lite for Lua Language Server.
 ---
---- This file depends on Factorio API type definitions provided by the Factorio Modding Tool Kit
---- VS Code extension: https://marketplace.visualstudio.com/items?itemName=justarandomgeek.factoriomod-debug
----
 --- ## MIT License
 ---
 --- Copyright (c) 2019 Daniel Brauer
@@ -35,6 +32,9 @@
 ---                          If omitted, the built-in overlay for the standard lab shape is used.
 --- @field scale number? Scale of the overlay. (Default: `1`)
 
+--- Lab Prototype for DiscoScience.prepareLab()
+--- @alias DiscoScienceLabPrototype { type: "lab", name: string }
+
 --- Public interface `_G.DiscoScience` for other mods on prototype stage.
 ---
 --- You can use it like `DiscoScience.prepareLab(...)`.
@@ -58,7 +58,7 @@ _G.DiscoScience = {
   --- - `scale` -
   ---     Scale of the overlay. (Default: `1`)
   ---
-  --- @param lab data.LabPrototype Lab prototype to be prepared.
+  --- @param lab DiscoScienceLabPrototype Lab prototype to be prepared.
   --- @param settings LabOverlaySettings? Settings for the lab overlay.
   prepareLab = function (lab, settings) end,
 

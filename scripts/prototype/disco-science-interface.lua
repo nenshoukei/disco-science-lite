@@ -16,7 +16,7 @@ function DiscoScienceInterface.prepareLab(lab, settings)
   assert(settings.scale == nil or (type(settings.scale) == "number" and settings.scale > 0),
     "DiscoScience.prepareLab: settings.scale must be a positive number")
 
-  LabPrototypeModifier.modify_lab(lab)
+  LabPrototypeModifier.modify_lab(lab --[[@as data.LabPrototype]])
   PrototypeLabRegistry.register(lab.name, {
     animation = settings.animation,
     scale = settings.scale,
