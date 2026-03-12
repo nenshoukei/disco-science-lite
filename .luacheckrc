@@ -6,7 +6,8 @@ unused_args = false
 include_files = {
     "*.lua",
     "scripts/**/*.lua",
-    "spec/**/*.lua"
+    "spec/**/*.lua",
+    "tasks/**/*.lua"
 }
 
 std = "lua52c"

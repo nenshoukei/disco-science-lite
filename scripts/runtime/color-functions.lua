@@ -93,6 +93,22 @@ local function compile_function(name, body, transition_sharpness)
   return assert(load(code, chunk_name))()
 end
 
+ColorFunctions.function_names = {
+  "Radial",
+  "Angular",
+  "Horizontal",
+  "Vertical",
+  "Diagonal",
+  "Grid",
+  "Spiral",
+  "Diamond",
+  "Kaleidoscope",
+  "Square",
+  "Lattice",
+  "Pulse",
+  "Random",
+}
+
 --- @type ColorFunction[]
 local functions = {
   -- [1] Radial: color cycles based on the distance between the player and the lab.

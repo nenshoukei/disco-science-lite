@@ -1,21 +1,26 @@
-.PHONY: dev lint test typecheck consts graphics
+.PHONY: dev lint test typecheck consts graphics benchmark
 
 dev:
 	# If pcre2 is installed by Homebrew
 	# make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
-	luarocks install --deps-only disco-science-lite-dev-1.rockspec
+	@luarocks install --deps-only disco-science-lite-dev-1.rockspec
+	@pip install -r requirements.txt
 
 lint:
-	luacheck .
+	@luacheck .
 
 test:
-	busted
+	@busted
 
 typecheck:
-	tsc -p tasks/typecheck/tsconfig.json
+	@tsc -p tasks/typecheck/tsconfig.json
 
 consts:
-	lua tasks/update-consts.lua
+	@lua tasks/update-consts.lua
 
 graphics:
-	python tasks/update-graphics.py
+	@python tasks/update-graphics.py
+
+benchmark:
+	@echo "## Color Functions"
+	@lua tasks/benchmark/color-functions.lua $(ARGS)

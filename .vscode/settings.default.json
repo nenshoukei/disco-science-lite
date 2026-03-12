@@ -9,5 +9,6 @@
     "${addons}/luassert/module/library",
     "${addons}/busted/module/library",
     "${addons}/lua-cjson/module/library"
-  ]
+  ],
+  "Lua.diagnostics.globals": ["io", "os"]
 }
