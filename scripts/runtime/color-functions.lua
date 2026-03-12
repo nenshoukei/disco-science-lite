@@ -1,3 +1,11 @@
+--- Color functions are functions to calculate lab colors based on time frame (phase), player's position and lab's position.
+---
+--- These are dynamically generated and compiled to eliminate function call overhead:
+---
+--- - **Template Inlining:** Core interpolation logic and animation patterns are merged into a single string template.
+--- - **Compilation:** The resulting code is compiled via `load()`, producing a flat, highly efficient function that avoids internal branching and nested calls.
+--- - **Embedded Math:** Mathematical constants (e.g., `INV_PI = 1 / math.pi`) are pre-calculated and embedded as literals during the compilation phase.
+---
 --- @class ColorFunctions
 local ColorFunctions = {}
 
@@ -70,6 +78,9 @@ local COLOR_FUNCTION_TEMPLATE = [[
   end
 ]]
 
+local function_names = {}
+ColorFunctions.function_names = function_names
+
 --- Compiles a color function.
 ---
 --- @param name string Function name for debugging.
@@ -77,6 +88,8 @@ local COLOR_FUNCTION_TEMPLATE = [[
 --- @param transition_sharpness number Transition sharpness.
 --- @return ColorFunction
 local function compile_function(name, body, transition_sharpness)
+  function_names[#function_names + 1] = name
+
   -- Replace constant tokens (e.g. INV_PI) with numeric literals.
   body = body:gsub("[A-Z0-9_]+", CONSTANTS)
 
@@ -87,24 +100,21 @@ local function compile_function(name, body, transition_sharpness)
   return assert(load(code, chunk_name))()
 end
 
-ColorFunctions.function_names = {
-  "Radial",
-  "Angular",
-  "Horizontal",
-  "Vertical",
-  "Diagonal",
-  "Grid",
-  "Spiral",
-  "Diamond",
-  "Kaleidoscope",
-  "Square",
-  "Lattice",
-  "Pulse",
-  "Random",
-}
-
 --- @type ColorFunction[]
 local functions = {
+  -- In Factorio's Lua environment, even standard library function calls carry significant overhead compared to inline arithmetic.
+  -- Benchmarks run inside the Factorio runtime (100,000+ iterations via `game.create_profiler()`) guided these choices:
+  --
+  -- * Avoid `math.abs`, `math.max`, `math.floor`:
+  --     Replaced with inline equivalents (`x < 0 and -x or x`, `a > b and a or b`, `t - t % 1`). These are meaningfully faster in a hot loop.
+  -- * `math.atan2` vs. Diamond Angle:
+  --     For full 360° radial calculations, `math.atan2` is faster and more accurate than a Lua-based quadrant-branching approximation.
+  --     However, for a single-quadrant case like the Kaleidoscope pattern, a simple division (`dy / (dx + dy)`) beats `atan2`.
+  -- * Multiply by inverse instead of divide:
+  --     `val * (1/10)` is faster than `val / 10` in a hot loop. Constants are pre-calculated as upvalues.
+  -- * Pre-scale loop invariants:
+  --     Values that can be pre-computed once (e.g., scaling `phase_speed` by `1/40`) are applied before the loop rather than inside every iteration.
+
   -- [1] Radial: color cycles based on the distance between the player and the lab.
   compile_function("Radial", [[
     local dx = lx - px
@@ -202,7 +212,7 @@ local functions = {
   ]], 20),
 }
 ColorFunctions.functions = functions
-ColorFunctions._compile_function = compile_function
+ColorFunctions._compile_function = compile_function -- for benchmark
 local n_functions = #functions
 
 --- Choose a random color function.
