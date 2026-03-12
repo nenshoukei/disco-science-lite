@@ -60,8 +60,54 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- Flattened list of lab overlays currently in any player's view.
     --- @type LabOverlay[]
     visible_overlays = {},
+
+    --- Whether the fallback overlay is enabled.
+    is_fallback_enabled = true,
+
+    --- Whether the overlay animation flickers in unison.
+    is_unison_flicker = false,
+
+    --- Color intensity. [0, 1]
+    color_intensity = 1.0,
+
+    --- Color function duration in ticks.
+    color_pattern_duration = 180,
+
+    --- Stride for updating colors of labs in ticks.
+    lab_update_interval = 6,
   }
-  return setmetatable(self, LabOverlayRenderer)
+  self = setmetatable(self, LabOverlayRenderer)
+  self:load_settings()
+  return self
+end
+
+--- Load settings from the `settings` global variable.
+function LabOverlayRenderer:load_settings()
+  local startup = settings.startup
+  local global = settings.global
+  local old_unison_flicker = self.is_unison_flicker
+  local old_color_intensity = self.color_intensity
+
+  self.is_fallback_enabled =
+    startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
+  self.is_unison_flicker =
+    global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value --[[@as boolean]]
+  self.color_intensity =
+    global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value * 0.01
+  self.color_pattern_duration =
+    global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as integer]]
+  self.lab_update_interval =
+    global[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ].value --[[@as integer]]
+
+  -- Since `game` is not available for `on_load`, this guard avoids updates on game state in `on_load` handler.
+  if game then
+    if old_unison_flicker ~= self.is_unison_flicker then
+      self:reset_all_overlays_animation_offset()
+    end
+    if old_color_intensity ~= self.color_intensity then
+      self:update_all_forces_current_research()
+    end
+  end
 end
 
 --- Render an overlay for a lab entity.
@@ -74,7 +120,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   if not lab_unit_number then return nil end
 
   local overlay_settings = self.lab_registry:get_overlay_settings(lab.name)
-  if not overlay_settings and not settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value then
+  if not overlay_settings and not self.is_fallback_enabled then
     return nil
   end
 
@@ -97,11 +143,17 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   if existing_object then
     -- If existing rendering object given, just update it with the overlay settings.
     render_object = existing_object
-    render_object.animation = animation
-    render_object.x_scale = scale
-    render_object.y_scale = scale
+    -- Check if settings change for avoiding setting same value which forces re-rendaring.
+    if render_object.animation ~= animation then
+      render_object.animation = animation
+    end
+    if render_object.x_scale ~= scale then
+      render_object.x_scale = scale
+    end
+    if render_object.y_scale ~= scale then
+      render_object.y_scale = scale
+    end
   else
-    local is_randomized_flicker = not settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value
     render_object = draw_animation({
       animation = animation,
       surface = lab.surface,
@@ -110,7 +162,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
       y_scale = scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = is_randomized_flicker and random() * 300 or 0,
+      animation_offset = self.is_unison_flicker and 0 or random() * 300,
     })
   end
 
@@ -188,6 +240,16 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Destroy any remaining render objects that were not reused.
   for _, object in pairs(existing_objects) do
     object.destroy()
+  end
+end
+
+--- Reset animation_offset of all overlays for updated is_unison_flicker.
+function LabOverlayRenderer:reset_all_overlays_animation_offset()
+  local is_unison_flicker = self.is_unison_flicker
+  local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+  for i = 1, #all_objects do
+    local object = all_objects[i]
+    object.animation_offset = is_unison_flicker and 0 or random() * 300
   end
 end
 
@@ -326,6 +388,53 @@ function LabOverlayRenderer:get_tracker_update_function()
   end
 end
 
+--- Update force_state by the force's current_research.
+---
+--- It does nothing if force_state for the force does not exist.
+---
+--- @param force LuaForce
+function LabOverlayRenderer:update_force_current_research(force)
+  local force_index = force.index
+  local fs = self.force_state[force_index]
+  if not fs then return end
+
+  local force_current_research = force.current_research
+  fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] = force_current_research
+
+  if force_current_research then
+    local colors = self.color_registry:get_colors_for_research(force_current_research, self.color_intensity)
+    local n_colors = #colors
+
+    -- Flatten the color tuples into a single array for performance in the hot tick function.
+    local flat_colors = {}
+    local color_index = 1
+    for i = 1, n_colors do
+      local c = colors[i]
+      flat_colors[color_index] = c[1]
+      flat_colors[color_index + 1] = c[2]
+      flat_colors[color_index + 2] = c[3]
+      color_index = color_index + 3
+    end
+
+    fs[ 2 --[[$FS_COLORS]] ] = flat_colors
+    fs[ 3 --[[$FS_N_COLORS]] ] = n_colors
+  else
+    fs[ 2 --[[$FS_COLORS]] ] = nil
+    fs[ 3 --[[$FS_N_COLORS]] ] = 0
+  end
+end
+
+--- Update force_state for all tracked forces by their current_research.
+function LabOverlayRenderer:update_all_forces_current_research()
+  local forces = game.forces
+  for force_index in pairs(self.force_state) do
+    local force = forces[force_index]
+    if force then
+      self:update_force_current_research(force)
+    end
+  end
+end
+
 --- Get a state update function to be called periodically (not every tick).
 ---
 --- The returned function:
@@ -337,11 +446,8 @@ end
 ---
 --- @return fun()
 function LabOverlayRenderer:get_state_update_function()
-  local intensity = settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value *
-    0.01 --[[@as number]]
   local player_trackers = self.player_trackers
   local force_state = self.force_state
-  local color_registry = self.color_registry
   local chunk_map = self.chunk_map
   local visible_overlays = self.visible_overlays
 
@@ -370,7 +476,6 @@ function LabOverlayRenderer:get_state_update_function()
 
       local force = tracker.force --[[@as LuaForce]]
       local force_index = force.index
-      local force_current_research = force.current_research
 
       -- Update force_state for this player's force.
       local fs = force_state[force_index]
@@ -385,29 +490,9 @@ function LabOverlayRenderer:get_state_update_function()
         }
         force_state[force_index] = fs
       end
-      if force_current_research ~= fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] then
-        fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] = force_current_research
-        if force_current_research then
-          local colors = color_registry:get_colors_for_research(force_current_research, intensity)
-          local n_colors = #colors
-
-          -- Flatten the color tuples into a single array for performance in the hot tick function.
-          local flat_colors = {}
-          local color_index = 1
-          for i = 1, n_colors do
-            local c = colors[i]
-            flat_colors[color_index] = c[1]
-            flat_colors[color_index + 1] = c[2]
-            flat_colors[color_index + 2] = c[3]
-            color_index = color_index + 3
-          end
-
-          fs[ 2 --[[$FS_COLORS]] ] = flat_colors
-          fs[ 3 --[[$FS_N_COLORS]] ] = n_colors
-        else
-          fs[ 2 --[[$FS_COLORS]] ] = nil
-          fs[ 3 --[[$FS_N_COLORS]] ] = 0
-        end
+      if force.current_research ~= fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] then
+        -- Update current research in the force_state
+        self:update_force_current_research(force)
       end
 
       -- Iterate chunks in this player's view and build visible_overlays.
@@ -483,14 +568,10 @@ function LabOverlayRenderer:get_tick_function()
   -- * Avoid creating a new object.
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
-  local global_settings = settings.global
-  local color_pattern_duration = global_settings[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ]
-    .value --[[@as integer]]
-  local lab_update_interval = global_settings[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ]
-    .value --[[@as integer]]
-
   local visible_overlays = self.visible_overlays
   local force_state = self.force_state
+  local color_pattern_duration = self.color_pattern_duration
+  local lab_update_interval = self.lab_update_interval
 
   -- `phase` is a continuously drifting value passed to the color function.
   -- It drives animation by shifting the color cycle position over time.

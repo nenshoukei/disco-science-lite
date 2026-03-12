@@ -128,8 +128,13 @@ LabControl.events = {
     end
   end,
 
-  [defines.events.on_runtime_mod_setting_changed] = function ()
-    rebuild_overlays()
+  --- @param event EventData.on_runtime_mod_setting_changed
+  [defines.events.on_runtime_mod_setting_changed] = function (event)
+    local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
+    if string.sub(event.setting, 1, #prefix) == prefix then
+      renderer:load_settings()
+      setup_event_handlers()
+    end
   end,
 }
 

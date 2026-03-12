@@ -1046,4 +1046,183 @@ describe("LabOverlayRenderer", function ()
       ColorFunctions.choose_random = original_choose_random
     end)
   end)
+
+  -- -------------------------------------------------------------------
+  describe("load_settings", function ()
+    it("updates instance variables from global settings", function ()
+      local r = make_renderer()
+
+      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value = false
+      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = true
+      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
+      _G.settings.global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value = 120
+      _G.settings.global[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ].value = 10
+
+      r:load_settings()
+
+      assert.is_false(r.is_fallback_enabled)
+      assert.is_true(r.is_unison_flicker)
+      assert.are.equal(0.5, r.color_intensity)
+      assert.are.equal(120, r.color_pattern_duration)
+      assert.are.equal(10, r.lab_update_interval)
+    end)
+
+    it("calls reset_all_overlays_animation_offset when unison-flicker changes", function ()
+      local r = make_renderer()
+      r.is_unison_flicker = false
+      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = true
+
+      local called = false
+      r.reset_all_overlays_animation_offset = function () called = true end
+
+      r:load_settings()
+      assert.is_true(called)
+    end)
+
+    it("calls update_all_forces_current_research when color-intensity changes", function ()
+      local r = make_renderer()
+      r.color_intensity = 1.0
+      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50 -- 0.5
+
+      local called = false
+      r.update_all_forces_current_research = function () called = true end
+
+      r:load_settings()
+      assert.is_true(called)
+    end)
+
+    it("does not call side effects when game is nil (on_load safety)", function ()
+      local old_game = _G.game
+      _G.game = nil
+
+      local r = make_renderer()
+      r.is_unison_flicker = false
+      r.color_intensity = 1.0
+      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = true
+      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
+
+      local flicker_called = false
+      local research_called = false
+      r.reset_all_overlays_animation_offset = function () flicker_called = true end
+      r.update_all_forces_current_research = function () research_called = true end
+
+      r:load_settings()
+
+      assert.is_false(flicker_called)
+      assert.is_false(research_called)
+
+      _G.game = old_game
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("reset_all_overlays_animation_offset", function ()
+    it("sets animation_offset=0 when is_unison_flicker is true", function ()
+      local r = make_renderer()
+      r.is_unison_flicker = true
+
+      -- Mock two rendering objects
+      local obj1 = { animation_offset = 123 }
+      local obj2 = { animation_offset = 456 }
+      _G.rendering.objects = { [1] = obj1, [2] = obj2 }
+
+      r:reset_all_overlays_animation_offset()
+
+      assert.are.equal(0, obj1.animation_offset)
+      assert.are.equal(0, obj2.animation_offset)
+    end)
+
+    it("sets randomized animation_offset when is_unison_flicker is false", function ()
+      local r = make_renderer()
+      r.is_unison_flicker = false
+
+      local obj1 = { animation_offset = 0 }
+      _G.rendering.objects = { [1] = obj1 }
+
+      r:reset_all_overlays_animation_offset()
+
+      -- Should be updated to something else than 0, in range [0, 300]
+      assert.is_true(obj1.animation_offset > 0)
+      assert.is_true(obj1.animation_offset <= 300)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("update_force_current_research", function ()
+    it("updates FS_CURRENT_RESEARCH and re-calculates colors", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      local tech = make_tech({ "automation-science-pack" })
+      force.current_research = tech
+
+      -- Setup force_state (px/py are preserved)
+      r.force_state[1] = { nil, nil, 0, 10, 20 }
+      r.color_registry:set_ingredient_color("automation-science-pack", { 1, 0, 0 })
+      r.color_intensity = 1.0
+
+      r:update_force_current_research(force)
+
+      local fs = r.force_state[1]
+      assert.is_not_nil(fs) --- @cast fs -nil
+      assert.are.equal(tech, fs[ 1 --[[$FS_CURRENT_RESEARCH]] ])
+      assert.are.same({ 1, 0, 0 }, fs[ 2 --[[$FS_COLORS]] ])
+      assert.are.equal(1, fs[ 3 --[[$FS_N_COLORS]] ])
+      assert.are.equal(10, fs[ 4 --[[$FS_PX]] ]) -- preserved
+    end)
+
+    it("flattens colors into the state for performance", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      local tech = make_tech({ "automation-science-pack", "logistic-science-pack" })
+      force.current_research = tech
+
+      r.force_state[1] = { nil, nil, 0, 0, 0 }
+      r.color_registry:set_ingredient_color("automation-science-pack", { 1, 0, 0 })
+      r.color_registry:set_ingredient_color("logistic-science-pack", { 0, 1, 0 })
+      r.color_intensity = 1.0
+
+      r:update_force_current_research(force)
+
+      local fs = r.force_state[1]
+      assert.is_not_nil(fs) --- @cast fs -nil
+      assert.are.same({ 1, 0, 0, 0, 1, 0 }, fs[ 2 --[[$FS_COLORS]] ])
+      assert.are.equal(2, fs[ 3 --[[$FS_N_COLORS]] ])
+    end)
+
+    it("clears FS_COLORS when research is nil", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      force.current_research = nil
+      r.force_state[1] = { nil, { 1, 1, 1 }, 1, 0, 0 }
+
+      r:update_force_current_research(force)
+
+      local fs = r.force_state[1]
+      assert.is_not_nil(fs) --- @cast fs -nil
+      assert.is_nil(fs[ 1 --[[$FS_CURRENT_RESEARCH]] ])
+      assert.is_nil(fs[ 2 --[[$FS_COLORS]] ])
+      assert.are.equal(0, fs[ 3 --[[$FS_N_COLORS]] ])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("update_all_forces_current_research", function ()
+    it("iterates over self.force_state and updates each force", function ()
+      local r = make_renderer()
+
+      local force1 = make_force(1)
+      local force2 = make_force(2)
+      _G.game.forces = { [1] = force1, [2] = force2 }
+
+      r.force_state[1] = { nil, nil, 0, 0, 0 }
+      r.force_state[2] = { nil, nil, 0, 0, 0 }
+
+      local update_calls = 0
+      r.update_force_current_research = function () update_calls = update_calls + 1 end
+
+      r:update_all_forces_current_research()
+
+      assert.are.equal(2, update_calls)
+    end)
+  end)
 end)
