@@ -21,8 +21,8 @@ local function setup_event_handlers()
     defines.events.on_player_changed_position,
     defines.events.on_player_changed_surface,
     defines.events.on_player_changed_force,
-    defines.events.on_player_display_resolution_changed,
     defines.events.on_player_created,
+    defines.events.on_player_joined_game,
   }, position_update_function)
   script.on_event({
     defines.events.on_player_removed,
@@ -39,6 +39,7 @@ local function setup_event_handlers()
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
+    defines.events.on_player_display_resolution_changed,
   }, state_update_function)
 end
 
