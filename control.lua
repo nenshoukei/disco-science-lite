@@ -5,6 +5,6 @@ event_handler.add_libraries({
 })
 
 -- This is for benchmarking on development
-if script.active_mods["debugadapter"] then
+if __DebugAdapter then
   require("scripts.runtime.control.benchmark")
 end

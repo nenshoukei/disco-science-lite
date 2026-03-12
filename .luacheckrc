@@ -26,5 +26,6 @@ globals = {
     "log",
     "remote",
     "rendering",
-    "commands"
+    "commands",
+    "__DebugAdapter"
 }
