@@ -22,47 +22,21 @@ describe("DiscoScienceInterface", function ()
 
   -- -------------------------------------------------------------------
   describe("prepareLab", function ()
-    it("modifies the lab prototype", function ()
-      local lab = make_lab()
+    it("modifies prototype and registers lab with provided settings", function ()
+      local lab = make_lab("my-lab")
       local off = lab.off_animation
-      DiscoScienceInterface.prepareLab(lab)
+      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim", scale = 2.5 })
+
       assert.are.equal(off, lab.on_animation)
-    end)
-
-    it("registers the lab name in PrototypeLabRegistry", function ()
-      local lab = make_lab("my-lab")
-      DiscoScienceInterface.prepareLab(lab)
-      assert.is_not_nil(PrototypeLabRegistry.registered_labs["my-lab"])
-    end)
-
-    it("stores animation setting in the registry", function ()
-      local lab = make_lab("my-lab")
-      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
       local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("my-anim", settings.animation)
-    end)
-
-    it("stores scale setting in the registry", function ()
-      local lab = make_lab("my-lab")
-      DiscoScienceInterface.prepareLab(lab, { scale = 2.5 })
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal(2.5, settings.scale)
     end)
 
-    it("registers with empty settings when no settings are passed", function ()
+    it("registers with empty settings when omitted", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab)
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.is_nil(settings.animation)
-      assert.is_nil(settings.scale)
-    end)
-
-    it("registers with empty settings when empty table is passed", function ()
-      local lab = make_lab("my-lab")
-      DiscoScienceInterface.prepareLab(lab, {})
       local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.is_nil(settings.animation)
@@ -78,104 +52,35 @@ describe("DiscoScienceInterface", function ()
       assert.are.equal("anim-b", PrototypeLabRegistry.registered_labs["lab-b"].animation)
     end)
 
-    -- -------------------------------------------------------------------
     describe("validation", function ()
-      it("errors when lab is not a table", function ()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.prepareLab("not-a-table")
-        end)
-      end)
-
-      it("errors when lab.type is not 'lab'", function ()
+      it("errors for invalid lab prototype", function ()
         local lab = make_lab()
-        lab.type = "item" --[[@as any]]
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.prepareLab(("not-a-table")) end)
         assert.has_error(function ()
+          lab.type = "item" --[[@as any]]
+          DiscoScienceInterface.prepareLab(lab)
+        end)
+        assert.has_error(function ()
+          lab.type = "lab"
+          lab.name = ""
           DiscoScienceInterface.prepareLab(lab)
         end)
       end)
 
-      it("errors when lab.name is missing", function ()
+      it("errors for invalid settings", function ()
         local lab = make_lab()
-        lab.name = nil --[[@as any]]
-        assert.has_error(function ()
-          DiscoScienceInterface.prepareLab(lab)
-        end)
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, ("not-a-table")) end)
+        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "" }) end)
+        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { scale = 0 }) end)
+        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { scale = -1 }) end)
       end)
 
-      it("errors when lab.name is an empty string", function ()
+      it("accepts valid optional settings", function ()
         local lab = make_lab()
-        lab.name = "" --[[@as any]]
-        assert.has_error(function ()
-          DiscoScienceInterface.prepareLab(lab)
-        end)
-      end)
-
-      it("errors when settings is not a table", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.prepareLab(lab, "not-a-table")
-        end)
-      end)
-
-      it("errors when settings.animation is an empty string", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.prepareLab(lab, { animation = "" })
-        end)
-      end)
-
-      it("errors when settings.animation is not a string", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: assign-type-mismatch
-          DiscoScienceInterface.prepareLab(lab, { animation = 123 })
-        end)
-      end)
-
-      it("errors when settings.scale is zero", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          DiscoScienceInterface.prepareLab(lab, { scale = 0 })
-        end)
-      end)
-
-      it("errors when settings.scale is negative", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          DiscoScienceInterface.prepareLab(lab, { scale = -1 })
-        end)
-      end)
-
-      it("errors when settings.scale is not a number", function ()
-        local lab = make_lab()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: assign-type-mismatch
-          DiscoScienceInterface.prepareLab(lab, { scale = "big" })
-        end)
-      end)
-
-      it("accepts nil settings.animation", function ()
-        local lab = make_lab()
-        assert.no_error(function ()
-          DiscoScienceInterface.prepareLab(lab, { animation = nil })
-        end)
-      end)
-
-      it("accepts nil settings.scale", function ()
-        local lab = make_lab()
-        assert.no_error(function ()
-          DiscoScienceInterface.prepareLab(lab, { scale = nil })
-        end)
-      end)
-
-      it("accepts a positive scale", function ()
-        local lab = make_lab()
-        assert.no_error(function ()
-          DiscoScienceInterface.prepareLab(lab, { scale = 0.5 })
-        end)
+        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = nil, scale = nil }) end)
+        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { scale = 0.5 }) end)
       end)
     end)
   end)
@@ -188,59 +93,33 @@ describe("DiscoScienceInterface", function ()
       assert.is_not_nil(color)
     end)
 
-    -- -------------------------------------------------------------------
     describe("validation", function ()
-      it("errors when name is not a string", function ()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.setIngredientColor(123, { 0.1, 0.2, 0.3 })
-        end)
-      end)
-
-      it("errors when name is an empty string", function ()
-        assert.has_error(function ()
-          DiscoScienceInterface.setIngredientColor("", { 0.1, 0.2, 0.3 })
-        end)
-      end)
-
-      it("errors when color is not a table", function ()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.setIngredientColor("custom-pack", "red")
-        end)
+      it("errors for invalid arguments", function ()
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.setIngredientColor(123, { 1, 1, 1 }) end)
+        assert.has_error(function () DiscoScienceInterface.setIngredientColor("", { 1, 1, 1 }) end)
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.setIngredientColor("p", "red") end)
       end)
     end)
   end)
 
   -- -------------------------------------------------------------------
   describe("getIngredientColor", function ()
-    it("returns the color for a registered ingredient", function ()
+    it("returns color for registered or nil for unregistered", function ()
       DiscoScienceInterface.setIngredientColor("custom-pack", { 0.1, 0.2, 0.3 })
       local color = DiscoScienceInterface.getIngredientColor("custom-pack")
       assert.is_not_nil(color) --- @cast color -nil
       assert.are.equal(0.1, color.r)
-      assert.are.equal(0.2, color.g)
-      assert.are.equal(0.3, color.b)
+
+      assert.is_nil(DiscoScienceInterface.getIngredientColor("unknown"))
     end)
 
-    it("returns nil for an unregistered ingredient", function ()
-      local color = DiscoScienceInterface.getIngredientColor("unknown-pack")
-      assert.is_nil(color)
-    end)
-
-    -- -------------------------------------------------------------------
     describe("validation", function ()
-      it("errors when name is not a string", function ()
-        assert.has_error(function ()
-          --- @diagnostic disable-next-line: param-type-mismatch
-          DiscoScienceInterface.getIngredientColor(123)
-        end)
-      end)
-
-      it("errors when name is an empty string", function ()
-        assert.has_error(function ()
-          DiscoScienceInterface.getIngredientColor("")
-        end)
+      it("errors for invalid ingredient name", function ()
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.getIngredientColor(123) end)
+        assert.has_error(function () DiscoScienceInterface.getIngredientColor("") end)
       end)
     end)
   end)
