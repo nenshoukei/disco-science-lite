@@ -191,20 +191,6 @@ describe("LabOverlayRenderer", function ()
 
   -- -------------------------------------------------------------------
   describe("render_overlay_for_lab", function ()
-    it("returns nil when lab.valid is false", function ()
-      local r = make_renderer()
-      local lab = make_entity(1, 1, 0, 0)
-      lab.valid = false
-      assert.is_nil(r:render_overlay_for_lab(lab))
-    end)
-
-    it("returns nil when entity type is not 'lab'", function ()
-      local r = make_renderer()
-      local lab = make_entity(1, 1, 0, 0)
-      lab.type = "assembling-machine"
-      assert.is_nil(r:render_overlay_for_lab(lab))
-    end)
-
     it("returns nil when lab has no unit_number", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)

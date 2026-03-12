@@ -66,12 +66,10 @@ end
 
 --- Render an overlay for a lab entity.
 ---
---- @param lab LuaEntity The lab entity.
+--- @param lab LuaEntity The lab entity. Must be valid.
 --- @param existing_object LuaRenderObject? An existing render object to reuse (optional, used when rebuilding all). Must be valid.
 --- @return LabOverlay|nil # The rendered overlay. `nil` if the lab is not target.
 function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
-  if not lab.valid or lab.type ~= "lab" then return nil end
-
   local lab_unit_number = lab.unit_number
   if not lab_unit_number then return nil end
 

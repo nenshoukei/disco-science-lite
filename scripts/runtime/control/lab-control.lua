@@ -108,8 +108,9 @@ LabControl.events = {
 
   --- @param event EventData.on_script_trigger_effect
   [defines.events.on_script_trigger_effect] = function (event)
-    if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and event.target_entity then
-      renderer:render_overlay_for_lab(event.target_entity)
+    local target_entity = event.target_entity
+    if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and target_entity then
+      renderer:render_overlay_for_lab(target_entity)
     end
   end,
 
