@@ -186,7 +186,7 @@ describe("LabOverlayRenderer", function ()
       _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = true
       _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
       _G.settings.global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value = 120
-      _G.settings.global[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ].value = 10
+      _G.settings.global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value = 500
 
       r:load_settings()
 
@@ -194,7 +194,7 @@ describe("LabOverlayRenderer", function ()
       assert.is_true(r.is_unison_flicker)
       assert.are.equal(0.5, r.color_intensity)
       assert.are.equal(120, r.color_pattern_duration)
-      assert.are.equal(10, r.lab_update_interval)
+      assert.are.equal(500, r.max_updates_per_tick)
     end)
 
     it("calls side effects when unison-flicker or color-intensity changes", function ()
@@ -581,13 +581,56 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(1, #r.visible_overlays)
       assert.is_nil(r.visible_overlays[2])
     end)
+
+    it("sets current_interval to 1 when visible labs fit within max_updates_per_tick", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      r.max_updates_per_tick = 200
+      for i = 1, 10 do
+        r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
+      end
+      activate_view(r, 1, force, -100, -100, 100, 100)
+
+      r:get_state_update_function()()
+
+      assert.are.equal(1, r.current_interval)
+    end)
+
+    it("increases current_interval when visible labs exceed max_updates_per_tick", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      r.max_updates_per_tick = 10
+      for i = 1, 30 do
+        r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
+      end
+      activate_view(r, 1, force, -100, -100, 100, 100)
+
+      r:get_state_update_function()()
+
+      -- ceil(30 / 10) = 3
+      assert.are.equal(3, r.current_interval)
+    end)
+
+    it("caps current_interval at 60", function ()
+      local r = make_renderer()
+      local force = make_force(1)
+      r.max_updates_per_tick = 1
+      for i = 1, 300 do
+        r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
+      end
+      activate_view(r, 1, force, -100, -100, 100, 100)
+
+      r:get_state_update_function()()
+
+      assert.are.equal(60, r.current_interval)
+    end)
   end)
 
   -- -------------------------------------------------------------------
   describe("get_tick_function", function ()
     it("updates animation.color for visible overlays", function ()
       local r = make_renderer()
-      r.lab_update_interval = 1
+      r.current_interval = 1
       r.force_state[1] = { make_tech(), { 1.0, 0.0, 0.5 }, 1, 0, 0 }
 
       local written = false
@@ -606,9 +649,9 @@ describe("LabOverlayRenderer", function ()
       assert.is_true(written)
     end)
 
-    it("uses stride: updates only 1/N overlays per tick when lab_update_interval=N", function ()
+    it("uses stride: updates only 1/N overlays per tick when current_interval=N", function ()
       local r = make_renderer()
-      r.lab_update_interval = 3
+      r.current_interval = 3
       r.force_state[1] = { make_tech(), { 1.0, 0.0, 0.5 }, 1, 0, 0 }
 
       local colored = {}

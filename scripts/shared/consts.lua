@@ -40,7 +40,7 @@ local consts = {
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
   UNISON_FLICKER_NAME = NAME_PREFIX .. "unison-flicker",
-  LAB_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "lab-update-interval",
+  MAX_UPDATES_PER_TICK_NAME = NAME_PREFIX .. "max-updates-per-tick",
 
   -- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
   CHUNK_SIZE = 32,

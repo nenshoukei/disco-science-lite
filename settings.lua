@@ -32,10 +32,10 @@ data:extend({
   },
   {
     type = "int-setting",
-    name = "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]],
+    name = "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]],
     setting_type = "runtime-global",
-    default_value = 6,
+    default_value = 200,
     minimum_value = 1,
-    order = "rg-b[performance]-a",
+    order = "rg-b[performance]-b",
   },
 })

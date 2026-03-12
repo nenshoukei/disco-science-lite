@@ -73,8 +73,11 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- Color function duration in ticks.
     color_pattern_duration = 180,
 
-    --- Stride for updating colors of labs in ticks.
-    lab_update_interval = 6,
+    --- Maximum number of labs to update per tick. Controls automatic interval scaling.
+    max_updates_per_tick = 200,
+
+    --- Current dynamic interval (throttled based on load).
+    current_interval = 1,
   }
   self = setmetatable(self, LabOverlayRenderer)
   self:load_settings()
@@ -96,8 +99,8 @@ function LabOverlayRenderer:load_settings()
     global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value * 0.01
   self.color_pattern_duration =
     global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as integer]]
-  self.lab_update_interval =
-    global[ "mks-dsl-lab-update-interval" --[[$LAB_UPDATE_INTERVAL_NAME]] ].value --[[@as integer]]
+  self.max_updates_per_tick =
+    global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value --[[@as integer]]
 
   -- Since `game` is not available for `on_load`, this guard avoids updates on game state in `on_load` handler.
   if game then
@@ -549,6 +552,13 @@ function LabOverlayRenderer:get_state_update_function()
       if visible_overlays[i] == nil then break end
       visible_overlays[i] = nil
     end
+
+    -- Update dynamic interval based on the number of visible overlays.
+    -- Automatically extend the interval if there are more labs than the per-tick budget.
+    local max_updates = self.max_updates_per_tick
+    local interval = (count > max_updates) and math.ceil(count / max_updates) or 1
+    if interval > 60 then interval = 60 end
+    self.current_interval = interval
   end
 end
 
@@ -571,7 +581,6 @@ function LabOverlayRenderer:get_tick_function()
   local visible_overlays = self.visible_overlays
   local force_state = self.force_state
   local color_pattern_duration = self.color_pattern_duration
-  local lab_update_interval = self.lab_update_interval
 
   -- `phase` is a continuously drifting value passed to the color function.
   -- It drives animation by shifting the color cycle position over time.
@@ -587,6 +596,7 @@ function LabOverlayRenderer:get_tick_function()
     -- `visible_overlays` is captured once at closure creation; it is mutated in-place by get_state_update_function().
     if #visible_overlays == 0 then return end
 
+    local current_interval = self.current_interval
     phase = phase + phase_speed
 
     -- Switch color function periodically. Also update phase_speed.
@@ -598,7 +608,7 @@ function LabOverlayRenderer:get_tick_function()
     end
 
     lab_update_offset = lab_update_offset + 1
-    if lab_update_offset > lab_update_interval then lab_update_offset = 1 end
+    if lab_update_offset > current_interval then lab_update_offset = 1 end
 
     -- Bind frequently used upvalues to local variables for performance
     -- luacheck: push ignore
@@ -618,7 +628,7 @@ function LabOverlayRenderer:get_tick_function()
     local player_y = 0
 
     -- Update colors of the visible overlays using stride iteration
-    for i = lab_update_offset, #visible_overlays, lab_update_interval do
+    for i = lab_update_offset, #visible_overlays, current_interval do
       local overlay = visible_overlays[i]
       local force_index = overlay[ 8 --[[$OV_FORCE_INDEX]] ]
       if force_index ~= last_force_index then

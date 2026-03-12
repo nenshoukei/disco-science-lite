@@ -40,12 +40,29 @@ In Factorio's Lua environment, even standard library function calls carry signif
 - **Multiply by inverse instead of divide:** `val * (1/10)` is faster than `val / 10` in a hot loop. Constants are pre-calculated as upvalues.
 - **Pre-scale loop invariants:** Values that can be pre-computed once (e.g., scaling `phase_speed` by `1/40`) are applied before the loop rather than inside every iteration.
 
-## 4. Stride-Based Load Balancing
+## 4. Stride-Based Load Balancing with Auto-Scaling
 
-To handle extreme cases with hundreds of visible labs, the `Lab update interval` setting (default: 6) provides a final level of load balancing:
+To handle extreme cases with hundreds of visible labs, the mod uses a stride-based update system that automatically adjusts to the current workload.
 
-- The mod uses a "stride" to update only `1/N` of the visible labs each tick.
-- This spreads the Lua-to-C bridge cost across `N` ticks, smoothing out CPU spikes and maintaining a rock-solid 60 UPS even in mega-factories.
+Instead of updating every visible lab every tick, the mod updates only `1/N` of the list per tick — cycling through the full list over `N` ticks. This spreads the Lua-to-C bridge cost (the main bottleneck when writing `animation.color`) evenly over time, preventing CPU spikes.
+
+The stride `N` (`current_interval`) is recalculated every 30 ticks:
+
+```
+N = max(1, ceil(visible_labs / max_updates_per_tick))
+N = min(N, 60)
+```
+
+Where `max_updates_per_tick` is a mod setting (default: 200). For example:
+
+| Visible labs | Budget (default 200) | Stride N | Update frequency per lab |
+| ------------ | -------------------- | -------- | ------------------------ |
+| 50           | 200                  | 1        | Every tick               |
+| 300          | 200                  | 2        | Every 2 ticks            |
+| 1000         | 200                  | 5        | Every 5 ticks            |
+| 1000         | 500                  | 2        | Every 2 ticks            |
+
+The `Max lab color updates per tick` setting lets you tune this budget to your PC's performance — raising it on a fast machine gives smoother color transitions, while lowering it reduces CPU load.
 
 ## 5. Dynamic Color Function Compilation
 
