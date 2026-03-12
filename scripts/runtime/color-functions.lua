@@ -43,22 +43,19 @@ local CONSTANTS = {
 ---   %s: Function body - The function body to calculate 't'.
 ---   %f: Transition sharpness - The sharpness value for interpolation.
 local COLOR_FUNCTION_TEMPLATE = [[
-  local abs = math.abs
   local sqrt = math.sqrt
   local atan2 = math.atan2
-  local floor = math.floor
-  local max = math.max
 
   --- @type ColorFunction
   return function (output, phase, colors, n_colors, px, py, lx, ly)
     local t
     %s
 
-    -- Extract floor (i) and fractional part (f) from t.
-    -- i is for color index and f is for interpolation factor.
-    -- f is scaled by sharpness and clamped to [0, 1].
-    local i = floor(t)
-    local f = (t - i) * %.18f
+    -- Extract floor (i) and fractional part (f) from t using operator trick.
+    -- (t %% 1) is equivalent to (t - floor(t)).
+    local f_part = t %% 1
+    local i = t - f_part
+    local f = f_part * %.18f
     if f > 1 then f = 1 end
 
     -- Choose the colors to interpolate between.
@@ -120,88 +117,77 @@ local functions = {
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
   compile_function("Angular", [[
-    local dx = lx - px
-    local dy = ly - py
-
-    -- Use diamond-angle approximation to avoid expensive atan2(dx, dy).
-    local adx = abs(dx)
-    local ady = abs(dy)
-    local q = ady / (adx + ady + 1e-9)
-    if dx < 0 then
-      if dy < 0 then q = 2 + q else q = 2 - q end
-    elseif dy < 0 then
-      q = 4 - q
-    end
-
-    t = q * INV_4 * n_colors + phase * INV_30
+    t = (atan2(ly - py, lx - px) * INV_TWO_PI + 0.5) * n_colors + phase * INV_30
   ]], 2),
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
   compile_function("Horizontal", [[
-    t = abs(lx - px) * INV_10 + phase * INV_30
+    local d = lx - px
+    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
   ]], 2),
 
   -- [4] Vertical: color cycles based on vertical separation only.
   compile_function("Vertical", [[
-    t = abs(ly - py) * INV_10 + phase * INV_30
+    local d = ly - py
+    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
   ]], 2),
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
   compile_function("Diagonal", [[
-    t = abs(lx - px + ly - py) * INV_10 + phase * INV_30
+    local d = lx - px + ly - py
+    t = (d < 0 and -d or d) * INV_10 + phase * INV_30
   ]], 2),
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
   compile_function("Grid", [[
-    t = abs(floor((lx - px) * INV_9) + floor((ly - py) * INV_8)) + phase * INV_10
+    local dx = (lx - px) * INV_9
+    local dy = (ly - py) * INV_8
+    local fdx = dx - dx % 1
+    local fdy = dy - dy % 1
+    local val = fdx + fdy
+    t = (val < 0 and -val or val) + phase * INV_10
   ]], 5),
 
   -- [7] Spiral: color follows a clockwise spiral outward from the player; the spiral slowly rotates over time.
   compile_function("Spiral", [[
     local dx = lx - px
     local dy = ly - py
-
-    -- Use diamond-angle approximation to avoid expensive atan2(dx, dy).
-    local adx = abs(dx)
-    local ady = abs(dy)
-    local dist = sqrt(dx * dx + dy * dy)
-    local q = ady / (adx + ady + 1e-9)
-    if dx < 0 then
-      if dy < 0 then q = 2 + q else q = 2 - q end
-    elseif dy < 0 then
-      q = 4 - q
-    end
-
-    t = dist * INV_8 - q * INV_4 * n_colors + phase * INV_50
+    t = sqrt(dx * dx + dy * dy) * INV_8 - (atan2(dy, dx) * INV_TWO_PI + 0.5) * n_colors + phase * INV_50
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
   compile_function("Diamond", [[
-    t = (abs(lx - px) + abs(ly - py)) * INV_8 + phase * INV_40
+    local dx = lx - px
+    local dy = ly - py
+    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * INV_8 + phase * INV_40
   ]], 2),
 
   -- [9] Kaleidoscope: 4-fold mirror symmetry (fold both axes) combined with radial distance bands.
   compile_function("Kaleidoscope", [[
-    local dx = abs(lx - px)
-    local dy = abs(ly - py)
-    local dist = sqrt(dx * dx + dy * dy)
-
-    -- Use diamond-angle approximation in the first quadrant.
-    local q = dy / (dx + dy + 1e-9)
-
-    t = dist * INV_8 + q * n_colors + phase * INV_40
+    local dx = lx - px
+    local dy = ly - py
+    dx = dx < 0 and -dx or dx
+    dy = dy < 0 and -dy or dy
+    local dist = dx + dy
+    t = dist * INV_8 + (dy * n_colors) / (dist + 1e-9) + phase * INV_40
   ]], 3),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
   compile_function("Square", [[
-    t = max(abs(lx - px), abs(ly - py)) * INV_8 + phase * INV_40
+    local dx = lx - px
+    local dy = ly - py
+    dx = dx < 0 and -dx or dx
+    dy = dy < 0 and -dy or dy
+    t = (dx > dy and dx or dy) * INV_8 + phase * INV_40
   ]], 2),
 
   -- [11] Lattice: repeating tiled pattern of circular rings across the map.
   compile_function("Lattice", [[
-    local fx = abs((lx + 16) % 32 - 16)
-    local fy = abs((ly + 16) % 32 - 16)
-    t = sqrt(fx * fx + fy * fy) * INV_8 - phase * INV_40
+    local dx = (lx + 16) % 32 - 16
+    local dy = (ly + 16) % 32 - 16
+    dx = dx < 0 and -dx or dx
+    dy = dy < 0 and -dy or dy
+    t = sqrt(dx * dx + dy * dy) * INV_8 - phase * INV_40
   ]], 2),
 
   -- [12] Pulse: all labs change color in unison regardless of position.
@@ -212,13 +198,17 @@ local functions = {
   -- [13] Random: color changes at random periodically.
   compile_function("Random", [[
     -- Discretize phase into steps to control the flicker rate.
-    local phase_step = floor(phase * INV_10)
+    local ps = phase * INV_10
+    local phase_step = ps - ps % 1
     -- LCG-style pseudo-random number.
-    local r = (floor(lx) * 137 + floor(ly) * 149 + phase_step * 163) % 1024 * INV_1024
+    local flx = lx - lx % 1
+    local fly = ly - ly % 1
+    local r = (flx * 137 + fly * 149 + phase_step * 163) % 1024 * INV_1024
     t = r * n_colors
   ]], 20),
 }
 ColorFunctions.functions = functions
+ColorFunctions._compile_function = compile_function
 local n_functions = #functions
 
 --- Choose a random color function.
