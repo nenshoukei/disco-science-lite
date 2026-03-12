@@ -1,6 +1,6 @@
 local Utils = require("scripts.shared.utils")
 
---- Registry for colors of ingredients
+--- Registry for colors of research ingredients
 ---
 --- @class ColorRegistry
 local ColorRegistry = {

@@ -1,4 +1,4 @@
---- Color functions are functions to calculate lab colors based on time frame (phase), player's position and lab's position.
+--- Color functions are functions to calculate lab colors based on time frame (phase), colors of research ingredients, player's position and lab's position.
 ---
 --- These are dynamically generated and compiled to eliminate function call overhead:
 ---
