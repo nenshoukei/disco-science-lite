@@ -1,43 +1,53 @@
 # UPS Optimization in Disco Science Lite
 
-This document describes the technical strategies used to minimize the UPS (Updates Per Second) impact of Disco Science Lite. The mod is designed to handle hundreds of labs with minimal performance overhead.
+This document describes the technical strategies used to minimize the UPS (Updates Per Second) impact of Disco Science Lite. The mod is designed to handle hundreds of labs with minimal performance overhead, even in mega-bases.
 
-## 1. Spatial Filtering via ChunkMap
+## 1. Visibility-Based Processing (ChunkMap)
 
 The most effective optimization is **not processing what isn't visible**.
 
-The naive approach of iterating over all labs on every tick scales with the total number of labs ($O(N)$), which is not comfortable with mega-bases. Disco Science Lite iterates over only visible labs for connected players.
+While a standard implementation might update every lab in the entire world every single tick, this approach can struggle to scale as your factory grows to hundreds or thousands of labs. Disco Science Lite uses a custom "ChunkMap" to organize labs by their location on the map based on chunks (32x32 tiles).
 
-To reduce view-port calculation, the mod splits labs into chunks (32x32 tiles) using a custom [ChunkMap](/scripts/runtime/chunk-map.lua) (a three-level table: `surface → chunk_x → chunk_y`). Every 30 ticks, the mod calculates the range of chunks visible to the player's current view. Only labs within these chunks are gathered into a flat list `visible_overlays` for updating their colors by `on_tick` function.
+Every 30 ticks (twice per second), the mod calculates exactly which chunks of the map are currently visible to active players. Only labs within these visible chunks are added to the "Hot Update" list. If no one is looking at a lab, it consumes virtually zero CPU time.
+
+When multiple players are looking at the same chunk, the mod detects overlapping viewports and checks the same chunk only once per cycle, rather than once per player.
 
 ## 2. Tiered Update System
 
-Not all logic needs to run every tick. The mod separates tasks into three frequency-based tiers to balance responsiveness with performance:
+To balance responsiveness with performance, the mod separates tasks into two main frequency tiers:
 
-- **Heavy Update (Every 30 Ticks):** Checks `entity.status` and `force.current_research`, and rebuilds the `visible_overlays` list by calculating view-port on every connected players.
-- **Medium Update (Every 10 Ticks + Events):** Updates player position for each force to make the disco effect follow the player.
-- **Hot Update (Every Tick):** Updates lab colors calculated by color functions. Iterates only over the pre-filtered `visible_overlays` list.
+- **Heavy Update (Every 30 Ticks):**
+    - Checks what technology is currently being researched and updates the available color palette.
+    - Checks each lab's status (e.g., if it's working or has low power).
+    - Rebuilds the list of visible labs based on player positions and zoom levels.
+    - Recalculates the load-balancing "Stride" (see below).
 
-## 3. Stride-Based Load Balancing with Auto-Scaling
+- **Hot Update (Every Tick):**
+    - Updates the actual colors of the visible labs.
+    - This is the only logic that runs 60 times per second, and it only operates on the pre-filtered list of visible labs.
 
-To handle extreme cases with hundreds of visible labs, the mod uses a stride-based update system that automatically adjusts to the current workload.
+## 3. Stride-Base Load Balancing
 
-Instead of updating every visible lab every tick, the mod updates only `1/N` of the list per tick — cycling through the full list over `N` ticks. This spreads the Lua-to-C bridge cost (the main bottleneck when writing `LuaRenderObject.color`) evenly over time, preventing CPU spikes.
+Writing color data to the Factorio engine is one of the most "expensive" parts of a visual mod. If you zoom out to see 1,000 labs at once, updating all of them in a single tick could cause a noticeable "stutter" (CPU spike).
 
-The stride `N` (`current_interval`) is recalculated every 30 ticks:
+To prevent this, the mod uses an **Automatic Stride System**. If the number of visible labs exceeds the `Max lab color updates per tick` setting (default 500), the mod automatically spreads the updates over multiple ticks.
 
-```
-N = max(1, ceil(visible_labs / max_updates_per_tick))
-N = min(N, 60)
-```
+For example, if you are looking at 1,000 labs and the limit is 500:
 
-Where `max_updates_per_tick` is the mod setting `Max lab color updates per tick` (default: 500). For example:
+- The mod will update 500 labs on Tick A.
+- The mod will update the other 500 labs on Tick B.
+- This continues in a cycle, ensuring that the work is spread evenly over time.
 
-| Visible labs | `max_updates_per_tick` | Stride N | Update frequency per lab |
-| ------------ | ---------------------- | -------- | ------------------------ |
-| 50           | 500                    | 1        | Every tick               |
-| 300          | 500                    | 1        | Every tick               |
-| 1000         | 500                    | 2        | Every 2 ticks            |
-| 1000         | 200                    | 5        | Every 5 ticks            |
+| Visible Labs | Max Updates per Tick | Update Frequency per Lab | Visual Impact                  |
+| ------------ | -------------------- | ------------------------ | ------------------------------ |
+| 100          | 500                  | Every tick               | Perfectly smooth               |
+| 500          | 500                  | Every tick               | Perfectly smooth               |
+| 1000         | 500                  | Every 2nd tick           | Barely noticeable              |
+| 3000         | 500                  | Every 6th tick           | Slight flicker at extreme zoom |
 
-On Mac with Apple M2 Max, benchmarks show each `LuaRenderObject.color` write costs approximately 5 μs, so `max_updates_per_tick = 500` corresponds to ~2.5 ms at maximum (when 500+ labs fill the viewport at extreme zoom-out). At typical zoom levels, fewer than 200 labs are visible, keeping the overhead well under 1 ms.
+## 4. Minimizing "Engine Overhead"
+
+Interacting with the Factorio game engine (the "C-Bridge") is slower than running logic inside the mod itself. To keep things fast, the mod caches as much information as possible:
+
+- **Position Caching:** Instead of asking the engine where a player is for every single lab, we ask once per player per tick and reuse that position for all labs visible to them.
+- **Status Caching:** Lab status and research colors are stored in memory and only refreshed during the "Heavy Update" (every 30 ticks), avoiding thousands of redundant requests to the game engine every tick.
