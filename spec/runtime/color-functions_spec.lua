@@ -5,7 +5,7 @@ local ColorFunctions = require("scripts.runtime.color-functions")
 --- @param colors ColorTuple[] Array of colors to interpolate.
 --- @param n_colors integer #colors
 --- @param transition_sharpness number Transition sharpness.
-function test_inlined_interpolation(output, t, colors, n_colors, transition_sharpness)
+local function test_inlined_interpolation(output, t, colors, n_colors, transition_sharpness)
   local f = ColorFunctions._compile_function("inlined_interpolation", string.format("t = %.18f", t), transition_sharpness)
   return f(output, 0, colors, n_colors, 0, 0, 0, 0)
 end
