@@ -36,9 +36,7 @@ declare namespace DiscoScience {
    */
   interface LabOverlaySettings {
     /**
-     * Name of
-     * [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html)
-     * to be used as an overlay.
+     * Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
      * If omitted, the built-in overlay for the standard lab shape is used.
      */
     animation?: string;
@@ -116,7 +114,6 @@ declare const DiscoScience: {
    *
    * `settings` can be used to specify the overlay animation and scale.
    * If not passed, the default settings are used.
-   * These settings can be overridden at runtime via `remote.call()`.
    *
    * @param lab Lab prototype to be prepared.
    * @param settings Settings for the lab overlay.

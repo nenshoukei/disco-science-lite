@@ -3,7 +3,7 @@ local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
---- @type DiscoScienceInterface
+--- @type DiscoScience.Interface
 local DiscoScienceInterface = {}
 
 function DiscoScienceInterface.prepareLab(lab, settings)

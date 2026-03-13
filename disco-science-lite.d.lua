@@ -27,13 +27,23 @@
 ---
 
 --- Settings for rendering a lab overlay.
---- @class (exact) LabOverlaySettings
+---
+--- @class (exact) DiscoScience.LabOverlaySettings
 --- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
 ---                          If omitted, the built-in overlay for the standard lab shape is used.
 --- @field scale number? Scale of the overlay. (Default: `1`)
 
+--- A color in RGBA format.
+---
+--- See: https://lua-api.factorio.com/latest/types/Color.html
+---
+--- @alias DiscoScience.Color { r?: number, g?: number, b?: number, a?: number } | [number, number, number] | [number, number, number, number]
+
 --- Lab Prototype for DiscoScience.prepareLab()
---- @alias DiscoScienceLabPrototype { type: "lab", name: string }
+---
+--- See: https://lua-api.factorio.com/latest/prototypes/LabPrototype.html
+---
+--- @alias DiscoScience.LabPrototype { type: "lab", name: string }
 
 --- Public interface `_G.DiscoScience` for other mods on prototype stage.
 ---
@@ -42,14 +52,13 @@
 --- Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 ---
 --- Compatible with the original DiscoScience mod interface.
---- @class DiscoScienceInterface
+--- @class DiscoScience.Interface
 _G.DiscoScience = {
 
   --- Prepare a lab prototype for Disco Science colorization.
   ---
   --- `settings` can be used to specify the overlay animation and scale.
   --- If not passed, the default settings are used.
-  --- These settings can be overridden at runtime via `remote.call()`.
   ---
   --- Settings:
   --- - `animation` -
@@ -58,8 +67,8 @@ _G.DiscoScience = {
   --- - `scale` -
   ---     Scale of the overlay. (Default: `1`)
   ---
-  --- @param lab DiscoScienceLabPrototype Lab prototype to be prepared.
-  --- @param settings LabOverlaySettings? Settings for the lab overlay.
+  --- @param lab DiscoScience.LabPrototype Lab prototype to be prepared.
+  --- @param settings DiscoScience.LabOverlaySettings? Settings for the lab overlay.
   prepareLab = function (lab, settings) end,
 
   --- Set the color of an ingredient (science pack) at prototype stage.
@@ -67,13 +76,13 @@ _G.DiscoScience = {
   --- These colors can be overridden at runtime via `remote.call()`.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @param color Color
+  --- @param color DiscoScience.Color
   setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack) registered so far.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @return Color|nil color Color for the ingredient, or `nil` if not registered.
+  --- @return DiscoScience.Color|nil color Color for the ingredient, or `nil` if not registered.
   getIngredientColor = function (item_name) end,
 
 }
@@ -83,16 +92,17 @@ _G.DiscoScience = {
 --- Available in `control.lua`.
 ---
 --- Compatible with the original DiscoScience mod interface.
---- @class DiscoScienceRemote
+--- @class DiscoScience.Remote
 local DiscoScienceRemote = {
 
   --- Set the scale of a lab overlay.
   ---
-  --- @deprecated Use `DiscoScience.prepareLab()` at the prototype stage instead.
+  --- [DEPRECATED] Use `DiscoScience.prepareLab()` at the prototype stage instead.
   --- This function is kept for compatibility with the original DiscoScience mod.
   ---
   --- @param lab_name string Lab prototype name.
   --- @param scale number Scale of the overlay. Must be a positive number.
+  --- @deprecated
   setLabScale = function (lab_name, scale) end,
 
   --- Set the color of an ingredient (science pack) at runtime.
@@ -100,13 +110,13 @@ local DiscoScienceRemote = {
   --- Overrides colors set at prototype stage.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @param color Color
+  --- @param color DiscoScience.Color
   setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack).
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @return Color|nil color Color for the ingredient, or `nil` if not registered.
+  --- @return DiscoScience.Color|nil color Color for the ingredient, or `nil` if not registered.
   getIngredientColor = function (item_name) end,
 
 }

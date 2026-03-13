@@ -1,7 +1,7 @@
 --- @class RemoteInterface
 local RemoteInterface = {}
 
---- @type DiscoScienceRemote
+--- @type DiscoScience.Remote
 local DiscoScienceRemote = {}
 RemoteInterface.functions = DiscoScienceRemote
 

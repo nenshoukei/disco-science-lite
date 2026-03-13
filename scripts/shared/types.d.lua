@@ -4,6 +4,8 @@ error("This file cannot be executed")
 --- @type consts
 _G.consts = {}
 
+--- @alias LabOverlaySettings DiscoScience.LabOverlaySettings
+
 --- @alias ColorTuple [number, number, number]
 --- @alias ColorStruct Color.0
 

@@ -106,11 +106,11 @@ end
 | Parameter   | Type                                                                                  | Description                                    |
 | ----------- | ------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `lab`       | [data.LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize                  |
-| `settings`  | `LabOverlaySettings?`                                                                 | Optional overlay settings (see below)          |
+| `settings`  | `DiscoScience.LabOverlaySettings?`                                                    | Optional overlay settings (see below)          |
 | `item_name` | `string`                                                                              | Item prototype name of the ingredient          |
 | `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html)                         | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
 
-**`LabOverlaySettings`:**
+**`DiscoScience.LabOverlaySettings`:**
 
 | Field       | Type      | Default          | Description                                                                                                                |
 | ----------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
