@@ -12,7 +12,7 @@ data:extend({
     setting_type = "runtime-global",
     default_value = 180,
     minimum_value = 1,
-    order = "rg-a[visual]-a",
+    order = "rg-a[visual]-b",
   },
   {
     type = "int-setting",
@@ -21,13 +21,6 @@ data:extend({
     default_value = 100,
     minimum_value = 1,
     maximum_value = 100,
-    order = "rg-a[visual]-b",
-  },
-  {
-    type = "bool-setting",
-    name = "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]],
-    setting_type = "runtime-global",
-    default_value = false,
     order = "rg-a[visual]-c",
   },
   {
@@ -36,6 +29,6 @@ data:extend({
     setting_type = "runtime-global",
     default_value = 500,
     minimum_value = 1,
-    order = "rg-b[performance]-b",
+    order = "rg-b[performance]-a",
   },
 })

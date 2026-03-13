@@ -192,7 +192,6 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
 
       _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value = false
-      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = true
       _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
       _G.settings.global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value = 120
       _G.settings.global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value = 500
@@ -200,25 +199,20 @@ describe("LabOverlayRenderer", function ()
       r:load_settings()
 
       assert.is_false(r.is_fallback_enabled)
-      assert.is_true(r.is_unison_flicker)
       assert.are.equal(0.5, r.color_intensity)
       assert.are.equal(120, r.color_pattern_duration)
       assert.are.equal(500, r.max_updates_per_tick)
     end)
 
-    it("calls side effects when unison-flicker or color-intensity changes", function ()
+    it("calls side effects when color-intensity changes", function ()
       local r = make_renderer()
 
-      local flicker_called = false
       local research_called = false
-      r.reset_all_overlays_animation_offset = function () flicker_called = true end
       r.update_all_forces_current_research = function () research_called = true end
 
-      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = not r.is_unison_flicker
       _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
       r:load_settings()
 
-      assert.is_true(flicker_called)
       assert.is_true(research_called)
     end)
 
@@ -227,15 +221,12 @@ describe("LabOverlayRenderer", function ()
       _G.game = nil
 
       local r = make_renderer()
-      local flicker_called = false
       local research_called = false
-      r.reset_all_overlays_animation_offset = function () flicker_called = true end
       r.update_all_forces_current_research = function () research_called = true end
 
-      _G.settings.global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value = not r.is_unison_flicker
+      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
       r:load_settings()
 
-      assert.is_false(flicker_called)
       assert.is_false(research_called)
 
       _G.game = old_game
@@ -340,26 +331,6 @@ describe("LabOverlayRenderer", function ()
 
       assert.is_nil(_G.rendering.objects[orphan_id])
       assert.is_nil(_G.rendering.objects[anim2_id])
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("reset_all_overlays_animation_offset", function ()
-    it("updates animation_offset based on is_unison_flicker", function ()
-      local r = make_renderer()
-      local obj1 = { animation_offset = 123 }
-      local obj2 = { animation_offset = 456 }
-      _G.rendering.objects = { [1] = obj1, [2] = obj2 }
-
-      r.is_unison_flicker = true
-      r:reset_all_overlays_animation_offset()
-      assert.are.equal(0, obj1.animation_offset)
-      assert.are.equal(0, obj2.animation_offset)
-
-      r.is_unison_flicker = false
-      r:reset_all_overlays_animation_offset()
-      assert.is_true(obj1.animation_offset > 0)
-      assert.is_true(obj1.animation_offset <= 300)
     end)
   end)
 

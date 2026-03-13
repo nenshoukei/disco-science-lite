@@ -93,7 +93,6 @@ local function reset_mocks()
     global = {
       [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 },
       [ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ]               = { value = 100 },
-      [ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ]                 = { value = false },
       [ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ]     = { value = 500 },
     },
   })

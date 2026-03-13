@@ -60,9 +60,6 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- Whether the fallback overlay is enabled.
     is_fallback_enabled = true,
 
-    --- Whether the overlay animation flickers in unison.
-    is_unison_flicker = false,
-
     --- Color intensity. [0, 1]
     color_intensity = 1.0,
 
@@ -84,13 +81,10 @@ end
 function LabOverlayRenderer:load_settings()
   local startup = settings.startup
   local global = settings.global
-  local old_unison_flicker = self.is_unison_flicker
   local old_color_intensity = self.color_intensity
 
   self.is_fallback_enabled =
     startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
-  self.is_unison_flicker =
-    global[ "mks-dsl-unison-flicker" --[[$UNISON_FLICKER_NAME]] ].value --[[@as boolean]]
   self.color_intensity =
     global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value * 0.01
   self.color_pattern_duration =
@@ -100,9 +94,6 @@ function LabOverlayRenderer:load_settings()
 
   -- Since `game` is not available for `on_load`, this guard avoids updates on game state in `on_load` handler.
   if game then
-    if old_unison_flicker ~= self.is_unison_flicker then
-      self:reset_all_overlays_animation_offset()
-    end
     if old_color_intensity ~= self.color_intensity then
       self:update_all_forces_current_research()
     end
@@ -161,7 +152,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
       y_scale = scale,
       render_layer = "higher-object-under",
       visible = false,
-      animation_offset = self.is_unison_flicker and 0 or random() * 300,
+      animation_offset = random() * 300,
     })
   end
 
@@ -238,16 +229,6 @@ function LabOverlayRenderer:render_overlays_for_all_labs()
   -- Destroy any remaining render objects that were not reused.
   for _, object in pairs(existing_objects) do
     object.destroy()
-  end
-end
-
---- Reset animation_offset of all overlays for updated is_unison_flicker.
-function LabOverlayRenderer:reset_all_overlays_animation_offset()
-  local is_unison_flicker = self.is_unison_flicker
-  local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
-  for i = 1, #all_objects do
-    local object = all_objects[i]
-    object.animation_offset = is_unison_flicker and 0 or random() * 300
   end
 end
 

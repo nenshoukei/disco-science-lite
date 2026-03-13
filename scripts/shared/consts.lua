@@ -39,7 +39,6 @@ local consts = {
   FALLBACK_OVERLAY_ENABLED_NAME = NAME_PREFIX .. "fallback-overlay-enabled",
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
-  UNISON_FLICKER_NAME = NAME_PREFIX .. "unison-flicker",
   MAX_UPDATES_PER_TICK_NAME = NAME_PREFIX .. "max-updates-per-tick",
 
   -- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
