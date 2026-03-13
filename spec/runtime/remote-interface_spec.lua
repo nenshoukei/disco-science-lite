@@ -12,10 +12,7 @@ describe("RemoteInterface", function ()
   before_each(function ()
     color_reg = ColorRegistry.new()
     lab_reg = LabRegistry.new()
-    RemoteInterface.bind_storage({
-      color_registry = color_reg,
-      lab_registry = lab_reg,
-    })
+    RemoteInterface.bind_registries(color_reg, lab_reg)
     RemoteInterface.bind_rebuild_callback(nil --[[@as fun()]])
   end)
 
@@ -32,9 +29,13 @@ describe("RemoteInterface", function ()
       assert.is_true(called)
     end)
 
-    it("queues calls when not bound and applies after bind_storage", function ()
-      --- @diagnostic disable-next-line: missing-fields
-      RemoteInterface.bind_storage({})
+    it("writes to the scale_overrides table", function ()
+      RemoteInterface.functions.setLabScale("lab", 3)
+      assert.are.equal(3, lab_reg.scale_overrides["lab"])
+    end)
+
+    it("queues calls when not bound and applies after bind_registries", function ()
+      RemoteInterface.bind_registries(nil, nil)
       local called = false
       RemoteInterface.bind_rebuild_callback(function () called = true end)
 
@@ -42,7 +43,7 @@ describe("RemoteInterface", function ()
       assert.is_nil(lab_reg:get_overlay_settings("lab"))
       assert.is_false(called)
 
-      RemoteInterface.bind_storage({ color_registry = color_reg, lab_registry = lab_reg })
+      RemoteInterface.bind_registries(color_reg, lab_reg)
       assert.are.equal(3, lab_reg:get_overlay_settings("lab").scale)
       assert.is_true(called)
     end)
@@ -74,13 +75,17 @@ describe("RemoteInterface", function ()
       assert.are.equal(0.4, c2.r)
     end)
 
+    it("writes to the color_overrides table", function ()
+      RemoteInterface.functions.setIngredientColor("custom", { 0.1, 0.2, 0.3 })
+      assert.is_not_nil(color_reg.overrides["custom"])
+    end)
+
     it("queues calls and applies them later", function ()
-      --- @diagnostic disable-next-line: missing-fields
-      RemoteInterface.bind_storage({})
+      RemoteInterface.bind_registries(nil, nil)
       RemoteInterface.functions.setIngredientColor("custom", { 0.5, 0.6, 0.7 })
       assert.is_nil(color_reg:get_ingredient_color("custom"))
 
-      RemoteInterface.bind_storage({ color_registry = color_reg, lab_registry = lab_reg })
+      RemoteInterface.bind_registries(color_reg, lab_reg)
       assert.are.equal(0.5, color_reg:get_ingredient_color("custom").r)
     end)
 
@@ -104,8 +109,7 @@ describe("RemoteInterface", function ()
       assert.is_not_nil(RemoteInterface.functions.getIngredientColor("pack"))
       assert.is_nil(RemoteInterface.functions.getIngredientColor("unknown"))
 
-      --- @diagnostic disable-next-line: missing-fields
-      RemoteInterface.bind_storage({})
+      RemoteInterface.bind_registries(nil, nil)
       assert.is_nil(RemoteInterface.functions.getIngredientColor("pack"))
     end)
 

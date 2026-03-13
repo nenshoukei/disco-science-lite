@@ -31,26 +31,40 @@ local function rebuild_overlays()
   setup_event_handlers()
 end
 
+--- Create fresh registries from prototype data, with stored overrides applied.
+---
+--- @param ds_storage DiscoScienceStorage
+--- @return ColorRegistry, LabRegistry
+local function create_registries(ds_storage)
+  local color_registry = ColorRegistry.new(ds_storage.color_overrides)
+  color_registry:load_prototype_colors()
+  local lab_registry = LabRegistry.new(ds_storage.lab_scale_overrides)
+  lab_registry:load_prototype_settings()
+  return color_registry, lab_registry
+end
+
 function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
-  ds_storage.color_registry = ColorRegistry.new()
-  ds_storage.color_registry:load_prototype_colors(true)
-  ds_storage.lab_registry = LabRegistry.new()
-  ds_storage.lab_registry:load_prototype_settings(true)
-  RemoteInterface.bind_storage(ds_storage)
+  ds_storage.color_overrides = {}
+  ds_storage.lab_scale_overrides = {}
 
-  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.lab_registry)
+  local color_registry, lab_registry = create_registries(ds_storage)
+  RemoteInterface.bind_registries(color_registry, lab_registry)
+
+  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
   rebuild_overlays()
   RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
-  ds_storage.color_registry:validate_technology_prototypes()
+  color_registry:validate_technology_prototypes()
 end
 
 function LabControl.on_load()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
-  RemoteInterface.bind_storage(ds_storage)
 
-  renderer = LabOverlayRenderer.new(ds_storage.color_registry, ds_storage.lab_registry)
+  local color_registry, lab_registry = create_registries(ds_storage)
+  RemoteInterface.bind_registries(color_registry, lab_registry)
+
+  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
 
   -- on_load cannot modify game state, so defer rendering to the first tick.
   script.on_event(defines.events.on_tick, function ()
@@ -61,15 +75,15 @@ end
 
 function LabControl.on_configuration_changed()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
-  -- Reload prototype settings first in case mods were added/removed.
-  -- These do not overwrite any existing values set by remote calls at runtime.
-  ds_storage.color_registry:load_prototype_colors(false)
-  ds_storage.lab_registry:load_prototype_settings(false)
 
+  local color_registry, lab_registry = create_registries(ds_storage)
+  RemoteInterface.bind_registries(color_registry, lab_registry)
+
+  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
   rebuild_overlays() -- cancels the deferred render registered in on_load
   RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
-  ds_storage.color_registry:validate_technology_prototypes()
+  color_registry:validate_technology_prototypes()
 end
 
 local TARGET_TYPE_ENTITY = defines.target_type.entity

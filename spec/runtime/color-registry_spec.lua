@@ -22,6 +22,16 @@ local function make_prototypes(techs)
   return ({ technology = technology }) --[[@as LuaPrototypes]]
 end
 
+--- Set up mock mod_data for load_prototype_colors tests.
+--- @param colors table<string, ColorTuple>|nil nil to remove mod_data
+local function set_mod_data(colors)
+  if colors then
+    _G.prototypes.mod_data[ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ] = ({ data = colors }) --[[@as LuaModData]]
+  else
+    _G.prototypes.mod_data[ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ] = nil
+  end
+end
+
 describe("ColorRegistry", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
@@ -30,6 +40,17 @@ describe("ColorRegistry", function ()
       -- ingredient_colors starts empty; colors are loaded via load_prototype_colors()
       local color = r:get_ingredient_color("automation-science-pack")
       assert.is_nil(color)
+    end)
+
+    it("accepts an overrides table", function ()
+      local overrides = { ["custom-pack"] = { 0.5, 0.6, 0.7 } }
+      local r = ColorRegistry.new(overrides)
+      assert.are.equal(overrides, r.overrides)
+    end)
+
+    it("defaults overrides to an empty table when not provided", function ()
+      local r = ColorRegistry.new()
+      assert.are.same({}, r.overrides)
     end)
   end)
 
@@ -80,6 +101,13 @@ describe("ColorRegistry", function ()
       assert.are.equal(0.1, color.r)
     end)
 
+    it("writes to the overrides table", function ()
+      local overrides = {}
+      local r = ColorRegistry.new(overrides)
+      r:set_ingredient_color("custom-pack", { 0.1, 0.2, 0.3 })
+      assert.is_not_nil(overrides["custom-pack"])
+    end)
+
     it("instances are independent from each other", function ()
       local r1 = ColorRegistry.new()
       local r2 = ColorRegistry.new()
@@ -87,6 +115,78 @@ describe("ColorRegistry", function ()
       -- r2 should not be affected by r1's changes
       local color = r2:get_ingredient_color("automation-science-pack")
       assert.is_nil(color)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("load_prototype_colors", function ()
+    before_each(function ()
+      set_mod_data(nil)
+    end)
+
+    it("does nothing when mod_data prototype is absent", function ()
+      local r = ColorRegistry.new()
+      assert.no_error(function ()
+        r:load_prototype_colors()
+      end)
+      assert.is_nil(r:get_ingredient_color("automation-science-pack"))
+    end)
+
+    it("loads colors from mod_data", function ()
+      set_mod_data({ ["automation-science-pack"] = { 0.91, 0.16, 0.20 } })
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      local color = r:get_ingredient_color("automation-science-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.91, color.r)
+    end)
+
+    it("loads a copy of the prototype data (not a reference)", function ()
+      set_mod_data({ ["pack"] = { 0.1, 0.2, 0.3 } })
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      local proto_data = _G.prototypes.mod_data
+        [ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ].data
+      assert.are_not.equal(proto_data["pack"], r.ingredient_colors["pack"])
+    end)
+
+    it("replaces previously loaded colors on re-load", function ()
+      set_mod_data({ ["pack"] = { 0.5, 0.5, 0.5 } })
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      set_mod_data({ ["other-pack"] = { 0.1, 0.1, 0.1 } })
+      r:load_prototype_colors()
+      -- old color is gone, new color is present
+      assert.is_nil(r:get_ingredient_color("pack"))
+      assert.is_not_nil(r:get_ingredient_color("other-pack"))
+    end)
+
+    it("re-applies runtime overrides on top of prototype data", function ()
+      set_mod_data({ ["proto-pack"] = { 0.1, 0.2, 0.3 } })
+      local overrides = {}
+      local r = ColorRegistry.new(overrides)
+      r:set_ingredient_color("override-pack", { 0.9, 0.8, 0.7 })
+      -- Simulate re-load (e.g. on_configuration_changed): prototype data changes
+      set_mod_data({ ["proto-pack"] = { 0.4, 0.5, 0.6 }, ["override-pack"] = { 0.0, 0.0, 0.0 } })
+      r:load_prototype_colors()
+      -- Prototype color is updated
+      local proto_color = r:get_ingredient_color("proto-pack")
+      assert.is_not_nil(proto_color) --- @cast proto_color -nil
+      assert.are.equal(0.4, proto_color.r)
+      -- Override wins over new prototype value
+      local override_color = r:get_ingredient_color("override-pack")
+      assert.is_not_nil(override_color) --- @cast override_color -nil
+      assert.are.equal(0.9, override_color.r)
+    end)
+
+    it("applies overrides even when mod_data is absent", function ()
+      local overrides = {}
+      local r = ColorRegistry.new(overrides)
+      r:set_ingredient_color("custom-pack", { 0.5, 0.5, 0.5 })
+      r:load_prototype_colors() -- no mod_data
+      local color = r:get_ingredient_color("custom-pack")
+      assert.is_not_nil(color)  --- @cast color -nil
+      assert.are.equal(0.5, color.r)
     end)
   end)
 

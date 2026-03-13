@@ -18,6 +18,17 @@ describe("LabRegistry", function ()
       assert.is_nil(r:get_overlay_settings("lab"))
       assert.is_nil(r:get_overlay_settings("biolab"))
     end)
+
+    it("accepts a scale_overrides table", function ()
+      local overrides = { ["my-lab"] = 3 }
+      local r = LabRegistry.new(overrides)
+      assert.are.equal(overrides, r.scale_overrides)
+    end)
+
+    it("defaults scale_overrides to an empty table when not provided", function ()
+      local r = LabRegistry.new()
+      assert.are.same({}, r.scale_overrides)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -77,6 +88,13 @@ describe("LabRegistry", function ()
       assert.is_nil(settings.animation) -- nil for default value
       assert.are.equal(4, settings.scale)
     end)
+
+    it("writes to the scale_overrides table", function ()
+      local scale_overrides = {}
+      local r = LabRegistry.new(scale_overrides)
+      r:set_scale("my-lab", 3)
+      assert.are.equal(3, scale_overrides["my-lab"])
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -88,15 +106,15 @@ describe("LabRegistry", function ()
     it("does nothing when mod_data prototype is absent", function ()
       local r = LabRegistry.new()
       assert.no_error(function ()
-        r:load_prototype_settings(true)
+        r:load_prototype_settings()
       end)
       assert.is_nil(r:get_overlay_settings("lab"))
     end)
 
-    it("loads settings from mod_data when overwrites is true", function ()
+    it("loads settings from mod_data", function ()
       set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 2 } })
       local r = LabRegistry.new()
-      r:load_prototype_settings(true)
+      r:load_prototype_settings()
       local settings = r:get_overlay_settings("my-lab")
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("proto-anim", settings.animation)
@@ -109,47 +127,64 @@ describe("LabRegistry", function ()
         ["lab-b"] = { animation = "anim-b", scale = 3 },
       })
       local r = LabRegistry.new()
-      r:load_prototype_settings(true)
+      r:load_prototype_settings()
       assert.are.equal("anim-a", r:get_overlay_settings("lab-a").animation)
       assert.are.equal("anim-b", r:get_overlay_settings("lab-b").animation)
     end)
 
-    it("overwrites existing settings when overwrites is true", function ()
+    it("always overwrites existing settings with prototype data", function ()
       set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 5 } })
       local r = LabRegistry.new()
-      r:register("my-lab", { animation = "runtime-anim", scale = 1 })
-      r:load_prototype_settings(true)
+      r:register("my-lab", { animation = "old-anim", scale = 1 })
+      r:load_prototype_settings()
       local settings = r:get_overlay_settings("my-lab")
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("proto-anim", settings.animation)
       assert.are.equal(5, settings.scale)
     end)
 
-    it("does not overwrite existing settings when overwrites is false", function ()
-      set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 5 } })
+    it("replaces previously loaded settings on re-load", function ()
+      set_mod_data({ ["lab-a"] = { animation = "anim-a", scale = 1 } })
       local r = LabRegistry.new()
-      r:register("my-lab", { animation = "runtime-anim", scale = 1 })
-      r:load_prototype_settings(false)
-      local settings = r:get_overlay_settings("my-lab")
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("runtime-anim", settings.animation)
-      assert.are.equal(1, settings.scale)
+      r:load_prototype_settings()
+      set_mod_data({ ["lab-b"] = { animation = "anim-b", scale = 2 } })
+      r:load_prototype_settings()
+      -- old lab is gone, new lab is present
+      assert.is_nil(r:get_overlay_settings("lab-a"))
+      assert.is_not_nil(r:get_overlay_settings("lab-b"))
     end)
 
-    it("loads unregistered labs even when overwrites is false", function ()
-      set_mod_data({ ["new-lab"] = { animation = "proto-anim", scale = 2 } })
-      local r = LabRegistry.new()
-      r:load_prototype_settings(false)
-      local settings = r:get_overlay_settings("new-lab")
+    it("re-applies scale_overrides on top of prototype data", function ()
+      set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 1 } })
+      local scale_overrides = {}
+      local r = LabRegistry.new(scale_overrides)
+      r:set_scale("my-lab", 3)
+      -- Simulate re-load: prototype data changes
+      set_mod_data({ ["my-lab"] = { animation = "new-proto-anim", scale = 2 } })
+      r:load_prototype_settings()
+      local settings = r:get_overlay_settings("my-lab")
       assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("proto-anim", settings.animation)
-      assert.are.equal(2, settings.scale)
+      -- Animation is updated from prototype
+      assert.are.equal("new-proto-anim", settings.animation)
+      -- Scale override wins over new prototype value
+      assert.are.equal(3, settings.scale)
+    end)
+
+    it("creates entry for scale_overrides of unregistered labs", function ()
+      set_mod_data({ ["lab-a"] = { animation = "anim-a", scale = 1 } })
+      local r = LabRegistry.new()
+      r:set_scale("unknown-lab", 4) -- not in prototype data
+      r:load_prototype_settings()
+      local settings = r:get_overlay_settings("unknown-lab")
+      assert.is_not_nil(settings) --- @cast settings -nil
+      assert.is_nil(settings.animation)
+      assert.are.equal(4, settings.scale)
     end)
 
     it("loads a copy of settings (not a reference to the prototype data)", function ()
       set_mod_data({ ["my-lab"] = { animation = "proto-anim", scale = 2 } })
       local r = LabRegistry.new()
-      r:load_prototype_settings(true)
+      r:load_prototype_settings()
       local proto_data = _G.prototypes.mod_data
         [ "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]] ].data
       assert.are_not.equal(proto_data["my-lab"], r:get_overlay_settings("my-lab"))

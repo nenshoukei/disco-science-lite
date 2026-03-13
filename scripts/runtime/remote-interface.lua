@@ -16,12 +16,13 @@ local rebuild_callback = nil
 --- @type {fname: string, args: any[]}[]
 local pending_calls = {}
 
---- Bind the storage for registries.
+--- Bind the registries.
 ---
---- @param ds_storage DiscoScienceStorage
-function RemoteInterface.bind_storage(ds_storage)
-  lab_registry = ds_storage.lab_registry
-  color_registry = ds_storage.color_registry
+--- @param new_color_registry ColorRegistry|nil
+--- @param new_lab_registry LabRegistry|nil
+function RemoteInterface.bind_registries(new_color_registry, new_lab_registry)
+  color_registry = new_color_registry
+  lab_registry = new_lab_registry
   for i = 1, #pending_calls do
     local call = pending_calls[i]
     RemoteInterface.functions[call.fname](table.unpack(call.args))

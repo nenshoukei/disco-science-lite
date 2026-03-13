@@ -10,17 +10,17 @@ local ColorRegistry = {
 }
 ColorRegistry.__index = ColorRegistry
 
-if script then
-  script.register_metatable("ColorRegistry", ColorRegistry)
-end
-
+--- @param color_overrides table<string, ColorTuple>?
 --- @return ColorRegistry
-function ColorRegistry.new()
+function ColorRegistry.new(color_overrides)
   --- @class ColorRegistry
   local self = {
     --- Dictionary of ingredient colors. Key is ingredient's ItemPrototype name.
     --- @type table<string, ColorTuple>
     ingredient_colors = {},
+    --- Runtime overrides persisted in storage. Reference to storage.color_overrides.
+    --- @type table<string, ColorTuple>
+    overrides = color_overrides or {},
   }
   return setmetatable(self, ColorRegistry)
 end
@@ -30,7 +30,9 @@ end
 --- @param item_name string Name of ItemPrototype of the ingredient
 --- @param color Color Color for the ingredient.
 function ColorRegistry:set_ingredient_color(item_name, color)
-  self.ingredient_colors[item_name] = Utils.color_tuple(color)
+  local tuple = Utils.color_tuple(color)
+  self.ingredient_colors[item_name] = tuple
+  self.overrides[item_name] = tuple
 end
 
 --- Get color for an ingredient (science pack)
@@ -85,24 +87,18 @@ end
 
 --- Load ingredient colors from the prototype stage mod-data.
 ---
---- If `overwrites` is `true`, replaces all existing colors with the prototype data.
---- If `overwrites` is `false`, only adds colors for ingredients not yet registered.
----
---- @param overwrites boolean Whether to overwrite existing colors.
-function ColorRegistry:load_prototype_colors(overwrites)
+--- Always replaces existing colors with a fresh copy from the prototype data,
+--- then re-applies runtime overrides on top.
+function ColorRegistry:load_prototype_colors()
   local mod_data = prototypes.mod_data[ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ]
-  if not mod_data then return end
-  local prototype_colors = mod_data.data --[[@as table<string, ColorTuple>]]
-
-  if overwrites then
-    self.ingredient_colors = Utils.table_deep_copy(prototype_colors)
+  if mod_data then
+    self.ingredient_colors = Utils.table_deep_copy(mod_data.data --[[@as table<string, ColorTuple>]])
   else
-    local colors = self.ingredient_colors
-    for name, color in pairs(prototype_colors) do
-      if not colors[name] then
-        colors[name] = color
-      end
-    end
+    self.ingredient_colors = {}
+  end
+  -- Re-apply runtime overrides on top of prototype data.
+  for name, color in pairs(self.overrides) do
+    self.ingredient_colors[name] = color
   end
 end
 
