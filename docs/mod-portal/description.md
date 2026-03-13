@@ -1,6 +1,8 @@
 Get those biolabs on the dance floor — with a performance twist.
 
-Disco Science Lite is a variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age support.
+Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Biolabs support.
+
+This mod is not officially affiliated with or endorsed by the original mod author.
 
 ## What It Does
 
@@ -10,7 +12,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 ### Performance
 
-Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs. Additional performance tuning options are available in mod settings.
+Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
 
 ### Space Age Support
 
@@ -31,3 +33,16 @@ In addition to the color patterns from the original mod, Disco Science Lite incl
 ### Mod API Compatibility
 
 The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
+
+## License
+
+This mod includes source code based on the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by Daniel Brauer.
+
+Both the inherited code and the original code written for this mod are released under the MIT License.
+
+This mod also includes image assets derived from third-party works, including official Factorio game assets and assets from other Factorio mods.
+
+All such assets remain the property of their respective authors and are redistributed only as an integrated part of this mod in accordance with their applicable licenses.
+
+For full license details, please see the source repository:
+https://github.com/nenshoukei/disco-science-lite
