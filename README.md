@@ -92,8 +92,15 @@ make graphics
 
 ## License
 
-The original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod was created by Daniel Brauer and is licensed under the [MIT License](LICENSE).
+This mod is based in part on the original
+[Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by Daniel Brauer,
+which is licensed under the MIT License.
 
-This mod is a modified version of the original and is likewise released under the MIT License.
+The original source code from that mod, as well as the original code written for this mod,
+are released under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-The image files under `graphics/` were generated based on official Factorio assets.
+However, some image assets included in this repository are derived from third-party copyrighted works and are NOT covered by the MIT License:
+
+- Image files under `graphics/factorio/` are derived from the official Factorio game assets.  
+  Copyright © Wube Software Ltd.  
+  See [graphics/factorio/NOTICE.txt](graphics/factorio/NOTICE.txt) for details.

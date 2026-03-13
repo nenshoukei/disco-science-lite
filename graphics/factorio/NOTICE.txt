@@ -1,0 +1,16 @@
+NOTICE — Factorio Derived Art Assets
+
+This directory contains image files derived from the original art assets of the video game Factorio.
+The images have been modified (for example, converted to grayscale and adjusted in brightness) for use in this mod.
+
+Factorio and its original art assets are © Wube Software Ltd.
+All rights, title, and interest in the original assets and in any derivative works based on them remain with Wube Software Ltd.
+
+These files are distributed only as an integrated part of this Factorio mod.
+They must not be copied, extracted, reused, redistributed, or republished separately from the mod without explicit permission from Wube Software Ltd.
+
+The MIT License provided in the root of this repository applies only to the source code and original assets created by the mod author.
+It does NOT apply to the contents of this directory.
+
+Use and redistribution of these files are additionally subject to the Factorio End User Licence Agreement (EULA).
+https://factorio.com/terms-of-service

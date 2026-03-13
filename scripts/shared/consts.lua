@@ -31,8 +31,8 @@ local consts = {
   GENERAL_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "general-overlay",
 
   -- graphics
-  LAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "lab-overlay.png",
-  BIOLAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "biolab-overlay.png",
+  LAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "factorio/lab-overlay.png",
+  BIOLAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "factorio/biolab-overlay.png",
   GENERAL_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "general-overlay.png",
 
   -- settings

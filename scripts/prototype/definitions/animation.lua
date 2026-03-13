@@ -2,7 +2,7 @@ data:extend({
   {
     type = "animation",
     name = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-    filename = "__disco-science-lite__/graphics/lab-overlay.png" --[[$LAB_OVERLAY_GRAPHIC_FILE_NAME]],
+    filename = "__disco-science-lite__/graphics/factorio/lab-overlay.png" --[[$LAB_OVERLAY_GRAPHIC_FILE_NAME]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 216,
@@ -15,7 +15,7 @@ data:extend({
   {
     type = "animation",
     name = "mks-dsl-biolab-overlay" --[[$BIOLAB_OVERLAY_ANIMATION_NAME]],
-    filename = "__disco-science-lite__/graphics/biolab-overlay.png" --[[$BIOLAB_OVERLAY_GRAPHIC_FILE_NAME]],
+    filename = "__disco-science-lite__/graphics/factorio/biolab-overlay.png" --[[$BIOLAB_OVERLAY_GRAPHIC_FILE_NAME]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 326,

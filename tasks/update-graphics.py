@@ -43,8 +43,8 @@ BIOLAB_SRC = FACTORIO_DATA / "space-age/graphics/entity/biolab/biolab-lights.png
 BIOLAB_FRAME_W, BIOLAB_FRAME_H = 326, 362
 BIOLAB_COLS, BIOLAB_FRAMES = 8, 32
 
-LAB_OVERLAY_DST = GRAPHICS_DIR / "lab-overlay.png"
-BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "biolab-overlay.png"
+LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
+BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/biolab-overlay.png"
 GENERAL_OVERLAY_DST = GRAPHICS_DIR / "general-overlay.png"
 
 def apply_level(arr: np.ndarray, white_point: float = 0.8, gamma: float = 1.5) -> np.ndarray:
