@@ -5,7 +5,7 @@ local ChunkMap = require("scripts.runtime.chunk-map")
 --- @param unit_number number
 --- @return LabOverlay
 local function make_overlay(unit_number)
-  return ({ [ 7 --[[$OV_UNIT_NUM]] ] = unit_number }) --[[@as LabOverlay]]
+  return ({ unit_number = unit_number }) --[[@as LabOverlay]]
 end
 
 --- Create a mock LuaEntity.
@@ -62,11 +62,11 @@ describe("ChunkMap", function ()
       local v = make_overlay(5)
       m:insert(e, v)
       local entry = m.entries[5]
-      assert.are.equal(10, entry[ 1 --[[$CE_SURFACE]] ])
-      assert.are.equal(1, entry[ 2 --[[$CE_CX]] ])
-      assert.are.equal(2, entry[ 3 --[[$CE_CY]] ])
-      assert.are.equal(1, entry[ 4 --[[$CE_INDEX]] ])
-      assert.are.equal(v, entry[ 5 --[[$CE_OVERLAY]] ])
+      assert.are.equal(10, entry.surface_index)
+      assert.are.equal(1, entry.chunk_x)
+      assert.are.equal(2, entry.chunk_y)
+      assert.are.equal(1, entry.index)
+      assert.are.equal(v, entry.overlay)
     end)
 
     it("updates the entry if it has the same keys as before", function ()
@@ -99,8 +99,8 @@ describe("ChunkMap", function ()
       assert.are.equal(v, m.data[1][1][2][1])
       -- Entry should be updated
       local entry = m.entries[1]
-      assert.are.equal(1, entry[ 2 --[[$CE_CX]] ])
-      assert.are.equal(2, entry[ 3 --[[$CE_CY]] ])
+      assert.are.equal(1, entry.chunk_x)
+      assert.are.equal(2, entry.chunk_y)
     end)
 
     it("re-inserts if surface changed", function ()
@@ -118,7 +118,7 @@ describe("ChunkMap", function ()
       -- New surface should have the entry
       assert.are.equal(v, m.data[2][0][0][1])
       -- Entry should be updated
-      assert.are.equal(2, m.entries[1][ 1 --[[$CE_SURFACE]] ])
+      assert.are.equal(2, m.entries[1].surface_index)
     end)
 
     it("does nothing when entity has no unit_number", function ()
@@ -177,10 +177,10 @@ describe("ChunkMap", function ()
       assert.is_not_nil(m.entries[30])
       assert.is_not_nil(m.entries[40])
 
-      -- CE_INDEX should be updated
-      assert.are.equal(1, m.entries[10][ 4 --[[$CE_INDEX]] ])
-      assert.are.equal(2, m.entries[40][ 4 --[[$CE_INDEX]] ])
-      assert.are.equal(3, m.entries[30][ 4 --[[$CE_INDEX]] ])
+      -- .index should be updated
+      assert.are.equal(1, m.entries[10].index)
+      assert.are.equal(2, m.entries[40].index)
+      assert.are.equal(3, m.entries[30].index)
     end)
 
     it("removes empty chunk column and surface table", function ()

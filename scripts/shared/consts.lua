@@ -48,29 +48,6 @@ local consts = {
 
   -- Margin of player view boundaries in tiles
   VIEW_RECT_MARGIN = 6,
-
-  -- ChunkMapEntry filed indices
-  CE_SURFACE = 1,
-  CE_CX = 2,
-  CE_CY = 3,
-  CE_INDEX = 4,
-  CE_OVERLAY = 5,
-
-  -- LabOverlay field indices
-  OV_ENTITY = 1,
-  OV_ANIMATION = 2,
-  OV_X = 3,
-  OV_Y = 4,
-  OV_RECT = 5,
-  OV_VISIBLE = 6,
-  OV_UNIT_NUM = 7,
-  OV_FORCE_INDEX = 8,
-  OV_PLAYER_INDEX = 9,
-
-  -- ForceState field indices
-  FS_CURRENT_RESEARCH = 1,
-  FS_COLORS = 2,
-  FS_N_COLORS = 3,
 }
 
 return consts

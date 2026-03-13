@@ -11,11 +11,11 @@ local floor = math.floor
 
 --- An entry stored in the chunk map for a single entity.
 --- @class (exact) ChunkMapEntry
---- @field [1] number     [CE_SURFACE] Surface index of the entity.
---- @field [2] number     [CE_CX]      Chunk X coordinate of the entity.
---- @field [3] number     [CE_CY]      Chunk Y coordinate of the entity.
---- @field [4] number     [CE_INDEX]   Index in the chunk.
---- @field [5] LabOverlay [CE_OVERLAY] The lab overlay.
+--- @field surface_index number     Surface index of the entity.
+--- @field chunk_x       number     Chunk X coordinate of the entity.
+--- @field chunk_y       number     Chunk Y coordinate of the entity.
+--- @field index         number     Index in the chunk.
+--- @field overlay       LabOverlay The lab overlay.
 
 --- Constructor.
 ---
@@ -23,7 +23,7 @@ local floor = math.floor
 function ChunkMap.new()
   --- @class ChunkMap
   local self = {
-    --- Nested chunk data. `data[surface_index][cx][cy]` is an array of overlays.
+    --- Nested chunk data. `data[surface_index][chunk_x][chunk_y]` is an array of overlays.
     --- @type table<number, table<number, table<number, LabOverlay[]>>>
     data = {},
 
@@ -48,17 +48,17 @@ function ChunkMap:insert(entity, overlay)
 
   local surface_index = entity.surface_index
   local position = entity.position
-  local cx = floor((position.x or position[1]) * 0.03125 --[[$INV_CHUNK_SIZE]])
-  local cy = floor((position.y or position[2]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  local chunk_x = floor((position.x or position[1]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  local chunk_y = floor((position.y or position[2]) * 0.03125 --[[$INV_CHUNK_SIZE]])
 
   local entries = self.entries
   local existing = entries[unit_number]
   if existing then
-    if existing[ 1 --[[$CE_SURFACE]] ] == surface_index and existing[ 2 --[[$CE_CX]] ] == cx and existing[ 3 --[[$CE_CY]] ] == cy then
+    if existing.surface_index == surface_index and existing.chunk_x == chunk_x and existing.chunk_y == chunk_y then
       -- Same keys, so just update the existing one.
-      existing[ 5 --[[$CE_OVERLAY]] ] = overlay
-      local index = existing[ 4 --[[$CE_INDEX]] ]
-      self.data[surface_index][cx][cy][index] = overlay
+      existing.overlay = overlay
+      local index = existing.index
+      self.data[surface_index][chunk_x][chunk_y][index] = overlay
       return
     end
     -- Keys are changed. Remove the existing one.
@@ -71,25 +71,25 @@ function ChunkMap:insert(entity, overlay)
     surface_chunks = {}
     data[surface_index] = surface_chunks
   end
-  local col = surface_chunks[cx]
+  local col = surface_chunks[chunk_x]
   if not col then
     col = {}
-    surface_chunks[cx] = col
+    surface_chunks[chunk_x] = col
   end
-  local chunk = col[cy]
+  local chunk = col[chunk_y]
   if not chunk then
     chunk = {}
-    col[cy] = chunk
+    col[chunk_y] = chunk
   end
   local index = #chunk + 1
   chunk[index] = overlay
 
   entries[unit_number] = {
-    surface_index, -- CE_SURFACE
-    cx,            -- CE_CX
-    cy,            -- CE_CY
-    index,         -- CE_INDEX
-    overlay,       -- CE_OVERLAY
+    surface_index = surface_index,
+    chunk_x = chunk_x,
+    chunk_y = chunk_y,
+    index = index,
+    overlay = overlay,
   }
 end
 
@@ -100,17 +100,17 @@ function ChunkMap:remove(unit_number)
   local entry = self.entries[unit_number]
   if not entry then return end
 
-  local surface_index = entry[ 1 --[[$CE_SURFACE]] ]
-  local cx = entry[ 2 --[[$CE_CX]] ]
-  local cy = entry[ 3 --[[$CE_CY]] ]
-  local index = entry[ 4 --[[$CE_INDEX]] ]
+  local surface_index = entry.surface_index
+  local chunk_x = entry.chunk_x
+  local chunk_y = entry.chunk_y
+  local index = entry.index
 
   local data = self.data
   local surface_chunks = data[surface_index]
   if surface_chunks then
-    local col = surface_chunks[cx]
+    local col = surface_chunks[chunk_x]
     if col then
-      local chunk = col[cy]
+      local chunk = col[chunk_y]
       if chunk then
         -- Swap-and-pop.
         -- [A, B, C, D] → remove(B) → [A, D, C]
@@ -118,15 +118,15 @@ function ChunkMap:remove(unit_number)
         if index ~= last_index then
           local last = chunk[last_index]
           chunk[index] = last
-          self.entries[last[ 7 --[[$OV_UNIT_NUM]] ]][ 4 --[[$CE_INDEX]] ] = index
+          self.entries[last.unit_number].index = index
         end
         chunk[last_index] = nil
 
         -- Clean up empty arrays.
         if not chunk[1] then
-          col[cy] = nil
+          col[chunk_y] = nil
           if not next(col) then
-            surface_chunks[cx] = nil
+            surface_chunks[chunk_x] = nil
             if not next(surface_chunks) then
               data[surface_index] = nil
             end

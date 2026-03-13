@@ -16,20 +16,19 @@ local STATUS_LOW_POWER = defines.entity_status.low_power
 local RENDER_MODE_CHART = defines.render_mode.chart
 
 --- @class (exact) LabOverlay
---- @field [1] LuaEntity        [OV_ENTITY]       Lab entity.
---- @field [2] LuaRenderObject  [OV_ANIMATION]    Render object for the overlay.
---- @field [3] number           [OV_X]            X coordinate.
---- @field [4] number           [OV_Y]            Y coordinate.
---- @field [5] MapPositionRect  [OV_RECT]         Rectangle boundaries of the entity.
---- @field [6] boolean          [OV_VISIBLE]      Last known visible state of the animation (cached, avoids repeated C bridge reads).
---- @field [7] number           [OV_UNIT_NUM]     Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
---- @field [8] number           [OV_FORCE_INDEX]  Force index of the lab entity (cached, avoids C bridge read in tick function).
---- @field [9] integer          [OV_PLAYER_INDEX] Index of the player viewing this overlay (set by state_update_function).
+--- @field entity       LuaEntity       Lab entity.
+--- @field animation    LuaRenderObject Render object for the overlay.
+--- @field x            number          X coordinate.
+--- @field y            number          Y coordinate.
+--- @field visible      boolean         Last known visible state of the animation (cached, avoids repeated C bridge reads).
+--- @field unit_number  number          Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field force_index  number          Force index of the lab entity (cached, avoids C bridge read in tick function).
+--- @field player_index integer         Index of the player viewing this overlay (set by state_update_function).
 
 --- @class (exact) ForceState
---- @field [1] LuaTechnology|nil [FS_CURRENT_RESEARCH] Current researching technology.
---- @field [2] number[]|nil      [FS_COLORS]           Flattened colors array in format: `{ r, g, b, r, g, b... }`
---- @field [3] integer           [FS_N_COLORS]         Number of colors.
+--- @field current_research LuaTechnology|nil Current researching technology.
+--- @field colors           number[]|nil      Flattened colors array in format: `{ r, g, b, r, g, b... }`
+--- @field n_colors         integer           Number of colors.
 
 --- Constructor
 ---
@@ -169,19 +168,17 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   local lab_position = lab.position
   local lab_x = lab_position.x or lab_position[1]
   local lab_y = lab_position.y or lab_position[2]
-  local lab_rect = { lab_x, lab_y, lab_x + lab.tile_width, lab_y + lab.tile_height }
 
   --- @type LabOverlay
   local new_overlay = {
-    lab,                   -- OV_ENTITY
-    render_object,         -- OV_ANIMATION
-    lab_x,                 -- OV_X
-    lab_y,                 -- OV_Y
-    lab_rect,              -- OV_RECT
-    render_object.visible, -- OV_VISIBLE
-    lab_unit_number,       -- OV_UNIT_NUM
-    lab.force_index,       -- OV_FORCE_INDEX
-    0,                     -- OV_PLAYER_INDEX (set by state_update_function)
+    entity       = lab,
+    animation    = render_object,
+    x            = lab_x,
+    y            = lab_y,
+    visible      = render_object.visible,
+    unit_number  = lab_unit_number,
+    force_index  = lab.force_index,
+    player_index = 0, -- set by state_update_function
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -263,7 +260,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   local overlay = self.overlays[lab_unit_number]
   if not overlay then return end
 
-  local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
+  local animation = overlay.animation
   if animation.valid then
     animation.destroy()
   end
@@ -299,8 +296,8 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
     for _, chunk in pairs(col) do
       for i = 1, #chunk do
         local overlay = chunk[i]
-        local unit_number = overlay[ 7 --[[$OV_UNIT_NUM]] ]
-        local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
+        local unit_number = overlay.unit_number
+        local animation = overlay.animation
         if animation.valid then
           animation.destroy()
         end
@@ -326,11 +323,10 @@ function LabOverlayRenderer:update_lab_position(lab)
   local lab_position = lab.position
   local lab_x = lab_position.x or lab_position[1]
   local lab_y = lab_position.y or lab_position[2]
-  overlay[ 3 --[[$OV_X]] ] = lab_x
-  overlay[ 4 --[[$OV_Y]] ] = lab_y
-  overlay[ 5 --[[$OV_RECT]] ] = { lab_x, lab_y, lab_x + lab.tile_width, lab_y + lab.tile_height }
+  overlay.x = lab_x
+  overlay.y = lab_y
 
-  local animation = overlay[ 2 --[[$OV_ANIMATION]] ]
+  local animation = overlay.animation
   if animation.surface.index == lab.surface_index then
     -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
@@ -353,7 +349,7 @@ function LabOverlayRenderer:update_force_current_research(force)
   if not fs then return end
 
   local force_current_research = force.current_research
-  fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] = force_current_research
+  fs.current_research = force_current_research
 
   if force_current_research then
     local colors = self.color_registry:get_colors_for_research(force_current_research, self.color_intensity)
@@ -370,11 +366,11 @@ function LabOverlayRenderer:update_force_current_research(force)
       color_index = color_index + 3
     end
 
-    fs[ 2 --[[$FS_COLORS]] ] = flat_colors
-    fs[ 3 --[[$FS_N_COLORS]] ] = n_colors
+    fs.colors = flat_colors
+    fs.n_colors = n_colors
   else
-    fs[ 2 --[[$FS_COLORS]] ] = nil
-    fs[ 3 --[[$FS_N_COLORS]] ] = 0
+    fs.colors = nil
+    fs.n_colors = 0
   end
 end
 
@@ -417,9 +413,9 @@ end
 ---
 --- The returned function:
 ---   - Tracks current_research per force and updates force_state when it changes.
----   - Checks lab entity.status and updates overlay[OV_VISIBLE] and animation.visible.
+---   - Checks lab entity.status and updates overlay.visible and animation.visible.
 ---   - Rebuilds self.visible_overlays for the tick function to iterate.
----   - Sets overlay[OV_PLAYER_INDEX] for each visible overlay.
+---   - Sets overlay.player_index for each visible overlay.
 ---
 --- @return fun()
 function LabOverlayRenderer:get_state_update_function()
@@ -457,13 +453,13 @@ function LabOverlayRenderer:get_state_update_function()
       local fs = force_state[force_index]
       if not fs then
         fs = {
-          nil, -- FS_CURRENT_RESEARCH
-          nil, -- FS_COLORS
-          0,   -- FS_N_COLORS
+          current_research = nil,
+          colors = nil,
+          n_colors = 0,
         }
         force_state[force_index] = fs
       end
-      if force.current_research ~= fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] then
+      if force.current_research ~= fs.current_research then
         self:update_force_current_research(force)
       end
 
@@ -491,22 +487,22 @@ function LabOverlayRenderer:get_state_update_function()
 
                   for j = 1, #chunk do
                     local overlay = chunk[j]
-                    local status = overlay[ 1 --[[$OV_ENTITY]] ].status
-                    local lab_fs = force_state[overlay[ 8 --[[$OV_FORCE_INDEX]] ]]
-                    local colors = lab_fs and lab_fs[ 2 --[[$FS_COLORS]] ]
+                    local status = overlay.entity.status
+                    local lab_fs = force_state[overlay.force_index]
+                    local colors = lab_fs and lab_fs.colors
                     local is_visible = (
                       (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
                       colors ~= nil
                     )
-                    if overlay[ 6 --[[$OV_VISIBLE]] ] ~= is_visible then
-                      overlay[ 6 --[[$OV_VISIBLE]] ] = is_visible
-                      overlay[ 2 --[[$OV_ANIMATION]] ].visible = is_visible
+                    if overlay.visible ~= is_visible then
+                      overlay.visible = is_visible
+                      overlay.animation.visible = is_visible
                     end
 
                     if is_visible then
                       visible_overlay_count = visible_overlay_count + 1
                       visible_overlays[visible_overlay_count] = overlay
-                      overlay[ 9 --[[$OV_PLAYER_INDEX]] ] = player_index
+                      overlay.player_index = player_index
                     end
                   end
 
@@ -549,7 +545,6 @@ function LabOverlayRenderer:get_tick_function()
   --
   -- For optimization, as much as possible we should:
   -- * Avoid access to the same key on a table multiple times.
-  -- * Avoid access to a table by using string keys. Use array indices instead.
   -- * Avoid access to the same outer-scope variable (upvalue) multiple times.
   -- * Avoid function calls. Make it inline.
   -- * Avoid creating a new object.
@@ -608,19 +603,19 @@ function LabOverlayRenderer:get_tick_function()
     -- Update colors of the visible overlays using stride iteration
     for i = lab_update_offset, #visible_overlays, current_interval do
       local overlay = visible_overlays[i]
-      local force_index = overlay[ 8 --[[$OV_FORCE_INDEX]] ]
+      local force_index = overlay.force_index
       if force_index ~= last_force_index then
         last_force_index = force_index
         local fs = force_state[force_index]
         if fs then
-          colors = fs[ 2 --[[$FS_COLORS]] ]
-          n_colors = fs[ 3 --[[$FS_N_COLORS]] ]
+          colors = fs.colors
+          n_colors = fs.n_colors
         else
           colors = nil
         end
       end
       if colors then
-        local player_index = overlay[ 9 --[[$OV_PLAYER_INDEX]] ]
+        local player_index = overlay.player_index
         if player_index ~= last_player_index then
           last_player_index = player_index
           local player = game.get_player(player_index)
@@ -633,10 +628,8 @@ function LabOverlayRenderer:get_tick_function()
             player_y = 0
           end
         end
-        color_function(
-          color, phase, colors, n_colors, player_x, player_y, overlay[ 3 --[[$OV_X]] ], overlay[ 4 --[[$OV_Y]] ]
-        )
-        overlay[ 2 --[[$OV_ANIMATION]] ].color = color
+        color_function(color, phase, colors, n_colors, player_x, player_y, overlay.x, overlay.y)
+        overlay.animation.color = color
       end
     end
   end
