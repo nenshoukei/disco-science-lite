@@ -46,8 +46,8 @@ local consts = {
   CHUNK_SIZE = 32,
   INV_CHUNK_SIZE = 1 / 32,
 
-  -- Margin of PlayerView boundaries
-  VIEW_RECT_MARGIN = 6, -- tiles
+  -- Margin of player view boundaries in tiles
+  VIEW_RECT_MARGIN = 6,
 
   -- ChunkMapEntry filed indices
   CE_SURFACE = 1,
@@ -55,14 +55,6 @@ local consts = {
   CE_CY = 3,
   CE_INDEX = 4,
   CE_OVERLAY = 5,
-
-  -- PlayerView field indices
-  PV_VALID = 1,
-  PV_SURFACE = 2,
-  PV_LEFT = 3,
-  PV_TOP = 4,
-  PV_RIGHT = 5,
-  PV_BOTTOM = 6,
 
   -- LabOverlay field indices
   OV_ENTITY = 1,
@@ -73,13 +65,12 @@ local consts = {
   OV_VISIBLE = 6,
   OV_UNIT_NUM = 7,
   OV_FORCE_INDEX = 8,
+  OV_PLAYER_INDEX = 9,
 
   -- ForceState field indices
   FS_CURRENT_RESEARCH = 1,
   FS_COLORS = 2,
   FS_N_COLORS = 3,
-  FS_PX = 4,
-  FS_PY = 5,
 }
 
 return consts

@@ -73,6 +73,9 @@ local function reset_mocks()
   --- @diagnostic disable-next-line: missing-fields
   _G.game = {
     players = {},
+    forces = {},
+    surfaces = {},
+    get_player = function (index) return _G.game.players[index] end,
   }
 
   --- @diagnostic disable-next-line: missing-fields

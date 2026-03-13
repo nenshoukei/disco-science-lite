@@ -1,6 +1,5 @@
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
-local PlayerViewTracker = require("scripts.runtime.player-view-tracker")
 
 --- @class LabOverlayRenderer
 local LabOverlayRenderer = {}
@@ -8,27 +7,29 @@ LabOverlayRenderer.__index = LabOverlayRenderer
 
 local random = math.random
 local max = math.max
+local ceil = math.ceil
+local floor = math.floor
 local rendering_get_all_objects = rendering.get_all_objects
 local draw_animation = rendering.draw_animation
 local STATUS_WORKING = defines.entity_status.working
 local STATUS_LOW_POWER = defines.entity_status.low_power
+local RENDER_MODE_CHART = defines.render_mode.chart
 
 --- @class (exact) LabOverlay
---- @field [1] LuaEntity        [OV_ENTITY]      Lab entity.
---- @field [2] LuaRenderObject  [OV_ANIMATION]   Render object for the overlay.
---- @field [3] number           [OV_X]           X coordinate.
---- @field [4] number           [OV_Y]           Y coordinate.
---- @field [5] MapPositionRect  [OV_RECT]        Rectangle boundaries of the entity.
---- @field [6] boolean          [OV_VISIBLE]     Last known visible state of the animation (cached, avoids repeated C bridge reads).
---- @field [7] number           [OV_UNIT_NUM]    Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
---- @field [8] number           [OV_FORCE_INDEX] Force index of the lab entity (cached, avoids C bridge read in tick function).
+--- @field [1] LuaEntity        [OV_ENTITY]       Lab entity.
+--- @field [2] LuaRenderObject  [OV_ANIMATION]    Render object for the overlay.
+--- @field [3] number           [OV_X]            X coordinate.
+--- @field [4] number           [OV_Y]            Y coordinate.
+--- @field [5] MapPositionRect  [OV_RECT]         Rectangle boundaries of the entity.
+--- @field [6] boolean          [OV_VISIBLE]      Last known visible state of the animation (cached, avoids repeated C bridge reads).
+--- @field [7] number           [OV_UNIT_NUM]     Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field [8] number           [OV_FORCE_INDEX]  Force index of the lab entity (cached, avoids C bridge read in tick function).
+--- @field [9] integer          [OV_PLAYER_INDEX] Index of the player viewing this overlay (set by state_update_function).
 
 --- @class (exact) ForceState
 --- @field [1] LuaTechnology|nil [FS_CURRENT_RESEARCH] Current researching technology.
 --- @field [2] number[]|nil      [FS_COLORS]           Flattened colors array in format: `{ r, g, b, r, g, b... }`
 --- @field [3] integer           [FS_N_COLORS]         Number of colors.
---- @field [4] number            [FS_PX]               First valid player's X position.
---- @field [5] number            [FS_PY]               First valid player's Y position.
 
 --- Constructor
 ---
@@ -48,10 +49,6 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- Spatial chunk-based map for the overlays.
     --- @type ChunkMap
     chunk_map = ChunkMap.new(),
-
-    --- Tracks connected players' views. Key is player.index.
-    --- @type table<number, PlayerViewTracker|nil>
-    player_trackers = {},
 
     --- Per-force state for the tick function. Key is force.index.
     --- @type table<number, ForceState|nil>
@@ -184,6 +181,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
     render_object.visible, -- OV_VISIBLE
     lab_unit_number,       -- OV_UNIT_NUM
     lab.force_index,       -- OV_FORCE_INDEX
+    0,                     -- OV_PLAYER_INDEX (set by state_update_function)
   }
 
   self.overlays[lab_unit_number] = new_overlay
@@ -344,53 +342,6 @@ function LabOverlayRenderer:update_lab_position(lab)
   end
 end
 
---- Remove the player tracker for the given player index.
----
---- @param player_index number
-function LabOverlayRenderer:remove_player_tracker(player_index)
-  self.player_trackers[player_index] = nil
-end
-
---- Get a position update function to be called every 10 ticks or by events.
----
---- The returned function:
----   - Creates player trackers for newly connected players.
----   - Updates player positions of self.force_state from the first valid player for each force.
----
---- @return fun()
-function LabOverlayRenderer:get_position_update_function()
-  local player_trackers = self.player_trackers
-  local force_state = self.force_state
-
-  return function ()
-    for _, force in pairs(game.forces) do
-      local connected_players = force.connected_players
-      local n_connected_players = #connected_players
-      if n_connected_players > 0 then
-        local fs = force_state[force.index]
-        for i = 1, n_connected_players do
-          local player = connected_players[i]
-          local player_index = player.index
-          local tracker = player_trackers[player_index]
-          if not tracker then
-            tracker = PlayerViewTracker.new(player)
-            tracker:update()
-            player_trackers[player_index] = tracker
-          end
-
-          -- Update force_state position from the first valid player for each force.
-          if fs and tracker.view[ 1 --[[$PV_VALID]] ] then
-            local pos = player.position
-            fs[ 4 --[[$FS_PX]] ] = pos.x or pos[1]
-            fs[ 5 --[[$FS_PY]] ] = pos.y or pos[2]
-            fs = nil -- Only update for the first valid player.
-          end
-        end
-      end
-    end
-  end
-end
-
 --- Update force_state by the force's current_research.
 ---
 --- It does nothing if force_state for the force does not exist.
@@ -438,24 +389,46 @@ function LabOverlayRenderer:update_all_forces_current_research()
   end
 end
 
+--- Compute the chunk range visible to a player.
+---
+--- @param player LuaPlayer
+--- @return integer chunk_left
+--- @return integer chunk_top
+--- @return integer chunk_right
+--- @return integer chunk_bottom
+local function compute_player_view(player)
+  local player_position = player.position
+  local px = player_position.x or player_position[1]
+  local py = player_position.y or player_position[2]
+
+  local f = player.zoom * 64 -- * 32 (pixels per tile) * 2 (half)
+  local display_resolution = player.display_resolution
+  local half_vw = ceil(display_resolution.width / f)
+  local half_vh = ceil(display_resolution.height / f)
+
+  return
+    floor((px - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
+    floor((py - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
+    floor((px + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
+    floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+end
+
 --- Get a state update function to be called every 30 ticks.
 ---
 --- The returned function:
 ---   - Tracks current_research per force and updates force_state when it changes.
----   - Checks entity.status and updates overlay[OV_VISIBLE] and animation.visible.
+---   - Checks lab entity.status and updates overlay[OV_VISIBLE] and animation.visible.
 ---   - Rebuilds self.visible_overlays for the tick function to iterate.
----
---- Uses a generation counter to deduplicate overlays visible to multiple players.
+---   - Sets overlay[OV_PLAYER_INDEX] for each visible overlay.
 ---
 --- @return fun()
 function LabOverlayRenderer:get_state_update_function()
-  local player_trackers = self.player_trackers
   local force_state = self.force_state
   local chunk_map = self.chunk_map
   local visible_overlays = self.visible_overlays
 
-  -- A weak-key table to check if a chunk is updated in the current call. Key is a chunk (table) itself.
-  -- Generation counter avoids clearing between calls: stale entries are ignored.
+  --- A weak-key table to check if a chunk is updated in the current call. Key is a chunk (table) itself.
+  --- Value is a generation counter to avoid clearing between calls: stale entries are ignored.
   --- @type table<table, integer>
   local visited_chunk = setmetatable({}, { __mode = "k" })
   local generation = 0
@@ -466,99 +439,101 @@ function LabOverlayRenderer:get_state_update_function()
 
     -- Bind frequently used upvalues to local variables for performance
     -- luacheck: push ignore
-    local visible_overlays = visible_overlays --- @diagnostic disable-line: redefined-local
-    local STATUS_WORKING = STATUS_WORKING     --- @diagnostic disable-line: redefined-local
-    local STATUS_LOW_POWER = STATUS_LOW_POWER --- @diagnostic disable-line: redefined-local
+    local visible_overlays = visible_overlays   --- @diagnostic disable-line: redefined-local
+    local RENDER_MODE_CHART = RENDER_MODE_CHART --- @diagnostic disable-line: redefined-local
+    local STATUS_WORKING = STATUS_WORKING       --- @diagnostic disable-line: redefined-local
+    local STATUS_LOW_POWER = STATUS_LOW_POWER   --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
     local chunk_map_data = chunk_map.data
-    local count = 0
-    for _, tracker in pairs(player_trackers) do
-      tracker:update()
-      local view = tracker.view
-      if not view[ 1 --[[$PV_VALID]] ] then goto continue end
+    local visible_overlay_count = 0
+    for _, force in pairs(game.forces) do
+      local connected_players = force.connected_players
+      if #connected_players == 0 then goto next_force end
 
-      local player = tracker.player
-      local force = player.force --[[@as LuaForce]]
       local force_index = force.index
 
-      -- Update force_state for this player's force.
+      -- Update force_state once per force.
       local fs = force_state[force_index]
       if not fs then
-        local pos = player.position
         fs = {
-          nil,             -- FS_CURRENT_RESEARCH
-          nil,             -- FS_COLORS
-          0,               -- FS_N_COLORS
-          pos.x or pos[1], -- FS_PX
-          pos.y or pos[2], -- FS_PY
+          nil, -- FS_CURRENT_RESEARCH
+          nil, -- FS_COLORS
+          0,   -- FS_N_COLORS
         }
         force_state[force_index] = fs
       end
       if force.current_research ~= fs[ 1 --[[$FS_CURRENT_RESEARCH]] ] then
-        -- Update current research in the force_state
         self:update_force_current_research(force)
       end
 
-      -- Iterate chunks in this player's view and build visible_overlays.
-      local surface_chunks = chunk_map_data[view[ 2 --[[$PV_SURFACE]] ]]
-      if surface_chunks then
-        local chunk_left = view[ 3 --[[$PV_LEFT]] ]
-        local chunk_top = view[ 4 --[[$PV_TOP]] ]
-        local chunk_right = view[ 5 --[[$PV_RIGHT]] ]
-        local chunk_bottom = view[ 6 --[[$PV_BOTTOM]] ]
+      -- Process each connected player's view.
+      for i = 1, #connected_players do
+        local player = connected_players[i]
+        if player.render_mode == RENDER_MODE_CHART then goto next_player end
 
-        for cx = chunk_left, chunk_right do
-          local col = surface_chunks[cx]
-          if col then
-            for cy = chunk_top, chunk_bottom do
-              local chunk = col[cy]
-              if chunk then
-                -- Skip chunks already processed in this call (visible to multiple players).
-                if visited_chunk[chunk] == gen then goto next_chunk end
-                visited_chunk[chunk] = gen
+        local player_index = player.index
+        local surface_index = player.surface_index
+        local chunk_left, chunk_top, chunk_right, chunk_bottom = compute_player_view(player)
 
-                for i = 1, #chunk do
-                  local overlay = chunk[i]
-                  local status = overlay[ 1 --[[$OV_ENTITY]] ].status
-                  local lab_fs = force_state[overlay[ 8 --[[$OV_FORCE_INDEX]] ]]
-                  local colors = lab_fs and lab_fs[ 2 --[[$FS_COLORS]] ]
-                  local is_visible = (
-                    (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
-                    colors ~= nil
-                  )
-                  if overlay[ 6 --[[$OV_VISIBLE]] ] ~= is_visible then
-                    overlay[ 6 --[[$OV_VISIBLE]] ] = is_visible
-                    overlay[ 2 --[[$OV_ANIMATION]] ].visible = is_visible
+        -- Iterate chunks in this player's view and build visible_overlays.
+        local surface_chunks = chunk_map_data[surface_index]
+        if surface_chunks then
+          for cx = chunk_left, chunk_right do
+            local col = surface_chunks[cx]
+            if col then
+              for cy = chunk_top, chunk_bottom do
+                local chunk = col[cy]
+                if chunk then
+                  -- Skip chunks already processed in this call (visible to multiple players).
+                  if visited_chunk[chunk] == gen then goto next_chunk end
+                  visited_chunk[chunk] = gen
+
+                  for j = 1, #chunk do
+                    local overlay = chunk[j]
+                    local status = overlay[ 1 --[[$OV_ENTITY]] ].status
+                    local lab_fs = force_state[overlay[ 8 --[[$OV_FORCE_INDEX]] ]]
+                    local colors = lab_fs and lab_fs[ 2 --[[$FS_COLORS]] ]
+                    local is_visible = (
+                      (status == STATUS_WORKING or status == STATUS_LOW_POWER) and
+                      colors ~= nil
+                    )
+                    if overlay[ 6 --[[$OV_VISIBLE]] ] ~= is_visible then
+                      overlay[ 6 --[[$OV_VISIBLE]] ] = is_visible
+                      overlay[ 2 --[[$OV_ANIMATION]] ].visible = is_visible
+                    end
+
+                    if is_visible then
+                      visible_overlay_count = visible_overlay_count + 1
+                      visible_overlays[visible_overlay_count] = overlay
+                      overlay[ 9 --[[$OV_PLAYER_INDEX]] ] = player_index
+                    end
                   end
 
-                  if is_visible then
-                    count = count + 1
-                    visible_overlays[count] = overlay
-                  end
+                  ::next_chunk::
                 end
-
-                ::next_chunk::
               end
             end
           end
         end
+
+        ::next_player::
       end
 
-      ::continue::
+      ::next_force::
     end
 
     -- Clear trailing lab overlay references from the table to prevent memory leaks and GC issues.
     -- Setting elements to nil ensures that #visible_overlays accurately reflects the current count.
-    for i = count + 1, #visible_overlays do
+    for i = visible_overlay_count + 1, #visible_overlays do
       if visible_overlays[i] == nil then break end
       visible_overlays[i] = nil
     end
 
     -- Update dynamic interval based on the number of visible overlays.
-    -- Automatically extend the interval if there are more labs than the per-tick budget.
+    -- Automatically extend the interval if there are more labs than the `max_updates_per_tick`.
     local max_updates = self.max_updates_per_tick
-    local interval = (count > max_updates) and math.ceil(count / max_updates) or 1
+    local interval = (visible_overlay_count > max_updates) and ceil(visible_overlay_count / max_updates) or 1
     if interval > 60 then interval = 60 end
     self.current_interval = interval
   end
@@ -598,7 +573,6 @@ function LabOverlayRenderer:get_tick_function()
     -- `visible_overlays` is captured once at closure creation; it is mutated in-place by get_state_update_function().
     if #visible_overlays == 0 then return end
 
-    local current_interval = self.current_interval
     phase = phase + phase_speed
 
     -- Switch color function periodically. Also update phase_speed.
@@ -609,6 +583,7 @@ function LabOverlayRenderer:get_tick_function()
       phase_speed = (((random() * 5 + 3.5) % 6) - 3) * 0.025
     end
 
+    local current_interval = self.current_interval
     lab_update_offset = lab_update_offset + 1
     if lab_update_offset > current_interval then lab_update_offset = 1 end
 
@@ -621,11 +596,12 @@ function LabOverlayRenderer:get_tick_function()
     local color = color                       --- @diagnostic disable-line: redefined-local
     -- luacheck: pop
 
-    -- Cache the last force's colors and player position to avoid repeated table lookups.
-    -- In the common case (all labs on the same force), this avoids all but the first lookup.
+    -- Cache colors by force index and player position by player index to avoid repeated lookups.
+    -- In the common case (all labs under one force/player), this avoids all but the first lookup.
     local last_force_index = -1
     local colors = nil
     local n_colors = 0
+    local last_player_index = -1
     local player_x = 0
     local player_y = 0
 
@@ -639,13 +615,24 @@ function LabOverlayRenderer:get_tick_function()
         if fs then
           colors = fs[ 2 --[[$FS_COLORS]] ]
           n_colors = fs[ 3 --[[$FS_N_COLORS]] ]
-          player_x = fs[ 4 --[[$FS_PX]] ]
-          player_y = fs[ 5 --[[$FS_PY]] ]
         else
           colors = nil
         end
       end
       if colors then
+        local player_index = overlay[ 9 --[[$OV_PLAYER_INDEX]] ]
+        if player_index ~= last_player_index then
+          last_player_index = player_index
+          local player = game.get_player(player_index)
+          if player then
+            local pos = player.position
+            player_x = pos.x or pos[1]
+            player_y = pos.y or pos[2]
+          else
+            player_x = 0
+            player_y = 0
+          end
+        end
         color_function(
           color, phase, colors, n_colors, player_x, player_y, overlay[ 3 --[[$OV_X]] ], overlay[ 4 --[[$OV_Y]] ]
         )
