@@ -25,11 +25,11 @@ paths: ["**/*.lua"]
     - Do NOT use `@type any`.
     - Use `@cast var_name TypeName` or `expression --[[@as TypeName]]` for type casting.
     - Use `@cast var_name -nil` for removing `nil` from var_name's type union.
-- Prefer `arr[#arr + 1] = value` to append an element to an array than `table.insert()`.
 - Prefer `for i = 1, #arr` to iterate an array than `for i, v in ipairs(arr)`.
 - Prefer `local function name()` to define a local function than `local name = function()`.
 - Prefer `function table.name()` to define a method than `table.name = function()`.
 - Prefer early returns by using `if condition then return end`.
+- Performance is always over readability. Especially for hot paths.
 
 ## Factorio-specific Rules
 
@@ -53,14 +53,8 @@ paths: ["**/*.lua"]
 ## Testing
 
 - Always write unit tests, excpet for ones heavily depending on Factorio API.
-- Use `busted` for unit testing.
+- Use `busted` for unit testing. Run `make test` or `busted spec/file-name_spec.lua` for running unit tests.
 - Use [spec/helper.lua](../../spec/helper.lua) for helper functions.
 - Write tests in `spec/` as `<file_name>_spec.lua`.
-- Run tests with `make test`.
 - Use `assert.no_error(function () ... end)` for success pattern.
 - Use `assert.is_not_nil(var) --- @cast var -nil` idiom for nil check.
-
-## Performance
-
-- Performance is always over readability. Especially for `on_tick` event.
-- Cache frequently accessed table fields in local variables.
