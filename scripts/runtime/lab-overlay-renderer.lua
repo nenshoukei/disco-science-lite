@@ -433,14 +433,6 @@ function LabOverlayRenderer:get_state_update_function()
     generation = generation + 1
     local gen = generation
 
-    -- Bind frequently used upvalues to local variables for performance
-    -- luacheck: push ignore
-    local visible_overlays = visible_overlays   --- @diagnostic disable-line: redefined-local
-    local RENDER_MODE_CHART = RENDER_MODE_CHART --- @diagnostic disable-line: redefined-local
-    local STATUS_WORKING = STATUS_WORKING       --- @diagnostic disable-line: redefined-local
-    local STATUS_LOW_POWER = STATUS_LOW_POWER   --- @diagnostic disable-line: redefined-local
-    -- luacheck: pop
-
     local chunk_map_data = chunk_map.data
     local visible_overlay_count = 0
     for _, force in pairs(game.forces) do
@@ -545,7 +537,6 @@ function LabOverlayRenderer:get_tick_function()
   --
   -- For optimization, as much as possible we should:
   -- * Avoid access to the same key on a table multiple times.
-  -- * Avoid access to the same outer-scope variable (upvalue) multiple times.
   -- * Avoid function calls. Make it inline.
   -- * Avoid creating a new object.
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
@@ -581,15 +572,6 @@ function LabOverlayRenderer:get_tick_function()
     local current_interval = self.current_interval
     lab_update_offset = lab_update_offset + 1
     if lab_update_offset > current_interval then lab_update_offset = 1 end
-
-    -- Bind frequently used upvalues to local variables for performance
-    -- luacheck: push ignore
-    local visible_overlays = visible_overlays --- @diagnostic disable-line: redefined-local
-    local force_state = force_state           --- @diagnostic disable-line: redefined-local
-    local phase = phase                       --- @diagnostic disable-line: redefined-local
-    local color_function = color_function     --- @diagnostic disable-line: redefined-local
-    local color = color                       --- @diagnostic disable-line: redefined-local
-    -- luacheck: pop
 
     -- Cache colors by force index and player position by player index to avoid repeated lookups.
     -- In the common case (all labs under one force/player), this avoids all but the first lookup.
