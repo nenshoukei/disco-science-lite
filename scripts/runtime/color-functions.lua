@@ -94,6 +94,7 @@ local function compile_function(name, body, transition_sharpness)
   local chunk_name = "@color-functions/" .. name
   return assert(load(code, chunk_name))()
 end
+ColorFunctions._compile_function = compile_function -- for testing and benchmark
 
 --- @type ColorFunction[]
 local functions = {
@@ -203,7 +204,6 @@ local functions = {
   ]], 20),
 }
 ColorFunctions.functions = functions
-ColorFunctions._compile_function = compile_function -- for benchmark
 local n_functions = #functions
 
 --- Choose a random color function.
@@ -224,20 +224,6 @@ function ColorFunctions.choose_random(prev_index)
     new_index = random(1, n_functions)
   end
   return functions[new_index], new_index
-end
-
---- This is just for testing the inlined interpolation.
----
---- DO NOT use this for production code since it dynamically compiles a color function.
----
---- @param output ColorTuple Output color tuple.
---- @param t number `t` value for testing.
---- @param colors ColorTuple[] Array of colors to interpolate.
---- @param n_colors integer #colors
---- @param transition_sharpness number Transition sharpness.
-function ColorFunctions.test_inlined_interpolation(output, t, colors, n_colors, transition_sharpness)
-  local f = compile_function("inlined_interpolation", format("t = %.18f", t), transition_sharpness)
-  return f(output, 0, colors, n_colors, 0, 0, 0, 0)
 end
 
 return ColorFunctions

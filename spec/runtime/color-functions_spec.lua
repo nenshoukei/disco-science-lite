@@ -1,5 +1,15 @@
 local ColorFunctions = require("scripts.runtime.color-functions")
 
+--- @param output ColorTuple Output color tuple.
+--- @param t number `t` value for testing.
+--- @param colors ColorTuple[] Array of colors to interpolate.
+--- @param n_colors integer #colors
+--- @param transition_sharpness number Transition sharpness.
+function test_inlined_interpolation(output, t, colors, n_colors, transition_sharpness)
+  local f = ColorFunctions._compile_function("inlined_interpolation", string.format("t = %.18f", t), transition_sharpness)
+  return f(output, 0, colors, n_colors, 0, 0, 0, 0)
+end
+
 describe("ColorFunctions", function ()
   -- Three primary colors as test fixtures
   local colors = {
@@ -13,7 +23,7 @@ describe("ColorFunctions", function ()
   describe("inlined interpolation", function ()
     it("returns the first color exactly at t=0", function ()
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 0, colors, n_colors, 1.0)
+      test_inlined_interpolation(out, 0, colors, n_colors, 1.0)
       assert.are.equal(1, out[1])
       assert.are.equal(0, out[2])
       assert.are.equal(0, out[3])
@@ -21,7 +31,7 @@ describe("ColorFunctions", function ()
 
     it("returns the second color exactly at t=1", function ()
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 1, colors, n_colors, 1.0)
+      test_inlined_interpolation(out, 1, colors, n_colors, 1.0)
       assert.are.equal(0, out[1])
       assert.are.equal(1, out[2])
       assert.are.equal(0, out[3])
@@ -29,7 +39,7 @@ describe("ColorFunctions", function ()
 
     it("linearly interpolates halfway between two colors at t=0.5, sharpness=1", function ()
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 0.5, colors, n_colors, 1.0)
+      test_inlined_interpolation(out, 0.5, colors, n_colors, 1.0)
       assert.are.equal(0.5, out[1])
       assert.are.equal(0.5, out[2])
       assert.are.equal(0, out[3])
@@ -38,7 +48,7 @@ describe("ColorFunctions", function ()
     it("clamps f to 1 when sharpness * f exceeds 1", function ()
       -- t=0.5, sharpness=2.0 => f=1.0 (clamped) => returns second color
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 0.5, colors, n_colors, 2.0)
+      test_inlined_interpolation(out, 0.5, colors, n_colors, 2.0)
       assert.are.equal(0, out[1])
       assert.are.equal(1, out[2])
       assert.are.equal(0, out[3])
@@ -47,7 +57,7 @@ describe("ColorFunctions", function ()
     it("scales f by sharpness when below 1", function ()
       -- t=0.5, sharpness=0.5 => f=0.25 => 25% from red toward green
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 0.5, colors, n_colors, 0.5)
+      test_inlined_interpolation(out, 0.5, colors, n_colors, 0.5)
       assert.are.equal(0.75, out[1])
       assert.are.equal(0.25, out[2])
       assert.are.equal(0, out[3])
@@ -57,7 +67,7 @@ describe("ColorFunctions", function ()
       -- t=2.5 => between colors[3] (blue) and colors[1] (red)
       -- f=0.5, sharpness=1.0 => midpoint
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 2.5, colors, n_colors, 1.0)
+      test_inlined_interpolation(out, 2.5, colors, n_colors, 1.0)
       assert.are.equal(0.5, out[1])
       assert.are.equal(0, out[2])
       assert.are.equal(0.5, out[3])
@@ -66,7 +76,7 @@ describe("ColorFunctions", function ()
     it("works with a single color (no interpolation partner)", function ()
       local single = { 0.5, 0.3, 0.8 }
       local out = {}
-      ColorFunctions.test_inlined_interpolation(out, 0, single, 1, 1.0)
+      test_inlined_interpolation(out, 0, single, 1, 1.0)
       assert.are.equal(0.5, out[1])
       assert.are.equal(0.3, out[2])
       assert.are.equal(0.8, out[3])
