@@ -110,10 +110,6 @@ local functions = {
   -- * `math.atan2` vs. Diamond Angle:
   --     For full 360° radial calculations, `math.atan2` is faster and more accurate than a Lua-based quadrant-branching approximation.
   --     However, for a single-quadrant case like the Kaleidoscope pattern, a simple division (`dy / (dx + dy)`) beats `atan2`.
-  -- * Multiply by inverse instead of divide:
-  --     `val * (1/10)` is faster than `val / 10` in a hot loop. Constants are pre-calculated as upvalues.
-  -- * Pre-scale loop invariants:
-  --     Values that can be pre-computed once (e.g., scaling `phase_speed` by `1/40`) are applied before the loop rather than inside every iteration.
 
   -- [1] Radial: color cycles based on the distance between the player and the lab.
   compile_function("Radial", [[
