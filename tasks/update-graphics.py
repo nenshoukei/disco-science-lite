@@ -4,7 +4,7 @@ import math
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 import oxipng
 
 # https://wiki.factorio.com/Application_directory#Application_directory
@@ -99,6 +99,17 @@ lab_brightness_norm = [b / max_b for b in lab_frame_brightness]
 biolab_src = np.array(Image.open(BIOLAB_SRC).convert("L"))
 biolab_frames = []
 
+# Vertical fade mask: suppress stray artifact pixels near the top of each frame.
+# Artifacts (stray lights from biolab animation) appear at y≈22-40; the main body
+# starts around y=50. Hold 0 until y=BIOLAB_MASK_START, then ramp to 1 at y=BIOLAB_MASK_END.
+# Applied before glow so artifacts don't contribute to blur spread either.
+BIOLAB_MASK_START = 50
+BIOLAB_MASK_END = 70
+_biolab_top_mask = np.ones(BIOLAB_FRAME_H, dtype=np.float32)
+_biolab_top_mask[:BIOLAB_MASK_START] = 0.0
+_biolab_top_mask[BIOLAB_MASK_START:BIOLAB_MASK_END] = np.linspace(0.0, 1.0, BIOLAB_MASK_END - BIOLAB_MASK_START)
+biolab_top_mask = _biolab_top_mask[:, np.newaxis]  # column vector for broadcasting
+
 for i in range(BIOLAB_FRAMES):
     # Linear interpolation of lab brightness pattern resampled to BIOLAB_FRAMES
     t = i / BIOLAB_FRAMES  # 0.0 to (BIOLAB_FRAMES-1)/BIOLAB_FRAMES
@@ -106,11 +117,16 @@ for i in range(BIOLAB_FRAMES):
     i0 = int(pos) % LAB_FRAMES
     i1 = (i0 + 1) % LAB_FRAMES
     frac = pos - int(pos)
-    brightness = lab_brightness_norm[i0] * (1.0 - frac) + lab_brightness_norm[i1] * frac
+    brightness = (lab_brightness_norm[i0] * (1.0 - frac) + lab_brightness_norm[i1] * frac) * 2
 
     frame = extract_frame(biolab_src, i, BIOLAB_FRAME_W, BIOLAB_FRAME_H, BIOLAB_COLS)
-    leveled = apply_level(frame, white_point=0.8, gamma=6.0).astype(np.float32)
-    result = np.clip(leveled * brightness, 0, 255).round().astype(np.uint8)
+    leveled = apply_level(frame, white_point=0.8, gamma=2.0).astype(np.float32) * biolab_top_mask
+    brightened = np.clip(leveled * brightness, 0, 255)
+    # Glow: blur and screen-blend onto the brightened frame
+    glow = np.array(
+        Image.fromarray(brightened.astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(radius=15))
+    ).astype(np.float32)
+    result = np.clip(255.0 - (255.0 - brightened) * (255.0 - glow) / 255.0, 0, 255).round().astype(np.uint8)
     biolab_frames.append(result)
 
 assemble_grid(biolab_frames, BIOLAB_COLS).save(BIOLAB_OVERLAY_DST)
