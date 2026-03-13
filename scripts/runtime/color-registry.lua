@@ -67,8 +67,10 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
 
   if next(not_found) ~= nil then
     local names = {}
+    local i = 1
     for name, _ in pairs(not_found) do
-      names[#names + 1] = name
+      names[i] = name
+      i = i + 1
     end
     table.sort(names)
     log(
@@ -115,19 +117,22 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
   intensity = intensity or 1.0
   --- @type ColorTuple[]
   local colors = {}
+  local n_colors = 0
   local ingredient_colors = self.ingredient_colors
   local ingredients = technology.research_unit_ingredients
   for i = 1, #ingredients do
     local color = ingredient_colors[ingredients[i].name]
     if color then
-      colors[#colors + 1] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
+      n_colors = n_colors + 1
+      colors[n_colors] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
     end
   end
-  if #colors == 0 then
+  if n_colors == 0 then
     local dc = self.default_research_colors
     for i = 1, #dc do
       local c = dc[i]
-      colors[#colors + 1] = { c[1] * intensity, c[2] * intensity, c[3] * intensity }
+      n_colors = n_colors + 1
+      colors[n_colors] = { c[1] * intensity, c[2] * intensity, c[3] * intensity }
     end
   end
   return colors
