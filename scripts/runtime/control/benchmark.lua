@@ -1,6 +1,7 @@
 local ColorFunctions = require("scripts.runtime.color-functions")
 
 local N = 100000
+local ROUNDS = 10
 
 -- ID-to-Name map for translation callbacks
 local pending_translations = {}
@@ -27,24 +28,105 @@ commands.add_command(
     local player = game.get_player(event.player_index)
     if not player then return end
 
+    local pi = math.pi
+    local inv_pi = 1 / pi
+    local h_table = { x = 1, y = 2, z = 3 }
+    local a_table = { 1, 2, 3 }
+    local upvalue = 1
+
     --- @type { name: string, func: fun() }[]
     local test_cases = {
       {
-        name = "game.get_player().position",
+        name = "Division",
         func = function ()
-          local _ = game.get_player(1).position
+          local _ = 1 / pi
+        end,
+      },
+      {
+        name = "Multiplication",
+        func = function ()
+          local _ = 1 * inv_pi
+        end,
+      },
+      {
+        name = "Hash-key Access",
+        func = function ()
+          local _ = h_table.x + h_table.y
+        end,
+      },
+      {
+        name = "Array-index Access",
+        func = function ()
+          local _ = a_table[1] + a_table[2]
+        end,
+      },
+      {
+        name = "Upvalue",
+        func = function ()
+          local _ = upvalue + upvalue
+        end,
+      },
+      {
+        name = "Local variable",
+        func = function ()
+          local lv = upvalue
+          local _ = lv + lv
+        end,
+      },
+      {
+        name = "Index-based for-loop",
+        func = function ()
+          local tbl = a_table
+          for i = 1, #tbl do
+            local _v = a_table[i]
+          end
+        end,
+      },
+      {
+        name = "ipairs() for-loop",
+        func = function ()
+          local tbl = a_table
+          for _k, _v in ipairs(tbl) do
+          end
+        end,
+      },
+      {
+        name = "pairs() for-loop",
+        func = function ()
+          local tbl = h_table
+          for _k, _v in pairs(tbl) do
+          end
+        end,
+      },
+      {
+        name = "next() while-loop",
+        func = function ()
+          local tbl = h_table
+          local _k, _v = next(tbl, nil)
+          while _k do
+            _k, _v = next(tbl, _k)
+          end
         end,
       },
     }
 
-    print(string.format("--- Benchmarking %d cases (N=%d) ---", #test_cases, N))
+    print(string.format("--- Benchmarking %d cases (N=%d, ROUNDS=%d) ---", #test_cases, N, ROUNDS))
     for _, tc in ipairs(test_cases) do
       local func = tc.func
-      local p = game.create_profiler()
+
+      -- Warm up
       for _ = 1, N do
         func()
       end
+
+      local p = game.create_profiler()
+      for _ = 1, ROUNDS do
+        for _ = 1, N do
+          func()
+        end
+      end
       p.stop()
+      p.divide(ROUNDS)
       local id = player.request_translation(p)
       if id then
         pending_translations[id] = tc.name
@@ -101,13 +183,16 @@ commands.add_command(
       return
     end
 
-    print(string.format("--- Benchmarking %d cases (N=%d) ---", #test_cases, N))
+    print(string.format("--- Benchmarking %d cases (N=%d, ROUNDS=%d) ---", #test_cases, N, ROUNDS))
     for _, tc in ipairs(test_cases) do
       local p = game.create_profiler()
-      for _ = 1, N do
-        tc.func(output, phase, colors, n_colors, px, py, lx, ly)
+      for _ = 1, ROUNDS do
+        for _ = 1, N do
+          tc.func(output, phase, colors, n_colors, px, py, lx, ly)
+        end
       end
       p.stop()
+      p.divide(ROUNDS)
       local id = player.request_translation(p)
       if id then
         pending_translations[id] = tc.name
