@@ -78,7 +78,7 @@ commands.add_command(
         func = function ()
           local tbl = a_table
           for i = 1, #tbl do
-            local _v = a_table[i]
+            local _ = a_table[i]
           end
         end,
       },
@@ -102,9 +102,9 @@ commands.add_command(
         name = "next() while-loop",
         func = function ()
           local tbl = h_table
-          local _k, _v = next(tbl, nil)
+          local _k, _ = next(tbl, nil)
           while _k do
-            _k, _v = next(tbl, _k)
+            _k, _ = next(tbl, _k)
           end
         end,
       },

@@ -403,10 +403,10 @@ local function compute_player_view(player)
   local half_vh = ceil(display_resolution.height / f)
 
   return
-    floor((px - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
-    floor((py - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
-    floor((px + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]]),
-    floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+    floor((px - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
+    floor((py - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
+    floor((px + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
+    floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
 end
 
 --- Get a state update function to be called every 30 ticks.

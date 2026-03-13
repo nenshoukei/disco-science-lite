@@ -48,8 +48,8 @@ function ChunkMap:insert(entity, overlay)
 
   local surface_index = entity.surface_index
   local position = entity.position
-  local chunk_x = floor((position.x or position[1]) * 0.03125 --[[$INV_CHUNK_SIZE]])
-  local chunk_y = floor((position.y or position[2]) * 0.03125 --[[$INV_CHUNK_SIZE]])
+  local chunk_x = floor((position.x or position[1]) / 32 --[[$CHUNK_SIZE]])
+  local chunk_y = floor((position.y or position[2]) / 32 --[[$CHUNK_SIZE]])
 
   local entries = self.entries
   local existing = entries[unit_number]

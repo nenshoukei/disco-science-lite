@@ -44,7 +44,6 @@ local consts = {
 
   -- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
   CHUNK_SIZE = 32,
-  INV_CHUNK_SIZE = 1 / 32,
 
   -- Margin of player view boundaries in tiles
   VIEW_RECT_MARGIN = 6,

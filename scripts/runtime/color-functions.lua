@@ -4,7 +4,7 @@
 ---
 --- - **Template Inlining:** Core interpolation logic and animation patterns are merged into a single string template.
 --- - **Compilation:** The resulting code is compiled via `load()`, producing a flat, highly efficient function that avoids internal branching and nested calls.
---- - **Embedded Math:** Mathematical constants (e.g., `INV_PI = 1 / math.pi`) are pre-calculated and embedded as literals during the compilation phase.
+--- - **Embedded Math:** Mathematical constants (e.g., `TWO_PI = 2 * math.pi`) are pre-calculated and embedded as literals during the compilation phase.
 ---
 --- @class ColorFunctions
 local ColorFunctions = {}
@@ -27,13 +27,8 @@ local random = math.random
 -- Constants for pre-processing. These will be embedded as numeric literals.
 -- Inversed for folding constant divisions into multiplications. (much faster in Lua 5.2)
 local CONSTANTS = {
-  INV_PI     = format("%.18f", 1 / math.pi),
-  INV_TWO_PI = format("%.18f", 1 / (2 * math.pi)),
-  INV_4      = format("%.18f", 1 / 4),
-  INV_8      = format("%.18f", 1 / 8),
-  INV_9      = format("%.18f", 1 / 9),
-  INV_10     = format("%.18f", 1 / 10),
-  INV_1024   = format("%.18f", 1 / 1024),
+  PI     = format("%.18f", math.pi),
+  TWO_PI = format("%.18f", 2 * math.pi),
 }
 
 --- Template for the color functions.
@@ -42,7 +37,7 @@ local CONSTANTS = {
 --- with scaling by transition sharpness.
 ---
 --- The `t` value should be calculated by each color function's body.
---- `CONSTANTS` like `INV_PI` are embedded as numeric literals into the body.
+--- `CONSTANTS` like `TWO_PI` are embedded as numeric literals into the body.
 ---
 --- Placeholders:
 ---   %s: Function body - The function body to calculate 't'.
@@ -90,7 +85,7 @@ ColorFunctions.function_names = function_names
 local function compile_function(name, body, transition_sharpness)
   function_names[#function_names + 1] = name
 
-  -- Replace constant tokens (e.g. INV_PI) with numeric literals.
+  -- Replace constant tokens (e.g. TWO_PI) with numeric literals.
   body = body:gsub("[A-Z0-9_]+", CONSTANTS)
 
   local code = format(COLOR_FUNCTION_TEMPLATE, body, transition_sharpness)
@@ -115,36 +110,36 @@ local functions = {
   compile_function("Radial", [[
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) * INV_8 + phase
+    t = sqrt(dx * dx + dy * dy) / 8 + phase
   ]], 2),
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
   compile_function("Angular", [[
-    t = (atan2(ly - py, lx - px) * INV_TWO_PI + 0.5) * n_colors + phase
+    t = (atan2(ly - py, lx - px) / TWO_PI + 0.5) * n_colors + phase
   ]], 2),
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
   compile_function("Horizontal", [[
     local d = lx - px
-    t = (d < 0 and -d or d) * INV_10 + phase
+    t = (d < 0 and -d or d) / 10 + phase
   ]], 2),
 
   -- [4] Vertical: color cycles based on vertical separation only.
   compile_function("Vertical", [[
     local d = ly - py
-    t = (d < 0 and -d or d) * INV_10 + phase
+    t = (d < 0 and -d or d) / 10 + phase
   ]], 2),
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
   compile_function("Diagonal", [[
     local d = lx - px + ly - py
-    t = (d < 0 and -d or d) * INV_10 + phase
+    t = (d < 0 and -d or d) / 10 + phase
   ]], 2),
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
   compile_function("Grid", [[
-    local dx = (lx - px) * INV_9
-    local dy = (ly - py) * INV_8
+    local dx = (lx - px) / 9
+    local dy = (ly - py) / 8
     local fdx = dx - dx % 1
     local fdy = dy - dy % 1
     local val = fdx + fdy
@@ -155,14 +150,14 @@ local functions = {
   compile_function("Spiral", [[
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) * INV_8 - (atan2(dy, dx) * INV_TWO_PI + 0.5) * n_colors + phase
+    t = sqrt(dx * dx + dy * dy) / 8 - (atan2(dy, dx) / TWO_PI + 0.5) * n_colors + phase
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
   compile_function("Diamond", [[
     local dx = lx - px
     local dy = ly - py
-    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * INV_8 + phase
+    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) / 8 + phase
   ]], 2),
 
   -- [9] Kaleidoscope: 4-fold mirror symmetry (fold both axes) combined with radial distance bands.
@@ -172,7 +167,7 @@ local functions = {
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
     local dist = dx + dy
-    t = dist * INV_8 + (dy * n_colors) / (dist + 1e-9) + phase
+    t = dist / 8 + (dy * n_colors) / (dist + 1e-9) + phase
   ]], 3),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
@@ -181,7 +176,7 @@ local functions = {
     local dy = ly - py
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = (dx > dy and dx or dy) * INV_8 + phase
+    t = (dx > dy and dx or dy) / 8 + phase
   ]], 2),
 
   -- [11] Lattice: repeating tiled pattern of circular rings across the map.
@@ -190,7 +185,7 @@ local functions = {
     local dy = (ly + 16) % 32 - 16
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = sqrt(dx * dx + dy * dy) * INV_8 - phase
+    t = sqrt(dx * dx + dy * dy) / 8 - phase
   ]], 2),
 
   -- [12] Pulse: all labs change color in unison regardless of position.
@@ -203,7 +198,7 @@ local functions = {
     -- LCG-style pseudo-random number.
     local flx = lx - lx % 1
     local fly = ly - ly % 1
-    local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 * INV_1024
+    local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 / 1024
     t = r * n_colors
   ]], 20),
 }
