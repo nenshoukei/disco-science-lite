@@ -29,8 +29,7 @@
 --- Settings for rendering a lab overlay.
 ---
 --- @class (exact) DiscoScience.LabOverlaySettings
---- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
----                          If omitted, the built-in overlay for the standard lab shape is used.
+--- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.<br>If omitted, the built-in overlay for the standard lab shape is used.
 --- @field scale number? Scale of the overlay. (Default: `1`)
 
 --- A color in RGBA format.
@@ -52,23 +51,14 @@
 --- Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 ---
 --- Compatible with the original DiscoScience mod interface.
+---
 --- @class DiscoScience.Interface
 _G.DiscoScience = {
 
   --- Prepare a lab prototype for Disco Science colorization.
   ---
-  --- `settings` can be used to specify the overlay animation and scale.
-  --- If not passed, the default settings are used.
-  ---
-  --- Settings:
-  --- - `animation` -
-  ---     Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
-  ---     If omitted, the built-in overlay for the standard lab shape is used.
-  --- - `scale` -
-  ---     Scale of the overlay. (Default: `1`)
-  ---
   --- @param lab DiscoScience.LabPrototype Lab prototype to be prepared.
-  --- @param settings DiscoScience.LabOverlaySettings? Settings for the lab overlay.
+  --- @param settings DiscoScience.LabOverlaySettings? Settings for the lab overlay for colorization. If omitted, the default values are used.
   prepareLab = function (lab, settings) end,
 
   --- Set the color of an ingredient (science pack) at prototype stage.
@@ -76,7 +66,7 @@ _G.DiscoScience = {
   --- These colors can be overridden at runtime via `remote.call()`.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @param color DiscoScience.Color
+  --- @param color DiscoScience.Color Color for the ingredient.
   setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack) registered so far.
@@ -110,7 +100,7 @@ local DiscoScienceRemote = {
   --- Overrides colors set at prototype stage.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @param color DiscoScience.Color
+  --- @param color DiscoScience.Color Color for the ingredient.
   setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack).
