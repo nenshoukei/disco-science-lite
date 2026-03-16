@@ -10,6 +10,6 @@ GNU Lesser General Public License v3.0 (LGPL-3.0).
 These files are modified versions of the original assets and are redistributed under the terms of the LGPL-3.0.
 Original copyright and authorship of the assets remain with BiusArt.
 
-The full license text is provided in the accompanying LICENSE-LGPL-3.0.txt file.
+The full license text is provided in the accompanying LICENSE file.
 
 These files are included only as part of this mod.

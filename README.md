@@ -119,12 +119,11 @@ are released under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 However, some image assets included in this repository are derived from third-party copyrighted works and are NOT covered by the MIT License:
 
-- Image files under [graphics/factorio/](graphics/factorio/) are derived from the official Factorio game assets.  
-  Copyright © Wube Software Ltd.  
-  See [NOTICE.txt](graphics/factorio/NOTICE.txt) for details.
+- Image files under [graphics/factorio/](graphics/factorio/) are derived from the official Factorio game assets. Copyright © Wube Software Ltd. See [NOTICE.txt](graphics/factorio/NOTICE.txt) for details.
 
 - Image files under [graphics/laborat/](graphics/laborat/) are derived from assets of the
-  [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) Factorio mod created by BiusArt.  
-  The original mod is indicated on the Factorio Mod Portal as being licensed under the GNU Lesser General Public License v3.0.  
-  These files are treated as being redistributed under the terms of the GNU LGPL v3.0.  
-  See [LICENSE-LGPL-3.0.txt](graphics/laborat/LICENSE-LGPL-3.0.txt) and [NOTICE.txt](graphics/laborat/NOTICE.txt) for details.
+  [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) Factorio mod created by BiusArt.
+  The original mod is indicated on the Factorio Mod Portal as being licensed under the GNU Lesser General Public License v3.0.
+  These files are treated as being redistributed under the terms of the GNU LGPL v3.0.
+  See [LICENSE](graphics/laborat/LICENSE) and [NOTICE.txt](graphics/laborat/NOTICE.txt) for details.
+
