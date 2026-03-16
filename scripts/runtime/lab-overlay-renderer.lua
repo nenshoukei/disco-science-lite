@@ -153,6 +153,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
       render_layer = "higher-object-under",
       visible = false,
       animation_offset = random() * 300,
+      forces = lab.force_index,
     })
   end
 
