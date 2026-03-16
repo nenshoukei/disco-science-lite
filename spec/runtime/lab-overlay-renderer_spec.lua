@@ -203,34 +203,6 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(120, r.color_pattern_duration)
       assert.are.equal(500, r.max_updates_per_tick)
     end)
-
-    it("calls side effects when color-intensity changes", function ()
-      local r = make_renderer()
-
-      local research_called = false
-      r.update_all_forces_current_research = function () research_called = true end
-
-      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
-      r:load_settings()
-
-      assert.is_true(research_called)
-    end)
-
-    it("does not call side effects when game is nil (on_load safety)", function ()
-      local old_game = _G.game
-      _G.game = nil
-
-      local r = make_renderer()
-      local research_called = false
-      r.update_all_forces_current_research = function () research_called = true end
-
-      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
-      r:load_settings()
-
-      assert.is_false(research_called)
-
-      _G.game = old_game
-    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -331,6 +303,39 @@ describe("LabOverlayRenderer", function ()
 
       assert.is_nil(_G.rendering.objects[orphan_id])
       assert.is_nil(_G.rendering.objects[anim2_id])
+    end)
+
+    it("destroys all existing render objects and creates new ones when force=true", function ()
+      local r = make_renderer()
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      -- Initial render
+      r:render_overlays_for_all_labs()
+      local old_anim_id = r.overlays[1].animation.id
+
+      -- Force re-render: must destroy old objects and create new ones
+      r:render_overlays_for_all_labs(true)
+      local new_anim_id = r.overlays[1].animation.id
+
+      assert.is_nil(_G.rendering.objects[old_anim_id])
+      assert.are_not.equal(old_anim_id, new_anim_id)
+      assert.is_not_nil(_G.rendering.objects[new_anim_id])
+    end)
+
+    it("resets force_state when force=true", function ()
+      local r = make_renderer()
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      r:render_overlays_for_all_labs()
+      r.force_state[1] = { current_research = nil, colors = nil, n_colors = 0 }
+
+      r:render_overlays_for_all_labs(true)
+
+      assert.are.same({}, r.force_state)
     end)
   end)
 

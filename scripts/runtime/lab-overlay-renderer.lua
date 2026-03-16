@@ -9,6 +9,7 @@ local random = math.random
 local max = math.max
 local ceil = math.ceil
 local floor = math.floor
+local rendering_clear = rendering.clear
 local rendering_get_all_objects = rendering.get_all_objects
 local draw_animation = rendering.draw_animation
 local STATUS_WORKING = defines.entity_status.working
@@ -81,7 +82,6 @@ end
 function LabOverlayRenderer:load_settings()
   local startup = settings.startup
   local global = settings.global
-  local old_color_intensity = self.color_intensity
 
   self.is_fallback_enabled =
     startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
@@ -91,13 +91,6 @@ function LabOverlayRenderer:load_settings()
     global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as integer]]
   self.max_updates_per_tick =
     global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value --[[@as integer]]
-
-  -- Since `game` is not available for `on_load`, this guard avoids updates on game state in `on_load` handler.
-  if game then
-    if old_color_intensity ~= self.color_intensity then
-      self:update_all_forces_current_research()
-    end
-  end
 end
 
 --- Render an overlay for a lab entity.
@@ -184,19 +177,26 @@ end
 --- Render overlays for all lab entities.
 ---
 --- The tick function returned by `get_tick_function()` should be refreshed afterwards.
-function LabOverlayRenderer:render_overlays_for_all_labs()
-  -- Collect all existing valid render objects from the mod.
-  -- Index them by their target unit_number for fast lookup.
+---
+--- @param force boolean? If `true`, it destroys all overlays and re-render all overlays. Default: `false`.
+function LabOverlayRenderer:render_overlays_for_all_labs(force)
   local existing_objects = {}
-  local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
-  for i = 1, #all_objects do
-    local object = all_objects[i]
-    local entity = object.target.entity
-    if entity and entity.valid and entity.unit_number then
-      existing_objects[entity.unit_number] = object
-    else
-      -- Destroy objects with no valid lab target.
-      object.destroy()
+  if force then
+    -- Destroy all rendering objects
+    rendering_clear("disco-science-lite" --[[$MOD_NAME]])
+  else
+    -- Collect all existing valid render objects from the mod.
+    -- Index them by their target unit_number for fast lookup.
+    local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+    for i = 1, #all_objects do
+      local object = all_objects[i]
+      local entity = object.target.entity
+      if entity and entity.valid and entity.unit_number then
+        existing_objects[entity.unit_number] = object
+      else
+        -- Destroy objects with no valid lab target.
+        object.destroy()
+      end
     end
   end
 

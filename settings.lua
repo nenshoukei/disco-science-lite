@@ -7,6 +7,13 @@ data:extend({
     order = "su-a[visual]-a",
   },
   {
+    type = "bool-setting",
+    name = "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]],
+    setting_type = "startup",
+    default_value = false,
+    order = "su-a[visual]-b",
+  },
+  {
     type = "int-setting",
     name = "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]],
     setting_type = "runtime-global",

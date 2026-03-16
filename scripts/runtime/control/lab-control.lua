@@ -131,6 +131,14 @@ LabControl.events = {
     if string.sub(event.setting, 1, #prefix) == prefix then
       renderer:load_settings()
       setup_event_handlers()
+
+      if event.setting == "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] then
+        -- This resets color palette using new color intensity.
+        renderer:update_all_forces_current_research()
+      elseif event.setting == "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] then
+        -- Force re-render all overlays.
+        renderer:render_overlays_for_all_labs(true)
+      end
     end
   end,
 }
