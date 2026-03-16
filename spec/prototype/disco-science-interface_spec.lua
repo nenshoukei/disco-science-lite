@@ -1,4 +1,3 @@
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local DiscoScienceInterface = require("scripts.prototype.disco-science-interface")
@@ -15,19 +14,16 @@ end
 
 describe("DiscoScienceInterface", function ()
   before_each(function ()
-    LabPrototypeModifier.modified_labs = {}
     PrototypeLabRegistry.reset()
     PrototypeColorRegistry.reset()
   end)
 
   -- -------------------------------------------------------------------
   describe("prepareLab", function ()
-    it("modifies prototype and registers lab with provided settings", function ()
+    it("registers lab with provided settings", function ()
       local lab = make_lab("my-lab")
-      local off = lab.off_animation
       DiscoScienceInterface.prepareLab(lab, { animation = "my-anim", scale = 2.5 })
 
-      assert.are.equal(off, lab.on_animation)
       local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("my-anim", settings.animation)

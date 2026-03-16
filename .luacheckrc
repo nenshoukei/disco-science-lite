@@ -27,5 +27,6 @@ globals = {
     "remote",
     "rendering",
     "commands",
+    "mods",
     "__DebugAdapter"
 }

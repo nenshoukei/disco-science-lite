@@ -27,13 +27,7 @@ local consts = {
 
   -- animations
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",
-  BIOLAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "biolab-overlay",
   GENERAL_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "general-overlay",
-
-  -- graphics
-  LAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "factorio/lab-overlay.png",
-  BIOLAB_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "factorio/biolab-overlay.png",
-  GENERAL_OVERLAY_GRAPHIC_FILE_NAME = GRAPHICS_DIR .. "general-overlay.png",
 
   -- settings
   FALLBACK_OVERLAY_ENABLED_NAME = NAME_PREFIX .. "fallback-overlay-enabled",

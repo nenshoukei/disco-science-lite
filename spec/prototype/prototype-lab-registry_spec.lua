@@ -7,18 +7,8 @@ describe("PrototypeLabRegistry", function ()
 
   -- -------------------------------------------------------------------
   describe("registered_labs", function ()
-    it("contains default lab registration", function ()
-      local settings = PrototypeLabRegistry.registered_labs["lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]], settings.animation)
-      assert.are.equal(1, settings.scale)
-    end)
-
-    it("contains default biolab registration", function ()
-      local settings = PrototypeLabRegistry.registered_labs["biolab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("mks-dsl-biolab-overlay" --[[$BIOLAB_OVERLAY_ANIMATION_NAME]], settings.animation)
-      assert.are.equal(1, settings.scale)
+    it("is empty when initialized", function ()
+      assert.is_nil(next(PrototypeLabRegistry.registered_labs, nil))
     end)
   end)
 
@@ -58,18 +48,10 @@ describe("PrototypeLabRegistry", function ()
 
   -- -------------------------------------------------------------------
   describe("reset", function ()
-    it("removes custom registrations", function ()
+    it("clears registrations", function ()
       PrototypeLabRegistry.register("my-lab", { animation = "my-anim" })
       PrototypeLabRegistry.reset()
-      assert.is_nil(PrototypeLabRegistry.registered_labs["my-lab"])
-    end)
-
-    it("restores default lab registration after reset", function ()
-      PrototypeLabRegistry.register("lab", { animation = "overridden" })
-      PrototypeLabRegistry.reset()
-      local settings = PrototypeLabRegistry.registered_labs["lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]], settings.animation)
+      assert.is_nil(next(PrototypeLabRegistry.registered_labs, nil))
     end)
 
     it("returns independent tables after each reset (no shared state)", function ()

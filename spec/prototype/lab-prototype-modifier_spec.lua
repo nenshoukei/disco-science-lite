@@ -25,16 +25,65 @@ end
 
 describe("LabPrototypeModifier", function ()
   before_each(function ()
-    LabPrototypeModifier.modified_labs = {}
+    LabPrototypeModifier.reset()
   end)
 
   -- -------------------------------------------------------------------
   describe("modify_lab", function ()
-    it("replaces on_animation with off_animation", function ()
+    it("does nothing when on_animation is nil", function ()
       local lab = make_lab(nil)
-      local off = lab.off_animation
+      lab.on_animation = nil --[[@as any]]
+      assert.no_error(function () LabPrototypeModifier.modify_lab(lab) end)
+    end)
+
+    it("applies filename replacement on on_animation.filename", function ()
+      LabPrototypeModifier.set_filename_replacement("on.png", "on-masked.png")
+      local lab = make_lab(nil)
       LabPrototypeModifier.modify_lab(lab)
-      assert.are.equal(off, lab.on_animation)
+      assert.are.equal("on-masked.png", lab.on_animation.filename)
+    end)
+
+    it("does not replace on_animation.filename when no replacement is set", function ()
+      local lab = make_lab(nil)
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal("on.png", lab.on_animation.filename)
+    end)
+
+    it("applies filename replacement on on_animation.filenames", function ()
+      LabPrototypeModifier.set_filename_replacement("a.png", "a-masked.png")
+      local lab = make_lab(nil)
+      lab.on_animation = { filenames = { "a.png", "b.png" } } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal("a-masked.png", lab.on_animation.filenames[1])
+      assert.are.equal("b.png", lab.on_animation.filenames[2])
+    end)
+
+    it("removes layers from on_animation with matching removal filenames", function ()
+      LabPrototypeModifier.set_filename_removal("light.png")
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filename = "on.png" },
+          { filename = "light.png" },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(1, #lab.on_animation.layers)
+      assert.are.equal("on.png", lab.on_animation.layers[1].filename)
+    end)
+
+    it("applies filename replacement on on_animation layer filenames", function ()
+      LabPrototypeModifier.set_filename_replacement("on.png", "on-masked.png")
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filename = "on.png" },
+          { filename = "other.png" },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal("on-masked.png", lab.on_animation.layers[1].filename)
+      assert.are.equal("other.png", lab.on_animation.layers[2].filename)
     end)
 
     it("does nothing when the lab prototype is already modified", function ()
@@ -93,10 +142,8 @@ describe("LabPrototypeModifier", function ()
 
     it("modifies registered lab prototype", function ()
       local lab = make_lab(nil)
-      local off = lab.off_animation
       PrototypeLabRegistry.register(lab.name)
       LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
-      assert.are.equal(off, lab.on_animation)
       assert_is_dsl_trigger(lab.created_effect)
     end)
 
