@@ -1,6 +1,10 @@
 local Utils = require("scripts.shared.utils")
 local config_ingredient_colors = require("scripts.shared.config.ingredient-colors")
 
+if _G.DiscoSciencePrototypeColorRegistry then
+  return _G.DiscoSciencePrototypeColorRegistry
+end
+
 --- Registry for ingredient colors at prototype stage.
 local PrototypeColorRegistry = {
   --- Registered ingredient colors. Key is ingredient's ItemPrototype name.
@@ -9,6 +13,7 @@ local PrototypeColorRegistry = {
   --- @type table<string, ColorTuple>
   registered_colors = Utils.table_deep_copy(config_ingredient_colors),
 }
+_G.DiscoSciencePrototypeColorRegistry = PrototypeColorRegistry
 
 --- Resets the registry. Just for testing.
 function PrototypeColorRegistry.reset()

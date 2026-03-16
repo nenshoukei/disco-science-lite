@@ -1,5 +1,9 @@
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
+if _G.DiscoScienceLabPrototypeModifier then
+  return _G.DiscoScienceLabPrototypeModifier
+end
+
 local LabPrototypeModifier = {
   --- Modified lab prototypes
   --- @type table<data.LabPrototype, boolean>

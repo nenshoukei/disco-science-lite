@@ -1,6 +1,10 @@
 local Utils = require("scripts.shared.utils")
 local config_lab_overlay_settings = require("scripts.shared.config.lab-overlay-settings")
 
+if _G.DiscoSciencePrototypeLabRegistry then
+  return _G.DiscoSciencePrototypeLabRegistry
+end
+
 --- Registry for LabPrototype and its overlay settings.
 local PrototypeLabRegistry = {
   --- Registered LabPrototype name and its overlay settings.
@@ -9,6 +13,7 @@ local PrototypeLabRegistry = {
   --- @type table<string, LabOverlaySettings>
   registered_labs = Utils.table_deep_copy(config_lab_overlay_settings),
 }
+_G.DiscoSciencePrototypeLabRegistry = PrototypeLabRegistry
 
 --- Resets the registry. Just for testing.
 function PrototypeLabRegistry.reset()
