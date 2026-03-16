@@ -4,9 +4,9 @@ local Utils = require("scripts.shared.utils")
 ---
 --- @class ColorRegistry
 local ColorRegistry = {
-  --- Default colors for research
-  --- @type ColorTuple[]
-  default_research_colors = { { 1.0, 0.0, 1.0 } },
+  --- Default color for research
+  --- @type ColorTuple
+  default_research_color = { 0.27, 0.44, 0.93 },
 }
 ColorRegistry.__index = ColorRegistry
 
@@ -124,12 +124,8 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
     end
   end
   if n_colors == 0 then
-    local dc = self.default_research_colors
-    for i = 1, #dc do
-      local c = dc[i]
-      n_colors = n_colors + 1
-      colors[n_colors] = { c[1] * intensity, c[2] * intensity, c[3] * intensity }
-    end
+    local color = self.default_research_color
+    colors[1] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
   end
   return colors
 end
