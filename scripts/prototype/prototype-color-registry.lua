@@ -1,5 +1,4 @@
 local Utils = require("scripts.shared.utils")
-local config_ingredient_colors = require("scripts.shared.config.ingredient-colors")
 
 if _G.DiscoSciencePrototypeColorRegistry then
   return _G.DiscoSciencePrototypeColorRegistry
@@ -11,13 +10,13 @@ local PrototypeColorRegistry = {
   ---
   --- This table is stored as mod-data prototype for runtime stage.
   --- @type table<string, ColorTuple>
-  registered_colors = Utils.table_deep_copy(config_ingredient_colors),
+  registered_colors = {},
 }
 _G.DiscoSciencePrototypeColorRegistry = PrototypeColorRegistry
 
 --- Resets the registry. Just for testing.
 function PrototypeColorRegistry.reset()
-  PrototypeColorRegistry.registered_colors = Utils.table_deep_copy(config_ingredient_colors)
+  PrototypeColorRegistry.registered_colors = {}
 end
 
 --- Get color for an ingredient (science pack).
@@ -37,6 +36,18 @@ end
 --- @param color ColorTuple Color for the ingredient.
 function PrototypeColorRegistry.set(item_name, color)
   PrototypeColorRegistry.registered_colors[item_name] = color
+end
+
+--- Set colors for ingredients by a table.
+---
+--- This overwrites the existing colors with the same names.
+---
+--- @param item_name_to_color table<string, ColorTuple> ItemPrototype name to color table.
+function PrototypeColorRegistry.set_by_table(item_name_to_color)
+  local registered_colors = PrototypeColorRegistry.registered_colors
+  for item_name, color in pairs(item_name_to_color) do
+    registered_colors[item_name] = color
+  end
 end
 
 return PrototypeColorRegistry
