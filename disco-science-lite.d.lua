@@ -44,7 +44,7 @@
 ---
 --- @alias DiscoScience.LabPrototype { type: "lab", name: string }
 
---- Public interface `_G.DiscoScience` for other mods on prototype stage.
+--- Public interface `DiscoScience` for other mods on prototype stage.
 ---
 --- You can use it like `DiscoScience.prepareLab(...)`.
 ---

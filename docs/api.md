@@ -22,21 +22,21 @@ Register your lab in `data.lua`:
 
 ```lua
 -- data.lua
-if _G.DiscoScience then
+if DiscoScience then
     DiscoScience.prepareLab(data.raw["lab"]["my-lab"])
 end
 ```
 
-The `if _G.DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `_G.DiscoScience` will be `nil`.
+The `if DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `DiscoScience` will be `nil`.
 
 Disco Science Lite colorizes the lab based on the science packs it consumes.
 
-If your lab is **larger or smaller than the vanilla lab**, adjust the scale so the overlay fits:
+If your lab is a **bigger (or smaller) version** of the vanilla lab:
 
 ```lua
 -- data.lua
-if _G.DiscoScience then
-    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale = 1.5 })
+if DiscoScience then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale: 2.0 }) -- Twice bigger
 end
 ```
 
@@ -44,7 +44,7 @@ If your lab has a **fundamentally different shape** from the vanilla lab (not ju
 
 ```lua
 -- data.lua
-if _G.DiscoScience then
+if DiscoScience then
     DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { animation = "my-lab-overlay-animation" })
 end
 ```
@@ -57,7 +57,7 @@ Vanilla science pack colors are built-in. For custom science packs, register the
 
 ```lua
 -- data.lua
-if _G.DiscoScience then
+if DiscoScience then
     DiscoScience.setIngredientColor("my-science-pack", { r = 1, g = 0.5, b = 0 })
 end
 ```
@@ -66,7 +66,7 @@ Labs that consume this science pack will be tinted with this color.
 
 ---
 
-## Prototype Stage — `_G.DiscoScience`
+## Prototype Stage — `DiscoScience`
 
 Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 
