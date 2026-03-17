@@ -4,8 +4,6 @@ local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["space-age"] then
-  local animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay"
-
   LabPrototypeModifier.set_filename_replacement(
     "__space-age__/graphics/entity/biolab/biolab-anim.png",
     "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/biolab-masked.png"
@@ -17,7 +15,7 @@ if mods["space-age"] then
   data:extend({
     {
       type = "animation",
-      name = animation,
+      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
       filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/biolab-overlay.png",
       blend_mode = "additive",
       draw_as_glow = true,
@@ -32,6 +30,6 @@ if mods["space-age"] then
   })
 
   PrototypeLabRegistry.register("biolab", {
-    animation = animation,
+    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
   })
 end

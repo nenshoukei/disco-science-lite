@@ -130,7 +130,6 @@ LabControl.events = {
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
     if string.sub(event.setting, 1, #prefix) == prefix then
       renderer:load_settings()
-      setup_event_handlers()
 
       if event.setting == "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] then
         -- This resets color palette using new color intensity.
@@ -139,8 +138,22 @@ LabControl.events = {
         -- Force re-render all overlays.
         renderer:render_overlays_for_all_labs(true)
       end
+
+      setup_event_handlers()
     end
   end,
 }
+
+commands.add_command(
+  "ds-force-render",
+  "Force re-render all DiscoScienceLite lab overlays. Just for testing the mod.",
+  function (event)
+    renderer:render_overlays_for_all_labs(true)
+    setup_event_handlers()
+
+    local player = game.get_player(event.player_index)
+    if player then player.print("Disco Science Lite: All overlays are re-rendered.", { game_state = false }) end
+  end
+)
 
 return LabControl

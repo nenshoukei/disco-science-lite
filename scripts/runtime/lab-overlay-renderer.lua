@@ -206,6 +206,8 @@ function LabOverlayRenderer:render_overlays_for_all_labs(force)
   self.visible_overlays = {}
   self.force_state = {}
 
+  self:update_all_forces_current_research()
+
   local entity_filter = { type = "lab" }
   for _, surface in pairs(game.surfaces) do
     local entities = surface.find_entities_filtered(entity_filter)
@@ -592,7 +594,16 @@ function LabOverlayRenderer:get_tick_function()
           end
         end
         color_function(color, phase, colors, n_colors, player_x, player_y, overlay.x, overlay.y)
-        overlay.animation.color = color
+
+        local animation = overlay.animation
+        if animation.valid then
+          animation.color = color
+        elseif overlay.entity.valid then
+          self:render_overlay_for_lab(overlay.entity)
+        else
+          -- Lab entity is invalid. Should be removed.
+          self:remove_overlay_from_lab(overlay.unit_number)
+        end
       end
     end
   end

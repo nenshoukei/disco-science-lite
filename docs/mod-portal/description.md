@@ -40,7 +40,11 @@ This mod includes source code based on the [Disco Science](https://mods.factorio
 
 Both the inherited code and the original code written for this mod are released under the MIT License.
 
-This mod also includes image assets derived from third-party works, including official Factorio game assets and assets from other Factorio mods.
+This mod also includes image assets derived from third-party works:
+
+- [Factorio](https://www.factorio.com/) by Wube Software Ltd.
+- [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by BiusArt
+- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 
 All such assets remain the property of their respective authors and are redistributed only as an integrated part of this mod in accordance with their applicable licenses.
 

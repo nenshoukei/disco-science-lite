@@ -1,0 +1,8 @@
+NOTICE — Derived Assets from "Krastorio 2"
+
+This directory contains image files derived from assets originally distributed as part of the Factorio mod
+"Krastorio 2", created by raiguard, licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
+https://mods.factorio.com/mod/Krastorio2
+
+These files are modified versions of the original assets and are redistributed under the terms of the LGPL-3.0.
+The full license text is provided in the accompanying LICENSE file.

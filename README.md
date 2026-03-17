@@ -127,3 +127,7 @@ However, some image assets included in this repository are derived from third-pa
   These files are treated as being redistributed under the terms of the GNU LGPL v3.0.
   See [LICENSE](graphics/laborat/LICENSE) and [NOTICE.txt](graphics/laborat/NOTICE.txt) for details.
 
+- Image files under [graphics/Krastorio2/](graphics/Krastorio2/) are derived from assets of the
+  [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) Factorio mod created by raiguard,
+  licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
+  See [LICENSE](graphics/Krastorio2/LICENSE) and [NOTICE.txt](graphics/Krastorio2/NOTICE.txt) for details.
