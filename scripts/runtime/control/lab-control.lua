@@ -62,12 +62,12 @@ function LabControl.on_load()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
 
   local color_registry, lab_registry = create_registries(ds_storage)
-  RemoteInterface.bind_registries(color_registry, lab_registry)
-
   renderer = LabOverlayRenderer.new(color_registry, lab_registry)
 
-  -- on_load cannot modify game state, so defer rendering to the first tick.
+  -- on_load cannot modify game state, so defer rendering and registry binding to the first tick.
+  -- bind_registries flushes pending remote calls (e.g. setLabScale), which write to storage.
   script.on_event(defines.events.on_tick, function ()
+    RemoteInterface.bind_registries(color_registry, lab_registry)
     rebuild_overlays() -- overwrites on_tick event handler
     RemoteInterface.bind_rebuild_callback(rebuild_overlays)
   end)
