@@ -191,16 +191,14 @@ def generate_laborat_images():
         # Blend light in additive mode
         overlay_grid = np.clip(overlay_grid + light, 0, 255)
 
-        # Static overlay: max brightness across all frames, independent of entity animation.
+        # Static overlay: minimum brightness across all frames, independent of entity animation.
         # Overlay animation cannot be synchronized with entity animation (rendering.draw_animation
         # starts from the current tick offset, not frame 0), so we use a single static frame.
-        static_overlay = np.zeros((frame_h, frame_w), dtype=np.float32)
-        for i in range(LABORAT_FRAMES):
-            frame_overlay = extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS)
-            static_overlay = np.maximum(static_overlay, frame_overlay)
-
-        # Darken
-        static_overlay = np.clip(static_overlay * 0.8, 0, 255)
+        frames_stack = np.stack([
+            extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS)
+            for i in range(LABORAT_FRAMES)
+        ], axis=0)
+        static_overlay = frames_stack.min(axis=0).clip(0, 90) # Clipping makes pixels inside the dome flat
         save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
 
         mask = make_mask_frame(anim.astype(np.uint8), overlay_grid > 10)
