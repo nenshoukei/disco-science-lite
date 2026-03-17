@@ -28,5 +28,6 @@ globals = {
     "rendering",
     "commands",
     "mods",
+    "util",
     "__DebugAdapter"
 }

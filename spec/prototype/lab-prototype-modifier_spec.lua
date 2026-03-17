@@ -59,7 +59,7 @@ describe("LabPrototypeModifier", function ()
     end)
 
     it("removes layers from on_animation with matching removal filenames", function ()
-      LabPrototypeModifier.set_filename_removal("light.png")
+      LabPrototypeModifier.set_layer_removal("light.png")
       local lab = make_lab(nil)
       lab.on_animation = {
         layers = {
@@ -92,6 +92,62 @@ describe("LabPrototypeModifier", function ()
       lab.on_animation = { filename = "on2.png" }
       LabPrototypeModifier.modify_lab(lab)
       assert.are.equal("on2.png", lab.on_animation.filename)
+    end)
+
+    it("inserts a mask layer inheriting geometric properties from the target layer", function ()
+      LabPrototypeModifier.set_layer_mask("on.png", "mask.png")
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          {
+            filename = "on.png",
+            width = 194, height = 174,
+            frame_count = 33, line_length = 11,
+            scale = 0.5, shift = { 0, 0.05 },
+            animation_speed = 0.3,
+          },
+          { filename = "light.png" },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(3, #lab.on_animation.layers)
+      assert.are.equal("on.png", lab.on_animation.layers[1].filename)
+      local mask = lab.on_animation.layers[2]
+      assert.are.equal("mask.png", mask.filename)
+      assert.are.equal(194, mask.width)
+      assert.are.equal(174, mask.height)
+      assert.are.equal(33, mask.frame_count)
+      assert.are.equal(11, mask.line_length)
+      assert.are.equal(0.5, mask.scale)
+      assert.are.same({ 0, 0.05 }, mask.shift)
+      assert.are.equal(0.3, mask.animation_speed)
+      assert.are.equal("light.png", lab.on_animation.layers[3].filename)
+    end)
+
+    it("does not insert mask when target filename is not found", function ()
+      LabPrototypeModifier.set_layer_mask("other.png", "mask.png")
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = { { filename = "on.png" } },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(1, #lab.on_animation.layers)
+    end)
+
+    it("mask insertion happens after removal (removed layers are not targeted)", function ()
+      LabPrototypeModifier.set_layer_removal("light.png")
+      LabPrototypeModifier.set_layer_mask("light.png", "mask.png")
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filename = "on.png" },
+          { filename = "light.png" },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      -- light.png removed, mask not inserted (target was removed)
+      assert.are.equal(1, #lab.on_animation.layers)
+      assert.are.equal("on.png", lab.on_animation.layers[1].filename)
     end)
 
     describe("created_effect handling", function ()

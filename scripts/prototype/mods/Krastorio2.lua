@@ -5,22 +5,18 @@ local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["Krastorio2"] then
-  LabPrototypeModifier.set_filename_replacement(
-    "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
-    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-masked.png"
-  )
-  LabPrototypeModifier.set_filename_removal(
-    "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png"
-  )
-  LabPrototypeModifier.set_filename_replacement(
-    "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-working.png",
-    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "Krastorio2/singularity-lab-masked.png"
-  )
-  LabPrototypeModifier.set_filename_removal(
-    "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow-light.png"
-  )
-  LabPrototypeModifier.set_filename_removal(
+  LabPrototypeModifier.set_layer_removal(
+    "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png",
+    "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow-light.png",
     "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow.png"
+  )
+  LabPrototypeModifier.set_layer_mask(
+    "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
+    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-mask.png"
+  )
+  LabPrototypeModifier.set_layer_mask(
+    "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-working.png",
+    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "Krastorio2/singularity-lab-mask.png"
   )
 
   data:extend({

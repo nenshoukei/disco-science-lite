@@ -11,12 +11,12 @@ if mods["LabOMatic"] then
   if hd then
     animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "labomatic-overlay"
 
-    LabPrototypeModifier.set_filename_replacement(
-      "__LabOMatic__/graphics/lab_albedo_anim_x4.png",
-      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim_x4-masked.png"
-    )
-    LabPrototypeModifier.set_filename_removal(
+    LabPrototypeModifier.set_layer_removal(
       "__LabOMatic__/graphics/lab_light_anim_x4.png"
+    )
+    LabPrototypeModifier.set_layer_mask(
+      "__LabOMatic__/graphics/lab_albedo_anim_x4.png",
+      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim_x4-mask.png"
     )
 
     data:extend({
@@ -36,12 +36,12 @@ if mods["LabOMatic"] then
   else
     animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "LabOMatic-x4-overlay"
 
-    LabPrototypeModifier.set_filename_replacement(
-      "__LabOMatic__/graphics/lab_albedo_anim.png",
-      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-masked.png"
-    )
-    LabPrototypeModifier.set_filename_removal(
+    LabPrototypeModifier.set_layer_removal(
       "__LabOMatic__/graphics/lab_light_anim.png"
+    )
+    LabPrototypeModifier.set_layer_mask(
+      "__LabOMatic__/graphics/lab_albedo_anim.png",
+      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-mask.png"
     )
 
     data:extend({

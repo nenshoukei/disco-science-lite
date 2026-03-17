@@ -86,34 +86,19 @@ def resize_mask(mask: np.ndarray, width: int, height: int, img_shift: tuple[floa
 
     return sized_mask
 
-def grayscale_image_by_binary_mask(img: np.ndarray, mask: np.ndarray, brightness: float = 1.0) -> np.ndarray:
-    """Generate an image with binary mask. Where mask is true, grayscaled. Where mask is false, keep original."""
+def make_mask_frame(img: np.ndarray, alpha: np.ndarray, brightness: float = 0.5) -> np.ndarray:
+    """Return LA frame where alpha controls blending (0=transparent, 255=fully replace with gray).
+    alpha: bool array for binary mask (True→255, False→0),
+           or float/int array (0-255) for soft proportional blend."""
     r = img[:, :, 0].astype(np.float32)
     g = img[:, :, 1].astype(np.float32)
     b = img[:, :, 2].astype(np.float32)
-
-    gray = (rgb_to_grayscale(r, g, b).astype(np.float32) * brightness)
-
-    result = img.copy()
-    result[:, :, 0] = np.where(mask, gray, r)
-    result[:, :, 1] = np.where(mask, gray, g)
-    result[:, :, 2] = np.where(mask, gray, b)
-    return result
-
-def grayscale_image_by_saturation_mask(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """Generate an image with Saturation mask. Where mask is 255, S becomes 0. Where mask is 0, S keeps original. """
-    sat_scale = 1.0 - np.clip(mask, 0, 255) / 255.0
-    r = img[:, :, 0].astype(np.float32) / 255.0
-    g = img[:, :, 1].astype(np.float32) / 255.0
-    b = img[:, :, 2].astype(np.float32) / 255.0
-    v = np.maximum(np.maximum(r, g), b)
-
-    # To change S in RGB: channel' = V + (channel - V) * scale, where V = max(R,G,B)
-    result = img.copy()
-    result[:, :, 0] = np.clip((v + (r - v) * sat_scale) * 255, 0, 255).astype(img.dtype)
-    result[:, :, 1] = np.clip((v + (g - v) * sat_scale) * 255, 0, 255).astype(img.dtype)
-    result[:, :, 2] = np.clip((v + (b - v) * sat_scale) * 255, 0, 255).astype(img.dtype)
-    return result
+    gray = (rgb_to_grayscale(r, g, b) * brightness).clip(0, 255).astype(np.uint8)
+    if alpha.dtype == bool:
+        alpha_u8 = np.where(alpha, np.uint8(255), np.uint8(0))
+    else:
+        alpha_u8 = np.clip(alpha, 0, 255).astype(np.uint8)
+    return np.stack([gray, alpha_u8], axis=-1)
 
 @contextmanager
 def open_mod_zip(glob_pattern: Path) -> Iterator[Callable[[str], IO[bytes]]]:
@@ -147,7 +132,7 @@ LAB_LIGHT_FRAME_SHIFT = (0, 0)
 LAB_COLS = 11
 LAB_FRAMES = 33
 
-LAB_MASKED_DST = GRAPHICS_DIR / "factorio/lab-masked.png"
+LAB_MASK_DST = GRAPHICS_DIR / "factorio/lab-mask.png"
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
 
 def generate_lab_images():
@@ -160,20 +145,20 @@ def generate_lab_images():
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
 
     # Masked: Lab animation with grayscaled pixels for the overlay.
-    masked_frames: list[np.ndarray] = []
+    mask_frames: list[np.ndarray] = []
     frame_brightness: list[float] = []
     for i in range(LAB_FRAMES):
         # Extract frame from grid image.
         anim_frame = extract_frame(anim, i, LAB_ANIM_FRAME_W, LAB_ANIM_FRAME_H, LAB_COLS)
         light_frame = extract_frame(light, i, LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H, LAB_COLS)
-        # Append a new frame with masked grayscaling.
+        # Append a new mask frame (transparent except where grayscaled).
         mask = resize_mask(light_frame, LAB_ANIM_FRAME_W, LAB_ANIM_FRAME_H, LAB_ANIM_FRAME_SHIFT, LAB_LIGHT_FRAME_SHIFT)
-        masked_frames.append(grayscale_image_by_binary_mask(anim_frame, mask > 10, brightness=0.5))
+        mask_frames.append(make_mask_frame(anim_frame, mask > 10))
         # Get light frame brightness for general overlay.
         frame_brightness.append(float(light_frame.mean()))
 
-    masked_assembled = assemble_grid(masked_frames, LAB_COLS)
-    save_image(Image.fromarray(masked_assembled, "RGBA"), LAB_MASKED_DST)
+    mask_assembled = assemble_grid(mask_frames, LAB_COLS)
+    save_image(Image.fromarray(mask_assembled, "LA"), LAB_MASK_DST)
 
     max_b = max(frame_brightness)
     generate_general_overlay([b / max_b for b in frame_brightness])
@@ -213,7 +198,7 @@ BIOLAB_LIGHT_FRAME_SHIFT = (1.0, -6.5)
 BIOLAB_COLS = 8
 BIOLAB_FRAMES = 32
 
-BIOLAB_MASKED_DST = GRAPHICS_DIR / "factorio/biolab-masked.png"
+BIOLAB_MASK_DST = GRAPHICS_DIR / "factorio/biolab-mask.png"
 BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/biolab-overlay.png"
 
 def generate_biolab_images():
@@ -226,20 +211,20 @@ def generate_biolab_images():
     light = np.clip(light + light_blurred * 1.5, 0, 255)
 
     overlay_frames = []
-    masked_frames = []
+    mask_frames = []
     for i in range(BIOLAB_FRAMES):
         anim_frame = extract_frame(anim, i, BIOLAB_ANIM_FRAME_W, BIOLAB_ANIM_FRAME_H, BIOLAB_COLS)
         light_frame = extract_frame(light, i, BIOLAB_LIGHT_FRAME_W, BIOLAB_LIGHT_FRAME_H, BIOLAB_COLS)
         overlay_frames.append(light_frame)
 
         sized_mask = resize_mask(light_frame, BIOLAB_ANIM_FRAME_W, BIOLAB_ANIM_FRAME_H, BIOLAB_ANIM_FRAME_SHIFT, BIOLAB_LIGHT_FRAME_SHIFT)
-        masked_frames.append(grayscale_image_by_saturation_mask(anim_frame, sized_mask))
+        mask_frames.append(make_mask_frame(anim_frame.astype(np.uint8), sized_mask))
 
     overlay_assembled = assemble_grid(overlay_frames, BIOLAB_COLS)
     save_image(Image.fromarray(overlay_assembled.astype(np.uint8), "L"), BIOLAB_OVERLAY_DST)
 
-    masked_assembled = assemble_grid(masked_frames, BIOLAB_COLS)
-    save_image(Image.fromarray(masked_assembled.astype(np.uint8), "RGBA"), BIOLAB_MASKED_DST)
+    mask_assembled = assemble_grid(mask_frames, BIOLAB_COLS)
+    save_image(Image.fromarray(mask_assembled, "LA"), BIOLAB_MASK_DST)
 
 # --- LabOMatic (laborat) ---
 
@@ -250,9 +235,9 @@ LABORAT_FRAMES = 30
 LABORAT_COLS = 10
 
 LABORAT_DST_DIR = GRAPHICS_DIR / "laborat"
-LABORAT_MASKED_DST      = LABORAT_DST_DIR / "lab_albedo_anim-masked.png"
+LABORAT_MASK_DST        = LABORAT_DST_DIR / "lab_albedo_anim-mask.png"
 LABORAT_OVERLAY_DST     = LABORAT_DST_DIR / "lab_albedo_anim-overlay.png"
-LABORAT_X4_MASKED_DST   = LABORAT_DST_DIR / "lab_albedo_anim_x4-masked.png"
+LABORAT_X4_MASK_DST     = LABORAT_DST_DIR / "lab_albedo_anim_x4-mask.png"
 LABORAT_X4_OVERLAY_DST  = LABORAT_DST_DIR / "lab_albedo_anim_x4-overlay.png"
 
 def generate_laborat_images():
@@ -280,21 +265,21 @@ def generate_laborat_images():
         static_overlay = np.clip(static_overlay * 0.8, 0, 255)
         save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
 
-        masked = grayscale_image_by_binary_mask(anim, overlay_grid > 10, brightness=0.5)
-        save_image(Image.fromarray(masked.astype(np.uint8), "RGBA"), modified_dst)
+        mask = make_mask_frame(anim.astype(np.uint8), overlay_grid > 10)
+        save_image(Image.fromarray(mask, "LA"), modified_dst)
 
     with open_mod_zip(LABORAT_SRC) as open_file:
         with open_file("graphics/lab_albedo_anim.png") as f:
             anim_img = Image.open(f).convert("RGBA")
         with open_file("graphics/lab_light_anim.png") as f:
             light_img = Image.open(f).convert("RGBA")
-        make_images(anim_img, light_img, LABORAT_FRAME_W, LABORAT_FRAME_H, LABORAT_MASKED_DST, LABORAT_OVERLAY_DST)
+        make_images(anim_img, light_img, LABORAT_FRAME_W, LABORAT_FRAME_H, LABORAT_MASK_DST, LABORAT_OVERLAY_DST)
 
         with open_file("graphics/lab_albedo_anim_x4.png") as f:
             anim_img_x4 = Image.open(f).convert("RGBA")
         with open_file("graphics/lab_light_anim_x4.png") as f:
             light_img_x4 = Image.open(f).convert("RGBA")
-        make_images(anim_img_x4, light_img_x4, LABORAT_X4_FRAME_W, LABORAT_X4_FRAME_H, LABORAT_X4_MASKED_DST, LABORAT_X4_OVERLAY_DST)
+        make_images(anim_img_x4, light_img_x4, LABORAT_X4_FRAME_W, LABORAT_X4_FRAME_H, LABORAT_X4_MASK_DST, LABORAT_X4_OVERLAY_DST)
 
 # --- Krastorio2 ---
 
@@ -313,7 +298,7 @@ K2_MASK_COLS = 6
 K2_FRAMES = 60
 
 K2_DST_DIR = GRAPHICS_DIR / "Krastorio2"
-K2_MASKED_DST = K2_DST_DIR / "singularity-lab-masked.png"
+K2_MASK_DST = K2_DST_DIR / "singularity-lab-mask.png"
 K2_OVERLAY_DST = K2_DST_DIR / "singularity-lab-overlay.png"
 
 def generate_krastorio2_images():
@@ -326,20 +311,20 @@ def generate_krastorio2_images():
     anim = np.array(fill_black_background(anim_img)).astype(np.float32)
     light = np.array(fill_black_background(light_img).convert("L")).astype(np.float32)
 
-    masked_frames: list[np.ndarray] = []
+    mask_frames: list[np.ndarray] = []
     static_overlay = np.zeros((K2_ANIM_FRAME_H, K2_ANIM_FRAME_W), dtype=np.float32)
     for i in range(K2_FRAMES):
         anim_frame = extract_frame(anim, i, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_COLS)
         light_frame = extract_frame(light, i, K2_MASK_FRAME_W, K2_MASK_FRAME_H, K2_MASK_COLS)
         sized_mask = resize_mask(light_frame, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_FRAME_SHIFT, K2_MASK_FRAME_SHIFT)
-        masked_frames.append(grayscale_image_by_binary_mask(anim_frame, sized_mask > 10, brightness=0.5))
+        mask_frames.append(make_mask_frame(anim_frame.astype(np.uint8), sized_mask > 10))
         static_overlay = np.maximum(static_overlay, sized_mask)
 
     static_overlay = np.clip(static_overlay * 0.8, 0, 255)
     save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), K2_OVERLAY_DST)
 
-    masked_assembled = assemble_grid(masked_frames, K2_ANIM_COLS)
-    save_image(Image.fromarray(masked_assembled, "RGBA"), K2_MASKED_DST)
+    mask_assembled = assemble_grid(mask_frames, K2_ANIM_COLS)
+    save_image(Image.fromarray(mask_assembled, "LA"), K2_MASK_DST)
 
 # --- main ---
 

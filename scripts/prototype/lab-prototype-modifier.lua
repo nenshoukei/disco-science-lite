@@ -13,6 +13,11 @@ local LabPrototypeModifier = {
   --- @type table<string, string>
   replace_filenames = {},
 
+  --- Mask filenames to insert after the layer with the given filename.
+  --- The mask layer inherits geometric properties from the target layer.
+  --- @type table<string, string>
+  insert_mask_filenames = {},
+
   --- Modified lab prototypes
   --- @type table<data.LabPrototype, boolean>
   modified_labs = {},
@@ -23,13 +28,14 @@ _G.DiscoScienceLabPrototypeModifier = LabPrototypeModifier
 function LabPrototypeModifier.reset()
   LabPrototypeModifier.remove_layer_filenames = {}
   LabPrototypeModifier.replace_filenames = {}
+  LabPrototypeModifier.insert_mask_filenames = {}
   LabPrototypeModifier.modified_labs = {}
 end
 
---- Apply filename modifications to an Animation or a SpriteSource.
+--- Apply modifications to an Animation or a SpriteSource.
 ---
 --- @param animation data.Animation|data.SpriteSource
-local function apply_filename_modifications(animation)
+local function modify_animation(animation)
   local replace_filenames = LabPrototypeModifier.replace_filenames
 
   local new_fn = animation.filename and replace_filenames[animation.filename]
@@ -55,8 +61,33 @@ local function apply_filename_modifications(animation)
       if layer.filename and remove_layer_filenames[layer.filename] then
         table.remove(layers, i)
       else
-        apply_filename_modifications(layer)
+        modify_animation(layer)
       end
+    end
+
+    local mask_filenames = LabPrototypeModifier.insert_mask_filenames
+    --- @type {[1]: integer, [2]: data.Animation}[]
+    local insertions = {}
+    for i = 1, #layers do
+      local layer = layers[i]
+      if layer.filename then
+        local mask_fn = mask_filenames[layer.filename]
+        if mask_fn then
+          insertions[#insertions + 1] = { i, {
+            filename = mask_fn,
+            width = layer.width,
+            height = layer.height,
+            frame_count = layer.frame_count,
+            line_length = layer.line_length,
+            scale = layer.scale,
+            shift = layer.shift,
+            animation_speed = layer.animation_speed,
+          } --[[@as data.Animation]] }
+        end
+      end
+    end
+    for j = #insertions, 1, -1 do
+      table.insert(layers, insertions[j][1] + 1, insertions[j][2])
     end
   end
 end
@@ -96,11 +127,24 @@ function LabPrototypeModifier.set_filename_replacement(old_filename, new_filenam
   LabPrototypeModifier.replace_filenames[old_filename] = new_filename
 end
 
---- Set a filename to be removed from `on_animation` layers.
+--- Set filenames to be removed from `on_animation` layers.
 ---
---- @param filename string
-function LabPrototypeModifier.set_filename_removal(filename)
-  LabPrototypeModifier.remove_layer_filenames[filename] = true
+--- @param ... string
+function LabPrototypeModifier.set_layer_removal(...)
+  local remove_layer_filenames = LabPrototypeModifier.remove_layer_filenames
+  for i = 1, select("#", ...) do
+    remove_layer_filenames[select(i, ...)] = true
+  end
+end
+
+--- Set a mask layer to be inserted on top of the layer with the specified filename in `on_animation`.
+--- The mask layer inherits width, height, frame_count, line_length, scale, shift, and animation_speed
+--- from the target layer, and only replaces the filename.
+---
+--- @param target_filename string
+--- @param mask_filename string
+function LabPrototypeModifier.set_layer_mask(target_filename, mask_filename)
+  LabPrototypeModifier.insert_mask_filenames[target_filename] = mask_filename
 end
 
 --- Modify all lab prototypes registered by `DiscoScienceInterface.prepareLab()`,
@@ -133,7 +177,7 @@ function LabPrototypeModifier.modify_lab(lab)
   if LabPrototypeModifier.modified_labs[lab] then return end
 
   if lab.on_animation then
-    apply_filename_modifications(lab.on_animation)
+    modify_animation(lab.on_animation)
   end
 
   add_lab_trigger(lab)
