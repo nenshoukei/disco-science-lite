@@ -54,6 +54,18 @@
 --- @class DiscoScience.Interface
 _G.DiscoScience = {
 
+  --- `true` when running on Disco Science Lite. `nil` on the original Disco Science mod.
+  ---
+  --- Use this to distinguish between the two mods:
+  --- ```lua
+  --- if DiscoScience and DiscoScience.isLite then
+  ---     -- Disco Science Lite-specific code
+  --- end
+  --- ```
+  ---
+  --- @type true
+  isLite = true,
+
   --- Prepare a lab prototype for Disco Science colorization.
   ---
   --- When `settings.animation` is omitted, the overlay animation is auto-detected from filenames in the lab's `on_animation`.
@@ -88,14 +100,13 @@ _G.DiscoScience = {
 --- @class DiscoScience.Remote
 local DiscoScienceRemote = {
 
-  --- Set the scale of a lab overlay.
+  --- Set the scale of a lab overlay at runtime.
   ---
-  --- [DEPRECATED] Use `DiscoScience.prepareLab()` at the prototype stage instead.
-  --- This function is kept for compatibility with the original DiscoScience mod.
+  --- Works in both the original Disco Science mod and Disco Science Lite.
+  --- Useful when you want to support both mods with a single `control.lua` code path.
   ---
   --- @param lab_name string Lab prototype name.
   --- @param scale number Scale of the overlay. Must be a positive number.
-  --- @deprecated
   setLabScale = function (lab_name, scale) end,
 
   --- Set the color of an ingredient (science pack) at runtime.

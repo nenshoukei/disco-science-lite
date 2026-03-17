@@ -7,7 +7,9 @@ if _G.DiscoScience then
 end
 
 --- @type DiscoScience.Interface
-local DiscoScienceInterface = {}
+local DiscoScienceInterface = {
+  isLite = true,
+}
 _G.DiscoScience = DiscoScienceInterface
 
 function DiscoScienceInterface.prepareLab(lab, settings)

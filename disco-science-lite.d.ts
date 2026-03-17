@@ -67,10 +67,10 @@ declare namespace DiscoScience {
    */
   interface Remote {
     /**
-     * Set the scale of a lab overlay.
+     * Set the scale of a lab overlay at runtime.
      *
-     * @deprecated Use `DiscoScience.prepareLab()` at the prototype stage instead.
-     * This function is kept for compatibility with the original DiscoScience mod.
+     * Works in both the original Disco Science mod and Disco Science Lite.
+     * Useful when you want to support both mods with a single `control.lua` code path.
      *
      * @param lab_name Lab prototype name.
      * @param scale Scale of the overlay. Must be a positive number.
@@ -107,6 +107,18 @@ declare namespace DiscoScience {
  * Compatible with the original DiscoScience mod interface.
  */
 declare const DiscoScience: {
+  /**
+   * `true` when running on Disco Science Lite. `undefined` on the original Disco Science mod.
+   *
+   * Use this to distinguish between the two mods:
+   * ```lua
+   * if DiscoScience and DiscoScience.isLite then
+   *     -- Disco Science Lite-specific code
+   * end
+   * ```
+   */
+  readonly isLite: true;
+
   /**
    * Prepare a lab prototype for Disco Science colorization.
    *
