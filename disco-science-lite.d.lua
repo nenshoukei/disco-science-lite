@@ -29,8 +29,8 @@
 --- Settings for rendering a lab overlay.
 ---
 --- @class (exact) DiscoScience.LabOverlaySettings
---- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.<br>If omitted, the built-in overlay for the standard lab shape is used.
---- @field scale number? Scale of the overlay. (Default: `1`)
+--- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.<br>If omitted, auto-detected from the lab's `on_animation` filenames. Falls back to the built-in overlay for the standard lab shape if no match is found.
+--- @field scale number? Scale of the overlay. (Default: auto-calculated from the lab's animation when `animation` is auto-detected; `1` otherwise)
 
 --- A color in RGBA format.
 ---
@@ -57,8 +57,12 @@ _G.DiscoScience = {
 
   --- Prepare a lab prototype for Disco Science colorization.
   ---
+  --- When `settings.animation` is omitted, the overlay animation is auto-detected from
+  --- filenames in the lab's `on_animation`. The scale is also auto-calculated from the
+  --- matching layer if `settings.scale` is omitted.
+  ---
   --- @param lab DiscoScience.LabPrototype Lab prototype to be prepared.
-  --- @param settings DiscoScience.LabOverlaySettings? Settings for the lab overlay for colorization. If omitted, the default values are used.
+  --- @param settings DiscoScience.LabOverlaySettings? Settings for the lab overlay. If omitted, both animation and scale are auto-detected.
   prepareLab = function (lab, settings) end,
 
   --- Set the color of an ingredient (science pack) at prototype stage.

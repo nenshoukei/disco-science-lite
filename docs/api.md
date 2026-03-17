@@ -1,6 +1,6 @@
 # API for Mod Authors
 
-Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. Compatible with the runtime API of the original Disco Science mod.
+Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. These are drop-in compatible with the original Disco Science mod, so existing mods targeting Disco Science can work without code changes.
 
 ## Quick Start
 
@@ -14,7 +14,7 @@ To use the APIs, add `"? disco-science-lite"` to your mod's [dependencies](https
 }
 ```
 
-Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide Disco Science Lite from your dependency list.
+Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide it from the dependency list shown in the mod browser.
 
 ### If your mod adds a custom lab
 
@@ -31,16 +31,16 @@ The `if DiscoScience then` guard is required because Disco Science Lite is an op
 
 Disco Science Lite colorizes the lab based on the science packs it consumes.
 
-If your lab is a **bigger (or smaller) version** of the vanilla lab:
+If your lab is a **bigger (or smaller) version** of the vanilla lab, the scale is auto-calculated. You can also specify it explicitly if needed:
 
 ```lua
 -- data.lua
 if DiscoScience then
-    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale: 2.0 }) -- Twice bigger
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale = 2.0 }) -- Twice as large as the vanilla lab.
 end
 ```
 
-If your lab has a **fundamentally different shape** from the vanilla lab (not just a different size), provide a custom overlay animation so the glow aligns correctly:
+If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
 
 ```lua
 -- data.lua
@@ -49,7 +49,7 @@ if DiscoScience then
 end
 ```
 
-Without a custom animation, the built-in overlay designed for the vanilla lab shape is used, which may look misaligned on differently-shaped labs. See [Prototype Stage API](#prototype-stage--_gdiscoscience) below for how to define a custom animation.
+See [How to define a custom animation](#how-to-define-a-custom-animation) below for details.
 
 ### If your mod adds custom science packs
 
@@ -66,29 +66,11 @@ Labs that consume this science pack will be tinted with this color.
 
 ---
 
-## Prototype Stage — `DiscoScience`
+## How to define a custom animation
 
-Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
+By default, when no custom animation is defined, Disco Science Lite renders the [general glow effect](/graphics/general-overlay.png) on top of the lab entity. It may look unsuitable sometimes.
 
-### `DiscoScience.prepareLab(lab, settings?)`
-
-Prepare a lab prototype for Disco Science colorization.
-
-**Parameters:**
-
-| Parameter  | Type                                                                             | Description                           |
-| ---------- | -------------------------------------------------------------------------------- | ------------------------------------- |
-| `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize         |
-| `settings` | `DiscoScience.LabOverlaySettings?`                                               | Optional overlay settings (see below) |
-
-**`DiscoScience.LabOverlaySettings`:**
-
-| Field       | Type      | Default          | Description                                                                                                                |
-| ----------- | --------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `animation` | `string?` | built-in overlay | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to use as the overlay |
-| `scale`     | `number?` | `1`              | Scales the overlay (multiplies with the animation prototype's `scale`)                                                     |
-
-**About the `animation` field:**
+If your lab has a unique shape and you want the color effect to align with it — highlighting specific parts of the sprite rather than glowing uniformly — you can define a custom animation.
 
 The animation is rendered on top of the lab entity and tinted by [LuaRenderObject.color](https://lua-api.factorio.com/latest/classes/LuaRenderObject.html#color) to produce the colorization effect. Use `blend_mode = "additive"` and `draw_as_glow = true` so that the overlay glows and blends naturally with the lab sprite beneath it.
 
@@ -115,9 +97,34 @@ data:extend({
 })
 ```
 
-If `animation` is omitted, Disco Science Lite uses its built-in overlay animation, which is designed for the vanilla Factorio lab shape. If your lab is a different size, use the `scale` field to compensate. If your lab has a fundamentally different shape, provide a custom animation instead.
+> [!NOTE]
+> Due to a Factorio technical limitation, it is not possible to synchronize the overlay animation with the lab entity's animation. Even if `animation_offset = 0` is specified in [rendering.draw_animation()](https://lua-api.factorio.com/latest/classes/LuaRendering.html#draw_animation), the actual starting frame of the animation is determined by the current tick count at the time of rendering. For this reason, it is recommended to use a **looping animation without a distinct starting frame**, so that the lack of synchronization is not noticeable.
 
-For labs that are **not registered** via `prepareLab()` at all, Disco Science Lite will use a generic glow animation as a fallback overlay when the fallback option is enabled in mod settings. If you want to explicitly use this generic animation for your labs, specify `animation = "mks-dsl-general-overlay"`. (The `mks-dsl-` prefix is used to avoid name collisions with other mods.)
+---
+
+## Prototype Stage — `DiscoScience`
+
+Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
+
+### `DiscoScience.prepareLab(lab, settings?)`
+
+Prepare a lab prototype for Disco Science colorization.
+
+**Parameters:**
+
+| Parameter  | Type                                                                             | Description                           |
+| ---------- | -------------------------------------------------------------------------------- | ------------------------------------- |
+| `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize         |
+| `settings` | `DiscoScience.LabOverlaySettings?`                                               | Optional overlay settings (see below) |
+
+**`DiscoScience.LabOverlaySettings`:**
+
+| Field       | Type      | Default                  | Description                                                                                                                                                    |
+| ----------- | --------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animation` | `string?` | general glow overlay     | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
+| `scale`     | `number?` | auto-calculated (or `1`) | Scales the overlay (multiplies with the animation prototype's `scale`)                                                                                         |
+
+When `scale` is omitted, it is estimated from the lab prototype's visual scale relative to the vanilla lab, so labs that are simply rescaled versions of the vanilla lab get the correct scale automatically.
 
 ### `DiscoScience.setIngredientColor(item_name, color)`
 

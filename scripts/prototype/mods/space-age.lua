@@ -25,6 +25,11 @@ if mods["space-age"] then
     },
   })
 
+  PrototypeLabRegistry.add_overlay_detection(
+    "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
+    { "__space-age__/graphics/entity/biolab/biolab.png" }
+  )
+
   PrototypeLabRegistry.register("biolab", {
     animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
   })

@@ -37,6 +37,11 @@ if settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NA
   end
 end
 
+PrototypeLabRegistry.add_overlay_detection(
+  "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
+  { "__base__/graphics/entity/lab/lab.png" }
+)
+
 PrototypeLabRegistry.register("lab", {
   animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
 })

@@ -38,11 +38,16 @@ declare namespace DiscoScience {
     /**
      * Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
      *
-     * If omitted, the built-in overlay for the standard lab shape is used.
+     * If omitted, auto-detected from the lab's `on_animation` filenames.
+     * Falls back to the built-in overlay for the standard lab shape if no match is found.
      */
     animation?: string;
 
-    /** Scale of the overlay. (Default: `1`) */
+    /**
+     * Scale of the overlay.
+     *
+     * If omitted, auto-calculated from the lab's animation when `animation` is auto-detected; `1` otherwise.
+     */
     scale?: number;
   }
 
@@ -114,8 +119,12 @@ declare const DiscoScience: {
   /**
    * Prepare a lab prototype for Disco Science colorization.
    *
+   * When `settings.animation` is omitted, the overlay animation is auto-detected from
+   * filenames in the lab's `on_animation`. The scale is also auto-calculated from
+   * the matching layer if `settings.scale` is omitted.
+   *
    * @param lab Lab prototype to be prepared.
-   * @param settings Settings for the lab overlay for colorization. If omitted, the default settings are used.
+   * @param settings Settings for the lab overlay. If omitted, both animation and scale are auto-detected.
    */
   prepareLab(
     lab: { type: "lab"; name: string },
