@@ -34,6 +34,8 @@ In addition to the color patterns from the original mod, Disco Science Lite incl
 
 The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
 
+If you are a modder, see the [full API reference](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/api.md) for quick start examples, prototype stage and runtime stage APIs.
+
 ## License
 
 This mod includes source code based on the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by Daniel Brauer.
