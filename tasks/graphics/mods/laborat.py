@@ -43,7 +43,8 @@ def generate_laborat_images():
             extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS)
             for i in range(LABORAT_FRAMES)
         ], axis=0)
-        static_overlay = frames_stack.min(axis=0).clip(0, 90) # Clipping makes pixels inside the dome flat
+        static_overlay = frames_stack.min(axis=0).clip(0, 90)   # Clipping makes pixels inside the dome flat
+        static_overlay = np.clip(static_overlay * 1.5, 0, 255)  # Brighten
         save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
 
         mask = make_mask_frame(anim.astype(np.uint8), overlay_grid > 10)
