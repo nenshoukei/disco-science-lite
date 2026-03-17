@@ -16,32 +16,6 @@ To use the APIs, add `"? disco-science-lite"` to your mod's [dependencies](https
 
 Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide it from the dependency list shown in the mod browser.
 
-### If your mod adds a custom lab
-
-Register your lab in `data.lua`:
-
-```lua
--- data.lua
-if DiscoScience then
-    DiscoScience.prepareLab(data.raw["lab"]["my-lab"])
-end
-```
-
-The `if DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `DiscoScience` will be `nil`.
-
-Disco Science Lite colorizes the lab based on the science packs it consumes.
-
-If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
-
-```lua
--- data.lua
-if DiscoScience then
-    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { animation = "my-lab-overlay-animation" })
-end
-```
-
-See [How to define a custom animation](#how-to-define-a-custom-animation) below for details.
-
 ### If your mod adds custom science packs
 
 Vanilla science pack colors are built-in. For custom science packs, register the color of each one in `data.lua`:
@@ -54,6 +28,40 @@ end
 ```
 
 Labs that consume this science pack will be tinted with this color.
+
+This code is compatible with both the original Disco Science mod and Disco Science Lite.
+
+The `if DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `DiscoScience` will be `nil`.
+
+### If your mod adds a custom lab
+
+Register your lab in `data.lua`:
+
+```lua
+-- data.lua
+if DiscoScience then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"])
+end
+```
+
+Disco Science Lite colorizes the lab based on the science packs it consumes.
+
+This code is compatible with both the original Disco Science mod and Disco Science Lite.
+
+### If your mod adds a custom lab with a unique shape
+
+If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
+
+```lua
+-- data.lua
+if DiscoScience and DiscoScience.isLite then
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { animation = "my-lab-overlay-animation" })
+end
+```
+
+See [How to define a custom animation](#how-to-define-a-custom-animation) below for details.
+
+This is a Disco Science Lite–specific feature. The custom animation is not supported by the original Disco Science — use `DiscoScience.isLite` to guard Lite-only code.
 
 ---
 
@@ -93,7 +101,7 @@ data:extend({
 - [lab-overlay.png](/graphics/factorio/lab-overlay.png) is for the vanilla labs.
 - [biolab-overlay.png](/graphics/factorio/biolab-overlay.png) is for the vanilla biolabs.
 
-These are auto-generated from Factorio official assets by [Python script](/tasks/graphics/mods/factorio.py).
+These are auto-generated from the Factorio official assets by [Python script](/tasks/graphics/mods/factorio.py).
 
 > [!NOTE]
 > Due to a Factorio technical limitation, it is not possible to synchronize the overlay animation with the lab entity's animation. Even if `animation_offset = 0` is specified in [rendering.draw_animation()](https://lua-api.factorio.com/latest/classes/LuaRendering.html#draw_animation), the actual starting frame of the animation is determined by the current tick count at the time of rendering. For this reason, it is recommended to use a **looping animation without a distinct starting frame**, so that the lack of synchronization is not noticeable.
@@ -105,6 +113,16 @@ These are auto-generated from Factorio official assets by [Python script](/tasks
 ### Prototype Stage — `DiscoScience`
 
 Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
+
+#### `DiscoScience.isLite`
+
+Always `true` when running on Disco Science Lite. In the original Disco Science mod, this field is `nil`.
+
+```lua
+if DiscoScience and DiscoScience.isLite then
+    -- Disco Science Lite-specific code
+end
+```
 
 #### `DiscoScience.prepareLab(lab, settings?)`
 
@@ -189,10 +207,7 @@ local color = remote.call("DiscoScience", "getIngredientColor", item_name)
 
 #### `setLabScale`
 
-> [!WARNING]
-> **Deprecated**: Use `DiscoScience.prepareLab()` at the prototype stage instead.
-
-Set the scale of a lab overlay. This function is kept for compatibility with the original DiscoScience mod.
+Set the scale of a lab overlay at runtime. Works in both the original Disco Science mod and Disco Science Lite. Useful when you want to support both mods with a single `control.lua` code path.
 
 ```lua
 remote.call("DiscoScience", "setLabScale", lab_name, scale)
