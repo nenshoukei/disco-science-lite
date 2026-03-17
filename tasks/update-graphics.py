@@ -124,27 +124,13 @@ def save_image(img: Image.Image, dst_path: Path) -> None:
 # --- Lab ---
 
 LAB_LIGHT_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab-light.png"
-LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H = 216, 194
-LAB_COLS = 11
-LAB_FRAMES = 33
 
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
 
 def generate_lab_images():
     light = np.array(Image.open(LAB_LIGHT_SRC).convert("L")) # Grayscaled
-
-    # Overlay: Brightening.
-    overlay = (light * 1.5).clip(0, 255)
+    overlay = (light * 1.5).clip(0, 255) # Brightening
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
-
-    # Get per-frame brightness for general overlay.
-    frame_brightness: list[float] = []
-    for i in range(LAB_FRAMES):
-        light_frame = extract_frame(light, i, LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H, LAB_COLS)
-        frame_brightness.append(float(light_frame.mean()))
-
-    max_b = max(frame_brightness)
-    generate_general_overlay([b / max_b for b in frame_brightness])
 
 # --- General overlay ---
 
@@ -154,21 +140,13 @@ GENERAL_FALLOFF = 0.8  # exponent applied to gradient: <1 = more white in center
 
 GENERAL_OVERLAY_DST = GRAPHICS_DIR / "general-overlay.png"
 
-def generate_general_overlay(lab_frame_brightness: list[float]) -> None:
+def generate_general_overlay():
     # Draw a gradient circle.
     cx, cy = GENERAL_SIZE / 2.0, GENERAL_SIZE / 2.0
     ys, xs = np.ogrid[:GENERAL_SIZE, :GENERAL_SIZE]
     dist = np.sqrt((xs - cx)**2 + (ys - cy)**2)
-    base_gradient = np.clip(1.0 - np.divide(dist, GENERAL_RADIUS), 0.0, 1.0) ** GENERAL_FALLOFF
-
-    # Generate each frame with the same brightness as the lab overlay frames.
-    overlay_frames = []
-    for b in lab_frame_brightness:
-        frame = np.clip(base_gradient * b, 0.0, 1.0)
-        overlay_frames.append((frame * 255.0).round())
-
-    assembled = assemble_grid(overlay_frames, LAB_COLS)
-    save_image(Image.fromarray(assembled.astype(np.uint8), "L"), GENERAL_OVERLAY_DST)
+    gradient = np.clip(1.0 - np.divide(dist, GENERAL_RADIUS), 0.0, 1.0) ** GENERAL_FALLOFF
+    save_image(Image.fromarray((gradient * 255.0).round().astype(np.uint8), "L"), GENERAL_OVERLAY_DST)
 
 # --- Biolab ---
 
@@ -278,6 +256,7 @@ def generate_krastorio2_images():
 
 with ThreadPoolExecutor() as executor:
     executor.submit(generate_lab_images)
+    executor.submit(generate_general_overlay)
     executor.submit(generate_biolab_images)
     executor.submit(generate_laborat_images)
     executor.submit(generate_krastorio2_images)

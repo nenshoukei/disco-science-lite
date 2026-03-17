@@ -20,9 +20,7 @@ data:extend({
     draw_as_glow = true,
     width = 128,
     height = 128,
-    frame_count = 33,
-    line_length = 11,
-    animation_speed = 1 / 3,
+    frame_count = 1,
     scale = 0.5,
   },
 })
