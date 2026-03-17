@@ -18,7 +18,7 @@ consts:
 	@lua tasks/update-consts.lua
 
 graphics:
-	@python tasks/update-graphics.py
+	@python tasks/graphics/update-graphics.py
 
 benchmark:
 	@echo "## Color Functions"
