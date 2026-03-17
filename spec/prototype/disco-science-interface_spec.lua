@@ -22,12 +22,11 @@ describe("DiscoScienceInterface", function ()
   describe("prepareLab", function ()
     it("registers lab with provided settings", function ()
       local lab = make_lab("my-lab")
-      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim", scale = 2.5 })
+      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
 
       local settings = PrototypeLabRegistry.registered_labs["my-lab"]
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.are.equal("my-anim", settings.animation)
-      assert.are.equal(2.5, settings.scale)
     end)
 
     it("registers with empty settings when omitted", function ()
@@ -69,14 +68,12 @@ describe("DiscoScienceInterface", function ()
         --- @diagnostic disable-next-line: param-type-mismatch
         assert.has_error(function () DiscoScienceInterface.prepareLab(lab, ("not-a-table")) end)
         assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "" }) end)
-        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { scale = 0 }) end)
-        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { scale = -1 }) end)
       end)
 
       it("accepts valid optional settings", function ()
         local lab = make_lab()
-        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = nil, scale = nil }) end)
-        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { scale = 0.5 }) end)
+        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = nil }) end)
+        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" }) end)
       end)
     end)
   end)

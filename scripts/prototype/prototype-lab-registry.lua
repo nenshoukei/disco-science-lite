@@ -21,24 +21,39 @@ _G.DiscoSciencePrototypeLabRegistry = PrototypeLabRegistry
 --- @field [1] string  animation prototype name
 --- @field [2] table<string, boolean>  set of filenames to match against on_animation
 
---- Collect all filenames and the max effective dimension from an animation tree.
+--- Collect all filenames and expand a bounding box from an animation tree.
 ---
 --- Filenames are mapped to the scale of the animation node that contains them.
---- max_dim[1] tracks the running maximum of max(width, height) * scale across nodes
---- that have width and height defined.
+--- bbox is expanded to the union of all layer rectangles, in screen-pixel units,
+--- where each layer's center is at shift * TILE_SIZE and half-extents are w*scale/2.
 ---
 --- @param animation data.Animation
 --- @param filenames table<string, number>  output: filename -> scale
---- @param max_dim number[]  mutable box: max_dim[1] = running max effective dimension
-local function collect_filenames(animation, filenames, max_dim)
+--- @param bbox number[]  mutable: {min_x, max_x, min_y, max_y} in screen-pixel units
+local function collect_filenames(animation, filenames, bbox)
   local scale = animation.scale or 1.0
   local w = animation.width
   local h = animation.height
-  if w and h then
-    local effective = math.max(w, h) * scale
-    if effective > max_dim[1] then
-      max_dim[1] = effective
+  if not (w and h) then
+    local size = animation.size
+    if type(size) == "table" then
+      w = size[1]
+      h = size[2]
+    elseif size then
+      w = size
+      h = size
     end
+  end
+  if w and h then
+    local shift = animation.shift
+    local cx = shift and (shift[1] * 32 --[[$TILE_SIZE]]) or 0
+    local cy = shift and (shift[2] * 32 --[[$TILE_SIZE]]) or 0
+    local hw = w * scale / 2
+    local hh = h * scale / 2
+    if cx - hw < bbox[1] then bbox[1] = cx - hw end
+    if cx + hw > bbox[2] then bbox[2] = cx + hw end
+    if cy - hh < bbox[3] then bbox[3] = cy - hh end
+    if cy + hh > bbox[4] then bbox[4] = cy + hh end
   end
   if animation.filename then
     filenames[animation.filename] = scale
@@ -52,7 +67,7 @@ local function collect_filenames(animation, filenames, max_dim)
   local layers = animation.layers
   if layers then
     for i = 1, #layers do
-      collect_filenames(layers[i], filenames, max_dim)
+      collect_filenames(layers[i], filenames, bbox)
     end
   end
 end
@@ -61,8 +76,8 @@ end
 ---
 --- Priority:
 ---   1. Registered detection: matched by filename → animation_name, layer_scale / 0.5
----   2. General overlay fallback: unmatched but width/height available →
----      "mks-dsl-general-overlay", max_effective_dim / general_effective_dim
+---   2. General overlay fallback: bounding box available →
+---      "mks-dsl-general-overlay", bbox_max_dim / general_effective_dim
 ---   3. No match → nil, nil
 ---
 --- Returns nil, nil when data is unavailable (e.g. test environment without mock).
@@ -75,8 +90,8 @@ local function detect_overlay(lab_name)
   if not lab_proto or not lab_proto.on_animation then return nil, nil end
 
   local filenames = {} --- @type table<string, number>
-  local max_dim = { 0 }
-  collect_filenames(lab_proto.on_animation, filenames, max_dim)
+  local bbox = { math.huge, -math.huge, math.huge, -math.huge }
+  collect_filenames(lab_proto.on_animation, filenames, bbox)
 
   -- Try registered detections first
   local detections = PrototypeLabRegistry.overlay_detections
@@ -92,12 +107,13 @@ local function detect_overlay(lab_name)
     end
   end
 
-  -- Fall back to general overlay, scaled to fit the lab's animation dimensions
-  if max_dim[1] > 0 then
+  -- Fall back to general overlay, scaled to fit the lab's animation bounding box
+  if bbox[2] > bbox[1] then
     local general = data.raw["animation"] and data.raw["animation"][ "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]] ]
     if general then
+      local max_dim = math.max(bbox[2] - bbox[1], bbox[4] - bbox[3])
       local general_eff = math.max(general.width, general.height) * (general.scale or 0.5)
-      return "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]], max_dim[1] / general_eff
+      return "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]], max_dim / general_eff
     end
   end
 

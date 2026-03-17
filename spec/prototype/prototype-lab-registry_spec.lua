@@ -311,6 +311,61 @@ describe("PrototypeLabRegistry", function ()
         assert.are.equal("my-specific-overlay", settings.animation)
       end)
 
+      it("uses size (scalar) when width/height are absent", function ()
+        -- Lab: size=256 (both w/h) at scale=0.5 → bbox 128x128
+        -- Expected scale = 128 / 64 = 2.0
+        local on_anim = ({
+          filename = "mod/other-lab.png",
+          size = 256,
+          scale = 0.5,
+        }) --[[@as data.Animation]]
+        _G.data = make_data("my-lab", make_lab_proto(on_anim), {
+          ["mks-dsl-general-overlay"] = make_general_overlay(),
+        })
+        PrototypeLabRegistry.register("my-lab")
+        local settings = PrototypeLabRegistry.registered_labs["my-lab"]
+        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.are.equal(2.0, settings.scale)
+      end)
+
+      it("uses size (tuple) when width/height are absent", function ()
+        -- Lab: size={320,192} at scale=0.5 → bbox 160x96
+        -- Expected scale = 160 / 64 = 2.5
+        local on_anim = ({
+          filename = "mod/other-lab.png",
+          size = { 320, 192 },
+          scale = 0.5,
+        }) --[[@as data.Animation]]
+        _G.data = make_data("my-lab", make_lab_proto(on_anim), {
+          ["mks-dsl-general-overlay"] = make_general_overlay(),
+        })
+        PrototypeLabRegistry.register("my-lab")
+        local settings = PrototypeLabRegistry.registered_labs["my-lab"]
+        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.are.equal(2.5, settings.scale)
+      end)
+
+      it("accounts for shift when computing bounding box", function ()
+        -- Two 64x64 sprites at scale=0.5 shifted left/right by 2 tiles
+        -- Each: hw = 64*0.5/2 = 16px, cx = ±2*32 = ±64px
+        -- Combined x extent: -80 to +80 → width=160, y: -16 to +16 → height=32
+        -- max_dim = 160, general_eff = max(128,128)*0.5 = 64
+        -- Expected scale = 160 / 64 = 2.5
+        local on_anim = ({
+          layers = {
+            { filename = "mod/lab-left.png",  width = 64, height = 64, scale = 0.5, shift = { -2, 0 } },
+            { filename = "mod/lab-right.png", width = 64, height = 64, scale = 0.5, shift = { 2, 0 } },
+          },
+        }) --[[@as data.Animation]]
+        _G.data = make_data("my-lab", make_lab_proto(on_anim), {
+          ["mks-dsl-general-overlay"] = make_general_overlay(),
+        })
+        PrototypeLabRegistry.register("my-lab")
+        local settings = PrototypeLabRegistry.registered_labs["my-lab"]
+        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.are.equal(2.5, settings.scale)
+      end)
+
       it("preserves explicit scale with general-overlay fallback", function ()
         local on_anim = ({
           filename = "mod/other-lab.png",

@@ -31,15 +31,6 @@ The `if DiscoScience then` guard is required because Disco Science Lite is an op
 
 Disco Science Lite colorizes the lab based on the science packs it consumes.
 
-If your lab is a **bigger (or smaller) version** of the vanilla lab, the scale is auto-calculated. You can also specify it explicitly if needed:
-
-```lua
--- data.lua
-if DiscoScience then
-    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { scale = 2.0 }) -- Twice as large as the vanilla lab.
-end
-```
-
 If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
 
 ```lua
@@ -68,7 +59,7 @@ Labs that consume this science pack will be tinted with this color.
 
 ## How to define a custom animation
 
-By default, when no custom animation is defined, Disco Science Lite renders the [general glow effect](/graphics/general-overlay.png) on top of the lab entity. It may look unsuitable sometimes.
+When no custom animation is defined, Disco Science Lite auto-detects the lab shape from the filenames used in the [LabPrototype.on_animation](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html#on_animation). If the lab uses the vanilla lab or biolab animations, the overlay animation for the corresponding vanilla lab will be used. Otherwise, the [general glow effect](/graphics/general-overlay.png) is rendered on top of the lab entity, which may look unsuitable sometimes.
 
 If your lab has a unique shape and you want the color effect to align with it — highlighting specific parts of the sprite rather than glowing uniformly — you can define a custom animation.
 
@@ -76,7 +67,7 @@ The animation is rendered on top of the lab entity and tinted by [LuaRenderObjec
 
 For best results, the animation sprite should be a **grayscale image**: white (or bright) pixels in areas that should be colored and glow, and black pixels in areas that should remain invisible.
 
-Example animation prototype definition:
+### Example animation prototype definition
 
 ```lua
 -- data.lua (or data-updates.lua / data-final-fixes.lua)
@@ -97,16 +88,25 @@ data:extend({
 })
 ```
 
+### Example animation sprites
+
+- [lab-overlay.png](/graphics/factorio/lab-overlay.png) is for the vanilla labs.
+- [biolab-overlay.png](/graphics/factorio/biolab-overlay.png) is for the vanilla biolabs.
+
+These are auto-generated from Factorio official assets by [Python script](/tasks/graphics/mods/factorio.py).
+
 > [!NOTE]
 > Due to a Factorio technical limitation, it is not possible to synchronize the overlay animation with the lab entity's animation. Even if `animation_offset = 0` is specified in [rendering.draw_animation()](https://lua-api.factorio.com/latest/classes/LuaRendering.html#draw_animation), the actual starting frame of the animation is determined by the current tick count at the time of rendering. For this reason, it is recommended to use a **looping animation without a distinct starting frame**, so that the lack of synchronization is not noticeable.
 
 ---
 
-## Prototype Stage — `DiscoScience`
+## API
+
+### Prototype Stage — `DiscoScience`
 
 Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 
-### `DiscoScience.prepareLab(lab, settings?)`
+#### `DiscoScience.prepareLab(lab, settings?)`
 
 Prepare a lab prototype for Disco Science colorization.
 
@@ -115,18 +115,15 @@ Prepare a lab prototype for Disco Science colorization.
 | Parameter  | Type                                                                             | Description                           |
 | ---------- | -------------------------------------------------------------------------------- | ------------------------------------- |
 | `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize         |
-| `settings` | `DiscoScience.LabOverlaySettings?`                                               | Optional overlay settings (see below) |
+| `settings` | `DiscoScience.PrepareLabSettings?`                                               | Optional overlay settings (see below) |
 
-**`DiscoScience.LabOverlaySettings`:**
+**`DiscoScience.PrepareLabSettings`:**
 
-| Field       | Type      | Default                  | Description                                                                                                                                                    |
-| ----------- | --------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `animation` | `string?` | general glow overlay     | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
-| `scale`     | `number?` | auto-calculated (or `1`) | Scales the overlay (multiplies with the animation prototype's `scale`)                                                                                         |
+| Field       | Type      | Default                   | Description                                                                                                                                                    |
+| ----------- | --------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animation` | `string?` | auto-detected (see below) | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
 
-When `scale` is omitted, it is estimated from the lab prototype's visual scale relative to the vanilla lab, so labs that are simply rescaled versions of the vanilla lab get the correct scale automatically.
-
-### `DiscoScience.setIngredientColor(item_name, color)`
+#### `DiscoScience.setIngredientColor(item_name, color)`
 
 Set the color of an ingredient (science pack) at prototype stage. These colors can be overridden at runtime via `remote.call()`.
 
@@ -137,7 +134,7 @@ Set the color of an ingredient (science pack) at prototype stage. These colors c
 | `item_name` | `string`                                                      | Item prototype name of the ingredient          |
 | `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
 
-### `DiscoScience.getIngredientColor(item_name)`
+#### `DiscoScience.getIngredientColor(item_name)`
 
 Get the color of an ingredient (science pack) registered so far.
 
@@ -153,11 +150,11 @@ Get the color of an ingredient (science pack) registered so far.
 
 ---
 
-## Runtime Stage — `remote.call("DiscoScience", ...)`
+### Runtime Stage — `remote.call("DiscoScience", ...)`
 
 Available in `control.lua`.
 
-### `setIngredientColor`
+#### `setIngredientColor`
 
 Set the color of an ingredient (science pack) at runtime. Overrides colors set at prototype stage.
 
@@ -172,7 +169,7 @@ remote.call("DiscoScience", "setIngredientColor", item_name, color)
 | `item_name` | `string`                                                      | Item prototype name of the ingredient          |
 | `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
 
-### `getIngredientColor`
+#### `getIngredientColor`
 
 Get the color of an ingredient (science pack).
 
@@ -190,16 +187,16 @@ local color = remote.call("DiscoScience", "getIngredientColor", item_name)
 
 - [Color](https://lua-api.factorio.com/latest/types/Color.html) — Color for the ingredient, or `nil` if not registered.
 
-### `setLabScale` (Deprecated)
+#### `setLabScale`
+
+> [!WARNING]
+> **Deprecated**: Use `DiscoScience.prepareLab()` at the prototype stage instead.
 
 Set the scale of a lab overlay. This function is kept for compatibility with the original DiscoScience mod.
 
 ```lua
 remote.call("DiscoScience", "setLabScale", lab_name, scale)
 ```
-
-> [!WARNING]
-> **Deprecated**: Use `DiscoScience.prepareLab()` at the prototype stage instead.
 
 **Parameters:**
 

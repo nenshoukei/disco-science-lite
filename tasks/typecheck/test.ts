@@ -11,9 +11,7 @@
 // prepareLab: basic usage
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" });
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, {});
-DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { scale: 1.5 });
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { animation: "my-anim" });
-DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { animation: "my-anim", scale: 2 });
 
 // prepareLab: structural compatibility — a superset of { type: "lab", name: string }
 // simulates passing an actual LabPrototype from typed-factorio or factorio-types
@@ -60,15 +58,14 @@ if (color !== undefined) {
 }
 
 // ---------------------------------------------------------------------------
-// DiscoScience.LabOverlaySettings type
+// DiscoScience.PrepareLabSettings type
 // ---------------------------------------------------------------------------
 
-const settings1: DiscoScience.LabOverlaySettings = {};
-const settings2: DiscoScience.LabOverlaySettings = { scale: 2 };
-const settings3: DiscoScience.LabOverlaySettings = { animation: "my-anim", scale: 0.5 };
+const settings1: DiscoScience.PrepareLabSettings = {};
+const settings2: DiscoScience.PrepareLabSettings = { animation: "my-anim" };
 
 // @ts-expect-error - unknown key
-const _settings4: DiscoScience.LabOverlaySettings = { unknown: true };
+const _settings3: DiscoScience.PrepareLabSettings = { unknown: true };
 
 // ---------------------------------------------------------------------------
 // DiscoScience.Color type
@@ -101,4 +98,4 @@ const remoteColor: DiscoScience.Color | undefined = remote.getIngredientColor("i
 
 // suppress unused variable warnings
 void color; void color1; void color2; void color3; void color4; void color5;
-void settings1; void settings2; void settings3; void remote; void remoteColor;
+void settings1; void settings2; void remote; void remoteColor;

@@ -32,23 +32,14 @@
 
 declare namespace DiscoScience {
   /**
-   * Settings for rendering a lab overlay.
+   * Parameters for `DiscoScience.prepareLab()`.
    */
-  interface LabOverlaySettings {
+  interface PrepareLabSettings {
     /**
-     * Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as an overlay.
-     *
-     * If omitted, auto-detected from the lab's `on_animation` filenames.
-     * Falls back to the built-in overlay for the standard lab shape if no match is found.
+     * Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html)
+     * to be used as a custom overlay animation.
      */
     animation?: string;
-
-    /**
-     * Scale of the overlay.
-     *
-     * If omitted, auto-calculated from the lab's animation when `animation` is auto-detected; `1` otherwise.
-     */
-    scale?: number;
   }
 
   /**
@@ -119,16 +110,16 @@ declare const DiscoScience: {
   /**
    * Prepare a lab prototype for Disco Science colorization.
    *
-   * When `settings.animation` is omitted, the overlay animation is auto-detected from
-   * filenames in the lab's `on_animation`. The scale is also auto-calculated from
-   * the matching layer if `settings.scale` is omitted.
+   * When `settings.animation` is omitted, the overlay animation is auto-detected from filenames in the lab's `on_animation`.
+   * If the lab uses the vanilla lab/biolab animations, the overlay animation for the vanilla labs will be used.
+   * If not, the general glow effect will be used.
    *
-   * @param lab Lab prototype to be prepared.
-   * @param settings Settings for the lab overlay. If omitted, both animation and scale are auto-detected.
+   * @param lab Lab to register for Disco Science colorization.
+   * @param settings Custom overlay settings.
    */
   prepareLab(
     lab: { type: "lab"; name: string },
-    settings?: DiscoScience.LabOverlaySettings,
+    settings?: DiscoScience.PrepareLabSettings,
   ): void;
 
   /**

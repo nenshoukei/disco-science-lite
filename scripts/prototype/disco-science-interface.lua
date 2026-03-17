@@ -17,12 +17,9 @@ function DiscoScienceInterface.prepareLab(lab, settings)
   assert(type(settings) == "table", "DiscoScience.prepareLab: settings must be a table")
   assert(settings.animation == nil or (type(settings.animation) == "string" and settings.animation ~= ""),
     "DiscoScience.prepareLab: settings.animation must be a non-empty string")
-  assert(settings.scale == nil or (type(settings.scale) == "number" and settings.scale > 0),
-    "DiscoScience.prepareLab: settings.scale must be a positive number")
 
   PrototypeLabRegistry.register(lab.name, {
     animation = settings.animation,
-    scale = settings.scale,
   })
 end
 
