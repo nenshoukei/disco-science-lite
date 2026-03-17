@@ -36,10 +36,15 @@ local consts = {
   COLOR_INTENSITY_NAME = NAME_PREFIX .. "color-intensity",
   MAX_UPDATES_PER_TICK_NAME = NAME_PREFIX .. "max-updates-per-tick",
 
-  -- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
+  --- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
   CHUNK_SIZE = 32,
 
-  -- Margin of player view boundaries in tiles
+  --- Pixels per tile.
+  TILE_SIZE = 32,
+  --- Pixels per two tiles. (TILE_SIZE * 2)
+  TWO_TILE_SIZE = 64,
+
+  --- Margin of player view boundaries in tiles
   VIEW_RECT_MARGIN = 6,
 }
 

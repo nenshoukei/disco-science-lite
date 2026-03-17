@@ -21,7 +21,7 @@ if mods["space-age"] then
       line_length = 8,
       animation_speed = 0.2,
       scale = 0.5,
-      shift = { 1.0 / 32, -6.5 / 32 },
+      shift = { 1.0 / 32 --[[$TILE_SIZE]], -6.5 / 32 --[[$TILE_SIZE]] },
     },
   })
 
