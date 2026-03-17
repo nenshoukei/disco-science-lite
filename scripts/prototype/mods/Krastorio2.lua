@@ -14,9 +14,13 @@ if mods["Krastorio2"] then
     "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
     "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-mask.png"
   )
+  -- Use singularity-lab-glow-light.png (already grayscale) as a mask layer instead of a generated mask.
+  -- It is removed above (as draw_as_light), then re-inserted here as a regular opaque layer
+  -- to desaturate the colored working animation in the glow areas.
   LabPrototypeModifier.set_layer_mask(
     "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-working.png",
-    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "Krastorio2/singularity-lab-mask.png"
+    "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow-light.png",
+    { width = 153, height = 117, shift = { 0, -0.8 }, line_length = 6, animation_speed = 0.85 }
   )
 
   data:extend({

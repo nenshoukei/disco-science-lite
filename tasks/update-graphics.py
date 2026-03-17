@@ -123,42 +123,25 @@ def save_image(img: Image.Image, dst_path: Path) -> None:
 
 # --- Lab ---
 
-LAB_ANIM_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab.png"
-LAB_ANIM_FRAME_W, LAB_ANIM_FRAME_H = 194, 174
-LAB_ANIM_FRAME_SHIFT = (0, 1.5)
 LAB_LIGHT_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab-light.png"
 LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H = 216, 194
-LAB_LIGHT_FRAME_SHIFT = (0, 0)
 LAB_COLS = 11
 LAB_FRAMES = 33
 
-LAB_MASK_DST = GRAPHICS_DIR / "factorio/lab-mask.png"
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
 
 def generate_lab_images():
-    """Returns normalized per-frame brightness values."""
-    anim = np.array(Image.open(LAB_ANIM_SRC).convert("RGBA"))
     light = np.array(Image.open(LAB_LIGHT_SRC).convert("L")) # Grayscaled
 
     # Overlay: Brightening.
     overlay = (light * 1.5).clip(0, 255)
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
 
-    # Masked: Lab animation with grayscaled pixels for the overlay.
-    mask_frames: list[np.ndarray] = []
+    # Get per-frame brightness for general overlay.
     frame_brightness: list[float] = []
     for i in range(LAB_FRAMES):
-        # Extract frame from grid image.
-        anim_frame = extract_frame(anim, i, LAB_ANIM_FRAME_W, LAB_ANIM_FRAME_H, LAB_COLS)
         light_frame = extract_frame(light, i, LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H, LAB_COLS)
-        # Append a new mask frame (transparent except where grayscaled).
-        mask = resize_mask(light_frame, LAB_ANIM_FRAME_W, LAB_ANIM_FRAME_H, LAB_ANIM_FRAME_SHIFT, LAB_LIGHT_FRAME_SHIFT)
-        mask_frames.append(make_mask_frame(anim_frame, mask > 10))
-        # Get light frame brightness for general overlay.
         frame_brightness.append(float(light_frame.mean()))
-
-    mask_assembled = assemble_grid(mask_frames, LAB_COLS)
-    save_image(Image.fromarray(mask_assembled, "LA"), LAB_MASK_DST)
 
     max_b = max(frame_brightness)
     generate_general_overlay([b / max_b for b in frame_brightness])
@@ -189,42 +172,19 @@ def generate_general_overlay(lab_frame_brightness: list[float]) -> None:
 
 # --- Biolab ---
 
-BIOLAB_ANIM_SRC = FACTORIO_DATA / "space-age/graphics/entity/biolab/biolab-anim.png"
-BIOLAB_ANIM_FRAME_W, BIOLAB_ANIM_FRAME_H = 366, 404
-BIOLAB_ANIM_FRAME_SHIFT = (2.0, -5.0)
 BIOLAB_LIGHT_SRC = FACTORIO_DATA / "space-age/graphics/entity/biolab/biolab-lights.png"
-BIOLAB_LIGHT_FRAME_W, BIOLAB_LIGHT_FRAME_H = 326, 362
-BIOLAB_LIGHT_FRAME_SHIFT = (1.0, -6.5)
-BIOLAB_COLS = 8
-BIOLAB_FRAMES = 32
 
-BIOLAB_MASK_DST = GRAPHICS_DIR / "factorio/biolab-mask.png"
 BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/biolab-overlay.png"
 
 def generate_biolab_images():
-    anim = np.array(Image.open(BIOLAB_ANIM_SRC).convert("RGBA")).astype(np.float32)
     light = np.array(Image.open(BIOLAB_LIGHT_SRC).convert("L")).astype(np.float32) # Grayscaled
-    light = np.clip(light * 6.0, 0, 255) # Strong brightening
+    light = np.clip(light * 4.0, 0, 255) # Strong brightening
 
     # Additive-blend a blurred version for glow effect — apply blur once on the full sheet.
     light_blurred = np.array(Image.fromarray(light.astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(radius=12))).astype(np.float32)
     light = np.clip(light + light_blurred * 1.5, 0, 255)
 
-    overlay_frames = []
-    mask_frames = []
-    for i in range(BIOLAB_FRAMES):
-        anim_frame = extract_frame(anim, i, BIOLAB_ANIM_FRAME_W, BIOLAB_ANIM_FRAME_H, BIOLAB_COLS)
-        light_frame = extract_frame(light, i, BIOLAB_LIGHT_FRAME_W, BIOLAB_LIGHT_FRAME_H, BIOLAB_COLS)
-        overlay_frames.append(light_frame)
-
-        sized_mask = resize_mask(light_frame, BIOLAB_ANIM_FRAME_W, BIOLAB_ANIM_FRAME_H, BIOLAB_ANIM_FRAME_SHIFT, BIOLAB_LIGHT_FRAME_SHIFT)
-        mask_frames.append(make_mask_frame(anim_frame.astype(np.uint8), sized_mask))
-
-    overlay_assembled = assemble_grid(overlay_frames, BIOLAB_COLS)
-    save_image(Image.fromarray(overlay_assembled.astype(np.uint8), "L"), BIOLAB_OVERLAY_DST)
-
-    mask_assembled = assemble_grid(mask_frames, BIOLAB_COLS)
-    save_image(Image.fromarray(mask_assembled, "LA"), BIOLAB_MASK_DST)
+    save_image(Image.fromarray(light.astype(np.uint8), "L"), BIOLAB_OVERLAY_DST)
 
 # --- LabOMatic (laborat) ---
 
@@ -285,46 +245,34 @@ def generate_laborat_images():
 
 KRASTORIO2_ASSETS_SRC = ROOT_DIR.parent / "Krastorio2Assets_*.zip"
 
-K2_ANIM_PATH = "buildings/singularity-lab/singularity-lab-working.png"
 K2_ANIM_FRAME_W, K2_ANIM_FRAME_H = 520, 500
 K2_ANIM_FRAME_SHIFT = (0, -0.1 * 64) # shift = { 0.0, -0.1 }, scale=0.5 → tiles * 32 / 0.5
-K2_ANIM_COLS = 10
 
-K2_MASK_PATH = "buildings/singularity-lab/singularity-lab-glow-light.png"
-K2_MASK_FRAME_W, K2_MASK_FRAME_H = 153, 117
-K2_MASK_FRAME_SHIFT = (0, -0.8 * 64) # shift = { 0, -0.8 }, scale=0.5 → tiles * 32 / 0.5
-K2_MASK_COLS = 6
+K2_GLOW_LIGHT_PATH = "buildings/singularity-lab/singularity-lab-glow-light.png"
+K2_GLOW_LIGHT_FRAME_W, K2_GLOW_LIGHT_FRAME_H = 153, 117
+K2_GLOW_LIGHT_FRAME_SHIFT = (0, -0.8 * 64) # shift = { 0, -0.8 }, scale=0.5 → tiles * 32 / 0.5
+K2_GLOW_LIGHT_COLS = 6
 
 K2_FRAMES = 60
 
 K2_DST_DIR = GRAPHICS_DIR / "Krastorio2"
-K2_MASK_DST = K2_DST_DIR / "singularity-lab-mask.png"
 K2_OVERLAY_DST = K2_DST_DIR / "singularity-lab-overlay.png"
 
 def generate_krastorio2_images():
     with open_mod_zip(KRASTORIO2_ASSETS_SRC) as open_file:
-        with open_file(K2_ANIM_PATH) as f:
-            anim_img = Image.open(f).convert("RGBA")
-        with open_file(K2_MASK_PATH) as f:
+        with open_file(K2_GLOW_LIGHT_PATH) as f:
             light_img = Image.open(f).convert("RGBA")
 
-    anim = np.array(fill_black_background(anim_img)).astype(np.float32)
     light = np.array(fill_black_background(light_img).convert("L")).astype(np.float32)
 
-    mask_frames: list[np.ndarray] = []
     static_overlay = np.zeros((K2_ANIM_FRAME_H, K2_ANIM_FRAME_W), dtype=np.float32)
     for i in range(K2_FRAMES):
-        anim_frame = extract_frame(anim, i, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_COLS)
-        light_frame = extract_frame(light, i, K2_MASK_FRAME_W, K2_MASK_FRAME_H, K2_MASK_COLS)
-        sized_mask = resize_mask(light_frame, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_FRAME_SHIFT, K2_MASK_FRAME_SHIFT)
-        mask_frames.append(make_mask_frame(anim_frame.astype(np.uint8), sized_mask > 10))
-        static_overlay = np.maximum(static_overlay, sized_mask)
+        light_frame = extract_frame(light, i, K2_GLOW_LIGHT_FRAME_W, K2_GLOW_LIGHT_FRAME_H, K2_GLOW_LIGHT_COLS)
+        sized = resize_mask(light_frame, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_FRAME_SHIFT, K2_GLOW_LIGHT_FRAME_SHIFT)
+        static_overlay = np.maximum(static_overlay, sized)
 
     static_overlay = np.clip(static_overlay * 0.8, 0, 255)
     save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), K2_OVERLAY_DST)
-
-    mask_assembled = assemble_grid(mask_frames, K2_ANIM_COLS)
-    save_image(Image.fromarray(mask_assembled, "LA"), K2_MASK_DST)
 
 # --- main ---
 

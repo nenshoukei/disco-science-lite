@@ -13,10 +13,20 @@ local LabPrototypeModifier = {
   --- @type table<string, string>
   replace_filenames = {},
 
-  --- Mask filenames to insert after the layer with the given filename.
-  --- The mask layer inherits geometric properties from the target layer.
-  --- @type table<string, string>
+  --- @class (exact) MaskEntry
+  --- @field [1] string mask filename
+  --- @field [2] data.Animation? optional property overrides for the inserted layer
+
+  --- Mask entries to insert after the layer with the given filename.
+  --- The mask layer inherits geometric properties from the target layer,
+  --- with optional overrides.
+  --- @type table<string, MaskEntry>
   insert_mask_filenames = {},
+
+  --- Animation freeze triggers: when a layer with the given filename is found,
+  --- all layers in the same layers array are frozen to the specified 1-based frame index.
+  --- @type table<string, integer>
+  animation_freeze_triggers = {},
 
   --- Modified lab prototypes
   --- @type table<data.LabPrototype, boolean>
@@ -29,6 +39,7 @@ function LabPrototypeModifier.reset()
   LabPrototypeModifier.remove_layer_filenames = {}
   LabPrototypeModifier.replace_filenames = {}
   LabPrototypeModifier.insert_mask_filenames = {}
+  LabPrototypeModifier.animation_freeze_triggers = {}
   LabPrototypeModifier.modified_labs = {}
 end
 
@@ -71,23 +82,46 @@ local function modify_animation(animation)
     for i = 1, #layers do
       local layer = layers[i]
       if layer.filename then
-        local mask_fn = mask_filenames[layer.filename]
-        if mask_fn then
+        local mask_entry = mask_filenames[layer.filename]
+        if mask_entry then
+          local override = mask_entry[2] or {}
           insertions[#insertions + 1] = { i, {
-            filename = mask_fn,
-            width = layer.width,
-            height = layer.height,
-            frame_count = layer.frame_count,
-            line_length = layer.line_length,
-            scale = layer.scale,
-            shift = layer.shift,
-            animation_speed = layer.animation_speed,
+            filename = mask_entry[1],
+            width = override.width or layer.width,
+            height = override.height or layer.height,
+            frame_count = override.frame_count or layer.frame_count,
+            line_length = override.line_length or layer.line_length,
+            scale = override.scale or layer.scale,
+            shift = override.shift or layer.shift,
+            animation_speed = override.animation_speed or layer.animation_speed,
           } --[[@as data.Animation]] }
         end
       end
     end
     for j = #insertions, 1, -1 do
       table.insert(layers, insertions[j][1] + 1, insertions[j][2])
+    end
+
+    local freeze_triggers = LabPrototypeModifier.animation_freeze_triggers
+    local freeze_frame = nil
+    for i = 1, #layers do
+      local layer = layers[i]
+      if layer.filename then
+        local ff = freeze_triggers[layer.filename]
+        if ff then
+          freeze_frame = ff
+          break
+        end
+      end
+    end
+    if freeze_frame then
+      for i = 1, #layers do
+        local layer = layers[i]
+        layer.frame_sequence = { freeze_frame }
+        if layer.repeat_count and layer.repeat_count > 1 then
+          layer.repeat_count = 1
+        end
+      end
     end
   end
 end
@@ -139,12 +173,24 @@ end
 
 --- Set a mask layer to be inserted on top of the layer with the specified filename in `on_animation`.
 --- The mask layer inherits width, height, frame_count, line_length, scale, shift, and animation_speed
---- from the target layer, and only replaces the filename.
+--- from the target layer, with optional overrides from `override_props`.
 ---
 --- @param target_filename string
 --- @param mask_filename string
-function LabPrototypeModifier.set_layer_mask(target_filename, mask_filename)
-  LabPrototypeModifier.insert_mask_filenames[target_filename] = mask_filename
+--- @param override_props data.Animation?
+function LabPrototypeModifier.set_layer_mask(target_filename, mask_filename, override_props)
+  LabPrototypeModifier.insert_mask_filenames[target_filename] = { mask_filename, override_props }
+end
+
+--- Freeze all layers in the animation containing the trigger layer to a single frame.
+--- When a layer with `trigger_filename` is found in a layers array, sets
+--- frame_sequence = {frame_index} on every layer in that array.
+--- Layers with repeat_count > 1 also get repeat_count = 1.
+---
+--- @param trigger_filename string
+--- @param frame_index integer 1-based frame index to freeze at
+function LabPrototypeModifier.set_animation_freeze(trigger_filename, frame_index)
+  LabPrototypeModifier.animation_freeze_triggers[trigger_filename] = frame_index
 end
 
 --- Modify all lab prototypes registered by `DiscoScienceInterface.prepareLab()`,

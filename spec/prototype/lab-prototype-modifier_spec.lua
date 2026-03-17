@@ -124,6 +124,38 @@ describe("LabPrototypeModifier", function ()
       assert.are.equal("light.png", lab.on_animation.layers[3].filename)
     end)
 
+    it("inserts a mask layer with overridden geometric properties", function ()
+      LabPrototypeModifier.set_layer_mask("on.png", "mask.png", {
+        width = 100, height = 80,
+        shift = { 0, -0.5 },
+        line_length = 5,
+        animation_speed = 0.85,
+      })
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          {
+            filename = "on.png",
+            width = 194, height = 174,
+            frame_count = 60, line_length = 10,
+            scale = 0.5, shift = { 0, -0.1 },
+            animation_speed = 1.0,
+          },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(2, #lab.on_animation.layers)
+      local mask = lab.on_animation.layers[2]
+      assert.are.equal("mask.png", mask.filename)
+      assert.are.equal(100, mask.width)
+      assert.are.equal(80, mask.height)
+      assert.are.same({ 0, -0.5 }, mask.shift)
+      assert.are.equal(5, mask.line_length)
+      assert.are.equal(0.85, mask.animation_speed)
+      assert.are.equal(60, mask.frame_count) -- inherited
+      assert.are.equal(0.5, mask.scale)      -- inherited
+    end)
+
     it("does not insert mask when target filename is not found", function ()
       LabPrototypeModifier.set_layer_mask("other.png", "mask.png")
       local lab = make_lab(nil)
@@ -148,6 +180,46 @@ describe("LabPrototypeModifier", function ()
       -- light.png removed, mask not inserted (target was removed)
       assert.are.equal(1, #lab.on_animation.layers)
       assert.are.equal("on.png", lab.on_animation.layers[1].filename)
+    end)
+
+    it("freezes all layers when any layer matches the trigger filename", function ()
+      LabPrototypeModifier.set_animation_freeze("on.png", 1)
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filename = "on.png", frame_count = 33 },
+          { filename = "other.png", frame_count = 33 },
+          { filename = "static.png", frame_count = 1, repeat_count = 33 },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.same({ 1 }, lab.on_animation.layers[1].frame_sequence)
+      assert.are.same({ 1 }, lab.on_animation.layers[2].frame_sequence)
+      assert.are.same({ 1 }, lab.on_animation.layers[3].frame_sequence)
+      assert.are.equal(1, lab.on_animation.layers[3].repeat_count)
+    end)
+
+    it("does not freeze layers when trigger filename is not found", function ()
+      LabPrototypeModifier.set_animation_freeze("missing.png", 1)
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = { { filename = "on.png", frame_count = 33 } },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.is_nil(lab.on_animation.layers[1].frame_sequence)
+    end)
+
+    it("freeze applies after mask insertion (inserted mask also gets frame_sequence)", function ()
+      LabPrototypeModifier.set_layer_mask("on.png", "mask.png")
+      LabPrototypeModifier.set_animation_freeze("on.png", 1)
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = { { filename = "on.png", frame_count = 33 } },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(2, #lab.on_animation.layers)
+      assert.are.same({ 1 }, lab.on_animation.layers[1].frame_sequence)
+      assert.are.same({ 1 }, lab.on_animation.layers[2].frame_sequence)
     end)
 
     describe("created_effect handling", function ()

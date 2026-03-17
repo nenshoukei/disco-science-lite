@@ -7,10 +7,6 @@ if mods["space-age"] then
   LabPrototypeModifier.set_layer_removal(
     "__space-age__/graphics/entity/biolab/biolab-lights.png"
   )
-  LabPrototypeModifier.set_layer_mask(
-    "__space-age__/graphics/entity/biolab/biolab-anim.png",
-    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/biolab-mask.png"
-  )
 
   data:extend({
     {

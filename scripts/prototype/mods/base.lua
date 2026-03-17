@@ -6,9 +6,11 @@ local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 LabPrototypeModifier.set_layer_removal(
   "__base__/graphics/entity/lab/lab-light.png"
 )
-LabPrototypeModifier.set_layer_mask(
+-- Freeze entity animation at frame 1 (no light, no color in the overlay area).
+-- The overlay animation still plays normally to provide the disco color effect.
+LabPrototypeModifier.set_animation_freeze(
   "__base__/graphics/entity/lab/lab.png",
-  "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/lab-mask.png"
+  1
 )
 
 if settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ].value then
