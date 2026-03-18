@@ -6,7 +6,7 @@ dev:
 	@luarocks install --deps-only disco-science-lite-dev-1.rockspec
 
 lint:
-	@luacheck .
+	@luacheck --formatter plain .
 
 test:
 	@busted
