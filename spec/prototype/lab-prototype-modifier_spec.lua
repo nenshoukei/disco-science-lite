@@ -101,9 +101,12 @@ describe("LabPrototypeModifier", function ()
         layers = {
           {
             filename = "on.png",
-            width = 194, height = 174,
-            frame_count = 33, line_length = 11,
-            scale = 0.5, shift = { 0, 0.05 },
+            width = 194,
+            height = 174,
+            frame_count = 33,
+            line_length = 11,
+            scale = 0.5,
+            shift = { 0, 0.05 },
             animation_speed = 0.3,
           },
           { filename = "light.png" },
@@ -126,7 +129,8 @@ describe("LabPrototypeModifier", function ()
 
     it("inserts a mask layer with overridden geometric properties", function ()
       LabPrototypeModifier.set_layer_mask("on.png", "mask.png", {
-        width = 100, height = 80,
+        width = 100,
+        height = 80,
         shift = { 0, -0.5 },
         line_length = 5,
         animation_speed = 0.85,
@@ -136,9 +140,12 @@ describe("LabPrototypeModifier", function ()
         layers = {
           {
             filename = "on.png",
-            width = 194, height = 174,
-            frame_count = 60, line_length = 10,
-            scale = 0.5, shift = { 0, -0.1 },
+            width = 194,
+            height = 174,
+            frame_count = 60,
+            line_length = 10,
+            scale = 0.5,
+            shift = { 0, -0.1 },
             animation_speed = 1.0,
           },
         },
@@ -187,8 +194,8 @@ describe("LabPrototypeModifier", function ()
       local lab = make_lab(nil)
       lab.on_animation = {
         layers = {
-          { filename = "on.png", frame_count = 33 },
-          { filename = "other.png", frame_count = 33 },
+          { filename = "on.png",     frame_count = 33 },
+          { filename = "other.png",  frame_count = 33 },
           { filename = "static.png", frame_count = 1, repeat_count = 33 },
         },
       } --[[@as any]]
@@ -304,6 +311,21 @@ describe("LabPrototypeModifier", function ()
       local lab = make_lab(nil)
       LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.are.equal("on.png", lab.on_animation.filename)
+      assert.is_nil(lab.created_effect)
+    end)
+
+    it("skips excluded labs even when fallback is enabled", function ()
+      local lab = make_lab(nil)
+      PrototypeLabRegistry.exclude(lab.name)
+      LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
+      assert.is_nil(lab.created_effect)
+    end)
+
+    it("skips excluded labs even when explicitly registered", function ()
+      local lab = make_lab(nil)
+      PrototypeLabRegistry.register(lab.name)
+      PrototypeLabRegistry.exclude(lab.name)
+      LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.is_nil(lab.created_effect)
     end)
   end)

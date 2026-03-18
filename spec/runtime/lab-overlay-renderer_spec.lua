@@ -214,6 +214,13 @@ describe("LabOverlayRenderer", function ()
       assert.is_nil(r:render_overlay_for_lab(lab))
     end)
 
+    it("returns nil when lab is excluded", function ()
+      local r = make_renderer()
+      r.is_fallback_enabled = true
+      r.lab_registry.excluded_labs["lab"] = true
+      assert.is_nil(r:render_overlay_for_lab(make_entity(1, 1, 0, 0)))
+    end)
+
     it("returns nil when no overlay settings registered and fallback disabled", function ()
       local r = make_renderer()
       r.is_fallback_enabled = false

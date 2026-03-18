@@ -120,6 +120,17 @@ declare const DiscoScience: {
   readonly isLite: true;
 
   /**
+   * Exclude a lab prototype from Disco Science colorization.
+   *
+   * The lab will not receive a color overlay, even when the `Automatic colorization for unsupported mods` setting is enabled.
+   *
+   * Calling `prepareLab()` on the same lab later removes the exclusion.
+   *
+   * @param lab Lab to exclude, or its prototype name.
+   */
+  excludeLab(lab: { type: "lab"; name: string } | string): void;
+
+  /**
    * Prepare a lab prototype for Disco Science colorization.
    *
    * When `settings.animation` is omitted, the overlay animation is auto-detected from filenames in the lab's `on_animation`.

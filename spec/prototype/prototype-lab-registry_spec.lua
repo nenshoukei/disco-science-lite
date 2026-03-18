@@ -33,6 +33,34 @@ describe("PrototypeLabRegistry", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("excluded_labs", function ()
+    it("is empty when initialized", function ()
+      assert.is_nil(next(PrototypeLabRegistry.excluded_labs, nil))
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("exclude", function ()
+    it("adds lab to excluded_labs", function ()
+      PrototypeLabRegistry.exclude("my-lab")
+      assert.is_true(PrototypeLabRegistry.excluded_labs["my-lab"])
+    end)
+
+    it("removes lab from registered_labs", function ()
+      PrototypeLabRegistry.register("my-lab", { animation = "my-anim" })
+      PrototypeLabRegistry.exclude("my-lab")
+      assert.is_nil(PrototypeLabRegistry.registered_labs["my-lab"])
+    end)
+
+    it("works on an unregistered lab", function ()
+      assert.no_error(function ()
+        PrototypeLabRegistry.exclude("unknown-lab")
+      end)
+      assert.is_true(PrototypeLabRegistry.excluded_labs["unknown-lab"])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("add_overlay_detection", function ()
     it("stores a detection entry", function ()
       PrototypeLabRegistry.add_overlay_detection("my-anim", { "mod/lab.png" })
@@ -86,6 +114,13 @@ describe("PrototypeLabRegistry", function ()
       assert.are.equal(3, settings.scale)
     end)
 
+    it("removes exclusion when called on an excluded lab", function ()
+      PrototypeLabRegistry.exclude("my-lab")
+      PrototypeLabRegistry.register("my-lab", { animation = "my-anim" })
+      assert.is_nil(PrototypeLabRegistry.excluded_labs["my-lab"])
+      assert.is_not_nil(PrototypeLabRegistry.registered_labs["my-lab"])
+    end)
+
     it("can register multiple labs independently", function ()
       PrototypeLabRegistry.register("lab-a", { animation = "anim-a", scale = 1 })
       PrototypeLabRegistry.register("lab-b", { animation = "anim-b", scale = 2 })
@@ -124,8 +159,8 @@ describe("PrototypeLabRegistry", function ()
         PrototypeLabRegistry.add_overlay_detection("my-overlay", { "mod/lab.png" })
         PrototypeLabRegistry.register("my-lab")
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-        assert.is_not_nil(settings) --- @cast settings -nil
-        assert.are.equal(2.0, settings.scale)  -- 1.0 / 0.5
+        assert.is_not_nil(settings)           --- @cast settings -nil
+        assert.are.equal(2.0, settings.scale) -- 1.0 / 0.5
       end)
 
       it("uses scale=1.0 default when layer has no scale", function ()
@@ -135,24 +170,24 @@ describe("PrototypeLabRegistry", function ()
         PrototypeLabRegistry.add_overlay_detection("my-overlay", { "mod/lab.png" })
         PrototypeLabRegistry.register("my-lab")
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-        assert.is_not_nil(settings) --- @cast settings -nil
-        assert.are.equal(2.0, settings.scale)  -- 1.0 (default) / 0.5
+        assert.is_not_nil(settings)           --- @cast settings -nil
+        assert.are.equal(2.0, settings.scale) -- 1.0 (default) / 0.5
       end)
 
       it("detects from nested layers", function ()
         local on_anim = ({
           layers = {
             { filename = "mod/lab-light.png", scale = 0.5 },
-            { filename = "mod/lab.png", scale = 0.5 },
+            { filename = "mod/lab.png",       scale = 0.5 },
           },
         }) --[[@as data.Animation]]
         _G.data = make_data("my-lab", make_lab_proto(on_anim))
         PrototypeLabRegistry.add_overlay_detection("my-overlay", { "mod/lab.png" })
         PrototypeLabRegistry.register("my-lab")
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.is_not_nil(settings)           --- @cast settings -nil
         assert.are.equal("my-overlay", settings.animation)
-        assert.are.equal(1.0, settings.scale)  -- 0.5 / 0.5
+        assert.are.equal(1.0, settings.scale) -- 0.5 / 0.5
       end)
 
       it("detects from filenames array", function ()
@@ -175,9 +210,9 @@ describe("PrototypeLabRegistry", function ()
         PrototypeLabRegistry.add_overlay_detection("my-overlay", { "mod/lab.png" })
         PrototypeLabRegistry.register("my-lab", { scale = 3.0 })
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.is_not_nil(settings)           --- @cast settings -nil
         assert.are.equal("my-overlay", settings.animation)
-        assert.are.equal(3.0, settings.scale)  -- preserved, not overwritten by 2.0
+        assert.are.equal(3.0, settings.scale) -- preserved, not overwritten by 2.0
       end)
 
       it("returns nil when data is nil (test environment)", function ()
@@ -287,7 +322,7 @@ describe("PrototypeLabRegistry", function ()
           height = 128,
           scale = 0.5,
         }) --[[@as data.Animation]]
-        _G.data = make_data("my-lab", make_lab_proto(on_anim))  -- no animations mock
+        _G.data = make_data("my-lab", make_lab_proto(on_anim)) -- no animations mock
         PrototypeLabRegistry.register("my-lab")
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
         assert.is_not_nil(settings) --- @cast settings -nil
@@ -378,9 +413,9 @@ describe("PrototypeLabRegistry", function ()
         })
         PrototypeLabRegistry.register("my-lab", { scale = 1.5 })
         local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-        assert.is_not_nil(settings) --- @cast settings -nil
+        assert.is_not_nil(settings)           --- @cast settings -nil
         assert.are.equal("mks-dsl-general-overlay", settings.animation)
-        assert.are.equal(1.5, settings.scale)  -- preserved
+        assert.are.equal(1.5, settings.scale) -- preserved
       end)
     end)
   end)
@@ -391,6 +426,12 @@ describe("PrototypeLabRegistry", function ()
       PrototypeLabRegistry.register("my-lab", { animation = "my-anim" })
       PrototypeLabRegistry.reset()
       assert.is_nil(next(PrototypeLabRegistry.registered_labs, nil))
+    end)
+
+    it("clears excluded_labs", function ()
+      PrototypeLabRegistry.exclude("my-lab")
+      PrototypeLabRegistry.reset()
+      assert.is_nil(next(PrototypeLabRegistry.excluded_labs, nil))
     end)
 
     it("clears overlay_detections", function ()

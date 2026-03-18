@@ -196,16 +196,17 @@ end
 --- Modify all lab prototypes registered by `DiscoScienceInterface.prepareLab()`,
 --- including Factorio's basic lab prototypes.
 ---
---- If `fallback_overlay_enabled` setting is `true`, all lab prototypes without registration
+--- If `fallback_overlay_enabled` setting is `true`, all lab prototypes without registration and exclusion
 --- will also be modified for colorization.
 ---
 --- @param lab_prototypes { [string]: data.LabPrototype }
 function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
   local registered_labs = PrototypeLabRegistry.registered_labs
+  local excluded_labs = PrototypeLabRegistry.excluded_labs
   local fallback_enabled = settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ]
     .value
   for name, proto in pairs(lab_prototypes) do
-    if fallback_enabled or registered_labs[name] then
+    if not excluded_labs[name] and (fallback_enabled or registered_labs[name]) then
       LabPrototypeModifier.modify_lab(proto)
     end
   end

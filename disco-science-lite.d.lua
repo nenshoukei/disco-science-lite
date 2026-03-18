@@ -66,6 +66,15 @@ _G.DiscoScience = {
   --- @type true
   isLite = true,
 
+  --- Exclude a lab prototype from Disco Science colorization.
+  ---
+  --- The lab will not receive a color overlay, even when the `Automatic colorization for unsupported mods` setting is enabled.
+  ---
+  --- Calling `prepareLab()` on the same lab later removes the exclusion.
+  ---
+  --- @param lab DiscoScience.LabPrototype | string Lab to exclude, or its prototype name.
+  excludeLab = function (lab) end,
+
   --- Prepare a lab prototype for Disco Science colorization.
   ---
   --- When `settings.animation` is omitted, the overlay animation is auto-detected from filenames in the lab's `on_animation`.

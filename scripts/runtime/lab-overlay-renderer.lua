@@ -99,13 +99,16 @@ end
 --- @param existing_object LuaRenderObject? An existing render object to reuse (optional, used when rebuilding all). Must be valid.
 --- @return LabOverlay|nil # The rendered overlay. `nil` if the lab is not target.
 function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
-  local lab_unit_number = lab.unit_number
-  if not lab_unit_number then return nil end
+  local lab_name = lab.name
+  if self.lab_registry:is_excluded(lab_name) then return nil end
 
-  local overlay_settings = self.lab_registry:get_overlay_settings(lab.name)
+  local overlay_settings = self.lab_registry:get_overlay_settings(lab_name)
   if not overlay_settings and not self.is_fallback_enabled then
     return nil
   end
+
+  local lab_unit_number = lab.unit_number
+  if not lab_unit_number then return nil end
 
   local animation
   local scale

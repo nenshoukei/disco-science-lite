@@ -128,6 +128,8 @@ end
 
 Prepare a lab prototype for Disco Science colorization.
 
+If the lab was excluded by `DiscoScience.excludeLab()`, this cancels the exclusion.
+
 **Parameters:**
 
 | Parameter  | Type                                                                             | Description                           |
@@ -140,6 +142,29 @@ Prepare a lab prototype for Disco Science colorization.
 | Field       | Type      | Default                   | Description                                                                                                                                                    |
 | ----------- | --------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `animation` | `string?` | auto-detected (see below) | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
+
+#### `DiscoScience.excludeLab(lab)`
+
+Exclude a lab prototype from Disco Science colorization. Use this if your mod adds a lab that should not be colorized even if the `Automatic colorization for unsupported mods` setting is enabled.
+
+**Parameters:**
+
+| Parameter | Type                                                                                       | Description                                         |
+| --------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| `lab`     | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) or string | The lab prototype to exclude, or its prototype name |
+
+**Example:**
+
+```lua
+-- data.lua (or data-updates.lua / data-final-fixes.lua)
+if DiscoScience and DiscoScience.isLite then
+    DiscoScience.excludeLab(data.raw["lab"]["my-lab"])
+    -- or equivalently:
+    -- DiscoScience.excludeLab("my-lab")
+end
+```
+
+This is a Disco Science Lite–specific feature. The original Disco Science mod does not have `excludeLab`. Use `DiscoScience.isLite` to guard Lite-only code.
 
 #### `DiscoScience.setIngredientColor(item_name, color)`
 

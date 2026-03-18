@@ -19,6 +19,42 @@ describe("DiscoScienceInterface", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("excludeLab", function ()
+    it("excludes a lab by prototype table", function ()
+      local lab = make_lab("my-lab")
+      DiscoScienceInterface.excludeLab(lab)
+      assert.is_true(PrototypeLabRegistry.excluded_labs["my-lab"])
+    end)
+
+    it("excludes a lab by name string", function ()
+      DiscoScienceInterface.excludeLab("my-lab")
+      assert.is_true(PrototypeLabRegistry.excluded_labs["my-lab"])
+    end)
+
+    it("removes existing registration when excluding", function ()
+      local lab = make_lab("my-lab")
+      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
+      DiscoScienceInterface.excludeLab("my-lab")
+      assert.is_nil(PrototypeLabRegistry.registered_labs["my-lab"])
+    end)
+
+    describe("validation", function ()
+      it("errors for invalid arguments", function ()
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.excludeLab(123) end)
+        assert.has_error(function () DiscoScienceInterface.excludeLab("") end)
+        --- @diagnostic disable-next-line: param-type-mismatch
+        assert.has_error(function () DiscoScienceInterface.excludeLab({}) end)
+      end)
+
+      it("accepts valid arguments", function ()
+        assert.no_error(function () DiscoScienceInterface.excludeLab("my-lab") end)
+        assert.no_error(function () DiscoScienceInterface.excludeLab(make_lab("my-lab")) end)
+      end)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("prepareLab", function ()
     it("registers lab with provided settings", function ()
       local lab = make_lab("my-lab")
@@ -36,6 +72,14 @@ describe("DiscoScienceInterface", function ()
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.is_nil(settings.animation)
       assert.is_nil(settings.scale)
+    end)
+
+    it("removes exclusion when called on an excluded lab", function ()
+      DiscoScienceInterface.excludeLab("my-lab")
+      local lab = make_lab("my-lab")
+      DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
+      assert.is_nil(PrototypeLabRegistry.excluded_labs["my-lab"])
+      assert.is_not_nil(PrototypeLabRegistry.registered_labs["my-lab"])
     end)
 
     it("can prepare multiple labs independently", function ()

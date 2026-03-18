@@ -10,6 +10,12 @@ local PrototypeLabRegistry = {
   --- @type table<string, LabOverlaySettings>
   registered_labs = {},
 
+  --- LabPrototype names explicitly excluded from colorization.
+  ---
+  --- This table is stored as mod-data prototype for runtime stage.
+  --- @type table<string, boolean>
+  excluded_labs = {},
+
   --- Overlay detection entries: animation name + set of filenames to match.
   --- @type OverlayDetection[]
   overlay_detections = {},
@@ -123,7 +129,19 @@ end
 --- Resets the registry. Just for testing.
 function PrototypeLabRegistry.reset()
   PrototypeLabRegistry.registered_labs = {}
+  PrototypeLabRegistry.excluded_labs = {}
   PrototypeLabRegistry.overlay_detections = {}
+end
+
+--- Exclude a lab from colorization.
+---
+--- The lab will not receive a color overlay, even when fallback overlay is enabled.
+--- Calling `register()` on the same lab name removes the exclusion.
+---
+--- @param lab_name string LabPrototype name.
+function PrototypeLabRegistry.exclude(lab_name)
+  PrototypeLabRegistry.registered_labs[lab_name] = nil
+  PrototypeLabRegistry.excluded_labs[lab_name] = true
 end
 
 --- Register an overlay animation to be auto-detected by filename.
@@ -163,6 +181,7 @@ function PrototypeLabRegistry.register(lab_name, settings)
       settings.scale = scale
     end
   end
+  PrototypeLabRegistry.excluded_labs[lab_name] = nil
   PrototypeLabRegistry.registered_labs[lab_name] = settings
 end
 

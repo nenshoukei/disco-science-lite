@@ -10,6 +10,16 @@ local function set_mod_data(settings)
   end
 end
 
+--- Set up mock excluded labs mod_data for load_prototype_settings tests.
+--- @param excluded table<string, boolean>|nil nil to remove mod_data
+local function set_excluded_labs(excluded)
+  if excluded then
+    _G.prototypes.mod_data[ "mks-dsl-excluded-labs" --[[$EXCLUDED_LABS_MOD_DATA_NAME]] ] = ({ data = excluded }) --[[@as LuaModData]]
+  else
+    _G.prototypes.mod_data[ "mks-dsl-excluded-labs" --[[$EXCLUDED_LABS_MOD_DATA_NAME]] ] = nil
+  end
+end
+
 describe("LabRegistry", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
@@ -63,6 +73,28 @@ describe("LabRegistry", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("is_excluded", function ()
+    it("returns false for an unregistered lab", function ()
+      local r = LabRegistry.new()
+      assert.is_false(r:is_excluded("my-lab"))
+    end)
+
+    it("returns true after load_prototype_settings with excluded lab", function ()
+      set_excluded_labs({ ["my-lab"] = true })
+      local r = LabRegistry.new()
+      r:load_prototype_settings()
+      assert.is_true(r:is_excluded("my-lab"))
+    end)
+
+    it("returns false for a non-excluded lab", function ()
+      set_excluded_labs({ ["other-lab"] = true })
+      local r = LabRegistry.new()
+      r:load_prototype_settings()
+      assert.is_false(r:is_excluded("my-lab"))
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("set_scale", function ()
     it("updates scale for an existing lab", function ()
       local r = LabRegistry.new()
@@ -95,12 +127,22 @@ describe("LabRegistry", function ()
       r:set_scale("my-lab", 3)
       assert.are.equal(3, scale_overrides["my-lab"])
     end)
+
+    it("cancels exclusion for the lab", function ()
+      set_excluded_labs({ ["my-lab"] = true })
+      local r = LabRegistry.new()
+      r:load_prototype_settings()
+      assert.is_true(r:is_excluded("my-lab"))
+      r:set_scale("my-lab", 2)
+      assert.is_false(r:is_excluded("my-lab"))
+    end)
   end)
 
   -- -------------------------------------------------------------------
   describe("load_prototype_settings", function ()
     before_each(function ()
       set_mod_data(nil)
+      set_excluded_labs(nil)
     end)
 
     it("does nothing when mod_data prototype is absent", function ()
@@ -179,6 +221,38 @@ describe("LabRegistry", function ()
       assert.is_not_nil(settings) --- @cast settings -nil
       assert.is_nil(settings.animation)
       assert.are.equal(4, settings.scale)
+    end)
+
+    it("loads excluded labs from mod_data", function ()
+      set_excluded_labs({ ["excluded-lab"] = true })
+      local r = LabRegistry.new()
+      r:load_prototype_settings()
+      assert.is_true(r:is_excluded("excluded-lab"))
+    end)
+
+    it("removes excluded labs from overlay_settings", function ()
+      set_mod_data({ ["my-lab"] = { animation = "my-anim", scale = 1 } })
+      set_excluded_labs({ ["my-lab"] = true })
+      local r = LabRegistry.new()
+      r:load_prototype_settings()
+      assert.is_nil(r:get_overlay_settings("my-lab"))
+    end)
+
+    it("skips excluded labs when re-applying scale_overrides", function ()
+      set_mod_data({ ["lab-a"] = { animation = "anim-a", scale = 1 } })
+      set_excluded_labs({ ["excluded-lab"] = true })
+      local r = LabRegistry.new()
+      r.scale_overrides["excluded-lab"] = 3
+      r:load_prototype_settings()
+      assert.is_nil(r:get_overlay_settings("excluded-lab"))
+    end)
+
+    it("clears excluded_labs when excluded labs mod-data is absent", function ()
+      set_excluded_labs(nil)
+      local r = LabRegistry.new()
+      r.excluded_labs["my-lab"] = true
+      r:load_prototype_settings()
+      assert.is_false(r:is_excluded("my-lab"))
     end)
 
     it("loads a copy of settings (not a reference to the prototype data)", function ()
