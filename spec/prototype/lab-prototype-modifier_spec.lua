@@ -203,7 +203,7 @@ describe("LabPrototypeModifier", function ()
       assert.are.same({ 1 }, lab.on_animation.layers[1].frame_sequence)
       assert.are.same({ 1 }, lab.on_animation.layers[2].frame_sequence)
       assert.are.same({ 1 }, lab.on_animation.layers[3].frame_sequence)
-      assert.are.equal(1, lab.on_animation.layers[3].repeat_count)
+      assert.are.is_nil(lab.on_animation.layers[3].repeat_count)
     end)
 
     it("does not freeze layers when trigger filename is not found", function ()

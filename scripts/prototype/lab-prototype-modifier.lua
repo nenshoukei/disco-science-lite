@@ -118,9 +118,7 @@ local function modify_animation(animation)
       for i = 1, #layers do
         local layer = layers[i]
         layer.frame_sequence = { freeze_frame }
-        if layer.repeat_count and layer.repeat_count > 1 then
-          layer.repeat_count = 1
-        end
+        layer.repeat_count = nil
       end
     end
   end
@@ -184,8 +182,7 @@ end
 
 --- Freeze all layers in the animation containing the trigger layer to a single frame.
 --- When a layer with `trigger_filename` is found in a layers array, sets
---- frame_sequence = {frame_index} on every layer in that array.
---- Layers with repeat_count > 1 also get repeat_count = 1.
+--- frame_sequence = {frame_index} and repeat_count = nil on every layer in that array.
 ---
 --- @param trigger_filename string
 --- @param frame_index integer 1-based frame index to freeze at
