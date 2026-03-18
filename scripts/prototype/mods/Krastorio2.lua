@@ -1,4 +1,4 @@
---- Krastorio2 by raiguard
+--- Krastorio 2 by raiguard
 --- https://mods.factorio.com/mod/Krastorio2
 --- Krastorio 2 Spaced Out by Polka_37
 --- https://mods.factorio.com/mod/Krastorio2-spaced-out
