@@ -32,6 +32,8 @@ for name in "${files[@]}"; do
   fi
 done
 
+old_hash="$(sha1sum "$OUTPUT")"
+
 # Write output
 {
   for name in "${priority[@]}"; do
@@ -42,4 +44,8 @@ done
   done
 } > "$OUTPUT"
 
-echo "Updated $OUTPUT"
+new_hash="$(sha1sum "$OUTPUT")"
+
+if [ "$old_hash" != "$new_hash" ]; then
+  echo "Updated $OUTPUT"
+fi
