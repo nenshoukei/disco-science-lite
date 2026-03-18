@@ -35,11 +35,10 @@ This mod provides users with:
 
 ## Commands
 
-- To run unit tests: `make test` or `busted spec/file-name_spec.lua`
-- To lint: `make lint`
-- To type-check `disco-science-lite.d.ts`: `make typecheck`
-- To update graphics: `make graphics`
-- To update constants in `consts.lua`: `make consts`
-- To update mods list in `scripts/prototype/mods/_all.lua`: `make mods`
-- To update and check codes: `make check` (runs `make consts`, `make mods`, `make lint`, `make test`, `make typecheck`)
-  ma
+- `make check`: Runs following:
+    - `make consts`: Updates constant values for the special syntax
+    - `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua)
+    - `make lint`: Lints codes by `luacheck`
+    - `make test`: Runs unit tests by `busted`
+    - `make typecheck`: Type-checks [disco-science-lite.d.ts](/disco-science-lite.d.ts) by `tsc`
+- `make graphics`: Updates graphics
