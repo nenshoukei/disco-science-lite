@@ -28,6 +28,7 @@ If you are a modder, see the [full API reference](https://github.com/nenshoukei/
 
 These mods are supported out of the box.
 
+- [5Dim's mod - New Automatization](https://mods.factorio.com/mod/5dim_automation) by McGuten
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
