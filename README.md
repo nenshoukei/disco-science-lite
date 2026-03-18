@@ -56,23 +56,19 @@ make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
 
 ### Tests
 
-To lint:
+To run unit tests, lint, typecheck:
 
 ```
-make lint
+make check
 ```
 
-To run unit tests:
+This does:
 
-```
-make test
-```
-
-To type-check `disco-science-lite.d.ts` (requires `tcs`):
-
-```
-make typecheck
-```
+- `make consts`: Updates constant values for special syntax (See below)
+- `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua).
+- `make lint`: Lints codes by `luacheck`
+- `make test`: Runs unit tests by `busted`
+- `make typecheck`: Type-checks [disco-science-lite.d.ts](disco-science-lite.d.ts) by `tsc`
 
 ### Special Constants Syntax
 

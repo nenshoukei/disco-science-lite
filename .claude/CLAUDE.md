@@ -40,3 +40,6 @@ This mod provides users with:
 - To type-check `disco-science-lite.d.ts`: `make typecheck`
 - To update graphics: `make graphics`
 - To update constants in `consts.lua`: `make consts`
+- To update mods list in `scripts/prototype/mods/_all.lua`: `make mods`
+- To update and check codes: `make check` (runs `make consts`, `make mods`, `make lint`, `make test`, `make typecheck`)
+  ma
