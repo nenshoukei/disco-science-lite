@@ -3,16 +3,14 @@
 import numpy as np
 from PIL import Image, ImageFilter
 
-from lib import FACTORIO_DATA, GRAPHICS_DIR, save_image
+from lib import FACTORIO_DATA, GRAPHICS_DIR, LAB_LIGHT_PNG, save_image
 
 # --- Lab ---
-
-LAB_LIGHT_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab-light.png"
 
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
 
 def generate_lab_images():
-    light = np.array(Image.open(LAB_LIGHT_SRC).convert("L")) # Grayscaled
+    light = np.array(Image.open(LAB_LIGHT_PNG).convert("L")) # Grayscaled
     overlay = (light * 1.5).clip(0, 255) # Brightening
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
 

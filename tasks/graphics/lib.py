@@ -38,6 +38,12 @@ FACTORIO_DATA = _find_factorio_data()
 ROOT_DIR = Path(__file__).parent.parent.parent
 GRAPHICS_DIR = ROOT_DIR / "graphics"
 
+# Lab light image is useful for generating overlays
+LAB_LIGHT_PNG = FACTORIO_DATA / "base/graphics/entity/lab/lab-light.png"
+LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H = 216, 194
+LAB_LIGHT_FRAMES = 33
+LAB_LIGHT_COLS = 11
+LAB_LIGHT_ROWS = 3
 
 def fill_black_background(img: Image.Image) -> Image.Image:
     """Paste onto black background to ensure transparent areas are black (0, 0, 0)"""
@@ -50,10 +56,14 @@ def rgb_to_grayscale(r: np.ndarray, g: np.ndarray, b: np.ndarray) -> np.ndarray:
     # Weighted average same as Pillow's convert L
     return (0.299 * r + 0.587 * g + 0.114 * b).clip(0, 255)
 
-def extract_frame(arr: np.ndarray, idx: int, frame_w: int, frame_h: int, cols: int) -> np.ndarray:
+def extract_frame(arr: np.ndarray, idx: int, frame_w: int, frame_h: int, cols: int, offset_x: int = 0, offset_y: int = 0, capture_w: int = 0, capture_h: int = 0) -> np.ndarray:
     """Extract a frame from a grid image"""
     col, row = idx % cols, idx // cols
-    return arr[row * frame_h:(row + 1) * frame_h, col * frame_w:(col + 1) * frame_w]
+    left = col * frame_w + offset_x
+    right = left + (capture_w or frame_w)
+    top = row * frame_h + offset_y
+    bottom = top + (capture_h or frame_h)
+    return arr[top:bottom, left:right]
 
 def assemble_grid(frames: list[np.ndarray], cols: int) -> np.ndarray:
     """Assemble frames into a grid image"""
