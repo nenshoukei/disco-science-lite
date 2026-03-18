@@ -35,7 +35,7 @@ This mod provides users with:
 
 ## Commands
 
-- To run unit tests: `make test`
+- To run unit tests: `make test` or `busted spec/file-name_spec.lua`
 - To lint: `make lint`
 - To type-check `disco-science-lite.d.ts`: `make typecheck`
 - To update graphics: `make graphics`
