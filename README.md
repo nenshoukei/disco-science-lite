@@ -16,7 +16,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 - **Space Age Support**: Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
 
-- **Colorize any labs added by unsupported mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
+- **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
 - **Color Customization**: Adjust color intensity through mod settings to get the brightness that suits your taste.
 
