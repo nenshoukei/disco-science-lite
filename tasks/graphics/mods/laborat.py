@@ -6,9 +6,14 @@ import numpy as np
 from PIL import Image
 
 from lib import (
-    ROOT_DIR, GRAPHICS_DIR,
-    fill_black_background, rgb_to_grayscale, extract_frame, make_mask_frame,
-    open_mod_zip, save_image,
+    ROOT_DIR,
+    GRAPHICS_DIR,
+    fill_black_background,
+    rgb_to_grayscale,
+    extract_frame,
+    make_mask_frame,
+    open_mod_zip,
+    save_image,
 )
 
 LABORAT_SRC = ROOT_DIR.parent / "LabOMatic_*.zip"
@@ -18,10 +23,11 @@ LABORAT_FRAMES = 30
 LABORAT_COLS = 10
 
 LABORAT_DST_DIR = GRAPHICS_DIR / "laborat"
-LABORAT_MASK_DST        = LABORAT_DST_DIR / "lab_albedo_anim-mask.png"
-LABORAT_OVERLAY_DST     = LABORAT_DST_DIR / "lab_albedo_anim-overlay.png"
-LABORAT_X4_MASK_DST     = LABORAT_DST_DIR / "lab_albedo_anim_x4-mask.png"
-LABORAT_X4_OVERLAY_DST  = LABORAT_DST_DIR / "lab_albedo_anim_x4-overlay.png"
+LABORAT_MASK_DST = LABORAT_DST_DIR / "lab_albedo_anim-mask.png"
+LABORAT_OVERLAY_DST = LABORAT_DST_DIR / "lab_albedo_anim-overlay.png"
+LABORAT_X4_MASK_DST = LABORAT_DST_DIR / "lab_albedo_anim_x4-mask.png"
+LABORAT_X4_OVERLAY_DST = LABORAT_DST_DIR / "lab_albedo_anim_x4-overlay.png"
+
 
 def generate_laborat_images():
     def make_images(anim_img: Image.Image, light_img: Image.Image, frame_w: int, frame_h: int, modified_dst: Path, overlay_dst: Path) -> None:
@@ -39,11 +45,8 @@ def generate_laborat_images():
         # Static overlay: minimum brightness across all frames, independent of entity animation.
         # Overlay animation cannot be synchronized with entity animation (rendering.draw_animation
         # starts from the current tick offset, not frame 0), so we use a single static frame.
-        frames_stack = np.stack([
-            extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS)
-            for i in range(LABORAT_FRAMES)
-        ], axis=0)
-        static_overlay = frames_stack.min(axis=0).clip(0, 90)   # Clipping makes pixels inside the dome flat
+        frames_stack = np.stack([extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS) for i in range(LABORAT_FRAMES)], axis=0)
+        static_overlay = frames_stack.min(axis=0).clip(0, 90)  # Clipping makes pixels inside the dome flat
         static_overlay = np.clip(static_overlay * 1.5, 0, 255)  # Brighten
         save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
 
