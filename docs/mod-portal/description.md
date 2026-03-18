@@ -10,31 +10,27 @@ Your science labs glow with the color of the science packs they're consuming —
 
 ## Features
 
-### Performance
+- **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/ups-optimization.md))
 
-Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
+- **Space Age Support**: Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
 
-### Space Age Support
+- **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
-Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
+- **Color Customization**: Adjust color intensity through mod settings to get the brightness that suits your taste.
 
-### Colorize any labs added by unsupported mods
+- **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 
-Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
+- **Mod API Compatibility**: The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
 
-### Color Customization
+If you are a modder, see the [full API reference](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/api.md) for quick start examples and prototype/runtime stage APIs.
 
-Adjust color intensity through mod settings to get the brightness that suits your taste.
+## Supported Mods
 
-### New Color Patterns
+These mods are supported out of the box.
 
-In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
-
-### Mod API Compatibility
-
-The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
-
-If you are a modder, see the [full API reference](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/api.md) for quick start examples, prototype stage and runtime stage APIs.
+- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
+- [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
+- [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
 
 ## License
 

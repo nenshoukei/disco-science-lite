@@ -12,29 +12,17 @@ Your science labs glow with the color of the science packs they're consuming —
 
 ## Features
 
-### Performance
+- **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
 
-Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
+- **Space Age Support**: Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
 
-### Space Age Support
+- **Colorize any labs added by unsupported mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
-Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
+- **Color Customization**: Adjust color intensity through mod settings to get the brightness that suits your taste.
 
-### Colorize any labs added by unsupported mods
+- **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 
-Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
-
-### Color Customization
-
-Adjust color intensity through mod settings to get the brightness that suits your taste.
-
-### New Color Patterns
-
-In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
-
-### Mod API Compatibility
-
-The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
+- **Mod API Compatibility**: The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
 
 ---
 
