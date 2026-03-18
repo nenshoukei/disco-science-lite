@@ -29,14 +29,6 @@ LabPrototypeModifier.set_animation_freeze(
   1
 )
 
-if settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ].value then
-  -- Freeze lab overlay animation at frame index 2
-  local overlay = data.raw["animation"][ "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]] ]
-  if overlay then
-    overlay.frame_sequence = { 2 }
-  end
-end
-
 PrototypeLabRegistry.add_overlay_detection(
   "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
   { "__base__/graphics/entity/lab/lab.png" }

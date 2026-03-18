@@ -1,3 +1,5 @@
+local is_blinking_disabled = settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ].value
+
 data:extend({
   {
     type = "animation",
@@ -11,6 +13,7 @@ data:extend({
     line_length = 11,
     animation_speed = 1 / 3,
     scale = 0.5,
+    frame_sequence = is_blinking_disabled and { 2, 9, 12, 13, 26, 27 } or nil, -- Skips blinking frames
   },
   {
     type = "animation",
