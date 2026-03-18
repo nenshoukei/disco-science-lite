@@ -2,6 +2,7 @@
 --- https://mods.factorio.com/mod/space-exploration
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["space-exploration"] then
   PrototypeColorRegistry.set_by_table({
@@ -30,4 +31,8 @@ if mods["space-exploration"] then
     ["se-deep-space-science-pack-3"] = { 0.28, 0.00, 0.84 },
     ["se-deep-space-science-pack-4"] = { 0.28, 0.00, 0.84 },
   })
+
+  -- We cannot colorize the space science lab because it needs a grayscale mask, but
+  -- it is not allowed to make any deriviations by the mod's license.
+  PrototypeLabRegistry.exclude("se-space-science-lab")
 end
