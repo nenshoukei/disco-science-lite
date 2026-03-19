@@ -256,11 +256,13 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
 
   -- Removing the overlay from the visible_overlays list is necessary to prevent
   -- a potential crash in the tick function if it tries to color a destroyed animation.
-  -- This is O(N) but only happens when a lab is destroyed (rare).
+  -- Swap-and-pop: O(1). Order doesn't matter since the list is rebuilt every 30 ticks.
   local visible_overlays = self.visible_overlays
   for i = 1, #visible_overlays do
     if visible_overlays[i] == overlay then
-      table.remove(visible_overlays, i)
+      local n = #visible_overlays
+      visible_overlays[i] = visible_overlays[n]
+      visible_overlays[n] = nil
       break
     end
   end
