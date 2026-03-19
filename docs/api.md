@@ -71,11 +71,11 @@ If your mod already supports the original Disco Science mod, it may work with Di
 
 ### Check your mod-name guards
 
-The original Disco Science mod's name is `"DiscoScience"`. Some mods guard their integration code by checking for this mod name directly:
+The original Disco Science mod's name is `"DiscoScience"` and Disco Science Lite mod's name is `"disco-science-lite"`. Some mods guard their integration code by checking for this mod name directly:
 
 ```lua
 -- data.lua / data-updates.lua / data-final-fixes.lua
-if mods["DiscoScience"] then          -- ❌ Does not detect Disco Science Lite
+if mods["DiscoScience"] then                -- ❌ Does not detect Disco Science Lite
     DiscoScience.prepareLab(...)
 end
 
@@ -89,7 +89,7 @@ These guards will not trigger when only Disco Science Lite is installed. Replace
 
 ```lua
 -- data.lua / data-updates.lua / data-final-fixes.lua
-if DiscoScience then                  -- ✅ Works with both mods
+if DiscoScience then                        -- ✅ Works with both mods
     DiscoScience.prepareLab(...)
 end
 
