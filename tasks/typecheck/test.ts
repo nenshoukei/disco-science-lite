@@ -67,18 +67,18 @@ DiscoScience.prepareLab({ type: "lab" });
 // @ts-expect-error - `type` is not "lab"
 DiscoScience.prepareLab({ type: "item", name: "my-lab" });
 
-// @ts-expect-error - unknown settings key
+// @ts-expect-error - unknown options key
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { unknown: true });
 
 // ---------------------------------------------------------------------------
 // DiscoScience.PrepareLabOptions type
 // ---------------------------------------------------------------------------
 
-const settings1: DiscoScience.PrepareLabOptions = {};
-const settings2: DiscoScience.PrepareLabOptions = { animation: "my-anim" };
+const options1: DiscoScience.PrepareLabOptions = {};
+const options2: DiscoScience.PrepareLabOptions = { animation: "my-anim" };
 
 // @ts-expect-error - unknown key
-const _settings3: DiscoScience.PrepareLabOptions = { unknown: true };
+const _options3: DiscoScience.PrepareLabOptions = { unknown: true };
 
 // ---------------------------------------------------------------------------
 // DiscoScience.Color type
@@ -116,7 +116,7 @@ void color2;
 void color3;
 void color4;
 void color5;
-void settings1;
-void settings2;
+void options1;
+void options2;
 void remote;
 void remoteColor;

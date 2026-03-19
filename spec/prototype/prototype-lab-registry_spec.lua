@@ -42,28 +42,28 @@ describe("PrototypeLabRegistry", function ()
 
   -- -------------------------------------------------------------------
   describe("register", function ()
-    it("registers a new lab with settings", function ()
+    it("registers a new lab with LabRegistration", function ()
       PrototypeLabRegistry.register("my-lab", { animation = "my-anim", scale = 2 })
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("my-anim", settings.animation)
-      assert.are.equal(2, settings.scale)
+      local registration = PrototypeLabRegistry.registered_labs["my-lab"]
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("my-anim", registration.animation)
+      assert.are.equal(2, registration.scale)
     end)
 
-    it("registers a new lab with empty settings when nil is passed", function ()
+    it("registers a new lab with empty LabRegistration when nil is passed", function ()
       PrototypeLabRegistry.register("my-lab", nil)
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.is_nil(settings.animation)
-      assert.is_nil(settings.scale)
+      local registration = PrototypeLabRegistry.registered_labs["my-lab"]
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_nil(registration.animation)
+      assert.is_nil(registration.scale)
     end)
 
     it("overwrites existing registration", function ()
       PrototypeLabRegistry.register("lab", { animation = "new-anim", scale = 3 })
-      local settings = PrototypeLabRegistry.registered_labs["lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("new-anim", settings.animation)
-      assert.are.equal(3, settings.scale)
+      local registration = PrototypeLabRegistry.registered_labs["lab"]
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("new-anim", registration.animation)
+      assert.are.equal(3, registration.scale)
     end)
 
     it("removes exclusion when called on an excluded lab", function ()

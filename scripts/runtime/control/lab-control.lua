@@ -39,7 +39,7 @@ local function create_registries(ds_storage)
   local color_registry = ColorRegistry.new(ds_storage.color_overrides)
   color_registry:load_prototype_colors()
   local lab_registry = LabRegistry.new(ds_storage.lab_scale_overrides)
-  lab_registry:load_prototype_settings()
+  lab_registry:load_prototype_registrations()
   return color_registry, lab_registry
 end
 

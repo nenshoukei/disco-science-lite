@@ -4,7 +4,7 @@ local PrototypeColorRegistry = require("scripts.prototype.prototype-color-regist
 data:extend({
   {
     type = "mod-data",
-    name = "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]],
+    name = "mks-dsl-registered-labs" --[[$REGISTERED_LABS_MOD_DATA_NAME]],
     data = PrototypeLabRegistry.registered_labs,
   },
   {

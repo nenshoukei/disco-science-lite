@@ -102,8 +102,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   local lab_name = lab.name
   if self.lab_registry:is_excluded(lab_name) then return nil end
 
-  local overlay_settings = self.lab_registry:get_overlay_settings(lab_name)
-  if not overlay_settings and not self.is_fallback_enabled then
+  local registration = self.lab_registry:get_registration(lab_name)
+  if not registration and not self.is_fallback_enabled then
     return nil
   end
 
@@ -112,10 +112,10 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
 
   local animation
   local scale
-  if overlay_settings then
+  if registration then
     -- If lab is registered but no overlay animation specified, use animation for the standard Factorio lab.
-    animation = overlay_settings.animation or "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]]
-    scale = overlay_settings.scale or 1
+    animation = registration.animation or "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]]
+    scale = registration.scale or 1
   else
     -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
     -- Scale the overlay to fit the lab's tile size. The fallback sprite covers 2 tiles at scale=1.
@@ -127,7 +127,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_object)
   --- @type LuaRenderObject
   local render_object
   if existing_object then
-    -- If existing rendering object given, just update it with the overlay settings.
+    -- If existing rendering object given, just update it with the registered values.
     render_object = existing_object
     -- Check if settings change for avoiding setting same value which forces re-rendaring.
     if render_object.animation ~= animation then

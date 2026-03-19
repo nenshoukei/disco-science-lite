@@ -2,12 +2,12 @@ if _G.DiscoSciencePrototypeLabRegistry then
   return _G.DiscoSciencePrototypeLabRegistry
 end
 
---- Registry for LabPrototype and its overlay settings.
+--- Registry for LabPrototype registrations.
 local PrototypeLabRegistry = {
-  --- Registered LabPrototype name and its overlay settings.
+  --- Registered LabPrototype name and its registration.
   ---
   --- This table is stored as mod-data prototype for runtime stage.
-  --- @type table<string, LabOverlaySettings>
+  --- @type table<string, LabRegistration>
   registered_labs = {},
 
   --- LabPrototype names explicitly excluded from colorization.
@@ -35,21 +35,21 @@ function PrototypeLabRegistry.exclude(lab_name)
   PrototypeLabRegistry.excluded_labs[lab_name] = true
 end
 
---- Register a new LabPrototype and its overlay settings.
+--- Register a new LabPrototype and its registration.
 ---
---- This overwrites the existing overlay settings with the same name.
+--- This overwrites the existing registration with the same name.
 ---
---- When settings.animation is nil, the runtime will use the standard Factorio lab
+--- When registration.animation is nil, the runtime will use the standard Factorio lab
 --- overlay ("mks-dsl-lab-overlay") for this lab. This preserves compatibility with
 --- the original DiscoScience mod API where prepareLab(lab) without an animation
 --- always uses the vanilla lab overlay shape.
 ---
 --- @param lab_name string LabPrototype name
---- @param settings LabOverlaySettings? If not specified, both animation and scale are nil.
-function PrototypeLabRegistry.register(lab_name, settings)
-  settings = settings or {}
+--- @param registration LabRegistration? If not specified, both animation and scale are nil.
+function PrototypeLabRegistry.register(lab_name, registration)
+  registration = registration or {}
   PrototypeLabRegistry.excluded_labs[lab_name] = nil
-  PrototypeLabRegistry.registered_labs[lab_name] = settings
+  PrototypeLabRegistry.registered_labs[lab_name] = registration
 end
 
 return PrototypeLabRegistry

@@ -11,9 +11,9 @@ LabRegistry.__index = LabRegistry
 function LabRegistry.new(lab_scale_overrides)
   --- @class LabRegistry
   local self = {
-    --- Lab overlay settings by LabPrototype name.
-    --- @type table<string, LabOverlaySettings>
-    overlay_settings = {},
+    --- Registrations by LabPrototype name.
+    --- @type table<string, LabRegistration>
+    registered_labs = {},
     --- Runtime scale overrides persisted in storage. Reference to storage.lab_scale_overrides.
     --- @type table<string, number>
     scale_overrides = lab_scale_overrides or {},
@@ -26,20 +26,19 @@ end
 
 --- Register a lab type to be colorized by this mod.
 ---
---- If `settings` is passed, it will override the existing settings with the same name.
+--- If `registration` is passed, it will override the existing registration with the same name.
 ---
---- If `settings` is not passed, the default overlay settings are used. (See [LabOverlaySettings](lua://LabOverlaySettings))
+--- If `registration` is not passed, the vanilla lab overlay is used.
 ---
 --- @param lab_name string LabPrototype name.
---- @param settings LabOverlaySettings? Settings for the lab overlay.
-function LabRegistry:register(lab_name, settings)
-  self.overlay_settings[lab_name] = settings or {}
+--- @param registration LabRegistration? Registration for the lab.
+function LabRegistry:register(lab_name, registration)
+  self.registered_labs[lab_name] = registration or {}
 end
 
 --- Set scale of a lab overlay.
 ---
---- If the given lab has not been registered yet, it will be registered with the default lab overlay settings.
---- (See [LabOverlaySettings](lua://LabOverlaySettings))
+--- If the given lab has not been registered yet, it will be registered with the default registration values.
 ---
 --- If the lab was excluded, the exclusion is cancelled.
 ---
@@ -48,25 +47,25 @@ end
 function LabRegistry:set_scale(lab_name, scale)
   self.scale_overrides[lab_name] = scale
   self.excluded_labs[lab_name] = nil
-  local settings = self.overlay_settings[lab_name]
-  if settings then
-    settings.scale = scale
+  local registration = self.registered_labs[lab_name]
+  if registration then
+    registration.scale = scale
   else
-    -- Automatically creates a LabOverlaySettings with the default values (nil).
-    self.overlay_settings[lab_name] = {
+    -- Automatically creates a LabRegistration with the default values (nil).
+    self.registered_labs[lab_name] = {
       scale = scale,
     }
   end
 end
 
---- Get the LabOverlaySettings for the given lab name.
+--- Get the LabRegistration for the given lab name.
 ---
 --- Returns `nil` for excluded labs.
 ---
 --- @param lab_name string LabPrototype name.
---- @return LabOverlaySettings|nil
-function LabRegistry:get_overlay_settings(lab_name)
-  return self.overlay_settings[lab_name]
+--- @return LabRegistration|nil
+function LabRegistry:get_registration(lab_name)
+  return self.registered_labs[lab_name]
 end
 
 --- Returns whether the given lab is excluded from colorization.
@@ -77,14 +76,13 @@ function LabRegistry:is_excluded(lab_name)
   return self.excluded_labs[lab_name] == true
 end
 
---- Load lab settings from the mod-data prototype.
+--- Load lab registrations from the mod-data prototype.
 ---
---- Always replaces existing settings with a fresh copy from the prototype data,
+--- Always replaces existing registrations with a fresh copy from the prototype data,
 --- then re-applies runtime scale overrides on top.
 ---
---- Excluded labs are removed from overlay_settings and stored in excluded_labs.
-function LabRegistry:load_prototype_settings()
-  -- Load excluded labs set.
+--- Excluded labs are removed from registered_labs and stored in excluded_labs.
+function LabRegistry:load_prototype_registrations()
   local excluded_mod_data = prototypes.mod_data[ "mks-dsl-excluded-labs" --[[$EXCLUDED_LABS_MOD_DATA_NAME]] ]
   if excluded_mod_data then
     self.excluded_labs = excluded_mod_data.data --[[@as table<string, boolean>]]
@@ -92,26 +90,26 @@ function LabRegistry:load_prototype_settings()
     self.excluded_labs = {}
   end
 
-  local overlay_mod_data = prototypes.mod_data[ "mks-dsl-lab-overlay-settings" --[[$LAB_OVERLAY_SETTINGS_MOD_DATA_NAME]] ]
-  if overlay_mod_data then
-    self.overlay_settings = Utils.table_deep_copy(overlay_mod_data.data --[[@as table<string, LabOverlaySettings>]])
+  local registred_mod_data = prototypes.mod_data[ "mks-dsl-registered-labs" --[[$REGISTERED_LABS_MOD_DATA_NAME]] ]
+  if registred_mod_data then
+    self.registered_labs = Utils.table_deep_copy(registred_mod_data.data --[[@as table<string, LabRegistration>]])
   else
-    self.overlay_settings = {}
+    self.registered_labs = {}
   end
 
-  -- Remove excluded labs from overlay_settings.
+  -- Remove excluded labs from registered_labs.
   for lab_name in pairs(self.excluded_labs) do
-    self.overlay_settings[lab_name] = nil
+    self.registered_labs[lab_name] = nil
   end
 
   -- Re-apply runtime scale overrides on top of prototype data (skip excluded labs).
   for lab_name, scale in pairs(self.scale_overrides) do
     if not self.excluded_labs[lab_name] then
-      local settings = self.overlay_settings[lab_name]
-      if settings then
-        settings.scale = scale
+      local registration = self.registered_labs[lab_name]
+      if registration then
+        registration.scale = scale
       else
-        self.overlay_settings[lab_name] = { scale = scale }
+        self.registered_labs[lab_name] = { scale = scale }
       end
     end
   end

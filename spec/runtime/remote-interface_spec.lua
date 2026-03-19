@@ -23,9 +23,9 @@ describe("RemoteInterface", function ()
       RemoteInterface.bind_rebuild_callback(function () called = true end)
       RemoteInterface.functions.setLabScale("lab", 3)
 
-      local settings = lab_reg:get_overlay_settings("lab")
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal(3, settings.scale)
+      local registration = lab_reg:get_registration("lab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal(3, registration.scale)
       assert.is_true(called)
     end)
 
@@ -40,11 +40,11 @@ describe("RemoteInterface", function ()
       RemoteInterface.bind_rebuild_callback(function () called = true end)
 
       RemoteInterface.functions.setLabScale("lab", 3)
-      assert.is_nil(lab_reg:get_overlay_settings("lab"))
+      assert.is_nil(lab_reg:get_registration("lab"))
       assert.is_false(called)
 
       RemoteInterface.bind_registries(color_reg, lab_reg)
-      assert.are.equal(3, lab_reg:get_overlay_settings("lab").scale)
+      assert.are.equal(3, lab_reg:get_registration("lab").scale)
       assert.is_true(called)
     end)
 

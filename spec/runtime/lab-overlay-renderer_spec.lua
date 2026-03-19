@@ -221,7 +221,7 @@ describe("LabOverlayRenderer", function ()
       assert.is_nil(r:render_overlay_for_lab(make_entity(1, 1, 0, 0)))
     end)
 
-    it("returns nil when no overlay settings registered and fallback disabled", function ()
+    it("returns nil when lab is not registered and fallback disabled", function ()
       local r = make_renderer()
       r.is_fallback_enabled = false
       -- lab_registry has no registration for "lab"
@@ -242,12 +242,13 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(1.5, ov.animation.x_scale)
     end)
 
-    it("creates overlay using fallback when no settings registered but fallback enabled", function ()
+    it("creates overlay using general overlay when no registration but fallback enabled", function ()
       local r = make_renderer()
       r.is_fallback_enabled = true
       -- lab_registry has no registration for "lab"
       local overlay = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(overlay)
+      assert.is_not_nil(overlay) --- @cast overlay -nil
+      assert.are.equal("mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]], overlay.animation.animation)
     end)
 
     it("stores and indexes the new overlay", function ()

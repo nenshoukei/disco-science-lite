@@ -54,22 +54,22 @@ describe("DiscoScienceInterface", function ()
 
   -- -------------------------------------------------------------------
   describe("prepareLab", function ()
-    it("registers lab with provided settings", function ()
+    it("registers lab with provided options", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
 
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.are.equal("my-anim", settings.animation)
+      local registration = PrototypeLabRegistry.registered_labs["my-lab"]
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("my-anim", registration.animation)
     end)
 
-    it("registers with empty settings when omitted", function ()
+    it("registers with empty options when omitted", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab)
-      local settings = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(settings) --- @cast settings -nil
-      assert.is_nil(settings.animation)
-      assert.is_nil(settings.scale)
+      local registration = PrototypeLabRegistry.registered_labs["my-lab"]
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_nil(registration.animation)
+      assert.is_nil(registration.scale)
     end)
 
     it("removes exclusion when called on an excluded lab", function ()
@@ -105,19 +105,18 @@ describe("DiscoScienceInterface", function ()
         end)
       end)
 
-      it("errors for invalid settings", function ()
+      it("errors for invalid options", function ()
         local lab = make_lab()
         --- @diagnostic disable-next-line: param-type-mismatch
         assert.has_error(function () DiscoScienceInterface.prepareLab(lab, ("not-a-table")) end)
         assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "" }) end)
       end)
 
-      it("accepts valid optional settings", function ()
+      it("accepts valid options", function ()
         local lab = make_lab()
         assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = nil }) end)
         assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" }) end)
       end)
     end)
   end)
-
 end)

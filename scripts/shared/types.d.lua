@@ -4,9 +4,9 @@ error("This file cannot be executed")
 --- @type consts
 _G.consts = {}
 
---- Internal overlay settings for a lab. Includes auto-detected or runtime-overridden scale.
+--- Registration info for a lab to be colorized. Includes auto-detected or runtime-overridden scale.
 ---
---- @class (exact) LabOverlaySettings
+--- @class (exact) LabRegistration
 --- @field animation string? Name of AnimationPrototype to be used as an overlay.
 --- @field scale number? Scale of the overlay.
 
