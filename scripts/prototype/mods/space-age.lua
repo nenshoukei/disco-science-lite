@@ -1,9 +1,18 @@
 --- Factorio Space-Age DLC
 
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["space-age"] then
+  PrototypeColorRegistry.set_by_table({
+    ["agricultural-science-pack"]    = { 0.80, 0.86, 0.22 },
+    ["metallurgic-science-pack"]     = { 0.99, 0.50, 0.04 },
+    ["electromagnetic-science-pack"] = { 0.93, 0.17, 0.57 },
+    ["cryogenic-science-pack"]       = { 0.16, 0.35, 0.78 },
+    ["promethium-science-pack"]      = { 0.10, 0.10, 0.50 },
+  })
+
   LabPrototypeModifier.set_layer_removal(
     "__space-age__/graphics/entity/biolab/biolab-lights.png"
   )
