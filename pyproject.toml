@@ -1,2 +1,15 @@
+[project]
+name = "disco-science-lite"
+version = "0.1.0"
+description = "A Factorio mod for colorizing science labs"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.4.3",
+    "pillow>=12.1.1",
+    "pyoxipng>=9.1.1",
+    "ruff>=0.15.6",
+]
+
 [tool.ruff]
 line-length = 160

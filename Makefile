@@ -7,6 +7,7 @@ dev:
 
 lint:
 	@luacheck --formatter plain .
+	@uv run ruff check
 
 test:
 	@busted
@@ -18,7 +19,7 @@ consts:
 	@lua tasks/update-consts.lua
 
 graphics:
-	@python tasks/graphics/update-graphics.py
+	@uv run tasks/graphics/update-graphics.py
 
 mods:
 	@tasks/update-all-mods.sh
