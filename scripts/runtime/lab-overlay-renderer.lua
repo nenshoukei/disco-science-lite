@@ -313,7 +313,12 @@ function LabOverlayRenderer:update_lab_position(lab)
   overlay.y = lab_y
 
   local animation = overlay.animation
-  if animation.surface.index == lab.surface_index then
+  if not animation.valid then
+    -- Render object was destroyed externally; re-render from scratch.
+    self.chunk_map:remove(lab_unit_number)
+    self.overlays[lab_unit_number] = nil
+    self:render_overlay_for_lab(lab)
+  elseif animation.surface.index == lab.surface_index then
     -- Same surface: update animation target and chunk map if chunk changed.
     animation.target = lab
     self.chunk_map:insert(lab, overlay) -- updates the existing entry
