@@ -20,7 +20,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 - **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 
-- **Mod API Compatibility**: The runtime API is compatible with the original Disco Science mod, so other mods that integrate with Disco Science work out of the box.
+- **Mod API Compatibility**: Compatible with the original Disco Science mod's API, so mods supporting Disco Science should work out of the box.
 
 If you are a modder, see the [full API reference](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/api.md) for quick start examples and prototype/runtime stage APIs.
 
