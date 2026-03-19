@@ -8,7 +8,7 @@ local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["exotic-space-industries"] or mods["exotic-space-industries-remembrance"] then
   PrototypeColorRegistry.set_by_table({
-    ["ei-dark-age-tech"]              = { 1.00, 0.30, 0.80 },
+    ["ei-dark-age-tech"]              = { 1.00, 0.02, 0.08 },
     ["ei-steam-age-tech"]             = { 0.00, 0.86, 0.15 },
     ["ei-electricity-age-tech"]       = { 0.00, 0.97, 1.00 },
     ["ei-computer-age-tech"]          = { 0.98, 0.89, 0.17 },
