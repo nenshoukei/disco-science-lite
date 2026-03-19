@@ -146,23 +146,6 @@ declare const DiscoScience: {
     settings?: DiscoScience.PrepareLabSettings,
   ): void;
 
-  /**
-   * Set the color of an ingredient (science pack) at prototype stage.
-   *
-   * These colors can be overridden at runtime via `remote.call()`.
-   *
-   * @param item_name Item prototype name of the ingredient.
-   * @param color Color for the ingredient.
-   */
-  setIngredientColor(item_name: string, color: DiscoScience.Color): void;
-
-  /**
-   * Get the color of an ingredient (science pack) registered so far.
-   *
-   * @param item_name Item prototype name of the ingredient.
-   * @returns Color for the ingredient, or `undefined` if not registered.
-   */
-  getIngredientColor(item_name: string): DiscoScience.Color | undefined;
 };
 
 /**

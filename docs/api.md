@@ -18,12 +18,12 @@ Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide
 
 ### If your mod adds custom science packs
 
-Vanilla science pack colors are built-in. For custom science packs, register the color of each one in `data.lua`:
+Vanilla science pack colors are built-in. For custom science packs, register the color of each one in `control.lua`:
 
 ```lua
--- data.lua
-if DiscoScience then
-    DiscoScience.setIngredientColor("my-science-pack", { r = 1, g = 0.5, b = 0 })
+-- control.lua
+if remote.interfaces["DiscoScience"] then
+    remote.call("DiscoScience", "setIngredientColor", "my-science-pack", { r = 1, g = 0.5, b = 0 })
 end
 ```
 
@@ -31,7 +31,7 @@ Labs that consume this science pack will be tinted with this color.
 
 This code is compatible with both the original Disco Science mod and Disco Science Lite.
 
-The `if DiscoScience then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, `DiscoScience` will be `nil`.
+The `if remote.interfaces["DiscoScience"] then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, the interface will not be registered.
 
 ### If your mod adds a custom lab
 
@@ -48,7 +48,7 @@ Disco Science Lite colorizes the lab based on the science packs it consumes.
 
 This code is compatible with both the original Disco Science mod and Disco Science Lite.
 
-### If your mod adds a custom lab with a unique shape <kbd>Lite only</kbd>
+### If your mod adds a custom lab with a unique shape
 
 If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
 
@@ -61,7 +61,7 @@ end
 
 See [How to define a custom animation](#how-to-define-a-custom-animation) below for details.
 
-This is a Disco Science Lite–specific feature. The custom animation is not supported by the original Disco Science — use `DiscoScience.isLite` to guard Lite-only code.
+❇️ This is a Disco Science Lite–specific feature. The custom animation is not supported by the original Disco Science — use `DiscoScience.isLite` to guard Lite-only code.
 
 ---
 
@@ -114,6 +114,8 @@ The following calls work as-is with Disco Science Lite — no modifications requ
 
 ## How to define a custom animation
 
+❇️ The custom animation feature is Lite-only. Not supported by the original Disco Science mod.
+
 When no custom animation is defined, Disco Science Lite uses the vanilla lab overlay for any lab registered via `prepareLab()`. For labs that were not registered at all, the [general glow effect](/graphics/general-overlay.png) is rendered as a fallback (when the `Automatic colorization for unsupported mods` setting is enabled), which may look unsuitable sometimes.
 
 If your lab has a unique shape and you want the color effect to align with it — highlighting specific parts of the sprite rather than glowing uniformly — you can define a custom animation.
@@ -147,7 +149,7 @@ if DiscoScience and DiscoScience.isLite then
 end
 ```
 
-Note: Because the custom animation feature is not supported by the original Disco Science mod, the `DiscoScience.isLite` guard is required.
+Note: Make sure the guard includes the `DiscoScience.isLite` check. This code does not work in the original Disco Science mod.
 
 ### Example animation sprites
 
@@ -163,13 +165,13 @@ These are auto-generated from the Factorio official assets by [Python script](/t
 
 ## API
 
-<kbd>Lite only</kbd> : Only available in Disco Science Lite. Not available in the original Disco Science.
+❇️ = Only available in Disco Science Lite. Not available in the original Disco Science.
 
 ### Prototype Stage — `DiscoScience`
 
 Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 
-#### `DiscoScience.isLite` <kbd>Lite only</kbd>
+#### `DiscoScience.isLite` ❇️
 
 Always `true` when running on Disco Science Lite. In the original Disco Science mod, this field is `nil`.
 
@@ -187,18 +189,18 @@ If the lab was excluded by `DiscoScience.excludeLab()`, this cancels the exclusi
 
 **Parameters:**
 
-| Parameter  | Type                                                                             | Description                           |
-| ---------- | -------------------------------------------------------------------------------- | ------------------------------------- |
-| `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize         |
-| `settings` | `DiscoScience.PrepareLabSettings?`                                               | Optional overlay settings (see below) |
+| Parameter  | Type                                                                             | Description                              |
+| ---------- | -------------------------------------------------------------------------------- | ---------------------------------------- |
+| `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize            |
+| `settings` | `DiscoScience.PrepareLabSettings?`                                               | ❇️ Optional overlay settings (see below) |
 
 **`DiscoScience.PrepareLabSettings`:**
 
-| Field       | Type      | Default             | Description                                                                                                                                                                         |
-| ----------- | --------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `animation` | `string?` | vanilla lab overlay | <kbd>Lite only</kbd> Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
+| Field       | Type      | Default             | Description                                                                                                                                                    |
+| ----------- | --------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animation` | `string?` | vanilla lab overlay | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
 
-#### `DiscoScience.excludeLab(lab)` <kbd>Lite only</kbd>
+#### `DiscoScience.excludeLab(lab)` ❇️
 
 Exclude a lab prototype from Disco Science colorization. Use this if your mod adds a lab that should not be colorized even if the `Automatic colorization for unsupported mods` setting is enabled.
 
@@ -220,31 +222,6 @@ end
 ```
 
 This is a Disco Science Lite–specific feature. The original Disco Science mod does not have `excludeLab`. Use `DiscoScience.isLite` to guard Lite-only code.
-
-#### `DiscoScience.setIngredientColor(item_name, color)` <kbd>Lite only</kbd>
-
-Set the color of an ingredient (science pack) at prototype stage. These colors can be overridden at runtime via `remote.call()`.
-
-**Parameters:**
-
-| Parameter   | Type                                                          | Description                                    |
-| ----------- | ------------------------------------------------------------- | ---------------------------------------------- |
-| `item_name` | `string`                                                      | Item prototype name of the ingredient          |
-| `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
-
-#### `DiscoScience.getIngredientColor(item_name)` <kbd>Lite only</kbd>
-
-Get the color of an ingredient (science pack) registered so far.
-
-**Parameters:**
-
-| Parameter   | Type     | Description                           |
-| ----------- | -------- | ------------------------------------- |
-| `item_name` | `string` | Item prototype name of the ingredient |
-
-**Returns:**
-
-- [Color](https://lua-api.factorio.com/latest/types/Color.html) — Color for the ingredient, or `nil` if not registered.
 
 ---
 

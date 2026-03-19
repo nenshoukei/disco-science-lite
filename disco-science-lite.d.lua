@@ -86,20 +86,6 @@ _G.DiscoScience = {
   --- @param settings DiscoScience.PrepareLabSettings? Custom overlay settings.
   prepareLab = function (lab, settings) end,
 
-  --- Set the color of an ingredient (science pack) at prototype stage.
-  ---
-  --- These colors can be overridden at runtime via `remote.call()`.
-  ---
-  --- @param item_name string Item prototype name of the ingredient.
-  --- @param color DiscoScience.Color Color for the ingredient.
-  setIngredientColor = function (item_name, color) end,
-
-  --- Get the color of an ingredient (science pack) registered so far.
-  ---
-  --- @param item_name string Item prototype name of the ingredient.
-  --- @return DiscoScience.Color|nil color Color for the ingredient, or `nil` if not registered.
-  getIngredientColor = function (item_name) end,
-
 }
 
 --- Runtime interface via `remote.call("DiscoScience", ...)`.

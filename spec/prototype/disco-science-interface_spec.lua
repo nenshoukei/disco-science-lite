@@ -1,5 +1,4 @@
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
-local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local DiscoScienceInterface = require("scripts.prototype.disco-science-interface")
 
 --- @return data.LabPrototype
@@ -15,7 +14,6 @@ end
 describe("DiscoScienceInterface", function ()
   before_each(function ()
     PrototypeLabRegistry.reset()
-    PrototypeColorRegistry.reset()
   end)
 
   -- -------------------------------------------------------------------
@@ -122,42 +120,4 @@ describe("DiscoScienceInterface", function ()
     end)
   end)
 
-  -- -------------------------------------------------------------------
-  describe("setIngredientColor", function ()
-    it("stores the color for later retrieval", function ()
-      DiscoScienceInterface.setIngredientColor("custom-pack", { 0.1, 0.2, 0.3 })
-      local color = PrototypeColorRegistry.get("custom-pack")
-      assert.is_not_nil(color)
-    end)
-
-    describe("validation", function ()
-      it("errors for invalid arguments", function ()
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.setIngredientColor(123, { 1, 1, 1 }) end)
-        assert.has_error(function () DiscoScienceInterface.setIngredientColor("", { 1, 1, 1 }) end)
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.setIngredientColor("p", "red") end)
-      end)
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("getIngredientColor", function ()
-    it("returns color for registered or nil for unregistered", function ()
-      DiscoScienceInterface.setIngredientColor("custom-pack", { 0.1, 0.2, 0.3 })
-      local color = DiscoScienceInterface.getIngredientColor("custom-pack")
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.1, color.r)
-
-      assert.is_nil(DiscoScienceInterface.getIngredientColor("unknown"))
-    end)
-
-    describe("validation", function ()
-      it("errors for invalid ingredient name", function ()
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.getIngredientColor(123) end)
-        assert.has_error(function () DiscoScienceInterface.getIngredientColor("") end)
-      end)
-    end)
-  end)
 end)

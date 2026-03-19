@@ -1,6 +1,4 @@
-local Utils = require("scripts.shared.utils")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
-local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
 if _G.DiscoScience then
   return _G.DiscoScience
@@ -31,24 +29,6 @@ function DiscoScienceInterface.prepareLab(lab, settings)
   PrototypeLabRegistry.register(lab.name, {
     animation = settings.animation,
   })
-end
-
-function DiscoScienceInterface.setIngredientColor(item_name, color)
-  assert(type(item_name) == "string" and item_name ~= "",
-    "DiscoScience.setIngredientColor: item_name must be a non-empty string")
-  assert(type(color) == "table" and (
-    (type(color[1]) == "number" and type(color[2]) == "number" and type(color[3]) == "number") or
-    (type(color.r) == "number" and type(color.g) == "number" and type(color.b) == "number")
-  ), "DiscoScience.setIngredientColor: color must be a Color table")
-
-  PrototypeColorRegistry.set(item_name, Utils.color_tuple(color))
-end
-
-function DiscoScienceInterface.getIngredientColor(item_name)
-  assert(type(item_name) == "string" and item_name ~= "",
-    "DiscoScience.getIngredientColor: item_name must be a non-empty string")
-
-  return PrototypeColorRegistry.get(item_name)
 end
 
 return DiscoScienceInterface

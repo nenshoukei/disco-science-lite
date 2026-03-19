@@ -33,30 +33,6 @@ DiscoScience.prepareLab({ type: "item", name: "my-lab" });
 // @ts-expect-error - unknown settings key
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { unknown: true });
 
-// setIngredientColor: struct form
-DiscoScience.setIngredientColor("iron-plate", { r: 1, g: 0, b: 0 });
-DiscoScience.setIngredientColor("iron-plate", { r: 1, g: 0, b: 0, a: 1 });
-DiscoScience.setIngredientColor("iron-plate", { r: 0.5 });
-DiscoScience.setIngredientColor("iron-plate", {});
-
-// setIngredientColor: tuple form
-DiscoScience.setIngredientColor("iron-plate", [1, 0, 0]);        // 3-tuple
-DiscoScience.setIngredientColor("iron-plate", [1, 0, 0, 1]);     // 4-tuple
-DiscoScience.setIngredientColor("iron-plate", [255, 128, 0]);    // 0-255 range
-
-// setIngredientColor: errors
-// @ts-expect-error - 2-tuple is not a valid Color
-DiscoScience.setIngredientColor("iron-plate", [1, 0]);
-
-// @ts-expect-error - 5-tuple is not a valid Color
-DiscoScience.setIngredientColor("iron-plate", [1, 0, 0, 1, 0]);
-
-// getIngredientColor: return type is Color | undefined
-const color: DiscoScience.Color | undefined = DiscoScience.getIngredientColor("iron-plate");
-if (color !== undefined) {
-  const _color: DiscoScience.Color = color;
-}
-
 // ---------------------------------------------------------------------------
 // DiscoScience.PrepareLabSettings type
 // ---------------------------------------------------------------------------
@@ -97,5 +73,5 @@ remote.setIngredientColor("iron-plate", [1, 0, 0]);
 const remoteColor: DiscoScience.Color | undefined = remote.getIngredientColor("iron-plate");
 
 // suppress unused variable warnings
-void color; void color1; void color2; void color3; void color4; void color5;
+void color1; void color2; void color3; void color4; void color5;
 void settings1; void settings2; void remote; void remoteColor;
