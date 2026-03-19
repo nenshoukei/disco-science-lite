@@ -24,11 +24,4 @@ LabPrototypeModifier.set_animation_freeze(
   1
 )
 
-PrototypeLabRegistry.add_overlay_detection(
-  "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-  { "__base__/graphics/entity/lab/lab.png" }
-)
-
-PrototypeLabRegistry.register("lab", {
-  animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-})
+PrototypeLabRegistry.register("lab")

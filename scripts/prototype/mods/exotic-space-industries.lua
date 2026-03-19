@@ -24,7 +24,5 @@ if mods["exotic-space-industries"] or mods["exotic-space-industries-remembrance"
   -- Its animation already has color changing effect, so it does not matter so much.
   PrototypeLabRegistry.exclude("ei-big-lab")
 
-  PrototypeLabRegistry.register("ei-dark-age-lab", {
-    animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-  })
+  PrototypeLabRegistry.register("ei-dark-age-lab")
 end

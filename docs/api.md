@@ -48,7 +48,7 @@ Disco Science Lite colorizes the lab based on the science packs it consumes.
 
 This code is compatible with both the original Disco Science mod and Disco Science Lite.
 
-### If your mod adds a custom lab with a unique shape
+### If your mod adds a custom lab with a unique shape <kbd>Lite only</kbd>
 
 If you want the color effect to align with your lab's specific shape, you can provide a custom overlay animation:
 
@@ -65,9 +65,56 @@ This is a Disco Science Lite–specific feature. The custom animation is not sup
 
 ---
 
+## Compatibility with the Original Disco Science Mod
+
+If your mod already supports the original Disco Science mod, it may work with Disco Science Lite without any changes — but there is one common pitfall to check.
+
+### Check your mod-name guards
+
+The original Disco Science mod's name is `"DiscoScience"`. Some mods guard their integration code by checking for this mod name directly:
+
+```lua
+-- data.lua / data-updates.lua / data-final-fixes.lua
+if mods["DiscoScience"] then          -- ❌ Does not detect Disco Science Lite
+    DiscoScience.prepareLab(...)
+end
+
+-- control.lua
+if script.active_mods["DiscoScience"] then  -- ❌ Does not detect Disco Science Lite
+    remote.call("DiscoScience", ...)
+end
+```
+
+These guards will not trigger when only Disco Science Lite is installed. Replace them with the interface-based guards instead:
+
+```lua
+-- data.lua / data-updates.lua / data-final-fixes.lua
+if DiscoScience then                  -- ✅ Works with both mods
+    DiscoScience.prepareLab(...)
+end
+
+-- control.lua
+if remote.interfaces["DiscoScience"] then   -- ✅ Works with both mods
+    remote.call("DiscoScience", ...)
+end
+```
+
+Both Disco Science and Disco Science Lite expose the same `DiscoScience` global and `"DiscoScience"` remote interface, so these guards work correctly with either mod installed.
+
+### No changes needed for API calls
+
+The following calls work as-is with Disco Science Lite — no modifications required:
+
+- `DiscoScience.prepareLab(lab)` — uses the vanilla lab overlay, matching the original mod's behavior
+- `remote.call("DiscoScience", "setLabScale", lab_name, scale)` — works identically
+- `remote.call("DiscoScience", "setIngredientColor", item_name, color)` — works identically
+- `remote.call("DiscoScience", "getIngredientColor", item_name)` — works identically
+
+---
+
 ## How to define a custom animation
 
-When no custom animation is defined, Disco Science Lite auto-detects the lab shape from the filenames used in the [LabPrototype.on_animation](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html#on_animation). If the lab uses the vanilla lab or biolab animations, the overlay animation for the corresponding vanilla lab will be used. Otherwise, the [general glow effect](/graphics/general-overlay.png) is rendered on top of the lab entity, which may look unsuitable sometimes.
+When no custom animation is defined, Disco Science Lite uses the vanilla lab overlay for any lab registered via `prepareLab()`. For labs that were not registered at all, the [general glow effect](/graphics/general-overlay.png) is rendered as a fallback (when the `Automatic colorization for unsupported mods` setting is enabled), which may look unsuitable sometimes.
 
 If your lab has a unique shape and you want the color effect to align with it — highlighting specific parts of the sprite rather than glowing uniformly — you can define a custom animation.
 
@@ -75,26 +122,32 @@ The animation is rendered on top of the lab entity and tinted by [LuaRenderObjec
 
 For best results, the animation sprite should be a **grayscale image**: white (or bright) pixels in areas that should be colored and glow, and black pixels in areas that should remain invisible.
 
-### Example animation prototype definition
+### Example code
 
 ```lua
 -- data.lua (or data-updates.lua / data-final-fixes.lua)
-data:extend({
-  {
-    type = "animation",
-    name = "my-lab-overlay-animation",
-    filename = "__my-mod__/graphics/my-lab-overlay.png",
-    blend_mode = "additive",
-    draw_as_glow = true,
-    width = 216,
-    height = 194,
-    frame_count = 33,
-    line_length = 11,
-    animation_speed = 1 / 3,
-    scale = 0.5,
-  },
-})
+if DiscoScience and DiscoScience.isLite then
+    data:extend({
+        {
+            type = "animation",
+            name = "my-lab-overlay-animation",
+            filename = "__my-mod__/graphics/my-lab-overlay.png",
+            blend_mode = "additive",
+            draw_as_glow = true,
+            width = 216,
+            height = 194,
+            frame_count = 33,
+            line_length = 11,
+            animation_speed = 1 / 3,
+            scale = 0.5,
+        },
+    })
+
+    DiscoScience.prepareLab(data.raw["lab"]["my-lab"], { animation = "my-lab-overlay-animation" })
+end
 ```
+
+Note: Because the custom animation feature is not supported by the original Disco Science mod, the `DiscoScience.isLite` guard is required.
 
 ### Example animation sprites
 
@@ -110,11 +163,13 @@ These are auto-generated from the Factorio official assets by [Python script](/t
 
 ## API
 
+<kbd>Lite only</kbd> : Only available in Disco Science Lite. Not available in the original Disco Science.
+
 ### Prototype Stage — `DiscoScience`
 
 Available in `data.lua`, `data-updates.lua`, and `data-final-fixes.lua`.
 
-#### `DiscoScience.isLite`
+#### `DiscoScience.isLite` <kbd>Lite only</kbd>
 
 Always `true` when running on Disco Science Lite. In the original Disco Science mod, this field is `nil`.
 
@@ -139,11 +194,11 @@ If the lab was excluded by `DiscoScience.excludeLab()`, this cancels the exclusi
 
 **`DiscoScience.PrepareLabSettings`:**
 
-| Field       | Type      | Default                   | Description                                                                                                                                                    |
-| ----------- | --------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `animation` | `string?` | auto-detected (see below) | Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
+| Field       | Type      | Default             | Description                                                                                                                                                                         |
+| ----------- | --------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animation` | `string?` | vanilla lab overlay | <kbd>Lite only</kbd> Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) for [custom animation](#how-to-define-a-custom-animation) |
 
-#### `DiscoScience.excludeLab(lab)`
+#### `DiscoScience.excludeLab(lab)` <kbd>Lite only</kbd>
 
 Exclude a lab prototype from Disco Science colorization. Use this if your mod adds a lab that should not be colorized even if the `Automatic colorization for unsupported mods` setting is enabled.
 
@@ -166,7 +221,7 @@ end
 
 This is a Disco Science Lite–specific feature. The original Disco Science mod does not have `excludeLab`. Use `DiscoScience.isLite` to guard Lite-only code.
 
-#### `DiscoScience.setIngredientColor(item_name, color)`
+#### `DiscoScience.setIngredientColor(item_name, color)` <kbd>Lite only</kbd>
 
 Set the color of an ingredient (science pack) at prototype stage. These colors can be overridden at runtime via `remote.call()`.
 
@@ -177,7 +232,7 @@ Set the color of an ingredient (science pack) at prototype stage. These colors c
 | `item_name` | `string`                                                      | Item prototype name of the ingredient          |
 | `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
 
-#### `DiscoScience.getIngredientColor(item_name)`
+#### `DiscoScience.getIngredientColor(item_name)` <kbd>Lite only</kbd>
 
 Get the color of an ingredient (science pack) registered so far.
 

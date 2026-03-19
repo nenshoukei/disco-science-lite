@@ -29,15 +29,9 @@ if mods["bobtech"] then
     "__bobtech__/graphics/entity/lab/lab-alien-light.png"
   )
 
-  PrototypeLabRegistry.register("bob-lab-2", {
-    animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-  })
-  PrototypeLabRegistry.register("bob-burner-lab", {
-    animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-  })
-  PrototypeLabRegistry.register("bob-lab-alien", {
-    animation = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-  })
+  PrototypeLabRegistry.register("bob-lab-2")
+  PrototypeLabRegistry.register("bob-burner-lab")
+  PrototypeLabRegistry.register("bob-lab-alien")
 end
 
 if mods["reskins-bobs"] then

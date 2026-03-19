@@ -133,9 +133,10 @@ declare const DiscoScience: {
   /**
    * Prepare a lab prototype for Disco Science colorization.
    *
-   * When `settings.animation` is omitted, the overlay animation is auto-detected from filenames in the lab's `on_animation`.
-   * If the lab uses the vanilla lab/biolab animations, the overlay animation for the vanilla labs will be used.
-   * If not, the general glow effect will be used.
+   * When `settings.animation` is omitted, the vanilla lab overlay is used.
+   * This preserves compatibility with the original Disco Science mod.
+   *
+   * To use a custom overlay aligned to your lab's unique shape, specify `settings.animation`.
    *
    * @param lab Lab to register for Disco Science colorization.
    * @param settings Custom overlay settings.
