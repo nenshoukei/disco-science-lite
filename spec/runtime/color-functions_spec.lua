@@ -353,17 +353,11 @@ describe("ColorFunctions", function ()
   describe("choose_random", function ()
     local n_functions = #ColorFunctions.functions
 
-    it("returned function matches functions[returned_index]", function ()
+    it("returns a valid index and matching function", function ()
       for _ = 1, 50 do
         local fn, idx = ColorFunctions.choose_random(1)
-        assert.are.equal(ColorFunctions.functions[idx], fn)
-      end
-    end)
-
-    it("returned index is within [1, n] range", function ()
-      for _ = 1, 50 do
-        local _, idx = ColorFunctions.choose_random(1)
         assert.is_true(idx >= 1 and idx <= n_functions)
+        assert.are.equal(ColorFunctions.functions[idx], fn)
       end
     end)
 
