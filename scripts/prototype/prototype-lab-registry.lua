@@ -92,7 +92,8 @@ end
 --- @return string?, number?
 local function detect_overlay(lab_name)
   if not data then return nil, nil end
-  local lab_proto = data.raw["lab"] and data.raw["lab"][lab_name]
+  local labs = data.raw["lab"]
+  local lab_proto = labs and labs[lab_name]
   if not lab_proto or not lab_proto.on_animation then return nil, nil end
 
   local filenames = {} --- @type table<string, number>

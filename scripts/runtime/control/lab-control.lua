@@ -89,15 +89,8 @@ end
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
-  --- @param event EventData.on_surface_cleared
+  --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
   [defines.events.on_surface_cleared] = function (event)
-    if renderer then
-      renderer:remove_overlays_on_surface(event.surface_index)
-    end
-  end,
-
-  --- @param event EventData.on_surface_deleted
-  [defines.events.on_surface_deleted] = function (event)
     if renderer then
       renderer:remove_overlays_on_surface(event.surface_index)
     end
@@ -127,6 +120,7 @@ LabControl.events = {
 
   --- @param event EventData.on_runtime_mod_setting_changed
   [defines.events.on_runtime_mod_setting_changed] = function (event)
+    if not renderer then return end
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
     if string.sub(event.setting, 1, #prefix) == prefix then
       renderer:load_settings()
@@ -143,6 +137,9 @@ LabControl.events = {
     end
   end,
 }
+
+-- Same handler for both surface cleared and deleted events.
+LabControl.events[defines.events.on_surface_deleted] = LabControl.events[defines.events.on_surface_cleared]
 
 commands.add_command(
   "ds-force-render",

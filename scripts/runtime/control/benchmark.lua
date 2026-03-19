@@ -12,7 +12,7 @@ script.on_event(defines.events.on_string_translated, function (event)
   local result = event.result
   local name = pending_translations[event.id]
   if name then
-    local total_ms = tonumber(string.match(event.result, "([%d%.]+)"))
+    local total_ms = tonumber(string.match(result, "([%d%.]+)"))
     if total_ms then
       local ms_per_op = total_ms / N
       local ops_per_ms = 1 / ms_per_op
