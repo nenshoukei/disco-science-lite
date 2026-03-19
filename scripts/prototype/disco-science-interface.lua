@@ -18,16 +18,16 @@ function DiscoScienceInterface.excludeLab(lab)
   PrototypeLabRegistry.exclude(lab_name)
 end
 
-function DiscoScienceInterface.prepareLab(lab, settings)
-  settings = settings or {}
+function DiscoScienceInterface.prepareLab(lab, options)
+  options = options or {}
   assert(type(lab) == "table" and lab.type == "lab", "DiscoScience.prepareLab: lab must be a LabPrototype table")
   assert(type(lab.name) == "string" and lab.name ~= "", "DiscoScience.prepareLab: lab.name must be a non-empty string")
-  assert(type(settings) == "table", "DiscoScience.prepareLab: settings must be a table")
-  assert(settings.animation == nil or (type(settings.animation) == "string" and settings.animation ~= ""),
-    "DiscoScience.prepareLab: settings.animation must be a non-empty string")
+  assert(type(options) == "table", "DiscoScience.prepareLab: options must be a table")
+  assert(options.animation == nil or (type(options.animation) == "string" and options.animation ~= ""),
+    "DiscoScience.prepareLab: options.animation must be a non-empty string")
 
   PrototypeLabRegistry.register(lab.name, {
-    animation = settings.animation,
+    animation = options.animation,
   })
 end
 

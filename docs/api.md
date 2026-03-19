@@ -181,7 +181,7 @@ if DiscoScience and DiscoScience.isLite then
 end
 ```
 
-#### `DiscoScience.prepareLab(lab, settings?)`
+#### `DiscoScience.prepareLab(lab, options?)`
 
 Prepare a lab prototype for Disco Science colorization.
 
@@ -189,12 +189,12 @@ If the lab was excluded by `DiscoScience.excludeLab()`, this cancels the exclusi
 
 **Parameters:**
 
-| Parameter  | Type                                                                             | Description                              |
-| ---------- | -------------------------------------------------------------------------------- | ---------------------------------------- |
-| `lab`      | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize            |
-| `settings` | `DiscoScience.PrepareLabSettings?`                                               | ❇️ Optional overlay settings (see below) |
+| Parameter | Type                                                                             | Description                             |
+| --------- | -------------------------------------------------------------------------------- | --------------------------------------- |
+| `lab`     | [LabPrototype](https://lua-api.factorio.com/latest/prototypes/LabPrototype.html) | The lab prototype to colorize           |
+| `options` | `DiscoScience.PrepareLabOptions?`                                                | ❇️ Optional overlay options (see below) |
 
-**`DiscoScience.PrepareLabSettings`:**
+**`DiscoScience.PrepareLabOptions`:**
 
 | Field       | Type      | Default             | Description                                                                                                                                                    |
 | ----------- | --------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |

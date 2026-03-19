@@ -26,9 +26,9 @@
 --- SOFTWARE.
 ---
 
---- Parameters for `DiscoScience.prepareLab()`.
+--- Options for `DiscoScience.prepareLab()`.
 ---
---- @class (exact) DiscoScience.PrepareLabSettings
+--- @class (exact) DiscoScience.PrepareLabOptions
 --- @field animation string? Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html) to be used as a custom overlay animation.
 
 --- A color in RGBA format.
@@ -77,14 +77,14 @@ _G.DiscoScience = {
 
   --- Prepare a lab prototype for Disco Science colorization.
   ---
-  --- When `settings.animation` is omitted, the vanilla lab overlay is used.
+  --- When `options.animation` is omitted, the vanilla lab overlay is used.
   --- This preserves compatibility with the original Disco Science mod.
   ---
-  --- To use a custom overlay aligned to your lab's unique shape, specify `settings.animation`.
+  --- To use a custom overlay aligned to your lab's unique shape, specify `options.animation`.
   ---
   --- @param lab DiscoScience.LabPrototype Lab to register for Disco Science colorization.
-  --- @param settings DiscoScience.PrepareLabSettings? Custom overlay settings.
-  prepareLab = function (lab, settings) end,
+  --- @param options DiscoScience.PrepareLabOptions? Custom overlay options.
+  prepareLab = function (lab, options) end,
 
 }
 

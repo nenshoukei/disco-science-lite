@@ -32,9 +32,9 @@
 
 declare namespace DiscoScience {
   /**
-   * Parameters for `DiscoScience.prepareLab()`.
+   * Options for `DiscoScience.prepareLab()`.
    */
-  interface PrepareLabSettings {
+  interface PrepareLabOptions {
     /**
      * Name of [AnimationPrototype](https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html)
      * to be used as a custom overlay animation.
@@ -133,19 +133,18 @@ declare const DiscoScience: {
   /**
    * Prepare a lab prototype for Disco Science colorization.
    *
-   * When `settings.animation` is omitted, the vanilla lab overlay is used.
+   * When `options.animation` is omitted, the vanilla lab overlay is used.
    * This preserves compatibility with the original Disco Science mod.
    *
-   * To use a custom overlay aligned to your lab's unique shape, specify `settings.animation`.
+   * To use a custom overlay aligned to your lab's unique shape, specify `options.animation`.
    *
    * @param lab Lab to register for Disco Science colorization.
-   * @param settings Custom overlay settings.
+   * @param options Custom overlay options.
    */
   prepareLab(
     lab: { type: "lab"; name: string },
-    settings?: DiscoScience.PrepareLabSettings,
+    options?: DiscoScience.PrepareLabOptions,
   ): void;
-
 };
 
 /**

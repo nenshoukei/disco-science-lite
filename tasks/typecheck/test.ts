@@ -71,14 +71,14 @@ DiscoScience.prepareLab({ type: "item", name: "my-lab" });
 DiscoScience.prepareLab({ type: "lab", name: "my-lab" }, { unknown: true });
 
 // ---------------------------------------------------------------------------
-// DiscoScience.PrepareLabSettings type
+// DiscoScience.PrepareLabOptions type
 // ---------------------------------------------------------------------------
 
-const settings1: DiscoScience.PrepareLabSettings = {};
-const settings2: DiscoScience.PrepareLabSettings = { animation: "my-anim" };
+const settings1: DiscoScience.PrepareLabOptions = {};
+const settings2: DiscoScience.PrepareLabOptions = { animation: "my-anim" };
 
 // @ts-expect-error - unknown key
-const _settings3: DiscoScience.PrepareLabSettings = { unknown: true };
+const _settings3: DiscoScience.PrepareLabOptions = { unknown: true };
 
 // ---------------------------------------------------------------------------
 // DiscoScience.Color type
