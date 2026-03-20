@@ -51,7 +51,7 @@ This mod also includes image assets derived from third-party works:
 - [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by BiusArt
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 
-All such assets remain the property of their respective authors and are redistributed only as an integrated part of this mod in accordance with their applicable licenses.
+All such assets are used in accordance with their applicable licenses.
 
 For full license details, please see the source repository:
 https://github.com/nenshoukei/disco-science-lite
