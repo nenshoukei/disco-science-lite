@@ -118,7 +118,7 @@ Some image assets are derived from third-party works and are **NOT** covered by 
 
 | Files                                        | Source                                                        | Author                                                   | License                     |
 | -------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
-| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | [Wube Software Ltd.](https://factorio.com)               | © Wube Software Ltd. (EULA) |
+| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | Wube Software Ltd.                                       | © Wube Software Ltd. (EULA) |
 | [graphics/laborat/](graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)        | GNU LGPL v3.0               |
 | [graphics/Krastorio2/](graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)      | GNU LGPL v3.0               |
 | [graphics/hurricane/](graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046) | CC BY 4.0                   |
