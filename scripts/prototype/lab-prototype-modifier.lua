@@ -98,27 +98,35 @@ local function modify_animation(animation)
       if layer.filename then
         mask_entry = mask_filenames[layer.filename]
       elseif layer.filenames then
-        mask_entry = mask_filenames[table.concat(layer.filenames --[[@as string[] ]], "|")]
+        mask_entry = mask_filenames[table.concat(layer.filenames, "|")]
       end
       if mask_entry then
-        local override = mask_entry[2] or {}
         local mask_fn = mask_entry[1]
+        local override = mask_entry[2]
+
         --- @type data.Animation
         local new_layer = {
-          width = override.width or layer.width,
-          height = override.height or layer.height,
-          frame_count = override.frame_count or layer.frame_count,
-          line_length = override.line_length or layer.line_length,
-          scale = override.scale or layer.scale,
-          shift = override.shift or layer.shift,
-          animation_speed = override.animation_speed or layer.animation_speed,
+          width = layer.width,
+          height = layer.height,
+          frame_count = layer.frame_count,
+          line_length = layer.line_length,
+          scale = layer.scale,
+          shift = layer.shift,
+          animation_speed = layer.animation_speed,
         }
         if type(mask_fn) == "table" then
-          new_layer.filenames = mask_fn --[[@as string[] ]]
-          new_layer.lines_per_file = override.lines_per_file or layer.lines_per_file
+          new_layer.filenames = mask_fn
+          new_layer.lines_per_file = layer.lines_per_file
         else
-          new_layer.filename = mask_fn --[[@as string]]
+          new_layer.filename = mask_fn
         end
+
+        if override then
+          for k, v in pairs(override) do
+            new_layer[k] = v
+          end
+        end
+
         insertions[#insertions + 1] = { i, new_layer }
       end
     end

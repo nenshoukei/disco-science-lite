@@ -1,0 +1,15 @@
+NOTICE — Derived Assets from "Factorio Buildings"
+
+This directory contains image files derived from assets originally created by Hurricane and published on Figma.
+https://shorturl.at/AFcDm
+https://mods.factorio.com/user/Hurricane046
+
+The assets are indicated on the Figma page as being licensed under the Creative Commons Attribution (CC BY),
+without a specified version.
+
+These files are modified versions of the original assets. The modifications are licensed under CC BY 4.0.
+https://creativecommons.org/licenses/by/4.0/
+
+Original copyright and authorship of the assets remain with Hurricane.
+
+The full text of the CC BY 4.0 license is provided in the accompanying LICENSE file.

@@ -50,6 +50,7 @@ This mod also includes image assets derived from third-party works:
 - [Factorio](https://factorio.com/) by Wube Software Ltd.
 - [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by [BiusArt](https://mods.factorio.com/user/BiusArt)
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by [raiguard](https://mods.factorio.com/user/raiguard)
+- [Factorio Buildings](https://shorturl.at/AFcDm) by [Hurricane](https://mods.factorio.com/user/Hurricane046)
 
 All such assets are used in accordance with their applicable licenses.
 

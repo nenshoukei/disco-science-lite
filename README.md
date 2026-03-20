@@ -94,6 +94,8 @@ To generate these images, you have to install:
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) mod
     - This mod includes lab sprites from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) mod which cannot be installed on recent Factorio versions.
 - [Krastorio2Assets](https://mods.factorio.com/mod/Krastorio2Assets) mod
+- [Fusion lab](https://mods.factorio.com/mod/fusion-lab) mod
+    - This mod includes lab sprites from [Facotiro Buildings](https://shorturl.at/AFcDm) created by [Hurricane](https://mods.factorio.com/user/Hurricane046).
 
 ## License
 
@@ -116,3 +118,9 @@ However, some image assets included in this repository are derived from third-pa
   [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) Factorio mod created by [raiguard](https://mods.factorio.com/user/raiguard),
   licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
   See [LICENSE](graphics/Krastorio2/LICENSE) and [NOTICE.txt](graphics/Krastorio2/NOTICE.txt) for details.
+
+- Image files under [graphics/hurricane/](graphics/hurricane/) are derived from assets of the
+  [Factorio Buildings](https://shorturl.at/AFcDm) created by [Hurricane](https://mods.factorio.com/user/Hurricane046).
+  The original assets are indicated on the Figma page as being licensed under the Creative Commons Attribution (CC BY), without a specified version.
+  These files are modified versions of the original assets. The modifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+  See [LICENSE](graphics/hurricane/LICENSE) and [NOTICE.txt](graphics/hurricane/NOTICE.txt) for details.
