@@ -57,8 +57,8 @@ local function modify_animation(animation)
 
   local filenames = animation.filenames
   if filenames then --- @cast filenames -nil
-    for i, filename in ipairs(filenames) do
-      local new_fn_ = replace_filenames[filename]
+    for i = 1, #filenames do
+      local new_fn_ = replace_filenames[filenames[i]]
       if new_fn_ then
         filenames[i] = new_fn_
       end
