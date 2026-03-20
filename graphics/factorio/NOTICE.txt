@@ -9,8 +9,7 @@ All rights, title, and interest in the original assets and in any derivative wor
 These files are distributed only as an integrated part of this Factorio mod.
 They must not be copied, extracted, reused, redistributed, or republished separately from the mod without explicit permission from Wube Software Ltd.
 
-The MIT License provided in the root of this repository applies only to the source code and original assets created by the mod author.
-It does NOT apply to the contents of this directory.
+The MIT License provided in the root of this repository does NOT apply to the contents of this directory.
 
 Use and redistribution of these files are additionally subject to the Factorio End User Licence Agreement (EULA).
 https://factorio.com/terms-of-service
