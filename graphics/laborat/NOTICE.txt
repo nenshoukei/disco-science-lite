@@ -11,5 +11,3 @@ These files are modified versions of the original assets and are redistributed u
 Original copyright and authorship of the assets remain with BiusArt.
 
 The full license text is provided in the accompanying LICENSE file.
-
-These files are included only as part of this mod.
