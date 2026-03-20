@@ -69,7 +69,19 @@ local function modify_animation(animation)
     local remove_layer_filenames = LabPrototypeModifier.remove_layer_filenames
     for i = #layers, 1, -1 do
       local layer = layers[i]
-      if layer.filename and remove_layer_filenames[layer.filename] then
+      local should_remove = layer.filename and remove_layer_filenames[layer.filename]
+      if not should_remove then
+        local layer_filenames = layer.filenames
+        if layer_filenames then --- @cast layer_filenames -nil
+          for j = 1, #layer_filenames do
+            if remove_layer_filenames[layer_filenames[j]] then
+              should_remove = true
+              break
+            end
+          end
+        end
+      end
+      if should_remove then
         table.remove(layers, i)
       else
         modify_animation(layer)
