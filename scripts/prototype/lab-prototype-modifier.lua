@@ -4,6 +4,10 @@ if _G.DiscoScienceLabPrototypeModifier then
   return _G.DiscoScienceLabPrototypeModifier
 end
 
+--- @class (exact) MaskEntry
+--- @field [1] string|string[] mask filename or filenames
+--- @field [2] data.Animation? optional property overrides for the inserted layer
+
 local LabPrototypeModifier = {
   --- Animation filenames to be removed from on_animation.layers. Value is always `true`.
   --- @type table<string, boolean>
@@ -13,14 +17,9 @@ local LabPrototypeModifier = {
   --- @type table<string, string>
   replace_filenames = {},
 
-  --- @class (exact) MaskEntry
-  --- @field [1] string|string[] mask filename or filenames
-  --- @field [2] data.Animation? optional property overrides for the inserted layer
-
   --- Mask entries to insert after the layer with the given filename or filenames.
   --- The key is `filename` for single-file layers, or `table.concat(filenames, "|")` for multi-file layers.
-  --- The mask layer inherits geometric properties from the target layer,
-  --- with optional overrides.
+  --- The mask layer inherits geometric properties from the target layer, with optional overrides.
   --- @type table<string, MaskEntry>
   insert_mask_filenames = {},
 
@@ -50,108 +49,116 @@ end
 local function modify_animation(animation)
   local replace_filenames = LabPrototypeModifier.replace_filenames
 
-  local new_fn = animation.filename and replace_filenames[animation.filename]
-  if new_fn then
-    animation.filename = new_fn
+  local new_filename = animation.filename and replace_filenames[animation.filename]
+  if new_filename then
+    animation.filename = new_filename
   end
 
-  local filenames = animation.filenames
-  if filenames then --- @cast filenames -nil
-    for i = 1, #filenames do
-      local new_fn_ = replace_filenames[filenames[i]]
-      if new_fn_ then
-        filenames[i] = new_fn_
+  local a_filenames = animation.filenames
+  if a_filenames then
+    for i = 1, #a_filenames do
+      new_filename = replace_filenames[a_filenames[i]]
+      if new_filename then
+        a_filenames[i] = new_filename
       end
     end
   end
 
   local layers = animation.layers
-  if layers then
-    local remove_layer_filenames = LabPrototypeModifier.remove_layer_filenames
-    for i = #layers, 1, -1 do
-      local layer = layers[i]
-      local should_remove = layer.filename and remove_layer_filenames[layer.filename]
-      if not should_remove then
-        local layer_filenames = layer.filenames
-        if layer_filenames then --- @cast layer_filenames -nil
-          for j = 1, #layer_filenames do
-            if remove_layer_filenames[layer_filenames[j]] then
-              should_remove = true
-              break
-            end
-          end
-        end
-      end
-      if should_remove then
-        table.remove(layers, i)
-      else
-        modify_animation(layer)
-      end
-    end
+  if not layers then return end
 
-    local mask_filenames = LabPrototypeModifier.insert_mask_filenames
-    --- @type {[1]: integer, [2]: data.Animation}[]
-    local insertions = {}
-    for i = 1, #layers do
-      local layer = layers[i]
-      local mask_entry
-      if layer.filename then
-        mask_entry = mask_filenames[layer.filename]
-      elseif layer.filenames then
-        mask_entry = mask_filenames[table.concat(layer.filenames, "|")]
-      end
-      if mask_entry then
-        local mask_fn = mask_entry[1]
-        local override = mask_entry[2]
+  local remove_set = LabPrototypeModifier.remove_layer_filenames
+  local mask_set = LabPrototypeModifier.insert_mask_filenames
+  local freeze_triggers = LabPrototypeModifier.animation_freeze_triggers
 
-        --- @type data.Animation
-        local new_layer = {
-          width = layer.width,
-          height = layer.height,
-          frame_count = layer.frame_count,
-          line_length = layer.line_length,
-          scale = layer.scale,
-          shift = layer.shift,
-          animation_speed = layer.animation_speed,
-        }
-        if type(mask_fn) == "table" then
-          new_layer.filenames = mask_fn
-          new_layer.lines_per_file = layer.lines_per_file
-        else
-          new_layer.filename = mask_fn
-        end
+  --- @type [integer, data.Animation][]
+  local insertions = {}
+  local insertions_count = 0
+  local freeze_frame = nil
+  local layers_count = 0
 
-        if override then
-          for k, v in pairs(override) do
-            new_layer[k] = v
-          end
-        end
+  for i = 1, #layers do
+    local layer = layers[i]
+    local filename = layer.filename
+    local filenames = layer.filenames
 
-        insertions[#insertions + 1] = { i, new_layer }
-      end
-    end
-    for j = #insertions, 1, -1 do
-      table.insert(layers, insertions[j][1] + 1, insertions[j][2])
-    end
-
-    local freeze_triggers = LabPrototypeModifier.animation_freeze_triggers
-    local freeze_frame = nil
-    for i = 1, #layers do
-      local layer = layers[i]
-      if layer.filename then
-        local ff = freeze_triggers[layer.filename]
-        if ff then
-          freeze_frame = ff
+    local should_remove = filename and remove_set[filename]
+    if not should_remove and filenames then
+      for j = 1, #filenames do
+        if remove_set[filenames[j]] then
+          should_remove = true
           break
         end
       end
     end
-    if freeze_frame then
-      for i = 1, #layers do
-        local layer = layers[i]
-        layer.frame_sequence = { freeze_frame }
-        layer.repeat_count = nil
+    if should_remove then
+      goto next_layer
+    end
+
+    modify_animation(layer)
+    layers_count = layers_count + 1
+    layers[layers_count] = layer
+
+    local mask_entry --- @type MaskEntry
+    if filename then
+      mask_entry = mask_set[filename]
+    elseif filenames then
+      mask_entry = mask_set[table.concat(filenames, "|")]
+    end
+    if mask_entry then
+      local mask_filename = mask_entry[1]
+      local mask_overrides = mask_entry[2]
+
+      --- @type data.Animation
+      local new_layer = {
+        width = layer.width,
+        height = layer.height,
+        frame_count = layer.frame_count,
+        line_length = layer.line_length,
+        scale = layer.scale,
+        shift = layer.shift,
+        animation_speed = layer.animation_speed,
+      }
+
+      if type(mask_filename) == "table" then
+        new_layer.filenames = mask_filename --[[@as string[] ]]
+        new_layer.lines_per_file = layer.lines_per_file
+      else
+        new_layer.filename = mask_filename --[[@as string]]
       end
+
+      if mask_overrides then
+        for k, v in pairs(mask_overrides) do
+          new_layer[k] = v
+        end
+      end
+
+      insertions_count = insertions_count + 1
+      insertions[insertions_count] = { layers_count + 1, new_layer }
+    end
+
+    if not freeze_frame and filename then
+      freeze_frame = freeze_triggers[filename]
+    end
+
+    ::next_layer::
+  end
+
+  -- Clear removed tail
+  for i = layers_count + 1, #layers do
+    layers[i] = nil
+  end
+
+  -- Apply mask insertions (backward to preserve indices)
+  for j = insertions_count, 1, -1 do
+    table.insert(layers, insertions[j][1], insertions[j][2])
+  end
+
+  -- Apply freeze to all layers (including inserted mask layers)
+  if freeze_frame then
+    for i = 1, #layers do
+      layers[i].frame_sequence = { freeze_frame }
+      layers[i].repeat_count = nil
     end
   end
 end
@@ -252,7 +259,7 @@ end
 
 --- Modify LabPrototype for this mod.
 ---
---- * Applies the filename replacement on `on_animation` if exists.
+--- * Applies the modifications on `on_animation` if exists.
 --- * Adds the lab creation trigger.
 ---
 --- If the prototype is already modified, it does nothing.
