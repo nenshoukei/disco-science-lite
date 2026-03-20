@@ -97,30 +97,30 @@ To generate these images, you have to install:
 - [Fusion lab](https://mods.factorio.com/mod/fusion-lab) mod
     - This mod includes lab sprites from [Facotiro Buildings](https://shorturl.at/AFcDm) created by [Hurricane](https://mods.factorio.com/user/Hurricane046).
 
+---
+
+## Acknowledgements
+
+Thanks to these amazing creators for their work:
+
+- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all. _The disco must grow!_
+- **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
+- **[raiguard](https://mods.factorio.com/user/raiguard)** — for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
+- **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
+
 ## License
 
-This mod includes code originally derived from the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by Daniel Brauer, which is licensed under the MIT License.
+This mod includes code originally derived from the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by [Daniel Brauer](https://mods.factorio.com/user/danielbrauer), which is licensed under the MIT License.
 
-The original source code from that mod, as well as the original code written for this mod,
-are released under the MIT License. See the [LICENSE](LICENSE) file for details.
+The source code is released under the [MIT License](LICENSE).
 
-However, some image assets included in this repository are derived from third-party copyrighted works and are NOT covered by the MIT License:
+Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-- Image files under [graphics/factorio/](graphics/factorio/) are derived from the official Factorio game assets. Copyright © Wube Software Ltd. See [NOTICE.txt](graphics/factorio/NOTICE.txt) for details.
+| Files                                        | Source                                                        | Author                                                   | License                     |
+| -------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
+| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | [Wube Software Ltd.](https://factorio.com)               | © Wube Software Ltd. (EULA) |
+| [graphics/laborat/](graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)        | GNU LGPL v3.0               |
+| [graphics/Krastorio2/](graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)      | GNU LGPL v3.0               |
+| [graphics/hurricane/](graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046) | CC BY 4.0                   |
 
-- Image files under [graphics/laborat/](graphics/laborat/) are derived from assets of the
-  [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) Factorio mod created by [BiusArt](https://mods.factorio.com/user/BiusArt).
-  The original mod is indicated on the Factorio Mod Portal as being licensed under the GNU Lesser General Public License v3.0.
-  These files are treated as being redistributed under the terms of the GNU LGPL v3.0.
-  See [LICENSE](graphics/laborat/LICENSE) and [NOTICE.txt](graphics/laborat/NOTICE.txt) for details.
-
-- Image files under [graphics/Krastorio2/](graphics/Krastorio2/) are derived from assets of the
-  [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) Factorio mod created by [raiguard](https://mods.factorio.com/user/raiguard),
-  licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
-  See [LICENSE](graphics/Krastorio2/LICENSE) and [NOTICE.txt](graphics/Krastorio2/NOTICE.txt) for details.
-
-- Image files under [graphics/hurricane/](graphics/hurricane/) are derived from assets of the
-  [Factorio Buildings](https://shorturl.at/AFcDm) created by [Hurricane](https://mods.factorio.com/user/Hurricane046).
-  The original assets are indicated on the Figma page as being licensed under the Creative Commons Attribution (CC BY), without a specified version.
-  These files are modified versions of the original assets. The modifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-  See [LICENSE](graphics/hurricane/LICENSE) and [NOTICE.txt](graphics/hurricane/NOTICE.txt) for details.
+See the `NOTICE.txt` and `LICENSE` files in each directory for details.

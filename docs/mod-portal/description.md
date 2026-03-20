@@ -39,20 +39,30 @@ These mods are supported out of the box.
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
 
+---
+
+## Acknowledgements
+
+Thanks to these amazing creators for their work:
+
+- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all. _The disco must grow!_
+- **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the lab graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
+- **[raiguard](https://mods.factorio.com/user/raiguard)** — for the lab graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
+- **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
+
 ## License
 
-This mod includes source code based on the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by [Daniel Brauer](https://mods.factorio.com/user/danielbrauer).
+This mod includes code originally derived from the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by [Daniel Brauer](https://mods.factorio.com/user/danielbrauer), which is licensed under the MIT License.
 
-Both the inherited code and the original code written for this mod are released under the MIT License.
+The source code is released under the [MIT License](https://github.com/nenshoukei/disco-science-lite/blob/main/LICENSE).
 
-This mod also includes image assets derived from third-party works:
+Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-- [Factorio](https://factorio.com/) by Wube Software Ltd.
-- [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by [BiusArt](https://mods.factorio.com/user/BiusArt)
-- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by [raiguard](https://mods.factorio.com/user/raiguard)
-- [Factorio Buildings](https://shorturl.at/AFcDm) by [Hurricane](https://mods.factorio.com/user/Hurricane046)
+| Files                                                                                                   | Source                                                        | Author                                                   | License                     |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
+| [graphics/factorio/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/factorio/)     | Factorio                                                      | [Wube Software Ltd.](https://factorio.com)               | © Wube Software Ltd. (EULA) |
+| [graphics/laborat/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)        | GNU LGPL v3.0               |
+| [graphics/Krastorio2/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)      | GNU LGPL v3.0               |
+| [graphics/hurricane/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046) | CC BY 4.0                   |
 
-All such assets are used in accordance with their applicable licenses.
-
-For full license details, please see the source repository:
-https://github.com/nenshoukei/disco-science-lite
+See the `NOTICE.txt` and `LICENSE` files in each directory for details.
