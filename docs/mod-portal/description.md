@@ -41,15 +41,15 @@ These mods are supported out of the box.
 
 ## License
 
-This mod includes source code based on the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by Daniel Brauer.
+This mod includes source code based on the [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod created by [Daniel Brauer](https://mods.factorio.com/user/danielbrauer).
 
 Both the inherited code and the original code written for this mod are released under the MIT License.
 
 This mod also includes image assets derived from third-party works:
 
-- [Factorio](https://www.factorio.com/) by Wube Software Ltd.
-- [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by BiusArt
-- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
+- [Factorio](https://factorio.com/) by Wube Software Ltd.
+- [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) by [BiusArt](https://mods.factorio.com/user/BiusArt)
+- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by [raiguard](https://mods.factorio.com/user/raiguard)
 
 All such assets are used in accordance with their applicable licenses.
 

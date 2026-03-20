@@ -107,12 +107,12 @@ However, some image assets included in this repository are derived from third-pa
 - Image files under [graphics/factorio/](graphics/factorio/) are derived from the official Factorio game assets. Copyright © Wube Software Ltd. See [NOTICE.txt](graphics/factorio/NOTICE.txt) for details.
 
 - Image files under [graphics/laborat/](graphics/laborat/) are derived from assets of the
-  [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) Factorio mod created by BiusArt.
+  [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) Factorio mod created by [BiusArt](https://mods.factorio.com/user/BiusArt).
   The original mod is indicated on the Factorio Mod Portal as being licensed under the GNU Lesser General Public License v3.0.
   These files are treated as being redistributed under the terms of the GNU LGPL v3.0.
   See [LICENSE](graphics/laborat/LICENSE) and [NOTICE.txt](graphics/laborat/NOTICE.txt) for details.
 
 - Image files under [graphics/Krastorio2/](graphics/Krastorio2/) are derived from assets of the
-  [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) Factorio mod created by raiguard,
+  [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) Factorio mod created by [raiguard](https://mods.factorio.com/user/raiguard),
   licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
   See [LICENSE](graphics/Krastorio2/LICENSE) and [NOTICE.txt](graphics/Krastorio2/NOTICE.txt) for details.
