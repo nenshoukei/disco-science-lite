@@ -3,6 +3,7 @@
 
 local cjson = require("cjson.safe")
 local serpent = require("serpent")
+require("spec.helper.rendering")
 
 _G.serpent = serpent
 
