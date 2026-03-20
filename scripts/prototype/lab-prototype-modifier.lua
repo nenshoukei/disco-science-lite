@@ -14,10 +14,11 @@ local LabPrototypeModifier = {
   replace_filenames = {},
 
   --- @class (exact) MaskEntry
-  --- @field [1] string mask filename
+  --- @field [1] string|string[] mask filename or filenames
   --- @field [2] data.Animation? optional property overrides for the inserted layer
 
-  --- Mask entries to insert after the layer with the given filename.
+  --- Mask entries to insert after the layer with the given filename or filenames.
+  --- The key is `filename` for single-file layers, or `table.concat(filenames, "|")` for multi-file layers.
   --- The mask layer inherits geometric properties from the target layer,
   --- with optional overrides.
   --- @type table<string, MaskEntry>
@@ -93,21 +94,32 @@ local function modify_animation(animation)
     local insertions = {}
     for i = 1, #layers do
       local layer = layers[i]
+      local mask_entry
       if layer.filename then
-        local mask_entry = mask_filenames[layer.filename]
-        if mask_entry then
-          local override = mask_entry[2] or {}
-          insertions[#insertions + 1] = { i, {
-            filename = mask_entry[1],
-            width = override.width or layer.width,
-            height = override.height or layer.height,
-            frame_count = override.frame_count or layer.frame_count,
-            line_length = override.line_length or layer.line_length,
-            scale = override.scale or layer.scale,
-            shift = override.shift or layer.shift,
-            animation_speed = override.animation_speed or layer.animation_speed,
-          } --[[@as data.Animation]] }
+        mask_entry = mask_filenames[layer.filename]
+      elseif layer.filenames then
+        mask_entry = mask_filenames[table.concat(layer.filenames --[[@as string[] ]], "|")]
+      end
+      if mask_entry then
+        local override = mask_entry[2] or {}
+        local mask_fn = mask_entry[1]
+        --- @type data.Animation
+        local new_layer = {
+          width = override.width or layer.width,
+          height = override.height or layer.height,
+          frame_count = override.frame_count or layer.frame_count,
+          line_length = override.line_length or layer.line_length,
+          scale = override.scale or layer.scale,
+          shift = override.shift or layer.shift,
+          animation_speed = override.animation_speed or layer.animation_speed,
+        }
+        if type(mask_fn) == "table" then
+          new_layer.filenames = mask_fn --[[@as string[] ]]
+          new_layer.lines_per_file = override.lines_per_file or layer.lines_per_file
+        else
+          new_layer.filename = mask_fn --[[@as string]]
         end
+        insertions[#insertions + 1] = { i, new_layer }
       end
     end
     for j = #insertions, 1, -1 do
@@ -181,15 +193,24 @@ function LabPrototypeModifier.set_layer_removal(...)
   end
 end
 
---- Set a mask layer to be inserted on top of the layer with the specified filename in `on_animation`.
+--- Set a mask layer to be inserted on top of the layer with the specified filename(s) in `on_animation`.
 --- The mask layer inherits width, height, frame_count, line_length, scale, shift, and animation_speed
 --- from the target layer, with optional overrides from `override_props`.
 ---
---- @param target_filename string
---- @param mask_filename string
+--- When `target_filename` is a string array, it matches layers whose `filenames` field equals that array.
+--- When `mask_filename` is a string array, the inserted layer uses `filenames` instead of `filename`.
+---
+--- @param target_filename string|string[]
+--- @param mask_filename string|string[]
 --- @param override_props data.Animation?
 function LabPrototypeModifier.set_layer_mask(target_filename, mask_filename, override_props)
-  LabPrototypeModifier.insert_mask_filenames[target_filename] = { mask_filename, override_props }
+  local key
+  if type(target_filename) == "table" then
+    key = table.concat(target_filename --[[@as string[] ]], "|")
+  else
+    key = target_filename --[[@as string]]
+  end
+  LabPrototypeModifier.insert_mask_filenames[key] = { mask_filename, override_props }
 end
 
 --- Freeze all layers in the animation containing the trigger layer to a single frame.

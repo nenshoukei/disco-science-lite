@@ -200,6 +200,53 @@ describe("LabPrototypeModifier", function ()
       assert.are.equal(1, #lab.on_animation.layers)
     end)
 
+    it("inserts mask layer with filenames after layer with matching filenames", function ()
+      LabPrototypeModifier.set_layer_mask({ "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          {
+            filenames = { "a.png", "b.png" },
+            width = 200,
+            height = 150,
+            frame_count = 10,
+            line_length = 5,
+            lines_per_file = 3,
+            scale = 0.5,
+            shift = { 0, -0.1 },
+            animation_speed = 0.5,
+          },
+          { filename = "other.png" },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(3, #lab.on_animation.layers)
+      assert.are.same({ "a.png", "b.png" }, lab.on_animation.layers[1].filenames)
+      local mask = lab.on_animation.layers[2]
+      assert.are.same({ "mask-a.png", "mask-b.png" }, mask.filenames)
+      assert.are.equal(200, mask.width)
+      assert.are.equal(150, mask.height)
+      assert.are.equal(10, mask.frame_count)
+      assert.are.equal(5, mask.line_length)
+      assert.are.equal(3, mask.lines_per_file)
+      assert.are.equal(0.5, mask.scale)
+      assert.are.same({ 0, -0.1 }, mask.shift)
+      assert.are.equal(0.5, mask.animation_speed)
+      assert.are.equal("other.png", lab.on_animation.layers[3].filename)
+    end)
+
+    it("does not insert mask when filenames array does not match target", function ()
+      LabPrototypeModifier.set_layer_mask({ "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filenames = { "a.png", "c.png" } },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.equal(1, #lab.on_animation.layers)
+    end)
+
     it("mask insertion happens after removal (removed layers are not targeted)", function ()
       LabPrototypeModifier.set_layer_removal("light.png")
       LabPrototypeModifier.set_layer_mask("light.png", "mask.png")
