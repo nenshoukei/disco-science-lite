@@ -18,7 +18,7 @@ if mods["aai-industry"] then
     {
       type = "animation",
       name = "mks-dsl" --[[$PREFIX]] .. "burner-lab-overlay",
-      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "aai-industry/burner-lab-overlay.png",
+      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/aai-burner-lab-overlay.png",
       blend_mode = "additive",
       draw_as_glow = true,
       width = 194,

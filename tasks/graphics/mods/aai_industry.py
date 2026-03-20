@@ -15,8 +15,8 @@ from lib import (
     assemble_grid,
 )
 
-AAI_DST_DIR = GRAPHICS_DIR / "aai-industry"
-BURNER_LAB_OVERLAY_DST = AAI_DST_DIR / "burner-lab-overlay.png"
+AAI_DST_DIR = GRAPHICS_DIR / "factorio"
+BURNER_LAB_OVERLAY_DST = AAI_DST_DIR / "aai-burner-lab-overlay.png"
 
 # Burner-lab sprite frame dimensions
 OVERLAY_FRAME_W, OVERLAY_FRAME_H = 194, 174
