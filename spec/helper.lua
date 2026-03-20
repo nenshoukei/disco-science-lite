@@ -24,6 +24,9 @@ local missing_mock_check = {
 }
 
 _G.defines = setmetatable({
+  target_type = {
+    entity = 1,
+  },
   render_mode = {
     chart = 1,
     game = 2,
@@ -57,7 +60,7 @@ _G.defines = setmetatable({
     on_script_trigger_effect = 500,
     on_object_destroyed = 501,
     script_raised_teleported = 502,
-    on_runtime_mod_setting_changed = 500,
+    on_runtime_mod_setting_changed = 503,
   }, missing_mock_check),
 }, missing_mock_check)
 
@@ -84,6 +87,17 @@ local function reset_mocks()
     register_metatable = function () end,
     register_on_object_destroyed = function () end,
     on_event = function () end,
+    on_nth_tick = function () end,
+  }
+
+  --- @diagnostic disable-next-line: missing-fields
+  _G.remote = {
+    add_interface = function () end,
+  }
+
+  --- @diagnostic disable-next-line: missing-fields
+  _G.commands = {
+    add_command = function () end,
   }
 
   --- @diagnostic disable-next-line: missing-fields
