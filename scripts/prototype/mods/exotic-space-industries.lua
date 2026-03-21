@@ -3,6 +3,7 @@
 --- Exotic Space Industries: Remembrance by aRighteousGod
 --- https://mods.factorio.com/mod/exotic-space-industries-remembrance
 
+local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -20,9 +21,15 @@ if mods["exotic-space-industries"] or mods["exotic-space-industries-remembrance"
     ["ei-black-hole-exotic-age-tech"] = { 1.00, 0.68, 0.37 },
   })
 
+  if mods["exotic-space-industries"] then
+    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png", 1)
+  else
+    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-remembrance-graphics-1__/graphics/entities/dark-age-lab_animation.png", 1)
+  end
+
+  PrototypeLabRegistry.register("ei-dark-age-lab")
+
   -- We cannot make an overlay for the ei-big-lab (Advanced lab) because it requires GPLv3 license.
   -- Its animation already has color changing effect, so it does not matter so much.
   PrototypeLabRegistry.exclude("ei-big-lab")
-
-  PrototypeLabRegistry.register("ei-dark-age-lab")
 end
