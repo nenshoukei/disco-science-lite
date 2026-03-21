@@ -380,7 +380,7 @@ describe("LabOverlayRenderer", function ()
       assert.is_nil(r.overlays[1])
       assert.is_nil(r.chunk_map.entries[1])
       assert.is_false(anim.valid)
-      assert.are.equal(0, #r.visible_overlays)
+      assert.are.equal(1, #r.visible_overlays) -- does not remove it from visible_overlays
     end)
 
     it("destroys companion render object when present", function ()

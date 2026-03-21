@@ -303,18 +303,8 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
   self.chunk_map:remove(lab_unit_number)
   self.overlays[lab_unit_number] = nil
 
-  -- Removing the overlay from the visible_overlays list is necessary to prevent
-  -- a potential crash in the tick function if it tries to color a destroyed animation.
-  -- Swap-and-pop: O(1). Order doesn't matter since the list is rebuilt every 30 ticks.
-  local visible_overlays = self.visible_overlays
-  for i = 1, #visible_overlays do
-    if visible_overlays[i] == overlay then
-      local n = #visible_overlays
-      visible_overlays[i] = visible_overlays[n]
-      visible_overlays[n] = nil
-      break
-    end
-  end
+  -- We do not remove the overlay from the visible_overlays here because it is rebuilt every 30 ticks.
+  -- The tick function checks the animation.valid so it does not cause a crash by setting a color to the destroyed object.
 end
 
 --- Remove all overlays on the given surface.
@@ -669,10 +659,8 @@ function LabOverlayRenderer:get_tick_function()
           animation.color = color
         elseif overlay.entity.valid then
           self:render_overlay_for_lab(overlay.entity)
-        else
-          -- Lab entity is invalid. Should be removed.
-          self:remove_overlay_from_lab(overlay.unit_number)
         end
+        -- We ignore the invalid entity. The overlay will be destroyed by the `on_object_destroyed` handler.
       end
     end
   end
