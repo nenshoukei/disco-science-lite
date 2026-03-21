@@ -47,6 +47,62 @@ describe("Utils", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("table_merge", function ()
+    it("merges two tables", function ()
+      local result = Utils.table_merge({ a = 1, b = 2 }, { c = 3 })
+      assert.are.same({ a = 1, b = 2, c = 3 }, result)
+    end)
+
+    it("later values overwrite earlier ones for duplicate keys", function ()
+      local result = Utils.table_merge({ a = 1, b = 2 }, { b = 99, c = 3 })
+      assert.are.equal(1, result.a)
+      assert.are.equal(99, result.b)
+      assert.are.equal(3, result.c)
+    end)
+
+    it("returns a new table, not the original", function ()
+      local t1 = { a = 1 }
+      local t2 = { b = 2 }
+      local result = Utils.table_merge(t1, t2)
+      assert.are_not.equal(t1, result)
+      assert.are_not.equal(t2, result)
+    end)
+
+    it("does not mutate the input tables", function ()
+      local t1 = { a = 1 }
+      local t2 = { b = 2 }
+      Utils.table_merge(t1, t2)
+      assert.is_nil(t1.b)
+      assert.is_nil(t2.a)
+    end)
+
+    it("merges three or more tables", function ()
+      local result = Utils.table_merge({ a = 1 }, { b = 2 }, { c = 3 })
+      assert.are.same({ a = 1, b = 2, c = 3 }, result)
+    end)
+
+    it("returns an empty table when called with no arguments", function ()
+      local result = Utils.table_merge()
+      assert.are.same({}, result)
+    end)
+
+    it("shallow-copies values (does not deep-copy nested tables)", function ()
+      local inner = { x = 10 }
+      local result = Utils.table_merge({ inner = inner })
+      assert.are.equal(inner, result.inner)
+    end)
+
+    it("skips nil values (nil overwrites are ignored)", function ()
+      -- nil values cannot be stored in a table, so passing nil between tables is skipped
+      local t1 = { a = 1 }
+      local t2 = {}
+      t2.a = nil -- explicit nil: pairs() will skip this key
+      local result = Utils.table_merge(t1, t2)
+      assert.are.equal(1, result.a)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("color_tuple", function ()
     it("converts indexed color to tuple", function ()
       local t = Utils.color_tuple({ 0.1, 0.2, 0.3 })

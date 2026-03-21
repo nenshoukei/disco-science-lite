@@ -4,8 +4,9 @@ local Utils = {}
 ---
 --- This function is copied from util.lua provided by Factorio
 ---
---- @param object table
---- @return table
+--- @generic T : table
+--- @param object T
+--- @return T
 function Utils.table_deep_copy(object)
   local lookup_table = {}
   local function _copy(obj)
@@ -22,6 +23,27 @@ function Utils.table_deep_copy(object)
     return setmetatable(new_table, getmetatable(obj))
   end
   return _copy(object)
+end
+
+--- Make a merged table from multiple tables.
+---
+--- For the same key, the later value overwrites the earlier value.
+--- Be careful `nil` value is skipped in this process.
+---
+--- Values are shallow-copied.
+---
+--- @generic T : table
+--- @param ... T
+--- @return T
+function Utils.table_merge(...)
+  local tables = table.pack(...)
+  local result = {}
+  for i = 1, tables.n do
+    for k, v in pairs(tables[i]) do
+      result[k] = v
+    end
+  end
+  return result
 end
 
 --- Make a ColorTuple for color
