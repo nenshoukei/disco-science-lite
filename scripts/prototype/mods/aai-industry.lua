@@ -17,7 +17,7 @@ if mods["aai-industry"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl" --[[$PREFIX]] .. "burner-lab-overlay",
+      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "burner-lab-overlay",
       filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/aai-burner-lab-overlay.png",
       blend_mode = "additive",
       draw_as_glow = true,
@@ -32,6 +32,6 @@ if mods["aai-industry"] then
   })
 
   PrototypeLabRegistry.register("burner-lab", {
-    animation = "mks-dsl" --[[$PREFIX]] .. "burner-lab-overlay",
+    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "burner-lab-overlay",
   })
 end

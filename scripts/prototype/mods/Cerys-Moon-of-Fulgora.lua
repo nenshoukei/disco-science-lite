@@ -18,13 +18,13 @@ if mods["Cerys-Moon-of-Fulgora"] then
     table_merge(
       data.raw["animation"][ "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]] ],
       {
-        name = "mks-dsl" --[[$PREFIX]] .. "cerys-lab-overlay",
+        name = "mks-dsl-" --[[$NAME_PREFIX]] .. "cerys-lab-overlay",
         scale = 0.68,
       }
     ),
     {
       type = "animation",
-      name = "mks-dsl" --[[$PREFIX]] .. "cerys-lab-companion",
+      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "cerys-lab-companion",
       layers = {
         {
           filename = "__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front-shadow.png",
@@ -48,7 +48,7 @@ if mods["Cerys-Moon-of-Fulgora"] then
   })
 
   PrototypeLabRegistry.register("cerys-lab", {
-    animation = "mks-dsl" --[[$PREFIX]] .. "cerys-lab-overlay",
-    companion = "mks-dsl" --[[$PREFIX]] .. "cerys-lab-companion",
+    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "cerys-lab-overlay",
+    companion = "mks-dsl-" --[[$NAME_PREFIX]] .. "cerys-lab-companion",
   })
 end
