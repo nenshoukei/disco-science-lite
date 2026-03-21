@@ -31,7 +31,7 @@ These mods are supported out of the box.
 - [5Dim's mod - New Automatization](https://mods.factorio.com/mod/5dim_automation) by McGuten
 - [AAI Industry](https://mods.factorio.com/mod/aai-industry) by Earendel
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout (including [Artisanal Reskins](https://mods.factorio.com/mod/reskins-bobs) by Kirazy)
-- [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont
+- [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37

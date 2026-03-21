@@ -1,4 +1,4 @@
---- Exotic Space Industries by eliont
+--- Exotic Space Industries by eliont and PreLeyZero
 --- https://mods.factorio.com/mod/exotic-space-industries
 --- Exotic Space Industries: Remembrance by aRighteousGod
 --- https://mods.factorio.com/mod/exotic-space-industries-remembrance
