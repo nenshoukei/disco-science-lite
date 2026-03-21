@@ -10,9 +10,7 @@ if mods["Cerys-Moon-of-Fulgora"] then
   PrototypeColorRegistry.set("cerysian-science-pack", { 0.65, 1, 0.9 })
 
   LabPrototypeModifier.set_layer_removal(
-    "__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front-shadow.png"
-  )
-  LabPrototypeModifier.set_layer_removal(
+    "__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front-shadow.png",
     "__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front.png"
   )
 

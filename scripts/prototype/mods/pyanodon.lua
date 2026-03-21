@@ -27,9 +27,7 @@ if mods["pycoalprocessing"] and mods["pycoalprocessinggraphics"] then
     "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw-bw.png"
   )
   LabPrototypeModifier.set_layer_removal(
-    "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png"
-  )
-  LabPrototypeModifier.set_layer_removal(
+    "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png",
     "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png"
   )
 

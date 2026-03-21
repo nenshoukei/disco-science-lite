@@ -14,9 +14,6 @@ if mods["bobtech"] then
     "__bobtech__/graphics/entity/lab/lab2.png",
     "__base__/graphics/entity/lab/lab.png"
   )
-  LabPrototypeModifier.set_layer_removal(
-    "__bobtech__/graphics/entity/lab/lab2-light.png"
-  )
   LabPrototypeModifier.set_filename_replacement(
     "__bobtech__/graphics/entity/lab/lab-red.png",
     "__base__/graphics/entity/lab/lab.png"
@@ -26,6 +23,7 @@ if mods["bobtech"] then
     "__base__/graphics/entity/lab/lab.png"
   )
   LabPrototypeModifier.set_layer_removal(
+    "__bobtech__/graphics/entity/lab/lab2-light.png",
     "__bobtech__/graphics/entity/lab/lab-alien-light.png"
   )
 
