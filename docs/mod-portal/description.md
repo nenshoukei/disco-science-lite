@@ -36,9 +36,11 @@ These mods are supported out of the box.
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
-- [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
+- Space-Age Planet Mods
+    - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
+    - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 
 ---
 
