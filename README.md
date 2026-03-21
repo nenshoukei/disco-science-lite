@@ -107,6 +107,7 @@ Thanks to these amazing creators for their work:
 - **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
 - **[raiguard](https://mods.factorio.com/user/raiguard)** — for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
 - **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
+- **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)** — for the graphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
 
 ## License
 
@@ -116,11 +117,12 @@ The source code is released under the [MIT License](LICENSE).
 
 Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-| Files                                        | Source                                                        | Author                                                   | License                     |
-| -------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
-| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | Wube Software Ltd.                                       | © Wube Software Ltd. (EULA) |
-| [graphics/laborat/](graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)        | GNU LGPL v3.0               |
-| [graphics/Krastorio2/](graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)      | GNU LGPL v3.0               |
-| [graphics/hurricane/](graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046) | CC BY 4.0                   |
+| Files                                        | Source                                                        | Author                                                      | License                     |
+| -------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
+| [graphics/laborat/](graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
+| [graphics/Krastorio2/](graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |
+| [graphics/hurricane/](graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046)    | CC BY 4.0                   |
+| [graphics/corrundum/](graphics/corrundum/)   | [🌐Corrundum](https://mods.factorio.com/mod/corrundum)        | [Zach Kolansky](https://mods.factorio.com/user/AnotherZach) | MIT                         |
 
 See the `NOTICE.txt` and `LICENSE` files in each directory for details.

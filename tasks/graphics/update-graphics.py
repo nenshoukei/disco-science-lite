@@ -11,6 +11,7 @@ from mods.laborat import generate_laborat_images
 from mods.Krastorio2 import generate_krastorio2_images
 from mods.aai_industry import generate_aai_industry_images
 from mods.hurricane import generate_hurricane_images
+from mods.corrundum import generate_corrundum_images
 
 with ThreadPoolExecutor() as executor:
     futures = [
@@ -21,6 +22,7 @@ with ThreadPoolExecutor() as executor:
         executor.submit(generate_krastorio2_images),
         executor.submit(generate_aai_industry_images),
         executor.submit(generate_hurricane_images),
+        executor.submit(generate_corrundum_images),
     ]
     for future in as_completed(futures):
         future.result()  # re-raise any exceptions

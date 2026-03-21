@@ -1,0 +1,9 @@
+NOTICE — Derived Assets from "🌐Corrundum"
+
+This directory contains image files derived from assets originally distributed as part of the Factorio mod
+"🌐Corrundum", created by Zach Kolansky, licensed under the MIT License (MIT).
+https://mods.factorio.com/mod/corrundum
+
+These files are modified versions of the original assets and are redistributed under the terms of the MIT.
+
+The full license text is provided in the accompanying LICENSE file.

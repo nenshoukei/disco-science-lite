@@ -129,7 +129,8 @@ def open_mod_zip(glob_pattern: Path) -> Iterator[Callable[[str], IO[bytes]]]:
     if not zips:
         raise FileNotFoundError(f"Zip not found at: {glob_pattern}")
     with zipfile.ZipFile(zips[-1]) as z:
-        top_dirs = {name.split("/")[0] for name in z.namelist() if "/" in name}
+        top_dirs = set(name.split("/")[0] for name in z.namelist() if "/" in name)
+        top_dirs.discard("__MACOSX")  # Some mods have this directory
         if len(top_dirs) != 1:
             raise ValueError(f"Expected one top-level directory in zip, found: {top_dirs}")
         zip_dir = top_dirs.pop()
