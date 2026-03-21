@@ -199,6 +199,34 @@ describe("LabOverlayRenderer", function ()
       assert.is_false(ov.visible)
       assert.are.equal("lab-anim", ov.animation.animation)
       assert.are.equal(1.5, ov.animation.x_scale)
+      assert.is_nil(ov.companion)
+    end)
+
+    it("creates companion render object when companion is registered", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { animation = "lab-anim", companion = "comp-anim", scale = 1.5 })
+      local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
+
+      assert.is_not_nil(ov)        --- @cast ov -nil
+      local companion = ov.companion
+      assert.is_not_nil(companion) --- @cast companion -nil
+      assert.are.equal("comp-anim", companion.animation)
+      assert.are.equal(1.5, companion.x_scale)
+      assert.are.equal("higher-object-above", companion.render_layer)
+    end)
+
+    it("reuses existing companion render object when provided", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { animation = "lab-anim", companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      local ov1 = r:render_overlay_for_lab(lab)
+      assert.is_not_nil(ov1)   --- @cast ov1 -nil
+      local comp1 = ov1.companion
+      assert.is_not_nil(comp1) --- @cast comp1 -nil
+
+      local ov2 = r:render_overlay_for_lab(lab, ov1.animation, comp1)
+      assert.is_not_nil(ov2) --- @cast ov2 -nil
+      assert.are.equal(comp1, ov2.companion)
     end)
 
     it("creates overlay using general overlay when no registration but fallback enabled", function ()
@@ -272,6 +300,38 @@ describe("LabOverlayRenderer", function ()
       assert.is_nil(_G.rendering.objects[anim2_id])
     end)
 
+    it("reuses existing companion render object", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      r:render_overlays_for_all_labs()
+      local comp1_id = r.overlays[1].companion.id
+
+      r:render_overlays_for_all_labs()
+      assert.are.equal(comp1_id, r.overlays[1].companion.id)
+    end)
+
+    it("destroys companion when lab is removed", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      _G.game.surfaces = { [1] = lab.surface }
+      --- @diagnostic disable-next-line: duplicate-set-field
+      lab.surface.find_entities_filtered = function () return { lab } end
+
+      r:render_overlays_for_all_labs()
+      local comp_id = r.overlays[1].companion.id
+
+      --- @diagnostic disable-next-line: duplicate-set-field
+      lab.surface.find_entities_filtered = function () return {} end
+      r:render_overlays_for_all_labs()
+
+      assert.is_nil(_G.rendering.objects[comp_id])
+    end)
+
     it("destroys all existing render objects and creates new ones when force=true", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)
@@ -323,6 +383,19 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(0, #r.visible_overlays)
     end)
 
+    it("destroys companion render object when present", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
+      assert.is_not_nil(ov)        --- @cast ov -nil
+      local companion = ov.companion
+      assert.is_not_nil(companion) --- @cast companion -nil
+
+      r:remove_overlay_from_lab(1)
+
+      assert.is_false(companion.valid)
+    end)
+
     it("does not error for unknown unit_number or invalid animation", function ()
       local r = make_renderer()
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
@@ -351,6 +424,19 @@ describe("LabOverlayRenderer", function ()
       assert.is_false(anim2.valid)
       assert.is_nil(r.chunk_map.data[2])
     end)
+
+    it("destroys companion render objects on target surface", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
+      assert.is_not_nil(ov)        --- @cast ov -nil
+      local companion = ov.companion
+      assert.is_not_nil(companion) --- @cast companion -nil
+
+      r:remove_overlays_on_surface(1)
+
+      assert.is_false(companion.valid)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -369,6 +455,31 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(lab, ov.animation.target)
     end)
 
+    it("updates companion target on the same surface", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      r:render_overlay_for_lab(lab)
+
+      lab.position = { x = 32, y = 64 }
+      r:update_lab_position(lab)
+
+      assert.are.equal(lab, r.overlays[1].companion.target)
+    end)
+
+    it("triggers re-render when companion is invalid", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      r:render_overlay_for_lab(lab)
+      local old_comp_id = r.overlays[1].companion.id
+
+      r.overlays[1].companion.valid = false
+      r:update_lab_position(lab)
+
+      assert.are_not.equal(old_comp_id, r.overlays[1].companion.id)
+    end)
+
     it("rebuilds overlay when lab teleports to another surface", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)
@@ -381,6 +492,21 @@ describe("LabOverlayRenderer", function ()
 
       assert.is_false(old_anim.valid)
       assert.are.equal(2, r.overlays[1].animation.surface.index)
+    end)
+
+    it("destroys companion when lab teleports to another surface", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      r:render_overlay_for_lab(lab)
+      local old_companion = r.overlays[1].companion
+      assert.is_not_nil(old_companion) --- @cast old_companion -nil
+
+      lab.surface_index = 2
+      lab.surface = ({ index = 2 }) --[[@as LuaSurface]]
+      r:update_lab_position(lab)
+
+      assert.is_false(old_companion.valid)
     end)
   end)
 
@@ -455,6 +581,43 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(1, #r.visible_overlays)
       assert.is_true(ov_working.visible)
       assert.is_false(ov_normal.visible)
+    end)
+
+    it("syncs companion visibility when overlay becomes visible", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local force = make_force(1)
+      local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
+      assert.is_not_nil(ov)        --- @cast ov -nil
+      local companion = ov.companion
+      assert.is_not_nil(companion) --- @cast companion -nil
+
+      add_connected_player(force, 1)
+      r:get_state_update_function()()
+
+      assert.is_true(companion.visible)
+    end)
+
+    it("syncs companion visibility when overlay becomes hidden", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local force = make_force(1)
+      local lab = make_entity(1, 1, 0, 0)
+      local ov = r:render_overlay_for_lab(lab)
+      assert.is_not_nil(ov)        --- @cast ov -nil
+      local companion = ov.companion
+      assert.is_not_nil(companion) --- @cast companion -nil
+
+      -- Make visible first
+      add_connected_player(force, 1)
+      local update = r:get_state_update_function()
+      update()
+      assert.is_true(companion.visible)
+
+      -- Now make it hidden (lab stops working)
+      lab.status = defines.entity_status.normal
+      update()
+      assert.is_false(companion.visible)
     end)
 
     it("manages force_state and research changes", function ()

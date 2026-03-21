@@ -28,6 +28,7 @@ _G.rendering = {
       x_scale          = params.x_scale,
       y_scale          = params.y_scale,
       animation_offset = params.animation_offset,
+      render_layer     = params.render_layer,
     }
     obj.destroy = function ()
       obj.valid = false
