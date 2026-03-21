@@ -41,6 +41,7 @@ These mods are supported out of the box.
 - Space-Age Planet Mods
     - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
     - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
+    - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
     - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 
 ---
