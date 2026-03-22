@@ -141,5 +141,6 @@ def save_image(img: Image.Image, dst_path: Path) -> None:
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     optimized = oxipng.optimize_from_memory(buf.getvalue())
+    dst_path.parent.mkdir(parents=True, exist_ok=True)
     dst_path.write_bytes(optimized)
-    print("Generated", dst_path)
+    print("Generated", dst_path.relative_to(ROOT_DIR))
