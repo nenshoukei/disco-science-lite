@@ -49,24 +49,6 @@ local function setup_common()
     end
   end
 
-  -- game needs surfaces/forces for render_overlays_for_all_labs.
-  --- @diagnostic disable-next-line: missing-fields
-  _G.game = {
-    surfaces = {},
-    forces = {},
-    players = {},
-    get_player = function (index) return _G.game.players[index] end,
-  }
-
-  -- validate_technology_prototypes iterates prototypes.technology.
-  --- @diagnostic disable-next-line: missing-fields
-  _G.prototypes = {
-    shortcut = {},
-    item = {},
-    mod_data = {},
-    technology = {},
-  }
-
   -- Reset RemoteInterface to unbound state so pending_calls is empty.
   RemoteInterface.bind_registries(nil, nil)
   RemoteInterface.bind_rebuild_callback(nil --[[@as fun()]])

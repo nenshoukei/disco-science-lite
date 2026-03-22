@@ -72,10 +72,12 @@ local function reset_mocks()
     shortcut = {},
     item = {},
     mod_data = {},
+    technology = {},
   }
 
   --- @diagnostic disable-next-line: missing-fields
   _G.game = {
+    tick = 0,
     players = {},
     forces = {},
     surfaces = {},
