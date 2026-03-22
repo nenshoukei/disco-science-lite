@@ -8,6 +8,12 @@ local function make_storage()
   return ({
     color_overrides = {},
     lab_scale_overrides = {},
+    anim_state = {
+      phase = 0,
+      phase_speed = 0.025,
+      color_function_index = 1,
+      saved_tick = 0,
+    },
   }) --[[@as DiscoScienceStorage]]
 end
 
@@ -141,7 +147,7 @@ describe("LabControl", function ()
   -- -------------------------------------------------------------------------
   describe("on_configuration_changed", function ()
     it("resolves pending remote calls immediately without waiting for a tick", function ()
-      _G.storage = ({}) --[[@as DiscoScienceStorage]]
+      _G.storage = make_storage()
 
       RemoteInterface.functions.setIngredientColor("pending-pack", { 0.5, 0.6, 0.7 })
 

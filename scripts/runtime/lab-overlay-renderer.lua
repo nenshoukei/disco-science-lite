@@ -572,12 +572,32 @@ function LabOverlayRenderer:get_state_update_function()
   end
 end
 
+--- Returns a random phase_speed value in { [-3.0, -0.5) or [0.5, 3.0) } / 40.
+--- @return number
+local function random_phase_speed()
+  return (((random() * 5 + 3.5) % 6) - 3) * 0.025
+end
+
+--- Create an initial animation state based on the current game tick.
+---
+--- @return AnimState
+function LabOverlayRenderer.create_anim_state()
+  local _, color_function_index = ColorFunctions.choose_random()
+  return ({
+    phase = 0,
+    phase_speed = random_phase_speed(),
+    color_function_index = color_function_index,
+    saved_tick = game.tick,
+  }) --[[@as AnimState]]
+end
+
 --- Get a tick function to be called by on_tick event.
 ---
 --- The function updates colors of overlays in self.visible_overlays.
 ---
+--- @param anim_state AnimState
 --- @return fun()
-function LabOverlayRenderer:get_tick_function()
+function LabOverlayRenderer:get_tick_function(anim_state)
   -- Because a tick function is critical for UPS (Updates Per Second), we should optimize it very tightly.
   --
   -- For optimization, as much as possible we should:
@@ -590,12 +610,13 @@ function LabOverlayRenderer:get_tick_function()
   local force_state = self.force_state
   local color_pattern_duration = self.color_pattern_duration
 
-  -- `phase` is a continuously drifting value passed to the color function.
-  -- It drives animation by shifting the color cycle position over time.
-  local phase = 0
-  local phase_speed = (((random() * 5 + 3.5) % 6) - 3) * 0.025 -- { [-3.0, -0.5) or [0.5, 3.0) } / 40
-  local color_function, color_function_index = ColorFunctions.choose_random()
-  local color_pattern_counter = 0
+  -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
+  -- This ensures animation is continuous across load/configuration_changed transitions.
+  local color_pattern_elapsed = max(0, game.tick - anim_state.saved_tick) -- max is just for safety
+  local phase = anim_state.phase + color_pattern_elapsed * anim_state.phase_speed
+  local phase_speed = anim_state.phase_speed
+  local color_function_index = anim_state.color_function_index
+  local color_function = ColorFunctions.functions[color_function_index]
   local color = { 0, 0, 0 }
   local lab_update_offset = 1
 
@@ -606,12 +627,17 @@ function LabOverlayRenderer:get_tick_function()
 
     phase = phase + phase_speed
 
-    -- Switch color function periodically. Also update phase_speed.
-    color_pattern_counter = color_pattern_counter + 1
-    if color_pattern_counter >= color_pattern_duration then
-      color_pattern_counter = 0
+    color_pattern_elapsed = color_pattern_elapsed + 1
+    if color_pattern_elapsed >= color_pattern_duration then
+      color_pattern_elapsed = 0
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-      phase_speed = (((random() * 5 + 3.5) % 6) - 3) * 0.025
+      phase_speed = random_phase_speed()
+
+      -- Persist so that the next tick function (after reload or settings change) can resume mid-epoch.
+      anim_state.phase = phase
+      anim_state.phase_speed = phase_speed
+      anim_state.color_function_index = color_function_index
+      anim_state.saved_tick = game.tick
     end
 
     local current_interval = self.current_interval

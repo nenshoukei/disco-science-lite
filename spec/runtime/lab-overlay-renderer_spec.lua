@@ -780,7 +780,7 @@ describe("LabOverlayRenderer", function ()
       ov.animation = mock_anim --[[@as LuaRenderObject]]
       r.visible_overlays[1] = ov
 
-      r:get_tick_function()()
+      r:get_tick_function(LabOverlayRenderer.create_anim_state())()
       assert.is_true(written)
     end)
 
@@ -804,7 +804,7 @@ describe("LabOverlayRenderer", function ()
         r.visible_overlays[i] = ov
       end
 
-      local tick = r:get_tick_function()
+      local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
       tick()
       assert.are.equal(1, #colored)
       assert.are.equal(2, colored[1])
@@ -838,11 +838,118 @@ describe("LabOverlayRenderer", function ()
         r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
         r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
 
-        local tick = r:get_tick_function() -- cf_calls = 1
-        tick()                             -- 1
-        tick()                             -- 2
-        tick()                             -- 3 >= 3, switch!
+        local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        -- starts with cf_calls = 1
+        tick() -- 1
+        tick() -- 2
+        tick() -- 3 >= 3, switch! cf_calls = 2
         assert.are.equal(2, cf_calls)
+      end)
+    end)
+
+    -- -------------------------------------------------------------------
+    describe("anim_state", function ()
+      local original_fns = {}
+      local captured_phase
+
+      before_each(function ()
+        captured_phase = nil
+        for i = 1, #ColorFunctions.functions do
+          original_fns[i] = ColorFunctions.functions[i]
+          local orig = original_fns[i]
+          ColorFunctions.functions[i] = function (color, phase, ...)
+            captured_phase = phase
+            return orig(color, phase, ...)
+          end
+        end
+      end)
+
+      after_each(function ()
+        for i = 1, #original_fns do
+          ColorFunctions.functions[i] = original_fns[i]
+        end
+      end)
+
+      --- @return AnimState
+      local function make_anim_state(phase, phase_speed, saved_tick_offset)
+        local _, cf_idx = ColorFunctions.choose_random()
+        return ({
+          phase = phase,
+          phase_speed = phase_speed,
+          color_function_index = cf_idx,
+          saved_tick = _G.game.tick - (saved_tick_offset or 0),
+        }) --[[@as AnimState]]
+      end
+
+      local function make_renderer_with_overlay()
+        local r = make_renderer()
+        r.current_interval = 1
+        r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
+        r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+        return r
+      end
+
+      it("restores phase from anim_state.phase", function ()
+        local r = make_renderer_with_overlay()
+        -- phase=2.0, phase_speed=0.25, saved_tick=game.tick (no elapsed)
+        local anim_state = make_anim_state(2.0, 0.25, 0)
+
+        r:get_tick_function(anim_state)()
+
+        -- phase = 2.0 + 0 * 0.25 (no elapsed) + 0.25 (one tick advance) = 2.25
+        assert.are.equal(2.25, captured_phase)
+      end)
+
+      it("accounts for elapsed ticks since saved_tick", function ()
+        local r = make_renderer_with_overlay()
+        -- phase=0.0, phase_speed=0.25, saved_tick=game.tick - 4 (4 elapsed ticks)
+        local anim_state = make_anim_state(0.0, 0.25, 4)
+
+        r:get_tick_function(anim_state)()
+
+        -- phase = 0.0 + 4 * 0.25 (elapsed) + 0.25 (one tick advance) = 1.25
+        assert.are.equal(1.25, captured_phase)
+      end)
+
+      it("writes back phase and saved_tick to anim_state at epoch end", function ()
+        local r = make_renderer_with_overlay()
+        r.color_pattern_duration = 3
+        local anim_state = make_anim_state(0.0, 0.25, 0)
+
+        local tick = r:get_tick_function(anim_state)
+        tick() -- elapsed=1, phase=0.25 — not yet written back
+        tick() -- elapsed=2, phase=0.50 — not yet written back
+        assert.are.equal(0.0, anim_state.phase)
+
+        tick() -- elapsed=3 >= 3 → write back!
+        assert.are.equal(0.75, anim_state.phase)
+        assert.are.equal(_G.game.tick, anim_state.saved_tick)
+      end)
+
+      it("new tick function resumes with elapsed ticks after write-back", function ()
+        local r = make_renderer_with_overlay()
+        r.color_pattern_duration = 2
+        local anim_state = make_anim_state(0.0, 0.25, 0)
+
+        -- Run first tick function until epoch end
+        local tick1 = r:get_tick_function(anim_state)
+        tick1() -- elapsed=1, phase=0.25
+        tick1() -- elapsed=2 >= 2 → write back: phase=0.50, saved_tick=game.tick
+
+        local written_phase = anim_state.phase
+        local written_phase_speed = anim_state.phase_speed
+
+        -- Advance game.tick to simulate 3 ticks passing since the write-back
+        _G.game.tick = _G.game.tick + 3
+
+        -- Create a new tick function from the written-back anim_state and call once
+        local tick2 = r:get_tick_function(anim_state)
+        tick2()
+
+        -- phase = written_phase + 3 * written_phase_speed (elapsed) + written_phase_speed (one tick)
+        -- Use same evaluation order as the implementation to avoid floating-point divergence.
+        local expected = (written_phase + 3 * written_phase_speed) + written_phase_speed
+        assert.are.equal(expected, captured_phase)
       end)
     end)
   end)

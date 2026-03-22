@@ -12,8 +12,24 @@ local renderer
 -- Compatible with original DiscoScience interface
 remote.add_interface("DiscoScience", RemoteInterface.functions)
 
+--- @return LabOverlayRenderer
+local function create_renderer()
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+
+  local color_registry = ColorRegistry.new(ds_storage.color_overrides)
+  color_registry:load_prototype_colors()
+  local lab_registry = LabRegistry.new(ds_storage.lab_scale_overrides)
+  lab_registry:load_prototype_registrations()
+
+  return LabOverlayRenderer.new(color_registry, lab_registry)
+end
+
 local function setup_event_handlers()
-  script.on_event(defines.events.on_tick, renderer:get_tick_function())
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  if not ds_storage.anim_state then
+    ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
+  end
+  script.on_event(defines.events.on_tick, renderer:get_tick_function(ds_storage.anim_state))
 
   local state_update_function = renderer:get_state_update_function()
   script.on_nth_tick(30, state_update_function)
@@ -25,65 +41,41 @@ local function setup_event_handlers()
   }, state_update_function)
 end
 
---- Rebuild all overlays and refresh event handlers.
+--- Rebuild all overlays and refresh event handlers and registry bindings.
 local function rebuild_overlays()
   renderer:render_overlays_for_all_labs()
   setup_event_handlers()
-end
-
---- Create fresh registries from prototype data, with stored overrides applied.
----
---- @param ds_storage DiscoScienceStorage
---- @return ColorRegistry, LabRegistry
-local function create_registries(ds_storage)
-  local color_registry = ColorRegistry.new(ds_storage.color_overrides)
-  color_registry:load_prototype_colors()
-  local lab_registry = LabRegistry.new(ds_storage.lab_scale_overrides)
-  lab_registry:load_prototype_registrations()
-  return color_registry, lab_registry
+  RemoteInterface.bind_registries(renderer.color_registry, renderer.lab_registry)
+  RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 end
 
 function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_overrides = {}
   ds_storage.lab_scale_overrides = {}
+  ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
 
-  local color_registry, lab_registry = create_registries(ds_storage)
-  RemoteInterface.bind_registries(color_registry, lab_registry)
-
-  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
+  renderer = create_renderer()
   rebuild_overlays()
-  RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
-  color_registry:validate_technology_prototypes()
+  renderer.color_registry:validate_technology_prototypes()
 end
 
 function LabControl.on_load()
-  local ds_storage = storage --[[@as DiscoScienceStorage]]
-
-  local color_registry, lab_registry = create_registries(ds_storage)
-  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
+  renderer = create_renderer()
 
   -- on_load cannot modify game state, so defer rendering and registry binding to the first tick.
   -- bind_registries flushes pending remote calls (e.g. setLabScale), which write to storage.
   script.on_event(defines.events.on_tick, function ()
-    RemoteInterface.bind_registries(color_registry, lab_registry)
     rebuild_overlays() -- overwrites on_tick event handler
-    RemoteInterface.bind_rebuild_callback(rebuild_overlays)
   end)
 end
 
 function LabControl.on_configuration_changed()
-  local ds_storage = storage --[[@as DiscoScienceStorage]]
-
-  local color_registry, lab_registry = create_registries(ds_storage)
-  RemoteInterface.bind_registries(color_registry, lab_registry)
-
-  renderer = LabOverlayRenderer.new(color_registry, lab_registry)
+  renderer = create_renderer()
   rebuild_overlays() -- cancels the deferred render registered in on_load
-  RemoteInterface.bind_rebuild_callback(rebuild_overlays)
 
-  color_registry:validate_technology_prototypes()
+  renderer.color_registry:validate_technology_prototypes()
 end
 
 local TARGET_TYPE_ENTITY = defines.target_type.entity
