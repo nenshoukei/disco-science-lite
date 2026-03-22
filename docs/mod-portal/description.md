@@ -42,6 +42,7 @@ These mods are supported out of the box.
     - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
     - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
     - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
+    - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
     - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 
 ---
