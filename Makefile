@@ -1,4 +1,4 @@
-.PHONY: dev lint test typecheck consts graphics mods benchmark check
+.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check
 
 dev:
 	# If pcre2 is installed by Homebrew
@@ -20,6 +20,9 @@ consts:
 
 graphics:
 	@uv run tasks/graphics/update-graphics.py
+
+mod-description:
+	@uv run tasks/update-mod-description.py
 
 mods:
 	@tasks/update-all-mods.sh

@@ -52,8 +52,8 @@ These mods are supported out of the box.
 Thanks to these amazing creators for their work:
 
 - **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all. _The disco must grow!_
-- **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the lab graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
-- **[raiguard](https://mods.factorio.com/user/raiguard)** — for the lab graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
+- **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
+- **[raiguard](https://mods.factorio.com/user/raiguard)** — for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
 - **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
 - **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)** — for the graphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
 
@@ -65,8 +65,8 @@ The source code is released under the [MIT License](https://github.com/nenshouke
 
 Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-| Files                                                                                                   | Source                                                        | Author                                                      | License                     |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| Files                                        | Source                                                        | Author                                                      | License                     |
+| -------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
 | [graphics/factorio/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/factorio/)     | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
 | [graphics/laborat/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
 | [graphics/Krastorio2/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |

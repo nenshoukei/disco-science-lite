@@ -4,7 +4,7 @@ Get those biolabs on the dance floor — with a performance twist.
 
 Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Biolabs support.
 
-This mod is not affiliated with or endorsed by the original mod author.
+This mod is not officially affiliated with or endorsed by the original mod author.
 
 ## What It Does
 
@@ -24,11 +24,28 @@ Your science labs glow with the color of the science packs they're consuming —
 
 - **Mod API Compatibility**: Compatible with the original Disco Science mod's API, so mods supporting Disco Science should work out of the box.
 
----
+If you are a modder, see the [full API reference](docs/api.md) for quick start examples and prototype/runtime stage APIs.
 
-## API for Mod Authors
+## Supported Mods
 
-See [docs/api.md](docs/api.md) for the full API reference, including quick start examples, prototype stage and runtime stage APIs, and type definition files for Lua Language Server and TypeScriptToLua.
+These mods are supported out of the box.
+
+- [5Dim's mod - New Automatization](https://mods.factorio.com/mod/5dim_automation) by McGuten
+- [AAI Industry](https://mods.factorio.com/mod/aai-industry) by Earendel
+- [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout (including [Artisanal Reskins](https://mods.factorio.com/mod/reskins-bobs) by Kirazy)
+- [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
+- [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
+- [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
+- [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
+- [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
+- [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
+- [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
+- Space-Age Planet Mods
+    - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
+    - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
+    - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
+    - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+    - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 
 ---
 
