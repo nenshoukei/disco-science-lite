@@ -20,7 +20,7 @@ if mods["metal-and-stars"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "microgravity-lab-overlay",
+      name = "mks-dsl-microgravity-lab-overlay" --[[$NAME_PREFIX .. "microgravity-lab-overlay"]],
       blend_mode = "additive",
       draw_as_glow = true,
       width = 400,
@@ -39,6 +39,6 @@ if mods["metal-and-stars"] then
   })
 
   PrototypeLabRegistry.register("microgravity-lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "microgravity-lab-overlay",
+    animation = "mks-dsl-microgravity-lab-overlay" --[[$NAME_PREFIX .. "microgravity-lab-overlay"]],
   })
 end

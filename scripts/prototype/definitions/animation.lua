@@ -4,7 +4,7 @@ data:extend({
   {
     type = "animation",
     name = "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]],
-    filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/lab-overlay.png",
+    filename = "__disco-science-lite__/graphics/factorio/lab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/lab-overlay.png"]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 216,
@@ -18,7 +18,7 @@ data:extend({
   {
     type = "animation",
     name = "mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]],
-    filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "general-overlay.png",
+    filename = "__disco-science-lite__/graphics/general-overlay.png" --[[$GRAPHICS_DIR .. "general-overlay.png"]],
     blend_mode = "additive",
     draw_as_glow = true,
     width = 128,

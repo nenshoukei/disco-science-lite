@@ -7,6 +7,7 @@ describe("tasks/update-consts", function ()
     BAZ = true,
     PI = 3.14,
     ESCAPED = 'quote"inside',
+    NAME_PREFIX = "mks-dsl-",
   }
 
   setup(function ()
@@ -43,15 +44,33 @@ describe("tasks/update-consts", function ()
       assert.equal(expected, task.update_content(input))
     end)
 
+    it("preserves original tag whitespaces", function ()
+      local input = "local x = 999\n  --[[$  FOO ]]"
+      local expected = "local x = 123\n  --[[$  FOO ]]"
+      assert.equal(expected, task.update_content(input))
+    end)
+
     it("handles multiple constants in one file", function ()
       local input = "local x = consts.FOO\nlocal y = consts.BAR"
       local expected = 'local x = 123 --[[$FOO]]\nlocal y = "hello" --[[$BAR]]'
       assert.equal(expected, task.update_content(input))
     end)
 
+    it("handles multiple constants in one line", function ()
+      local input = "local x = consts.FOO .. consts.BAR"
+      local expected = 'local x = 123 --[[$FOO]] .. "hello" --[[$BAR]]'
+      assert.equal(expected, task.update_content(input))
+    end)
+
     it("handles mixed naked and tagged constants", function ()
       local input = "local x = 999 --[[$FOO]]\nlocal y = consts.BAR"
       local expected = 'local x = 123 --[[$FOO]]\nlocal y = "hello" --[[$BAR]]'
+      assert.equal(expected, task.update_content(input))
+    end)
+
+    it("handles multiple tagged constants in one line", function ()
+      local input = 'local x = 999 --[[$FOO]] .. "test" --[[$BAR]]'
+      local expected = 'local x = 123 --[[$FOO]] .. "hello" --[[$BAR]]'
       assert.equal(expected, task.update_content(input))
     end)
 
@@ -101,6 +120,61 @@ describe("tasks/update-consts", function ()
       assert.has_error(function ()
         task.update_content(input)
       end, "Constant not found: consts.UNKNOWN")
+    end)
+
+    it("evaluates string concatenation expressions", function ()
+      local input = 'local x = "old-value" --[[$NAME_PREFIX .. "foo"]]'
+      local expected = '"mks-dsl-foo" --[[$NAME_PREFIX .. "foo"]]'
+      assert.equal("local x = " .. expected, task.update_content(input))
+    end)
+
+    it("evaluates arithmetic expressions", function ()
+      local input = "local x = 0 --[[$FOO + 1]]"
+      local expected = "local x = 124 --[[$FOO + 1]]"
+      assert.equal(expected, task.update_content(input))
+    end)
+
+    it("evaluates boolean expressions", function ()
+      local input = "local x = false --[[$BAZ]]"
+      local expected = "local x = true --[[$BAZ]]"
+      assert.equal(expected, task.update_content(input))
+    end)
+
+    it("is idempotent with expression tags", function ()
+      local input = 'local x = "mks-dsl-foo" --[[$NAME_PREFIX .. "foo"]]'
+      local step1 = task.update_content(input)
+      local step2 = task.update_content(step1)
+      assert.equal(step1, step2)
+      assert.equal(input, step1)
+    end)
+
+    it("throws an error when expression using non-existent constant", function ()
+      local input = 'local x = "v" --[[$UNKNOWN_VAR .. "foo"]]'
+      assert.has_error(function ()
+        task.update_content(input)
+      end, "Constant not found: consts.UNKNOWN_VAR")
+    end)
+
+    it("throws an error when expression has syntax error", function ()
+      local input = 'local x = "v" --[[$syntax error]]'
+      assert.has_error(function ()
+        task.update_content(input)
+      end, "Failed to compile syntax error: [string \"syntax error\"]:1: <eof> expected near 'error'")
+    end)
+
+    it("throws an error when expression returns nil", function ()
+      local input = 'local x = "v" --[[$nil]]'
+      assert.has_error(function ()
+        task.update_content(input)
+      end, "Constant expression returned nil: nil")
+    end)
+
+    it("throws an error when expression returns a non-literal value", function ()
+      -- Tables cannot be embedded as literals
+      local input = 'local x = "v" --[[${FOO}]]'
+      assert.has_error(function ()
+        task.update_content(input)
+      end)
     end)
   end)
 end)

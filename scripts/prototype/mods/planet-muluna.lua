@@ -26,20 +26,23 @@ if mods["planet-muluna"] then
   data:extend({
     table_merge(shared_props, {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "cryolab-overlay",
-      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-overlay-1.png",
+      name = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
+      filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png"
+      --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
       blend_mode = "additive",
       draw_as_glow = true,
     }),
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "cryolab-companion",
+      name = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
       layers = {
         table_merge(shared_props, {
-          filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-mask-1.png",
+          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-1.png"
+          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-1.png"]],
         }),
         table_merge(shared_props, {
-          filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-red-light-1.png",
+          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-1.png"
+          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-1.png"]],
           blend_mode = "additive",
           draw_as_glow = true,
         }),
@@ -48,8 +51,8 @@ if mods["planet-muluna"] then
   })
 
   PrototypeLabRegistry.register("cryolab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "cryolab-overlay",
-    companion = "mks-dsl-" --[[$NAME_PREFIX]] .. "cryolab-companion",
+    animation = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
+    companion = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
     is_companion_under_overlay = true,
   })
 end

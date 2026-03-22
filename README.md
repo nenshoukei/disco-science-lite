@@ -96,11 +96,16 @@ This does:
 
 In order to maximize performance, we use special syntax which allows to embed constants as literal values like: `"abc"`, `123`, `true`, `false`.
 
-Special syntax is `value --[[$CONST_NAME]]` where `value` is the literal value of the constant and `CONST_NAME` is the name of the constant. (For example, `print("xyz" --[[$ABC]])` uses `consts.ABC = "xyz"`)
+Special syntax is `value --[[$expr]]` where `value` is the pre-evaluated literal and `expr` is a Lua expression evaluated in the `consts` scope at `make consts` time.
 
-- All constants are defined in [scripts/shared/consts.lua](scripts/shared/consts.lua).
+- `"xyz" --[[$ABC]]` — simple constant reference (`consts.ABC = "xyz"`)
+- `"mks-dsl-foo" --[[$NAME_PREFIX .. "foo"]]` — expression (`consts.NAME_PREFIX .. "foo"` evaluated at `make consts` time)
+
+All constants are defined in [scripts/shared/consts.lua](scripts/shared/consts.lua).
+
 - To use a constant, write `consts.CONST_NAME` to where you want (no require needed), and run `make consts`. It will be replaced by `value --[[$CONST_NAME]]`.
-- To update a constant, change its value in [consts.lua](scripts/shared/consts.lua), and run `make consts`. All referrences to that constant will be updated idempotently.
+- To use a constant expression, write `value --[[$expr]]` directly, where `value` is the result of evaluating `expr` in the `consts` scope.
+- To update a constant, change its value in [consts.lua](scripts/shared/consts.lua), and run `make consts`. All references to that constant will be updated idempotently.
 - `make consts` targets all lua files in `scripts/` and `spec/`, and lua files on top-level such as `data.lua`.
 
 ### Graphic Generation

@@ -43,7 +43,7 @@ if mods["corrundum"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "pressure-lab-overlay",
+      name = "mks-dsl-pressure-lab-overlay" --[[$NAME_PREFIX .. "pressure-lab-overlay"]],
       layers = {
         {
           filename = lab_overlay.filename,
@@ -58,7 +58,8 @@ if mods["corrundum"] then
           frame_count = FRAME_COUNT,
         },
         {
-          filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "corrundum/chemical-plant-smoke-outer-grayscaled.png",
+          filename = "__disco-science-lite__/graphics/corrundum/chemical-plant-smoke-outer-grayscaled.png"
+          --[[$GRAPHICS_DIR .. "corrundum/chemical-plant-smoke-outer-grayscaled.png"]],
           frame_count = FRAME_COUNT,
           line_length = 16,
           width = 90,
@@ -68,7 +69,8 @@ if mods["corrundum"] then
           shift = util.by_pixel_hr(-30, -228),
         },
         {
-          filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "corrundum/chemical-plant-smoke-inner-grayscaled.png",
+          filename = "__disco-science-lite__/graphics/corrundum/chemical-plant-smoke-inner-grayscaled.png"
+          --[[$GRAPHICS_DIR .. "corrundum/chemical-plant-smoke-inner-grayscaled.png"]],
           frame_count = FRAME_COUNT,
           line_length = 16,
           width = 40,
@@ -81,7 +83,7 @@ if mods["corrundum"] then
     },
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "pressure-lab-companion",
+      name = "mks-dsl-pressure-lab-companion" --[[$NAME_PREFIX .. "pressure-lab-companion"]],
       filename = "__corrundum__/graphics/entity/chem-lab-on-mask.png",
       width = 220,
       height = 292,
@@ -91,7 +93,7 @@ if mods["corrundum"] then
   })
 
   PrototypeLabRegistry.register("pressure-lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "pressure-lab-overlay",
-    companion = "mks-dsl-" --[[$NAME_PREFIX]] .. "pressure-lab-companion",
+    animation = "mks-dsl-pressure-lab-overlay" --[[$NAME_PREFIX .. "pressure-lab-overlay"]],
+    companion = "mks-dsl-pressure-lab-companion" --[[$NAME_PREFIX .. "pressure-lab-companion"]],
   })
 end

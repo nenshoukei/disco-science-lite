@@ -34,7 +34,7 @@ if mods["pycoalprocessing"] and mods["pycoalprocessinggraphics"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "pyanodon-lab-overlay",
+      name = "mks-dsl-pyanodon-lab-overlay" --[[$NAME_PREFIX .. "pyanodon-lab-overlay"]],
       layers = {
         {
           filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l-bw.png",
@@ -64,6 +64,6 @@ if mods["pycoalprocessing"] and mods["pycoalprocessinggraphics"] then
 
   -- Overrides the base lab registration
   PrototypeLabRegistry.register("lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "pyanodon-lab-overlay",
+    animation = "mks-dsl-pyanodon-lab-overlay" --[[$NAME_PREFIX .. "pyanodon-lab-overlay"]],
   })
 end

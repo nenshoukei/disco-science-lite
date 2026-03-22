@@ -439,7 +439,7 @@ local function compute_player_view(player)
   local px = player_position.x or player_position[1]
   local py = player_position.y or player_position[2]
 
-  local f = player.zoom * 64 --[[$TWO_TILE_SIZE]]
+  local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
   local display_resolution = player.display_resolution
   local half_vw = ceil(display_resolution.width / f)
   local half_vh = ceil(display_resolution.height / f)

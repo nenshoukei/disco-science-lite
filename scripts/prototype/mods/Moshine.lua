@@ -23,7 +23,7 @@ if mods["Moshine"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "neural_computer-overlay",
+      name = "mks-dsl-neural_computer-overlay" --[[$NAME_PREFIX .. "neural_computer-overlay"]],
       layers = {
         {
           filename = "__Moshine__/graphics/entity/supercomputer/supercomputer_glow.png",
@@ -63,6 +63,6 @@ if mods["Moshine"] then
   })
 
   PrototypeLabRegistry.register("neural_computer", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "neural_computer-overlay",
+    animation = "mks-dsl-neural_computer-overlay" --[[$NAME_PREFIX .. "neural_computer-overlay"]],
   })
 end

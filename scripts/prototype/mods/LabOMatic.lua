@@ -9,21 +9,22 @@ if mods["LabOMatic"] then
   local animation
 
   if hd then
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "labomatic-overlay"
+    animation = "mks-dsl-labomatic-overlay" --[[$NAME_PREFIX .. "labomatic-overlay"]]
 
     LabPrototypeModifier.set_layer_removal(
       "__LabOMatic__/graphics/lab_light_anim_x4.png"
     )
     LabPrototypeModifier.set_layer_mask(
       "__LabOMatic__/graphics/lab_albedo_anim_x4.png",
-      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim_x4-mask.png"
+      "__disco-science-lite__/graphics/laborat/lab_albedo_anim_x4-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim_x4-mask.png"]]
     )
 
     data:extend({
       {
         type = "animation",
         name = animation,
-        filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim_x4-overlay.png",
+        filename = "__disco-science-lite__/graphics/laborat/lab_albedo_anim_x4-overlay.png"
+        --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim_x4-overlay.png"]],
         blend_mode = "additive",
         draw_as_glow = true,
         width = 600,
@@ -34,21 +35,21 @@ if mods["LabOMatic"] then
       },
     })
   else
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "LabOMatic-x4-overlay"
+    animation = "mks-dsl-LabOMatic-x4-overlay" --[[$NAME_PREFIX .. "LabOMatic-x4-overlay"]]
 
     LabPrototypeModifier.set_layer_removal(
       "__LabOMatic__/graphics/lab_light_anim.png"
     )
     LabPrototypeModifier.set_layer_mask(
       "__LabOMatic__/graphics/lab_albedo_anim.png",
-      "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-mask.png"
+      "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]]
     )
 
     data:extend({
       {
         type = "animation",
         name = animation,
-        filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-overlay.png",
+        filename = "__disco-science-lite__/graphics/laborat/lab_albedo_anim-overlay.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-overlay.png"]],
         blend_mode = "additive",
         draw_as_glow = true,
         width = 150,

@@ -50,7 +50,7 @@ if mods["Krastorio2"] or mods["Krastorio2-spaced-out"] then
   )
   LabPrototypeModifier.set_layer_mask(
     "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
-    "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-mask.png"
+    "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]]
   )
   -- Use singularity-lab-glow-light.png (already grayscale) as a mask layer instead of a generated mask.
   -- It is removed above (as draw_as_light), then re-inserted here as a regular opaque layer
@@ -64,8 +64,8 @@ if mods["Krastorio2"] or mods["Krastorio2-spaced-out"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "kr-advanced-lab-overlay",
-      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim-overlay.png",
+      name = "mks-dsl-kr-advanced-lab-overlay" --[[$NAME_PREFIX .. "kr-advanced-lab-overlay"]],
+      filename = "__disco-science-lite__/graphics/laborat/lab_albedo_anim-overlay.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-overlay.png"]],
       blend_mode = "additive",
       draw_as_glow = true,
       width = 150,
@@ -76,8 +76,8 @@ if mods["Krastorio2"] or mods["Krastorio2-spaced-out"] then
     },
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "kr-singularity-lab-overlay",
-      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "Krastorio2/singularity-lab-overlay.png",
+      name = "mks-dsl-kr-singularity-lab-overlay" --[[$NAME_PREFIX .. "kr-singularity-lab-overlay"]],
+      filename = "__disco-science-lite__/graphics/Krastorio2/singularity-lab-overlay.png" --[[$GRAPHICS_DIR .. "Krastorio2/singularity-lab-overlay.png"]],
       blend_mode = "additive",
       draw_as_glow = true,
       width = 520,
@@ -89,9 +89,9 @@ if mods["Krastorio2"] or mods["Krastorio2-spaced-out"] then
   })
 
   PrototypeLabRegistry.register("kr-advanced-lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "kr-advanced-lab-overlay",
+    animation = "mks-dsl-kr-advanced-lab-overlay" --[[$NAME_PREFIX .. "kr-advanced-lab-overlay"]],
   })
   PrototypeLabRegistry.register("kr-singularity-lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "kr-singularity-lab-overlay",
+    animation = "mks-dsl-kr-singularity-lab-overlay" --[[$NAME_PREFIX .. "kr-singularity-lab-overlay"]],
   })
 end

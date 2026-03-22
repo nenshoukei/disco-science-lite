@@ -20,8 +20,8 @@ if mods["space-age"] then
   data:extend({
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
-      filename = "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "factorio/biolab-overlay.png",
+      name = "mks-dsl-biolab-overlay" --[[$NAME_PREFIX .. "biolab-overlay"]],
+      filename = "__disco-science-lite__/graphics/factorio/biolab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/biolab-overlay.png"]],
       blend_mode = "additive",
       draw_as_glow = true,
       width = 326,
@@ -30,11 +30,11 @@ if mods["space-age"] then
       line_length = 8,
       animation_speed = 0.2,
       scale = 0.5,
-      shift = { 1.0 / 32 --[[$TILE_SIZE]], -6.5 / 32 --[[$TILE_SIZE]] },
+      shift = { 0.03125 --[[$1.0 / TILE_SIZE]], -0.203125 --[[$-6.5 / TILE_SIZE]] },
     },
   })
 
   PrototypeLabRegistry.register("biolab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "biolab-overlay",
+    animation = "mks-dsl-biolab-overlay" --[[$NAME_PREFIX .. "biolab-overlay"]],
   })
 end

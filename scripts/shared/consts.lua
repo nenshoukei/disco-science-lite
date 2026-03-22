@@ -42,8 +42,6 @@ local consts = {
 
   --- Pixels per tile.
   TILE_SIZE = 32,
-  --- Pixels per two tiles. (TILE_SIZE * 2)
-  TWO_TILE_SIZE = 64,
 
   --- Margin of player view boundaries in tiles
   VIEW_RECT_MARGIN = 6,

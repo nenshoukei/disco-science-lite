@@ -24,28 +24,28 @@ if mods["fusion-lab"] then
   data:extend({
     table_merge(shared_props, {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "fusion-lab-overlay",
+      name = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
       filenames = {
-        "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-overlay-1.png",
-        "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-overlay-2.png",
+        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
+        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-2.png"]],
       },
       blend_mode = "additive",
       draw_as_glow = true,
     }),
     {
       type = "animation",
-      name = "mks-dsl-" --[[$NAME_PREFIX]] .. "fusion-lab-companion",
+      name = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
       layers = {
         table_merge(shared_props, {
           filenames = {
-            "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-mask-1.png",
-            "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-mask-2.png",
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-1.png"]],
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-2.png"]],
           },
         }),
         table_merge(shared_props, {
           filenames = {
-            "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-red-light-1.png",
-            "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "hurricane/photometric-lab-hr-red-light-2.png",
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-1.png"]],
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-2.png"]],
           },
           blend_mode = "additive",
           draw_as_glow = true,
@@ -55,8 +55,8 @@ if mods["fusion-lab"] then
   })
 
   PrototypeLabRegistry.register("fusion-lab", {
-    animation = "mks-dsl-" --[[$NAME_PREFIX]] .. "fusion-lab-overlay",
-    companion = "mks-dsl-" --[[$NAME_PREFIX]] .. "fusion-lab-companion",
+    animation = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
+    companion = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
     is_companion_under_overlay = true,
   })
 end

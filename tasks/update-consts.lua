@@ -25,23 +25,52 @@ local BOOLEAN_LITERAL = "\\b(?:true|false)\\b"
 local LITERAL = "(?:" .. STRING_LITERAL .. "|" .. NUMERIC_LITERAL .. "|" .. BOOLEAN_LITERAL .. ")"
 
 local NAKED_CONST = "\\b(?:consts\\.([A-Z0-9_]+))"
-local TAGGED_LITERAL = LITERAL .. "\\s*--\\s*\\[\\[\\s*\\$([A-Z0-9_]+)\\s*\\]\\]"
+local TAGGED_LITERAL = LITERAL .. "(\\s*--\\s*\\[\\[\\s*\\$([^]]+?)\\s*\\]\\])"
 
---- For `expr --[[$CONST_NAME]]`, captures: [1] = CONST_NAME
---- For `consts.CONST_NAME`, captures: [2] = CONST_NAME
+--- For `expr --[[$const_expr]]`, captures: [1] = --[[$const_expr]], [2] = const_expr
+--- For `consts.CONST_NAME`, captures: [3] = CONST_NAME
 local consts_regex = Regex(TAGGED_LITERAL .. "|" .. NAKED_CONST)
 
 --- @param content string
 --- @return string
 local function update_content(content)
   -- Update all existing consts expressions
-  local processed_content = consts_regex:gsub(content, function (_, tagged_const_name, naked_const_name)
-    local const_name = tagged_const_name ~= "" and tagged_const_name or naked_const_name
-    local new_value = consts[const_name]
-    if new_value == nil then
-      error("Constant not found: consts." .. const_name)
+  local processed_content = consts_regex:gsub(content, function (matched, matched_tag, tagged_const_expr, naked_const_name)
+    if tagged_const_expr ~= "" then
+      local eval_func, load_error = load("return " .. tagged_const_expr, tagged_const_expr, "bt", consts)
+      if not eval_func then
+        error("Failed to compile " .. tagged_const_expr .. ": " .. load_error)
+      end
+
+      local success, returned_value = pcall(eval_func)
+      if not success then
+        local error_const_name = string.match(returned_value, "attempt to concatenate global '([A-Z0-9_]+)'")
+        if error_const_name then
+          error("Constant not found: consts." .. error_const_name)
+        else
+          error("Failed to eval: " .. returned_value)
+        end
+      end
+      if returned_value == nil then
+        if string.match(tagged_const_expr, "^[A-Z0-9_]+$") then
+          error("Constant not found: consts." .. tagged_const_expr)
+        else
+          error("Constant expression returned nil: " .. tagged_const_expr)
+        end
+      end
+
+      local value_type = type(returned_value)
+      if value_type ~= "string" and value_type ~= "number" and value_type ~= "boolean" then
+        error("Constant expression returned non-literal value: " .. matched)
+      end
+      return to_literal(returned_value) .. matched_tag
+    else
+      local const_value = consts[naked_const_name]
+      if const_value == nil then
+        error("Constant not found: consts." .. naked_const_name)
+      end
+      return to_literal(const_value) .. " --[[$" .. naked_const_name .. "]]"
     end
-    return to_literal(new_value) .. " --[[$" .. const_name .. "]]"
   end)
   return processed_content
 end
