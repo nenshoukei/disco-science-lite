@@ -46,6 +46,7 @@ These mods are supported out of the box.
     - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
     - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
     - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+    - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
     - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 
 ---
