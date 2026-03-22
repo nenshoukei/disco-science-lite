@@ -44,6 +44,7 @@ These mods are supported out of the box.
     - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
     - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
     - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+    - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
     - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 
 ---
