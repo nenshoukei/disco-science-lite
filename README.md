@@ -2,7 +2,7 @@
 
 Get those biolabs on the dance floor — with a performance twist.
 
-Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Biolabs support.
+Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age DLC support.
 
 This mod is not officially affiliated with or endorsed by the original mod author.
 
@@ -14,7 +14,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 - **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
 
-- **Space Age Support**: Biolabs from the Space Age DLC are supported out of the box, with a correctly fitted overlay animation for their unique shape.
+- **Out-of-the-Box Mod Support**: Over 20 mods are supported out of the box with properly fitted color animations — including Space Age Biolabs, Planet mods (e.g. Maraxis, Cerys), Krastorio 2, Exotic Space Industries, and many more. See the full list below.
 
 - **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
