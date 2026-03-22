@@ -112,13 +112,15 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   local lab_unit_number = lab.unit_number
   if not lab_unit_number then return nil end
 
-  local animation --- @type string
-  local companion --- @type string|nil
-  local scale     --- @type number
+  local animation                  --- @type string
+  local companion                  --- @type string|nil
+  local is_companion_under_overlay --- @type boolean|nil
+  local scale                      --- @type number
   if registration then
     -- If lab is registered but no overlay animation specified, use animation for the standard Factorio lab.
     animation = registration.animation or "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]]
     companion = registration.companion
+    is_companion_under_overlay = registration.is_companion_under_overlay
     scale = registration.scale or 1
   else
     -- Fallback: use a generic glow animation for labs without a registered overlay sprite.
@@ -174,7 +176,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       target = lab,
       x_scale = scale,
       y_scale = scale,
-      render_layer = "higher-object-above",
+      -- "object" < "cargo-hatch" < "higher-object-under" < "higher-object-above"
+      render_layer = is_companion_under_overlay and "cargo-hatch" or "higher-object-above",
       visible = render_object.visible,
       animation_offset = render_object.animation_offset,
     })

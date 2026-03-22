@@ -9,6 +9,7 @@ _G.consts = {}
 --- @class (exact) LabRegistration
 --- @field animation string? Name of AnimationPrototype to be used as an overlay.
 --- @field companion string? Name of AnimationPrototype to be used as a companion, which is rendered over the overlay but not colorized.
+--- @field is_companion_under_overlay boolean? If `true`, the companion will be rendered under the overlay.
 --- @field scale number? Scale of the overlay.
 
 --- @alias ColorTuple [number, number, number]
