@@ -111,13 +111,21 @@ local function modify_animation(animation)
 
       --- @type data.Animation
       local new_layer = {
+        size = layer.size,
         width = layer.width,
         height = layer.height,
+        x = layer.x,
+        y = layer.y,
+        position = layer.position,
+        shift = layer.shift,
+        scale = layer.scale,
+        run_mode = layer.run_mode,
         frame_count = layer.frame_count,
         line_length = layer.line_length,
-        scale = layer.scale,
-        shift = layer.shift,
         animation_speed = layer.animation_speed,
+        max_advance = layer.max_advance,
+        repeat_count = layer.repeat_count,
+        frame_sequence = layer.frame_sequence,
       }
 
       if type(mask_filename) == "table" then
