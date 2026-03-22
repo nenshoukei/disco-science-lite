@@ -35,6 +35,7 @@ These mods are supported out of the box.
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout (including [Artisanal Reskins](https://mods.factorio.com/mod/reskins-bobs) by Kirazy)
 - [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
+- [Factorio HD Age](https://mods.factorio.com/mod/factorio_hd_age_modpack) by Ingo_Igel
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
