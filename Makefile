@@ -27,7 +27,7 @@ mod-description:
 mods:
 	@tasks/update-all-mods.sh
 
-check: consts mods lint test typecheck
+check: consts mods mod-description lint test typecheck
 
 benchmark:
 	@echo "## Color Functions"

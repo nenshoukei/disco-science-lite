@@ -73,8 +73,9 @@ def main():
         output.pop(0)
 
     result = "\n".join(output).rstrip("\n") + "\n"
-    OUTPUT.write_text(result)
-    print(f"Generated {OUTPUT.relative_to(REPO_ROOT)}")
+    if result != OUTPUT.read_text():
+        OUTPUT.write_text(result)
+        print(f"Generated {OUTPUT.relative_to(REPO_ROOT)}")
 
 
 if __name__ == "__main__":
