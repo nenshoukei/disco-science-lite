@@ -26,13 +26,21 @@ Create `scripts/prototype/mods/<Mod ID>.lua` using this template:
 --- <Mod name> by <Author name>
 --- https://mods.factorio.com/mod/<Mod ID>
 
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
-local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+if not mods["<Mod ID>"] then return end
+
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
-if mods["<Mod ID>"] then
+return {
+  on_data = function ()
 
-end
+  end,
+
+  on_data_final_fixes = function ()
+
+  end,
+}
 ```
 
 ## Step 3: Update README.md
@@ -60,6 +68,6 @@ Run from the project root directory: `/Users/kotas/Library/Application Support/f
 
 ## Notes
 
-- The Lua file body (`if mods["<Mod ID>"] then ... end`) is intentionally left empty — the user will fill in the actual implementation.
+- The function body (`on_data = function () ... end`) is intentionally left empty — the user will fill in the actual implementation.
 - Do not add extra imports beyond the three standard ones unless the user asks.
 - Follow alphabetical order strictly for README.md insertion.
