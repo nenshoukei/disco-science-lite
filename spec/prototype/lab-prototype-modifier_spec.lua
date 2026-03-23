@@ -264,7 +264,7 @@ describe("LabPrototypeModifier", function ()
     end)
 
     it("freezes all layers when any layer matches the trigger filename", function ()
-      LabPrototypeModifier.set_animation_freeze("on.png", 1)
+      LabPrototypeModifier.set_animation_freeze("on.png")
       local lab = make_lab(nil)
       lab.on_animation = {
         layers = {
@@ -280,8 +280,25 @@ describe("LabPrototypeModifier", function ()
       assert.are.is_nil(lab.on_animation.layers[3].repeat_count)
     end)
 
+    it("freezes all layers at specified layer index", function ()
+      LabPrototypeModifier.set_animation_freeze("on.png", 3)
+      local lab = make_lab(nil)
+      lab.on_animation = {
+        layers = {
+          { filename = "on.png",     frame_count = 33 },
+          { filename = "other.png",  frame_count = 33 },
+          { filename = "static.png", frame_count = 1, repeat_count = 33 },
+        },
+      } --[[@as any]]
+      LabPrototypeModifier.modify_lab(lab)
+      assert.are.same({ 3 }, lab.on_animation.layers[1].frame_sequence)
+      assert.are.same({ 3 }, lab.on_animation.layers[2].frame_sequence)
+      assert.are.same({ 3 }, lab.on_animation.layers[3].frame_sequence)
+      assert.are.is_nil(lab.on_animation.layers[3].repeat_count)
+    end)
+
     it("does not freeze layers when trigger filename is not found", function ()
-      LabPrototypeModifier.set_animation_freeze("missing.png", 1)
+      LabPrototypeModifier.set_animation_freeze("missing.png")
       local lab = make_lab(nil)
       lab.on_animation = {
         layers = { { filename = "on.png", frame_count = 33 } },
@@ -292,7 +309,7 @@ describe("LabPrototypeModifier", function ()
 
     it("freeze applies after mask insertion (inserted mask also gets frame_sequence)", function ()
       LabPrototypeModifier.set_layer_mask("on.png", "mask.png")
-      LabPrototypeModifier.set_animation_freeze("on.png", 1)
+      LabPrototypeModifier.set_animation_freeze("on.png")
       local lab = make_lab(nil)
       lab.on_animation = {
         layers = { { filename = "on.png", frame_count = 33 } },

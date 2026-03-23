@@ -20,8 +20,7 @@ LabPrototypeModifier.set_layer_removal(
 -- Freeze entity animation at frame 1 (no light, no color in the overlay area).
 -- The overlay animation still plays normally to provide the disco color effect.
 LabPrototypeModifier.set_animation_freeze(
-  "__base__/graphics/entity/lab/lab.png",
-  1
+  "__base__/graphics/entity/lab/lab.png"
 )
 
 PrototypeLabRegistry.register("lab")

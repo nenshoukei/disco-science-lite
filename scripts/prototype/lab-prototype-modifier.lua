@@ -241,9 +241,9 @@ end
 --- frame_sequence = {frame_index} and repeat_count = nil on every layer in that array.
 ---
 --- @param trigger_filename string
---- @param frame_index integer 1-based frame index to freeze at
+--- @param frame_index integer? 1-based frame index to freeze at. (Default: `1`)
 function LabPrototypeModifier.set_animation_freeze(trigger_filename, frame_index)
-  LabPrototypeModifier.animation_freeze_triggers[trigger_filename] = frame_index
+  LabPrototypeModifier.animation_freeze_triggers[trigger_filename] = frame_index or 1
 end
 
 --- Modify all lab prototypes registered by `DiscoScienceInterface.prepareLab()`,

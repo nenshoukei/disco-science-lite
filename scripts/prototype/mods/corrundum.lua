@@ -9,8 +9,7 @@ if mods["corrundum"] then
   PrototypeColorRegistry.set("electrochemical-science-pack", { 0.91, 0.71, 0.27 })
 
   LabPrototypeModifier.set_animation_freeze(
-    "__corrundum__/graphics/entity/lab-3-x-frame.png",
-    1
+    "__corrundum__/graphics/entity/lab-3-x-frame.png"
   )
   LabPrototypeModifier.set_layer_removal(
     "__corrundum__/graphics/entity/chemical-plant-smoke-outer-blue.png",

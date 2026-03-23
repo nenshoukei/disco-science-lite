@@ -22,9 +22,9 @@ if mods["exotic-space-industries"] or mods["exotic-space-industries-remembrance"
   })
 
   if mods["exotic-space-industries"] then
-    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png", 1)
+    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png")
   else
-    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-remembrance-graphics-1__/graphics/entities/dark-age-lab_animation.png", 1)
+    LabPrototypeModifier.set_animation_freeze("__exotic-space-industries-remembrance-graphics-1__/graphics/entities/dark-age-lab_animation.png")
   end
 
   PrototypeLabRegistry.register("ei-dark-age-lab")

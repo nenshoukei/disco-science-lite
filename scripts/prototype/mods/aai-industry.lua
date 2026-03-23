@@ -6,8 +6,7 @@ local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 if mods["aai-industry"] then
   LabPrototypeModifier.set_animation_freeze(
-    "__aai-industry__/graphics/entity/burner-lab/burner-lab.png",
-    1
+    "__aai-industry__/graphics/entity/burner-lab/burner-lab.png"
   )
   LabPrototypeModifier.set_layer_removal(
     "__aai-industry__/graphics/entity/burner-lab/burner-lab-light.png"
