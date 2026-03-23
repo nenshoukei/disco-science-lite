@@ -1,4 +1,5 @@
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local copy_geometric_properties = require("scripts.prototype.helpers").copy_geometric_properties
 
 if _G.DiscoScienceLabPrototypeModifier then
   return _G.DiscoScienceLabPrototypeModifier
@@ -109,24 +110,7 @@ local function modify_animation(animation)
       local mask_filename = mask_entry[1]
       local mask_overrides = mask_entry[2]
 
-      --- @type data.Animation
-      local new_layer = {
-        size = layer.size,
-        width = layer.width,
-        height = layer.height,
-        x = layer.x,
-        y = layer.y,
-        position = layer.position,
-        shift = layer.shift,
-        scale = layer.scale,
-        run_mode = layer.run_mode,
-        frame_count = layer.frame_count,
-        line_length = layer.line_length,
-        animation_speed = layer.animation_speed,
-        max_advance = layer.max_advance,
-        repeat_count = layer.repeat_count,
-        frame_sequence = layer.frame_sequence,
-      }
+      local new_layer = copy_geometric_properties(layer)
 
       if type(mask_filename) == "table" then
         new_layer.filenames = mask_filename --[[@as string[] ]]
