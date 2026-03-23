@@ -40,7 +40,7 @@ return {
     AnimationHelpers.modify_on_animation("lab", function (anim)
       local l_layer = anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png")
       local beam_layer = anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png")
-      anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png")
+      anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png") -- Has two beam layers, so remove twice
 
       anim:replace_filename(
         "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw.png",

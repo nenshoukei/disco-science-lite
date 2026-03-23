@@ -149,7 +149,7 @@ function AnimationHelpers.remove_layer(animation, target_filename)
 end
 
 --- Replace `old_filename` with `new_filename` in an animation's `filename`, `filenames`,
---- and recursively in all entries of `layers`.
+--- `stripes`, and recursively in all entries of `layers`.
 ---
 --- @param animation data.Animation
 --- @param old_filename string
@@ -164,6 +164,15 @@ function AnimationHelpers.replace_filename(animation, old_filename, new_filename
     for i = 1, #filenames do
       if filenames[i] == old_filename then
         filenames[i] = new_filename
+      end
+    end
+  end
+
+  local stripes = animation.stripes
+  if stripes then
+    for i = 1, #stripes do
+      if stripes[i].filename == old_filename then
+        stripes[i].filename = new_filename
       end
     end
   end

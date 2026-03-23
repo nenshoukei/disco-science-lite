@@ -147,6 +147,22 @@ describe("Helpers", function ()
       assert.are.equal("a-masked.png", animation.layers[1].filenames[1])
       assert.are.equal("b.png", animation.layers[1].filenames[2])
     end)
+
+    it("replaces filename in top-level stripes", function ()
+      local animation = ({ stripes = make_stripes({ "a.png", "b.png" }) }) --[[@as data.Animation]]
+      AnimationHelpers.replace_filename(animation, "a.png", "a-masked.png")
+      assert.are.equal("a-masked.png", animation.stripes[1].filename)
+      assert.are.equal("b.png", animation.stripes[2].filename)
+    end)
+
+    it("replaces filename in layer stripes", function ()
+      local animation = make_animation_with_layers({
+        { stripes = make_stripes({ "on.png", "other.png" }) },
+      })
+      AnimationHelpers.replace_filename(animation, "on.png", "on-masked.png")
+      assert.are.equal("on-masked.png", animation.layers[1].stripes[1].filename)
+      assert.are.equal("other.png", animation.layers[1].stripes[2].filename)
+    end)
   end)
 
   -- -------------------------------------------------------------------
