@@ -21,20 +21,16 @@ if mods["metal-and-stars"] then
     {
       type = "animation",
       name = "mks-dsl-microgravity-lab-overlay" --[[$NAME_PREFIX .. "microgravity-lab-overlay"]],
+      filename = "__disco-science-lite__/graphics/hurricane/fusion-reactor-hr-overlay.png"
+      --[[$GRAPHICS_DIR .. "hurricane/fusion-reactor-hr-overlay.png"]],
       blend_mode = "additive",
       draw_as_glow = true,
       width = 400,
       height = 400,
       frame_count = 60,
+      line_length = 8,
       animation_speed = 0.5,
       scale = 0.4,
-      stripes = {
-        {
-          filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation-emission.png",
-          width_in_frames = 8,
-          height_in_frames = 8,
-        },
-      },
     },
   })
 
