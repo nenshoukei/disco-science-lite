@@ -32,22 +32,14 @@ if mods["planet-muluna"] then
       blend_mode = "additive",
       draw_as_glow = true,
     }),
-    {
+
+    -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
+    table_merge(shared_props, {
       type = "animation",
       name = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
-      layers = {
-        table_merge(shared_props, {
-          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-1.png"
-          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-1.png"]],
-        }),
-        table_merge(shared_props, {
-          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-1.png"
-          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-1.png"]],
-          blend_mode = "additive",
-          draw_as_glow = true,
-        }),
-      },
-    },
+      filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png"
+      --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
+    }),
   })
 
   PrototypeLabRegistry.register("cryolab", {

@@ -32,26 +32,16 @@ if mods["fusion-lab"] then
       blend_mode = "additive",
       draw_as_glow = true,
     }),
-    {
+
+    -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
+    table_merge(shared_props, {
       type = "animation",
       name = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
-      layers = {
-        table_merge(shared_props, {
-          filenames = {
-            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-1.png"]],
-            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-mask-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-mask-2.png"]],
-          },
-        }),
-        table_merge(shared_props, {
-          filenames = {
-            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-1.png"]],
-            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-red-light-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-red-light-2.png"]],
-          },
-          blend_mode = "additive",
-          draw_as_glow = true,
-        }),
+      filenames = {
+        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
+        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-2.png"]],
       },
-    },
+    }),
   })
 
   PrototypeLabRegistry.register("fusion-lab", {

@@ -38,6 +38,7 @@ def _find_factorio_data() -> Path:
 FACTORIO_DATA = _find_factorio_data()
 
 ROOT_DIR = Path(__file__).parent.parent.parent
+SOURCE_DIR = ROOT_DIR / "tasks/graphics/source"
 GRAPHICS_DIR = ROOT_DIR / "graphics"
 
 # Lab light image is useful for generating overlays

@@ -128,8 +128,6 @@ To generate these images, you have to install:
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) mod
     - This mod includes lab sprites from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) mod which cannot be installed on recent Factorio versions.
 - [Krastorio2Assets](https://mods.factorio.com/mod/Krastorio2Assets) mod
-- [Fusion lab](https://mods.factorio.com/mod/fusion-lab) mod
-    - This mod includes lab sprites from [Facotiro Buildings](https://shorturl.at/AFcDm) created by [Hurricane](https://mods.factorio.com/user/Hurricane046).
 
 ---
 
@@ -151,12 +149,13 @@ The source code is released under the [MIT License](LICENSE).
 
 Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-| Files                                        | Source                                                        | Author                                                      | License                     |
-| -------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
-| [graphics/factorio/](graphics/factorio/)     | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
-| [graphics/laborat/](graphics/laborat/)       | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
-| [graphics/Krastorio2/](graphics/Krastorio2/) | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |
-| [graphics/hurricane/](graphics/hurricane/)   | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046)    | CC BY 4.0                   |
-| [graphics/corrundum/](graphics/corrundum/)   | [🌐Corrundum](https://mods.factorio.com/mod/corrundum)        | [Zach Kolansky](https://mods.factorio.com/user/AnotherZach) | MIT                         |
+| Files                                                                | Source                                                        | Author                                                      | License                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| [graphics/factorio/](graphics/factorio/)                             | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
+| [graphics/laborat/](graphics/laborat/)                               | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
+| [graphics/Krastorio2/](graphics/Krastorio2/)                         | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |
+| [graphics/hurricane/](graphics/hurricane/)                           | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046)    | CC BY 4.0                   |
+| [graphics/corrundum/](graphics/corrundum/)                           | [🌐Corrundum](https://mods.factorio.com/mod/corrundum)        | [Zach Kolansky](https://mods.factorio.com/user/AnotherZach) | MIT                         |
+| [tasks/graphics/source/hurricane/](tasks/graphics/source/hurricane/) | [Factorio Buildings](https://shorturl.at/AFcDm)               | [Hurricane](https://mods.factorio.com/user/Hurricane046)    | CC BY                       |
 
 See the `NOTICE.txt` and `LICENSE` files in each directory for details.
