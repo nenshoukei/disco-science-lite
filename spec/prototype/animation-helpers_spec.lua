@@ -20,7 +20,377 @@ local function make_stripes(filenames)
   return stripes
 end
 
-describe("Helpers", function ()
+describe("AnimationHelpers", function ()
+  -- -------------------------------------------------------------------
+  describe("copy_geometric_properties", function ()
+    it("copies all geometric properties from source", function ()
+      --- @type data.Animation
+      local source = {
+        filename = "on.png",
+        size = 200,
+        width = 194,
+        height = 174,
+        x = 10,
+        y = 20,
+        position = { 5, 5 },
+        shift = { 0, 0.05 },
+        scale = 0.5,
+        run_mode = "forward",
+        frame_count = 33,
+        line_length = 11,
+        animation_speed = 0.3,
+        max_advance = 1,
+        repeat_count = 5,
+        frame_sequence = { 1, 2, 3 },
+        -- Non-geometric properties
+        blend_mode = "additive",
+        draw_as_glow = true,
+      } --[[@as data.Animation]]
+      local result = AnimationHelpers.copy_geometric_properties(source)
+      assert.are.equal(200, result.size)
+      assert.are.equal(194, result.width)
+      assert.are.equal(174, result.height)
+      assert.are.equal(10, result.x)
+      assert.are.equal(20, result.y)
+      assert.are.same({ 5, 5 }, result.position)
+      assert.are.same({ 0, 0.05 }, result.shift)
+      assert.are.equal(0.5, result.scale)
+      assert.are.equal("forward", result.run_mode)
+      assert.are.equal(33, result.frame_count)
+      assert.are.equal(11, result.line_length)
+      assert.are.equal(0.3, result.animation_speed)
+      assert.are.equal(1, result.max_advance)
+      assert.are.equal(5, result.repeat_count)
+      assert.are.same({ 1, 2, 3 }, result.frame_sequence)
+      -- Non-geometric properties are NOT copied
+      assert.is_nil(result.blend_mode)
+      assert.is_nil(result.draw_as_glow)
+      assert.is_nil(result.filename)
+    end)
+
+    it("skips properties not present in source", function ()
+      local source = ({ width = 100 }) --[[@as data.Animation]]
+      local result = AnimationHelpers.copy_geometric_properties(source)
+      assert.are.equal(100, result.width)
+      assert.is_nil(result.height)
+      assert.is_nil(result.scale)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("convert_to_animation_prototype", function ()
+    it("converts an animation to an animation prototype", function ()
+      local animation = ({ filename = "on.png", width = 100, height = 80 }) --[[@as data.Animation]]
+      local result = AnimationHelpers.convert_to_animation_prototype(animation, { name = "my-anim" })
+      assert.are.equal("animation", result.type)
+      assert.are.equal("my-anim", result.name)
+      assert.are.equal("on.png", result.filename)
+      assert.are.equal(100, result.width)
+      assert.are.equal(80, result.height)
+    end)
+
+    it("applies override properties", function ()
+      local animation = ({ filename = "on.png", width = 100 }) --[[@as data.Animation]]
+      local result = AnimationHelpers.convert_to_animation_prototype(animation, {
+        name = "my-anim",
+        filename = "override.png",
+        blend_mode = "additive",
+      })
+      assert.are.equal("override.png", result.filename)
+      assert.are.equal("additive", result.blend_mode)
+    end)
+
+    it("works without override_props", function ()
+      local animation = ({ filename = "on.png" }) --[[@as data.Animation]]
+      local result = AnimationHelpers.convert_to_animation_prototype(animation)
+      assert.are.equal("animation", result.type)
+      assert.are.equal("on.png", result.filename)
+    end)
+
+    it("does not modify the original animation", function ()
+      local animation = ({ filename = "on.png" }) --[[@as data.Animation]]
+      AnimationHelpers.convert_to_animation_prototype(animation, { name = "my-anim" })
+      assert.is_nil((animation) --[[@as data.AnimationPrototype]].type)
+      assert.is_nil((animation) --[[@as data.AnimationPrototype]].name)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("convert_to_animation", function ()
+    it("converts an animation prototype to an animation", function ()
+      local proto = ({ type = "animation", name = "my-anim", filename = "on.png", width = 100 }) --[[@as data.AnimationPrototype]]
+      local result = AnimationHelpers.convert_to_animation(proto)
+      assert.is_nil((result) --[[@as any]].type)
+      assert.is_nil((result) --[[@as any]].name)
+      assert.are.equal("on.png", result.filename)
+      assert.are.equal(100, result.width)
+    end)
+
+    it("applies override properties", function ()
+      local proto = ({ type = "animation", name = "my-anim", filename = "on.png", frame_count = 10 }) --[[@as data.AnimationPrototype]]
+      local result = AnimationHelpers.convert_to_animation(proto, {
+        frame_sequence = { 1, 2, 3 },
+        frame_count = 30,
+      })
+      assert.are.same({ 1, 2, 3 }, result.frame_sequence)
+      assert.are.equal(30, result.frame_count)
+      assert.are.equal("on.png", result.filename)
+    end)
+
+    it("does not modify the original prototype", function ()
+      local proto = ({ type = "animation", name = "my-anim", filename = "on.png" }) --[[@as data.AnimationPrototype]]
+      AnimationHelpers.convert_to_animation(proto)
+      assert.are.equal("animation", proto.type)
+      assert.are.equal("my-anim", proto.name)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("modify_on_animation", function ()
+    local saved_data_raw
+
+    before_each(function ()
+      saved_data_raw = _G.data and _G.data.raw
+      --- @diagnostic disable-next-line: missing-fields
+      _G.data = {
+        raw = { lab = {} },
+      }
+    end)
+
+    after_each(function ()
+      if saved_data_raw then
+        _G.data.raw = saved_data_raw
+      else
+        _G.data = nil
+      end
+    end)
+
+    it("calls callback with on_animation having AnimationHelpers metatable", function ()
+      local on_animation = make_animation_with_layers({
+        { filename = "on.png" },
+        { filename = "light.png" },
+      })
+      _G.data.raw.lab["test-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
+
+      local called = false
+      AnimationHelpers.modify_on_animation("test-lab", function (anim, lab)
+        called = true
+        -- Can call AnimationHelpers methods via method syntax
+        assert.are.equal(on_animation, anim)
+        assert.is_not_nil(lab)
+        anim:remove_layer("light.png")
+      end)
+
+      assert.is_true(called)
+      assert.are.equal(1, #on_animation.layers)
+    end)
+
+    it("restores original metatable after callback", function ()
+      local original_mt = {}
+      local on_animation = setmetatable(make_animation_with_layers({}), original_mt)
+      _G.data.raw.lab["test-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
+
+      AnimationHelpers.modify_on_animation("test-lab", function () end)
+
+      assert.are.equal(original_mt, getmetatable(on_animation))
+    end)
+
+    it("restores metatable even when callback errors", function ()
+      local original_mt = {}
+      local on_animation = setmetatable(make_animation_with_layers({}), original_mt)
+      _G.data.raw.lab["test-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
+
+      assert.has_error(function ()
+        AnimationHelpers.modify_on_animation("test-lab", function ()
+          error("test error")
+        end)
+      end)
+
+      assert.are.equal(original_mt, getmetatable(on_animation))
+    end)
+
+    it("does nothing when lab is not defined", function ()
+      local called = false
+      assert.no_error(function ()
+        AnimationHelpers.modify_on_animation("nonexistent-lab", function ()
+          called = true
+        end)
+      end)
+      assert.is_false(called)
+    end)
+
+    it("does nothing when lab has no on_animation", function ()
+      _G.data.raw.lab["test-lab"] = ({}) --[[@as data.LabPrototype]]
+      local called = false
+      assert.no_error(function ()
+        AnimationHelpers.modify_on_animation("test-lab", function ()
+          called = true
+        end)
+      end)
+      assert.is_false(called)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("get_layer", function ()
+    it("returns nil when layers is nil", function ()
+      local animation = {} --[[@as data.Animation]]
+      local layer, index = AnimationHelpers.get_layer(animation, "on.png")
+      assert.is_nil(layer)
+      assert.is_nil(index)
+    end)
+
+    it("finds a layer by filename", function ()
+      local animation = make_animation_with_layers({
+        { filename = "on.png" },
+        { filename = "light.png" },
+      })
+      local layer, index = AnimationHelpers.get_layer(animation, "light.png")
+      assert.are.equal(animation.layers[2], layer)
+      assert.are.equal(2, index)
+    end)
+
+    it("finds a layer by filenames array entry", function ()
+      local animation = make_animation_with_layers({
+        { filename = "on.png" },
+        { filenames = { "a.png", "b.png" } },
+      })
+      local layer, index = AnimationHelpers.get_layer(animation, "b.png")
+      assert.are.equal(animation.layers[2], layer)
+      assert.are.equal(2, index)
+    end)
+
+    it("finds a layer by stripes entry", function ()
+      local animation = make_animation_with_layers({
+        { filename = "on.png" },
+        { stripes = make_stripes({ "stripe-a.png", "stripe-b.png" }) },
+      })
+      local layer, index = AnimationHelpers.get_layer(animation, "stripe-b.png")
+      assert.are.equal(animation.layers[2], layer)
+      assert.are.equal(2, index)
+    end)
+
+    it("returns only the first match", function ()
+      local animation = make_animation_with_layers({
+        { filename = "on.png" },
+        { filename = "on.png" },
+      })
+      local layer, index = AnimationHelpers.get_layer(animation, "on.png")
+      assert.are.equal(animation.layers[1], layer)
+      assert.are.equal(1, index)
+    end)
+
+    it("returns nil when no match", function ()
+      local animation = make_animation_with_layers({
+        { filename = "on.png" },
+      })
+      local layer, index = AnimationHelpers.get_layer(animation, "nonexistent.png")
+      assert.is_nil(layer)
+      assert.is_nil(index)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("apply_lab_modifications", function ()
+    local saved_mods
+
+    before_each(function ()
+      saved_mods = _G.mods
+      _G.mods = {}
+    end)
+
+    after_each(function ()
+      _G.mods = saved_mods
+    end)
+
+    it("removes lab-light layer and freezes animation", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
+      })
+      AnimationHelpers.apply_lab_modifications(animation)
+      assert.are.equal(2, #animation.layers)
+      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
+      assert.are.same({ 1 }, animation.layers[1].frame_sequence)
+      assert.are.same({ 1 }, animation.layers[2].frame_sequence)
+    end)
+
+    it("also removes HD Age lab-light layer when mod is active", function ()
+      _G.mods["factorio_hd_age_base_game_production"] = "1.0.0"
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
+      })
+      AnimationHelpers.apply_lab_modifications(animation)
+      assert.are.equal(1, #animation.layers)
+      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+    end)
+
+    it("does not remove HD Age layer when mod is not active", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
+      })
+      AnimationHelpers.apply_lab_modifications(animation)
+      assert.are.equal(2, #animation.layers)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("apply_biolab_modifications", function ()
+    local saved_mods
+
+    before_each(function ()
+      saved_mods = _G.mods
+      _G.mods = {}
+    end)
+
+    after_each(function ()
+      _G.mods = saved_mods
+    end)
+
+    it("removes biolab-lights layer", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__space-age__/graphics/entity/biolab/biolab-lights.png" },
+        { filename = "__space-age__/graphics/entity/biolab/biolab-shadow.png" },
+      })
+      AnimationHelpers.apply_biolab_modifications(animation)
+      assert.are.equal(2, #animation.layers)
+      assert.are.equal("__space-age__/graphics/entity/biolab/biolab.png", animation.layers[1].filename)
+      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-shadow.png", animation.layers[2].filename)
+    end)
+
+    it("also removes HD Age biolab-lights layer when mod is active", function ()
+      _G.mods["factorio_hd_age_space_age_production"] = "1.0.0"
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
+      })
+      AnimationHelpers.apply_biolab_modifications(animation)
+      assert.are.equal(1, #animation.layers)
+    end)
+
+    it("does not remove HD Age layer when mod is not active", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
+      })
+      AnimationHelpers.apply_biolab_modifications(animation)
+      assert.are.equal(2, #animation.layers)
+    end)
+
+    it("does not freeze animation", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png", frame_count = 33 },
+      })
+      AnimationHelpers.apply_biolab_modifications(animation)
+      assert.is_nil(animation.layers[1].frame_sequence)
+    end)
+  end)
+
   -- -------------------------------------------------------------------
   describe("remove_layer", function ()
     it("does nothing when layers is nil", function ()
