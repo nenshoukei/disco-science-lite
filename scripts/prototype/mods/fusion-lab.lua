@@ -1,52 +1,44 @@
 --- Fusion lab by teemu
 --- https://mods.factorio.com/mod/fusion-lab
 
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+if not mods["fusion-lab"] then return {} end
+
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
-local table_merge = require("scripts.shared.utils").table_merge
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
-if mods["fusion-lab"] then
-  LabPrototypeModifier.set_layer_removal(
-    "__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-emission-1.png"
-  )
+return {
+  on_data = function ()
+    PrototypeLabRegistry.register("fusion-lab", {
+      animation = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
+      companion = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
+      is_companion_under_overlay = true,
+    })
+  end,
 
-  local shared_props = {
-    lines_per_file = 8,
-    line_length = 8,
-    frame_count = 80,
-    width = 330,
-    height = 390,
-    shift = util.by_pixel(0, -16),
-    scale = 0.5,
-    animation_speed = 0.4,
-  }
+  on_data_final_fixes = function ()
+    AnimationHelpers.modify_on_animation("fusion-lab", function (anim)
+      local animation = anim:get_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-animation-1.png")
+      local emission = anim:remove_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-emission-1.png")
 
-  data:extend({
-    table_merge(shared_props, {
-      type = "animation",
-      name = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
-      filenames = {
-        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
-        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-2.png"]],
-      },
-      blend_mode = "additive",
-      draw_as_glow = true,
-    }),
+      if not (animation and emission) then return end
+      data:extend({
+        AnimationHelpers.convert_to_animation_prototype(emission, {
+          name = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
+          filenames = {
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-2.png"]],
+          },
+        }),
 
-    -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
-    table_merge(shared_props, {
-      type = "animation",
-      name = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
-      filenames = {
-        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
-        "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-2.png"]],
-      },
-    }),
-  })
-
-  PrototypeLabRegistry.register("fusion-lab", {
-    animation = "mks-dsl-fusion-lab-overlay" --[[$NAME_PREFIX .. "fusion-lab-overlay"]],
-    companion = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
-    is_companion_under_overlay = true,
-  })
-end
+        -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
+        AnimationHelpers.convert_to_animation_prototype(animation, {
+          name = "mks-dsl-fusion-lab-companion" --[[$NAME_PREFIX .. "fusion-lab-companion"]],
+          filenames = {
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
+            "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-2.png" --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-2.png"]],
+          },
+        }),
+      })
+    end)
+  end,
+}

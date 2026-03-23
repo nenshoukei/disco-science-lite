@@ -1,36 +1,35 @@
 --- AAI Industry by Earendel
 --- https://mods.factorio.com/mod/aai-industry
 
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+if not mods["aai-industry"] then return {} end
+
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
-if mods["aai-industry"] then
-  LabPrototypeModifier.set_animation_freeze(
-    "__aai-industry__/graphics/entity/burner-lab/burner-lab.png"
-  )
-  LabPrototypeModifier.set_layer_removal(
-    "__aai-industry__/graphics/entity/burner-lab/burner-lab-light.png"
-  )
+return {
+  on_data = function ()
+    PrototypeLabRegistry.register("burner-lab", {
+      animation = "mks-dsl-burner-lab-overlay" --[[$NAME_PREFIX .. "burner-lab-overlay"]],
+    })
+  end,
 
-  local is_blinking_disabled = settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ].value
-  data:extend({
-    {
-      type = "animation",
-      name = "mks-dsl-burner-lab-overlay" --[[$NAME_PREFIX .. "burner-lab-overlay"]],
-      filename = "__disco-science-lite__/graphics/factorio/aai-burner-lab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/aai-burner-lab-overlay.png"]],
-      blend_mode = "additive",
-      draw_as_glow = true,
-      width = 194,
-      height = 174,
-      frame_count = 33,
-      line_length = 11,
-      animation_speed = 1 / 3,
-      scale = 0.5,
-      frame_sequence = is_blinking_disabled and { 2, 9, 12, 13, 26, 27 } or nil,
-    },
-  })
+  on_data_final_fixes = function ()
+    AnimationHelpers.modify_on_animation("burner-lab", function (anim)
+      local lab_overlay = data.raw["animation"][ "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]] ]
 
-  PrototypeLabRegistry.register("burner-lab", {
-    animation = "mks-dsl-burner-lab-overlay" --[[$NAME_PREFIX .. "burner-lab-overlay"]],
-  })
-end
+      local light = anim:remove_layer("__aai-industry__/graphics/entity/burner-lab/burner-lab-light.png")
+      anim:freeze_animation()
+
+      if not (light and lab_overlay) then return end
+      data:extend({
+        AnimationHelpers.convert_to_animation_prototype(light, {
+          name = "mks-dsl-burner-lab-overlay" --[[$NAME_PREFIX .. "burner-lab-overlay"]],
+          filename = "__disco-science-lite__/graphics/factorio/aai-burner-lab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/aai-burner-lab-overlay.png"]],
+          blend_mode = "additive",
+          draw_as_glow = true,
+          frame_sequence = lab_overlay and lab_overlay.frame_sequence,
+        }),
+      })
+    end)
+  end,
+}

@@ -1,24 +1,25 @@
-require("scripts.prototype.mods.base")
-require("scripts.prototype.mods.space-age")
-require("scripts.prototype.mods.5dim")
-require("scripts.prototype.mods.aai-industry")
-require("scripts.prototype.mods.Age-of-Production")
-require("scripts.prototype.mods.bobsmods")
-require("scripts.prototype.mods.castra")
-require("scripts.prototype.mods.Cerys-Moon-of-Fulgora")
-require("scripts.prototype.mods.corrundum")
-require("scripts.prototype.mods.exotic-space-industries")
-require("scripts.prototype.mods.factorio_hd_age")
-require("scripts.prototype.mods.fusion-lab")
-require("scripts.prototype.mods.Igrys")
-require("scripts.prototype.mods.Krastorio2")
-require("scripts.prototype.mods.LabOMatic")
-require("scripts.prototype.mods.maraxis")
-require("scripts.prototype.mods.metal-and-stars")
-require("scripts.prototype.mods.Moshine")
-require("scripts.prototype.mods.Paracelsin")
-require("scripts.prototype.mods.planet-muluna")
-require("scripts.prototype.mods.pyanodon")
-require("scripts.prototype.mods.rubia")
-require("scripts.prototype.mods.secretas")
-require("scripts.prototype.mods.space-exploration")
+return {
+  require("scripts.prototype.mods.base"),
+  require("scripts.prototype.mods.space-age"),
+  require("scripts.prototype.mods.5dim"),
+  require("scripts.prototype.mods.aai-industry"),
+  require("scripts.prototype.mods.Age-of-Production"),
+  require("scripts.prototype.mods.bobsmods"),
+  require("scripts.prototype.mods.castra"),
+  require("scripts.prototype.mods.Cerys-Moon-of-Fulgora"),
+  require("scripts.prototype.mods.corrundum"),
+  require("scripts.prototype.mods.exotic-space-industries"),
+  require("scripts.prototype.mods.fusion-lab"),
+  require("scripts.prototype.mods.Igrys"),
+  require("scripts.prototype.mods.Krastorio2"),
+  require("scripts.prototype.mods.LabOMatic"),
+  require("scripts.prototype.mods.maraxis"),
+  require("scripts.prototype.mods.metal-and-stars"),
+  require("scripts.prototype.mods.Moshine"),
+  require("scripts.prototype.mods.Paracelsin"),
+  require("scripts.prototype.mods.planet-muluna"),
+  require("scripts.prototype.mods.pyanodon"),
+  require("scripts.prototype.mods.rubia"),
+  require("scripts.prototype.mods.secretas"),
+  require("scripts.prototype.mods.space-exploration"),
+}

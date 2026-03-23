@@ -1,50 +1,45 @@
 --- Muluna, Moon of Nauvis by MeteorSwarm
 --- https://mods.factorio.com/mod/planet-muluna
 
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+if not mods["planet-muluna"] then return {} end
+
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
-local table_merge = require("scripts.shared.utils").table_merge
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
-if mods["planet-muluna"] then
-  PrototypeColorRegistry.set("interstellar-science-pack", { 0.73, 0.73, 0.73 })
+return {
+  on_data = function ()
+    PrototypeColorRegistry.set("interstellar-science-pack", { 0.73, 0.73, 0.73 })
 
-  LabPrototypeModifier.set_layer_removal(
-    "__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-emission-1.png"
-  )
+    PrototypeLabRegistry.register("cryolab", {
+      animation = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
+      companion = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
+      is_companion_under_overlay = true,
+    })
+  end,
 
-  local shared_props = {
-    line_length = 8,
-    frame_count = 64,
-    width = 330,
-    height = 390,
-    shift = { 0, -0.5 },
-    run_mode = "forward-then-backward",
-    scale = 0.7,
-  }
+  on_data_final_fixes = function ()
+    AnimationHelpers.modify_on_animation("cryolab", function (anim)
+      local emission = anim:remove_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-emission-1.png")
+      local animation = anim:get_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-animation-1.png")
+      if not (emission and animation) then return end
 
-  data:extend({
-    table_merge(shared_props, {
-      type = "animation",
-      name = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
-      filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png"
-      --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
-      blend_mode = "additive",
-      draw_as_glow = true,
-    }),
+      data:extend({
+        AnimationHelpers.convert_to_animation_prototype(emission, {
+          name = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
+          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png"
+          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-overlay-1.png"]],
+          animation_speed = 1,
+        }),
 
-    -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
-    table_merge(shared_props, {
-      type = "animation",
-      name = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
-      filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png"
-      --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
-    }),
-  })
-
-  PrototypeLabRegistry.register("cryolab", {
-    animation = "mks-dsl-cryolab-overlay" --[[$NAME_PREFIX .. "cryolab-overlay"]],
-    companion = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
-    is_companion_under_overlay = true,
-  })
-end
+        -- Companion to make the animation sync-ed with the overlay by overriding moving parts.
+        AnimationHelpers.convert_to_animation_prototype(animation, {
+          name = "mks-dsl-cryolab-companion" --[[$NAME_PREFIX .. "cryolab-companion"]],
+          filename = "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png"
+          --[[$GRAPHICS_DIR .. "hurricane/photometric-lab-hr-override-1.png"]],
+          animation_speed = 1,
+        }),
+      })
+    end)
+  end,
+}

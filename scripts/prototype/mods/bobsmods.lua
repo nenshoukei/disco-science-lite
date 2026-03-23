@@ -1,44 +1,35 @@
 --- Bob's Tech by Bobingabout
 --- https://mods.factorio.com/mod/bobtech
---- Artisanal Reskins: Bob's Mods
---- https://mods.factorio.com/mod/reskins-bobs
 
-local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
+if not mods["bobtech"] then return {} end
+
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
-if mods["bobtech"] then
-  -- Ingredients colors are registered by the mod itself by using the remote interface.
+return {
+  on_data = function ()
+    -- Ingredients colors are registered by the mod itself by using the remote interface.
 
-  -- Change the on_animation to the vanilla lab (grayscale) for colorization.
-  LabPrototypeModifier.set_filename_replacement(
-    "__bobtech__/graphics/entity/lab/lab2.png",
-    "__base__/graphics/entity/lab/lab.png"
-  )
-  LabPrototypeModifier.set_filename_replacement(
-    "__bobtech__/graphics/entity/lab/lab-red.png",
-    "__base__/graphics/entity/lab/lab.png"
-  )
-  LabPrototypeModifier.set_filename_replacement(
-    "__bobtech__/graphics/entity/lab/lab-alien.png",
-    "__base__/graphics/entity/lab/lab.png"
-  )
-  LabPrototypeModifier.set_layer_removal(
-    "__bobtech__/graphics/entity/lab/lab2-light.png",
-    "__bobtech__/graphics/entity/lab/lab-alien-light.png"
-  )
+    -- Uses the vanilla lab overlay
+    PrototypeLabRegistry.register("bob-lab-2")
+    PrototypeLabRegistry.register("bob-burner-lab")
+    PrototypeLabRegistry.register("bob-lab-alien")
+  end,
 
-  PrototypeLabRegistry.register("bob-lab-2")
-  PrototypeLabRegistry.register("bob-burner-lab")
-  PrototypeLabRegistry.register("bob-lab-alien")
-end
+  on_data_final_fixes = function ()
+    AnimationHelpers.modify_on_animation("bob-lab-2", function (anim)
+      anim:remove_layer("__bobtech__/graphics/entity/lab/lab2-light.png")
+      anim:freeze_animation()
+    end)
 
-if mods["reskins-bobs"] then
-  LabPrototypeModifier.set_filename_replacement(
-    "__reskins-bobs__/graphics/entity/technology/lab/bob-lab-2.png",
-    "__base__/graphics/entity/lab/lab.png"
-  )
-  LabPrototypeModifier.set_filename_replacement(
-    "__reskins-bobs__/graphics/entity/technology/lab/bob-lab-alien.png",
-    "__base__/graphics/entity/lab/lab.png"
-  )
-end
+    AnimationHelpers.modify_on_animation("bob-burner-lab", function (anim)
+      -- No light layer
+      anim:freeze_animation()
+    end)
+
+    AnimationHelpers.modify_on_animation("bob-lab-alien", function (anim)
+      anim:remove_layer("__bobtech__/graphics/entity/lab/lab-alien-light.png")
+      anim:freeze_animation()
+    end)
+  end,
+}

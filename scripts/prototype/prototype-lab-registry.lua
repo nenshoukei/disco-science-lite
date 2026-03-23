@@ -52,4 +52,31 @@ function PrototypeLabRegistry.register(lab_name, registration)
   PrototypeLabRegistry.registered_labs[lab_name] = registration
 end
 
+--- Check all registrations have valid animations.
+---
+--- * If animation is not defined, use general overlay instead.
+--- * If companion is not defined, companion is ignored by setting `nil`.
+---
+function PrototypeLabRegistry.validate_registrations()
+  local animation_prototypes = data.raw["animation"]
+  local invalid_registrations = {}
+  for name, registration in pairs(PrototypeLabRegistry.registered_labs) do
+    local animation = registration.animation
+    if animation and not animation_prototypes[animation] then
+      log('Disco Science Lite: Registered lab "' .. name .. '" has animation "' .. animation .. '", but it is not defined. Falls back to the general overlay.')
+      table.insert(invalid_registrations, name)
+    else
+      local companion = registration.companion
+      if companion and not animation_prototypes[companion] then
+        log('Disco Science Lite: Registered lab "' .. name .. '" has companion "' .. companion .. '", but it is not defined. Ignored.')
+        registration.companion = nil
+      end
+    end
+  end
+
+  for _, name in ipairs(invalid_registrations) do
+    PrototypeLabRegistry.registered_labs[name] = nil
+  end
+end
+
 return PrototypeLabRegistry

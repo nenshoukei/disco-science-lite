@@ -36,12 +36,14 @@ old_hash="$(sha1sum "$OUTPUT")"
 
 # Write output
 {
+  echo "return {"
   for name in "${priority[@]}"; do
-    echo "require(\"scripts.prototype.mods.$name\")"
+    echo "  require(\"scripts.prototype.mods.$name\"),"
   done
   for name in "${rest[@]}"; do
-    echo "require(\"scripts.prototype.mods.$name\")"
+    echo "  require(\"scripts.prototype.mods.$name\"),"
   done
+  echo "}"
 } > "$OUTPUT"
 
 new_hash="$(sha1sum "$OUTPUT")"
