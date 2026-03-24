@@ -1,11 +1,5 @@
 local LabControl = require("scripts.runtime.control.lab-control")
-
---- @param surface LuaSurface
-local function clear_surface(surface)
-  for _, entity in ipairs(surface.find_entities()) do
-    entity.destroy()
-  end
-end
+local CommandHelpers = require("scripts.runtime.command.command-helpers")
 
 --- @class TestCase
 --- @field name string
@@ -25,7 +19,7 @@ local test_cases = {
   {
     name = "Renders vanilla lab overlay",
     test = function (renderer, surface)
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
 
       local lab = surface.create_entity({
         name = "lab",
@@ -62,7 +56,7 @@ local test_cases = {
   {
     name = "Renders multiple labs",
     test = function (renderer, surface, player)
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
 
       -- Create labs in different chunks: (0,0), (1,0), (0,1)
       local lab1 = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
@@ -103,7 +97,7 @@ local test_cases = {
   {
     name = "Lab teleportation updates chunk_map",
     test = function (renderer, surface, player)
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
 
       local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
       assert(lab, "lab entity is not created")
@@ -143,7 +137,7 @@ local test_cases = {
   {
     name = "Surface cleared removes overlays",
     test = function (renderer, surface, player)
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
 
       local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
       assert(lab, "lab entity is not created")
@@ -159,25 +153,18 @@ local test_cases = {
       assert(#objects == 0, "rendering objects remain after surface cleared")
 
       -- Lab entity still exists; clean it up without raising events (overlays already cleared).
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
     end,
   },
   {
     name = "Sets up research for colorization test",
     test = function (renderer, surface, player)
-      clear_surface(surface)
-      local force = player.force --[[@as LuaForce]]
+      CommandHelpers.clear_surface(surface)
+      local force = player.force
 
       -- Create lab at origin
       local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = force, raise_built = true })
       assert(lab, "lab entity not created")
-
-      -- Provide power: small-electric-pole at (2,0) covers lab at (0,0), accumulator at (4,0) supplies energy
-      local pole = surface.create_entity({ name = "small-electric-pole", position = { x = 2, y = 0 }, force = force })
-      local accum = surface.create_entity({ name = "accumulator", position = { x = 4, y = 0 }, force = force })
-      assert(pole, "small-electric-pole not created")
-      assert(accum, "accumulator not created")
-      accum.energy = accum.electric_buffer_size
 
       -- Use automation technology for reasearch
       local target_tech = force.technologies["automation"]
@@ -206,7 +193,7 @@ local test_cases = {
   {
     name = "Colors are applied to overlays in viewport",
     test = function (renderer, surface, player)
-      local force = player.force --[[@as LuaForce]]
+      local force = player.force
 
       local labs = surface.find_entities_filtered({ type = "lab" })
       assert(#labs >= 1, "Expected at least 1 lab on surface")
@@ -237,13 +224,13 @@ local test_cases = {
 
       -- Cleanup: cancel research, destroy all entities
       force.cancel_current_research()
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
     end,
   },
   {
     name = "Renders all lab prototypes",
     test = function (renderer, surface, player)
-      clear_surface(surface)
+      CommandHelpers.clear_surface(surface)
 
       local lab_prototypes = prototypes.get_entity_filtered({ { filter = "type", type = "lab" } })
       local created_labs = {} --- @type LuaEntity[]
@@ -311,7 +298,7 @@ commands.add_command(
     end
 
     player.print("Disco Science Lite: Running integration tests")
-    clear_surface(surface)
+    CommandHelpers.setup_test_surface(surface)
 
     local n_test_cases = #test_cases
     local test_case_index = 1
@@ -345,16 +332,5 @@ commands.add_command(
         test_case_index = test_case_index + 1
       end
     end)
-  end
-)
-
-commands.add_command(
-  "ds-force-render",
-  "Force re-render all DiscoScienceLite lab overlays.",
-  function (event)
-    LabControl.force_render()
-
-    local player = game.get_player(event.player_index)
-    if player then player.print("Disco Science Lite: All overlays are re-rendered.") end
   end
 )

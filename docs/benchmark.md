@@ -7,7 +7,7 @@ Empirical benchmark results for basic Lua operations in the Factorio runtime env
 Each test case runs N=100,000 iterations, repeated for ROUNDS=10 rounds, with N warm-up iterations before timing.
 The profiler measures total time across all rounds, then `profiler.divide(ROUNDS)` is used to get the average per round.
 
-Source: [scripts/runtime/control/benchmark.lua](../scripts/runtime/control/benchmark.lua)
+Source: [scripts/runtime/command/ds-bench.lua](../scripts/runtime/command/ds-bench.lua)
 
 ## Test Cases
 

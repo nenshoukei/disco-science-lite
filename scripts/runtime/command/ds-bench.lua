@@ -263,4 +263,5 @@ commands.add_command(
         pending_translations[id] = name
       end
     end
-  end)
+  end
+)
