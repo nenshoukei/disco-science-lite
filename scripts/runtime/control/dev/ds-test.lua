@@ -163,6 +163,84 @@ local test_cases = {
     end,
   },
   {
+    name = "Sets up research for colorization test",
+    test = function (renderer, surface, player)
+      clear_surface(surface)
+      local force = player.force --[[@as LuaForce]]
+
+      -- Create lab at origin
+      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = force, raise_built = true })
+      assert(lab, "lab entity not created")
+
+      -- Provide power: small-electric-pole at (2,0) covers lab at (0,0), accumulator at (4,0) supplies energy
+      local pole = surface.create_entity({ name = "small-electric-pole", position = { x = 2, y = 0 }, force = force })
+      local accum = surface.create_entity({ name = "accumulator", position = { x = 4, y = 0 }, force = force })
+      assert(pole, "small-electric-pole not created")
+      assert(accum, "accumulator not created")
+      accum.energy = accum.electric_buffer_size
+
+      -- Use automation technology for reasearch
+      local target_tech = force.technologies["automation"]
+      assert(target_tech, "automation technology does not exist")
+      target_tech.research_recursive() -- researches all prerequisites recursively
+      target_tech.researched = false
+
+      -- Insert the required ingredients into the lab
+      local inventory = lab.get_inventory(defines.inventory.lab_input)
+      assert(inventory, "lab_input inventory not found")
+      for j = 1, #target_tech.research_unit_ingredients do
+        local ingredient = target_tech.research_unit_ingredients[j]
+        inventory.insert({ name = ingredient.name, count = 100 })
+      end
+
+      -- Start research on the target technology
+      force.cancel_current_research()
+      local added = force.add_research(target_tech)
+      assert(added, "force.add_research failed for technology " .. target_tech.name)
+
+      -- Position the player at the lab so it is within the viewport
+      player.teleport({ x = 0, y = 0 }, surface)
+      player.zoom = 1.0
+    end,
+  },
+  {
+    name = "Colors are applied to overlays in viewport",
+    test = function (renderer, surface, player)
+      local force = player.force --[[@as LuaForce]]
+
+      local labs = surface.find_entities_filtered({ type = "lab" })
+      assert(#labs >= 1, "Expected at least 1 lab on surface")
+      local lab = labs[1]
+
+      local overlay = renderer.overlays[lab.unit_number]
+      assert(overlay, "overlay not found for lab")
+
+      -- Verify that force_state has colors computed from current_research
+      local fs = renderer.force_state[lab.force_index]
+      assert(fs, "force_state not initialized for this force")
+      assert(fs.colors, "force_state.colors not set (research color not computed)")
+
+      -- Verify the overlay is visible (lab is working/low_power and research is active)
+      assert(overlay.visible,
+        "overlay is not visible (entity.status=" .. tostring(lab.status)
+        .. ", current_research=" .. tostring(force.current_research and force.current_research.name) .. ")")
+
+      -- Verify the overlay was added to visible_overlays (state_update confirmed it in viewport)
+      local found_in_visible = false
+      for i = 1, #renderer.visible_overlays do
+        if renderer.visible_overlays[i] == overlay then
+          found_in_visible = true
+          break
+        end
+      end
+      assert(found_in_visible, "overlay not found in renderer.visible_overlays")
+
+      -- Cleanup: cancel research, destroy all entities
+      force.cancel_current_research()
+      clear_surface(surface)
+    end,
+  },
+  {
     name = "Renders all lab prototypes",
     test = function (renderer, surface, player)
       clear_surface(surface)
