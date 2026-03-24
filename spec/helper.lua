@@ -3,6 +3,8 @@
 
 local cjson = require("cjson.safe")
 local serpent = require("serpent")
+local table_deep_copy = require("scripts.shared.utils").table_deep_copy
+local AnimationAssertion = require("spec.helper.animation-assertion")
 require("spec.helper.rendering")
 
 _G.serpent = serpent
@@ -106,6 +108,7 @@ local function reset_mocks()
   _G.settings = ({
     startup = {
       [ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true },
+      [ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ] = { value = false },
     },
     global = {
       [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 },
@@ -113,10 +116,35 @@ local function reset_mocks()
       [ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ]     = { value = 500 },
     },
   })
+
+  _G.mods = {}
+
+  --- @diagnostic disable-next-line: missing-fields
+  _G.data = {
+    raw = { lab = {}, animation = {} },
+    extend = function (self, defs)
+      for _, def in ipairs(defs) do
+        local type_table = _G.data.raw[def.type]
+        if not type_table then
+          _G.data.raw[def.type] = {}
+          type_table = _G.data.raw[def.type]
+        end
+        type_table[def.name] = def
+      end
+    end,
+  }
+end
+
+local function load_animation_definitions()
+  package.loaded["scripts.prototype.definitions.animation"] = nil
+  require("scripts.prototype.definitions.animation")
 end
 
 reset_mocks()
 
 return {
   reset_mocks = reset_mocks,
+  load_animation_definitions = load_animation_definitions,
+  table_deep_copy = table_deep_copy,
+  assert_animation = AnimationAssertion,
 }
