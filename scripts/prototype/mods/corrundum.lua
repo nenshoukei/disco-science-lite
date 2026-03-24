@@ -1,12 +1,12 @@
 --- 🌐Corrundum by AnotherZach
 --- https://mods.factorio.com/mod/corrundum
 
+if not mods["corrundum"] then return {} end
+
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
 local table_merge = require("scripts.shared.utils").table_merge
-
-if not mods["corrundum"] then return {} end
 
 --- @param lab_overlay data.AnimationPrototype
 --- @param frame_count integer
