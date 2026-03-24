@@ -7,4 +7,5 @@ event_handler.add_libraries({
 -- This is for development
 if __DebugAdapter then
   require("scripts.runtime.control.dev.ds-bench")
+  require("scripts.runtime.control.dev.ds-test")
 end

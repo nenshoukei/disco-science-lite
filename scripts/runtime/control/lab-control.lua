@@ -134,16 +134,18 @@ LabControl.events = {
 -- Same handler for both surface cleared and deleted events.
 LabControl.events[defines.events.on_surface_deleted] = LabControl.events[defines.events.on_surface_cleared]
 
-commands.add_command(
-  "ds-force-render",
-  "Force re-render all DiscoScienceLite lab overlays. Just for testing the mod.",
-  function (event)
+--- Get the current renderer. Just for testing.
+--- @return LabOverlayRenderer
+function LabControl.get_renderer()
+  return renderer
+end
+
+--- Force re-render all lab overlays. Just for testing.
+function LabControl.force_render()
+  if renderer then
     renderer:render_overlays_for_all_labs(true)
     setup_event_handlers()
-
-    local player = game.get_player(event.player_index)
-    if player then player.print("Disco Science Lite: All overlays are re-rendered.", { game_state = false }) end
   end
-)
+end
 
 return LabControl
