@@ -5,15 +5,6 @@ local CommandHelpers = require("scripts.runtime.command.command-helpers")
 --- @field name string
 --- @field test fun(renderer: LabOverlayRenderer, surface: LuaSurface, player: LuaPlayer)
 
---- Count entries in a table.
---- @param t table
---- @return number
-local function count(t)
-  local n = 0
-  for _ in pairs(t) do n = n + 1 end
-  return n
-end
-
 --- @type TestCase[]
 local test_cases = {
   {
@@ -66,7 +57,7 @@ local test_cases = {
       assert(lab2, "lab2 entity is not created")
       assert(lab3, "lab3 entity is not created")
 
-      assert(count(renderer.overlays) == 3, "Expected 3 overlays, got " .. count(renderer.overlays))
+      assert(table_size(renderer.overlays) == 3, "Expected 3 overlays, got " .. table_size(renderer.overlays))
       assert(renderer.overlays[lab1.unit_number], "overlay for lab1 not found")
       assert(renderer.overlays[lab2.unit_number], "overlay for lab2 not found")
       assert(renderer.overlays[lab3.unit_number], "overlay for lab3 not found")
@@ -165,25 +156,10 @@ local test_cases = {
       -- Create lab at origin
       local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = force, raise_built = true })
       assert(lab, "lab entity not created")
+      CommandHelpers.fill_lab_entity_with_ingredients(lab)
 
       -- Use automation technology for reasearch
-      local target_tech = force.technologies["automation"]
-      assert(target_tech, "automation technology does not exist")
-      target_tech.research_recursive() -- researches all prerequisites recursively
-      target_tech.researched = false
-
-      -- Insert the required ingredients into the lab
-      local inventory = lab.get_inventory(defines.inventory.lab_input)
-      assert(inventory, "lab_input inventory not found")
-      for j = 1, #target_tech.research_unit_ingredients do
-        local ingredient = target_tech.research_unit_ingredients[j]
-        inventory.insert({ name = ingredient.name, count = 100 })
-      end
-
-      -- Start research on the target technology
-      force.cancel_current_research()
-      local added = force.add_research(target_tech)
-      assert(added, "force.add_research failed for technology " .. target_tech.name)
+      CommandHelpers.set_current_research(force, "automation")
 
       -- Position the player at the lab so it is within the viewport
       player.teleport({ x = 0, y = 0 }, surface)
