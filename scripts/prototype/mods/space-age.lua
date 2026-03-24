@@ -39,8 +39,8 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("biolab", function (anim)
-      anim:apply_biolab_modifications()
+    AnimationHelpers.modify_on_animation("biolab", function (modifier)
+      modifier:apply_biolab_modifications()
     end)
   end,
 }

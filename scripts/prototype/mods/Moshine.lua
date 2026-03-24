@@ -23,10 +23,10 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("neural_computer", function (anim)
-      local glow_layer = anim:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_glow.png")
-      local light_layer = anim:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_light.png")
-      local anim_layer = anim:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_anim.png")
+    AnimationHelpers.modify_on_animation("neural_computer", function (modifier)
+      local glow_layer = modifier:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_glow.png")
+      local light_layer = modifier:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_light.png")
+      local anim_layer = modifier:remove_layer("__Moshine__/graphics/entity/supercomputer/supercomputer_anim.png")
 
       if not (glow_layer and light_layer and anim_layer) then return end
       data:extend({

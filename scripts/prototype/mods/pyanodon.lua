@@ -37,12 +37,12 @@ return {
     -- The mod only supports the original DiscoScience by `mods["DiscoScience"]` guard.
     -- So, we need to apply the same logic onto the lab prototype.
     -- https://github.com/pyanodon/pycoalprocessing/blob/master/prototypes/buildings/lab.lua#L128
-    AnimationHelpers.modify_on_animation("lab", function (anim)
-      local l_layer = anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png")
-      local beam_layer = anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png")
-      anim:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png") -- Has two beam layers, so remove twice
+    AnimationHelpers.modify_on_animation("lab", function (modifier)
+      local l_layer = modifier:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png")
+      local beam_layer = modifier:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png")
+      modifier:remove_layer("__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png") -- Has two beam layers, so remove twice
 
-      anim:replace_filename(
+      modifier:replace_filename(
         "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw.png",
         "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw-bw.png"
       )

@@ -16,9 +16,9 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("fusion-lab", function (anim)
-      local animation = anim:get_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-animation-1.png")
-      local emission = anim:remove_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-emission-1.png")
+    AnimationHelpers.modify_on_animation("fusion-lab", function (modifier)
+      local animation = modifier:get_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-animation-1.png")
+      local emission = modifier:remove_layer("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-emission-1.png")
 
       if not (animation and emission) then return end
       data:extend({

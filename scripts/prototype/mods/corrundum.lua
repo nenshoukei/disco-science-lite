@@ -43,13 +43,13 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("pressure-lab", function (anim)
+    AnimationHelpers.modify_on_animation("pressure-lab", function (modifier)
       local lab_overlay = data.raw["animation"][ "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]] ]
-      local lab_mask = anim:get_layer("__corrundum__/graphics/entity/chem-lab-on-mask.png")
-      local smoke_outer = anim:remove_layer("__corrundum__/graphics/entity/chemical-plant-smoke-outer-blue.png")
-      local smoke_inner = anim:remove_layer("__corrundum__/graphics/entity/chemical-plant-smoke-inner-blue.png")
-      anim:remove_layer("__corrundum__/graphics/entity/lab-light-three-times-frames-no-change.png")
-      anim:freeze_animation()
+      local lab_mask = modifier:get_layer("__corrundum__/graphics/entity/chem-lab-on-mask.png")
+      local smoke_outer = modifier:remove_layer("__corrundum__/graphics/entity/chemical-plant-smoke-outer-blue.png")
+      local smoke_inner = modifier:remove_layer("__corrundum__/graphics/entity/chemical-plant-smoke-inner-blue.png")
+      modifier:remove_layer("__corrundum__/graphics/entity/lab-light-three-times-frames-no-change.png")
+      modifier:freeze_animation()
 
       if not (lab_overlay and lab_mask and smoke_outer and smoke_inner) then return end
 

@@ -14,8 +14,8 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("aop-quantum-computer", function (anim)
-      local emission = anim:remove_layer("__Age-of-Production-Graphics__/graphics/entity/quantum-computer/quantum-computer-hr-emission-1.png")
+    AnimationHelpers.modify_on_animation("aop-quantum-computer", function (modifier)
+      local emission = modifier:remove_layer("__Age-of-Production-Graphics__/graphics/entity/quantum-computer/quantum-computer-hr-emission-1.png")
 
       if not emission then return end
       data:extend({

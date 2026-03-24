@@ -17,19 +17,19 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("bob-lab-2", function (anim)
-      anim:remove_layer("__bobtech__/graphics/entity/lab/lab2-light.png")
-      anim:freeze_animation()
+    AnimationHelpers.modify_on_animation("bob-lab-2", function (modifier)
+      modifier:remove_layer("__bobtech__/graphics/entity/lab/lab2-light.png")
+      modifier:freeze_animation()
     end)
 
-    AnimationHelpers.modify_on_animation("bob-burner-lab", function (anim)
+    AnimationHelpers.modify_on_animation("bob-burner-lab", function (modifier)
       -- No light layer
-      anim:freeze_animation()
+      modifier:freeze_animation()
     end)
 
-    AnimationHelpers.modify_on_animation("bob-lab-alien", function (anim)
-      anim:remove_layer("__bobtech__/graphics/entity/lab/lab-alien-light.png")
-      anim:freeze_animation()
+    AnimationHelpers.modify_on_animation("bob-lab-alien", function (modifier)
+      modifier:remove_layer("__bobtech__/graphics/entity/lab/lab-alien-light.png")
+      modifier:freeze_animation()
     end)
   end,
 }

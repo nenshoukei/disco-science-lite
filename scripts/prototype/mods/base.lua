@@ -20,8 +20,8 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("lab", function (anim)
-      anim:apply_lab_modifications()
+    AnimationHelpers.modify_on_animation("lab", function (modifier)
+      modifier:apply_lab_modifications()
     end)
   end,
 }

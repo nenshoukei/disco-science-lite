@@ -1,4 +1,5 @@
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
+local OnAnimationModifier = AnimationHelpers.OnAnimationModifier
 
 --- @param layers data.Animation[]
 --- @return data.Animation
@@ -18,6 +19,12 @@ local function make_stripes(filenames)
     }
   end
   return stripes
+end
+
+--- @param animation data.Animation
+--- @return OnAnimationModifier
+local function make_modifier(animation)
+  return OnAnimationModifier.new(animation)
 end
 
 describe("AnimationHelpers", function ()
@@ -165,7 +172,7 @@ describe("AnimationHelpers", function ()
       end
     end)
 
-    it("calls callback with on_animation having AnimationHelpers metatable", function ()
+    it("calls callback with OnAnimationModifier and lab prototype", function ()
       local on_animation = make_animation_with_layers({
         { filename = "on.png" },
         { filename = "light.png" },
@@ -175,8 +182,6 @@ describe("AnimationHelpers", function ()
       local called = false
       AnimationHelpers.modify_on_animation("test-lab", function (anim, lab)
         called = true
-        -- Can call AnimationHelpers methods via method syntax
-        assert.are.equal(on_animation, anim)
         assert.is_not_nil(lab)
         anim:remove_layer("light.png")
       end)
@@ -185,7 +190,7 @@ describe("AnimationHelpers", function ()
       assert.are.equal(1, #on_animation.layers)
     end)
 
-    it("restores original metatable after callback", function ()
+    it("does not modify the metatable of on_animation", function ()
       local original_mt = {}
       local on_animation = setmetatable(make_animation_with_layers({}), original_mt)
       _G.data.raw.lab["test-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
@@ -195,9 +200,8 @@ describe("AnimationHelpers", function ()
       assert.are.equal(original_mt, getmetatable(on_animation))
     end)
 
-    it("restores metatable even when callback errors", function ()
-      local original_mt = {}
-      local on_animation = setmetatable(make_animation_with_layers({}), original_mt)
+    it("propagates callback errors", function ()
+      local on_animation = make_animation_with_layers({})
       _G.data.raw.lab["test-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
 
       assert.has_error(function ()
@@ -205,8 +209,6 @@ describe("AnimationHelpers", function ()
           error("test error")
         end)
       end)
-
-      assert.are.equal(original_mt, getmetatable(on_animation))
     end)
 
     it("does nothing when lab is not defined", function ()
@@ -230,12 +232,14 @@ describe("AnimationHelpers", function ()
       assert.is_false(called)
     end)
   end)
+end)
 
+describe("OnAnimationModifier", function ()
   -- -------------------------------------------------------------------
   describe("get_layer", function ()
     it("returns nil when layers is nil", function ()
-      local animation = {} --[[@as data.Animation]]
-      local layer, index = AnimationHelpers.get_layer(animation, "on.png")
+      local modifier = make_modifier({} --[[@as data.Animation]])
+      local layer, index = modifier:get_layer("on.png")
       assert.is_nil(layer)
       assert.is_nil(index)
     end)
@@ -245,7 +249,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filename = "light.png" },
       })
-      local layer, index = AnimationHelpers.get_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local layer, index = modifier:get_layer("light.png")
       assert.are.equal(animation.layers[2], layer)
       assert.are.equal(2, index)
     end)
@@ -255,7 +260,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filenames = { "a.png", "b.png" } },
       })
-      local layer, index = AnimationHelpers.get_layer(animation, "b.png")
+      local modifier = make_modifier(animation)
+      local layer, index = modifier:get_layer("b.png")
       assert.are.equal(animation.layers[2], layer)
       assert.are.equal(2, index)
     end)
@@ -265,7 +271,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { stripes = make_stripes({ "stripe-a.png", "stripe-b.png" }) },
       })
-      local layer, index = AnimationHelpers.get_layer(animation, "stripe-b.png")
+      local modifier = make_modifier(animation)
+      local layer, index = modifier:get_layer("stripe-b.png")
       assert.are.equal(animation.layers[2], layer)
       assert.are.equal(2, index)
     end)
@@ -275,7 +282,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filename = "on.png" },
       })
-      local layer, index = AnimationHelpers.get_layer(animation, "on.png")
+      local modifier = make_modifier(animation)
+      local layer, index = modifier:get_layer("on.png")
       assert.are.equal(animation.layers[1], layer)
       assert.are.equal(1, index)
     end)
@@ -284,118 +292,18 @@ describe("AnimationHelpers", function ()
       local animation = make_animation_with_layers({
         { filename = "on.png" },
       })
-      local layer, index = AnimationHelpers.get_layer(animation, "nonexistent.png")
+      local modifier = make_modifier(animation)
+      local layer, index = modifier:get_layer("nonexistent.png")
       assert.is_nil(layer)
       assert.is_nil(index)
     end)
   end)
 
   -- -------------------------------------------------------------------
-  describe("apply_lab_modifications", function ()
-    local saved_mods
-
-    before_each(function ()
-      saved_mods = _G.mods
-      _G.mods = {}
-    end)
-
-    after_each(function ()
-      _G.mods = saved_mods
-    end)
-
-    it("removes lab-light layer and freezes animation", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
-        { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
-        { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
-      })
-      AnimationHelpers.apply_lab_modifications(animation)
-      assert.are.equal(2, #animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
-      assert.are.same({ 1 }, animation.layers[1].frame_sequence)
-      assert.are.same({ 1 }, animation.layers[2].frame_sequence)
-    end)
-
-    it("also removes HD Age lab-light layer when mod is active", function ()
-      _G.mods["factorio_hd_age_base_game_production"] = "1.0.0"
-      local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
-      })
-      AnimationHelpers.apply_lab_modifications(animation)
-      assert.are.equal(1, #animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
-    end)
-
-    it("does not remove HD Age layer when mod is not active", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
-      })
-      AnimationHelpers.apply_lab_modifications(animation)
-      assert.are.equal(2, #animation.layers)
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
-  describe("apply_biolab_modifications", function ()
-    local saved_mods
-
-    before_each(function ()
-      saved_mods = _G.mods
-      _G.mods = {}
-    end)
-
-    after_each(function ()
-      _G.mods = saved_mods
-    end)
-
-    it("removes biolab-lights layer", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
-        { filename = "__space-age__/graphics/entity/biolab/biolab-lights.png" },
-        { filename = "__space-age__/graphics/entity/biolab/biolab-shadow.png" },
-      })
-      AnimationHelpers.apply_biolab_modifications(animation)
-      assert.are.equal(2, #animation.layers)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab.png", animation.layers[1].filename)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-shadow.png", animation.layers[2].filename)
-    end)
-
-    it("also removes HD Age biolab-lights layer when mod is active", function ()
-      _G.mods["factorio_hd_age_space_age_production"] = "1.0.0"
-      local animation = make_animation_with_layers({
-        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
-        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
-      })
-      AnimationHelpers.apply_biolab_modifications(animation)
-      assert.are.equal(1, #animation.layers)
-    end)
-
-    it("does not remove HD Age layer when mod is not active", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
-        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
-      })
-      AnimationHelpers.apply_biolab_modifications(animation)
-      assert.are.equal(2, #animation.layers)
-    end)
-
-    it("does not freeze animation", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__space-age__/graphics/entity/biolab/biolab.png", frame_count = 33 },
-      })
-      AnimationHelpers.apply_biolab_modifications(animation)
-      assert.is_nil(animation.layers[1].frame_sequence)
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
   describe("remove_layer", function ()
     it("does nothing when layers is nil", function ()
-      local animation = {} --[[@as data.Animation]]
-      assert.no_error(function () AnimationHelpers.remove_layer(animation, "light.png") end)
+      local modifier = make_modifier({} --[[@as data.Animation]])
+      assert.no_error(function () modifier:remove_layer("light.png") end)
     end)
 
     it("removes a layer matching filename", function ()
@@ -404,7 +312,8 @@ describe("AnimationHelpers", function ()
         { filename = "light.png" },
       })
       local light_layer = animation.layers[2]
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(light_layer, returned)
       assert.are.equal(1, #animation.layers)
       assert.are.equal("on.png", animation.layers[1].filename)
@@ -417,7 +326,8 @@ describe("AnimationHelpers", function ()
       })
       local light_layer1 = animation.layers[1]
       local light_layer2 = animation.layers[2]
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(light_layer1, returned)
       assert.are.equal(1, #animation.layers)
       assert.are.equal(light_layer2, animation.layers[1])
@@ -429,7 +339,8 @@ describe("AnimationHelpers", function ()
         { filenames = { "light.png", "light2.png" } },
       })
       local light_layer = animation.layers[2]
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(1, #animation.layers)
       assert.are.equal("on.png", animation.layers[1].filename)
       assert.are.equal(light_layer, returned)
@@ -441,7 +352,8 @@ describe("AnimationHelpers", function ()
         { stripes = make_stripes({ "light.png", "light2.png" }) },
       })
       local light_layer = animation.layers[2]
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(1, #animation.layers)
       assert.are.equal("on.png", animation.layers[1].filename)
       assert.are.equal(light_layer, returned)
@@ -452,7 +364,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filename = "other.png" },
       })
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(2, #animation.layers)
       assert.is_nil(returned)
     end)
@@ -462,7 +375,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filenames = { "other.png", "other2.png" } },
       })
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(2, #animation.layers)
       assert.is_nil(returned)
     end)
@@ -472,7 +386,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { stripes = make_stripes({ "other.png", "other2.png" }) },
       })
-      local returned = AnimationHelpers.remove_layer(animation, "light.png")
+      local modifier = make_modifier(animation)
+      local returned = modifier:remove_layer("light.png")
       assert.are.equal(2, #animation.layers)
       assert.is_nil(returned)
     end)
@@ -482,19 +397,22 @@ describe("AnimationHelpers", function ()
   describe("replace_filename", function ()
     it("replaces top-level filename", function ()
       local animation = ({ filename = "on.png" }) --[[@as data.Animation]]
-      AnimationHelpers.replace_filename(animation, "on.png", "on-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("on.png", "on-masked.png")
       assert.are.equal("on-masked.png", animation.filename)
     end)
 
     it("does not change top-level filename when no match", function ()
       local animation = ({ filename = "on.png" }) --[[@as data.Animation]]
-      AnimationHelpers.replace_filename(animation, "other.png", "other-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("other.png", "other-masked.png")
       assert.are.equal("on.png", animation.filename)
     end)
 
     it("replaces in top-level filenames array", function ()
       local animation = ({ filenames = { "a.png", "b.png" } }) --[[@as data.Animation]]
-      AnimationHelpers.replace_filename(animation, "a.png", "a-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("a.png", "a-masked.png")
       assert.are.equal("a-masked.png", animation.filenames[1])
       assert.are.equal("b.png", animation.filenames[2])
     end)
@@ -504,7 +422,8 @@ describe("AnimationHelpers", function ()
         { filename = "on.png" },
         { filename = "other.png" },
       })
-      AnimationHelpers.replace_filename(animation, "on.png", "on-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("on.png", "on-masked.png")
       assert.are.equal("on-masked.png", animation.layers[1].filename)
       assert.are.equal("other.png", animation.layers[2].filename)
     end)
@@ -513,14 +432,16 @@ describe("AnimationHelpers", function ()
       local animation = make_animation_with_layers({
         { filenames = { "a.png", "b.png" } },
       })
-      AnimationHelpers.replace_filename(animation, "a.png", "a-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("a.png", "a-masked.png")
       assert.are.equal("a-masked.png", animation.layers[1].filenames[1])
       assert.are.equal("b.png", animation.layers[1].filenames[2])
     end)
 
     it("replaces filename in top-level stripes", function ()
       local animation = ({ stripes = make_stripes({ "a.png", "b.png" }) }) --[[@as data.Animation]]
-      AnimationHelpers.replace_filename(animation, "a.png", "a-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("a.png", "a-masked.png")
       assert.are.equal("a-masked.png", animation.stripes[1].filename)
       assert.are.equal("b.png", animation.stripes[2].filename)
     end)
@@ -529,7 +450,8 @@ describe("AnimationHelpers", function ()
       local animation = make_animation_with_layers({
         { stripes = make_stripes({ "on.png", "other.png" }) },
       })
-      AnimationHelpers.replace_filename(animation, "on.png", "on-masked.png")
+      local modifier = make_modifier(animation)
+      modifier:replace_filename("on.png", "on-masked.png")
       assert.are.equal("on-masked.png", animation.layers[1].stripes[1].filename)
       assert.are.equal("other.png", animation.layers[1].stripes[2].filename)
     end)
@@ -538,9 +460,9 @@ describe("AnimationHelpers", function ()
   -- -------------------------------------------------------------------
   describe("insert_mask_layer", function ()
     it("does nothing when layers is nil", function ()
-      local animation = {} --[[@as data.Animation]]
+      local modifier = make_modifier({} --[[@as data.Animation]])
       assert.no_error(function ()
-        AnimationHelpers.insert_mask_layer(animation, "on.png", "mask.png")
+        modifier:insert_mask_layer("on.png", "mask.png")
       end)
     end)
 
@@ -558,7 +480,8 @@ describe("AnimationHelpers", function ()
         },
         { filename = "light.png" },
       })
-      AnimationHelpers.insert_mask_layer(animation, "on.png", "mask.png")
+      local modifier = make_modifier(animation)
+      modifier:insert_mask_layer("on.png", "mask.png")
       assert.are.equal(3, #animation.layers)
       assert.are.equal("on.png", animation.layers[1].filename)
       local mask = animation.layers[2]
@@ -586,7 +509,8 @@ describe("AnimationHelpers", function ()
           animation_speed = 1.0,
         },
       })
-      AnimationHelpers.insert_mask_layer(animation, "on.png", "mask.png", {
+      local modifier = make_modifier(animation)
+      modifier:insert_mask_layer("on.png", "mask.png", {
         width = 100,
         height = 80,
         shift = { 0, -0.5 },
@@ -609,7 +533,8 @@ describe("AnimationHelpers", function ()
       local animation = make_animation_with_layers({
         { filename = "on.png" },
       })
-      AnimationHelpers.insert_mask_layer(animation, "other.png", "mask.png")
+      local modifier = make_modifier(animation)
+      modifier:insert_mask_layer("other.png", "mask.png")
       assert.are.equal(1, #animation.layers)
     end)
 
@@ -628,7 +553,8 @@ describe("AnimationHelpers", function ()
         },
         { filename = "other.png" },
       })
-      AnimationHelpers.insert_mask_layer(animation, { "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
+      local modifier = make_modifier(animation)
+      modifier:insert_mask_layer({ "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
       assert.are.equal(3, #animation.layers)
       assert.are.same({ "a.png", "b.png" }, animation.layers[1].filenames)
       local mask = animation.layers[2]
@@ -648,7 +574,8 @@ describe("AnimationHelpers", function ()
       local animation = make_animation_with_layers({
         { filenames = { "a.png", "c.png" } },
       })
-      AnimationHelpers.insert_mask_layer(animation, { "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
+      local modifier = make_modifier(animation)
+      modifier:insert_mask_layer({ "a.png", "b.png" }, { "mask-a.png", "mask-b.png" })
       assert.are.equal(1, #animation.layers)
     end)
   end)
@@ -656,8 +583,8 @@ describe("AnimationHelpers", function ()
   -- -------------------------------------------------------------------
   describe("freeze_animation", function ()
     it("does nothing when layers is nil", function ()
-      local animation = {} --[[@as data.Animation]]
-      assert.no_error(function () AnimationHelpers.freeze_animation(animation) end)
+      local modifier = make_modifier({} --[[@as data.Animation]])
+      assert.no_error(function () modifier:freeze_animation() end)
     end)
 
     it("freezes all layers", function ()
@@ -666,7 +593,8 @@ describe("AnimationHelpers", function ()
         { filename = "other.png",  frame_count = 33 },
         { filename = "static.png", frame_count = 1, repeat_count = 33 },
       })
-      AnimationHelpers.freeze_animation(animation)
+      local modifier = make_modifier(animation)
+      modifier:freeze_animation()
       assert.are.same({ 1 }, animation.layers[1].frame_sequence)
       assert.are.same({ 1 }, animation.layers[2].frame_sequence)
       assert.are.same({ 1 }, animation.layers[3].frame_sequence)
@@ -678,9 +606,118 @@ describe("AnimationHelpers", function ()
         { filename = "on.png",    frame_count = 33 },
         { filename = "other.png", frame_count = 33 },
       })
-      AnimationHelpers.freeze_animation(animation, 3)
+      local modifier = make_modifier(animation)
+      modifier:freeze_animation(3)
       assert.are.same({ 3 }, animation.layers[1].frame_sequence)
       assert.are.same({ 3 }, animation.layers[2].frame_sequence)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("apply_lab_modifications", function ()
+    local saved_mods
+
+    before_each(function ()
+      saved_mods = _G.mods
+      _G.mods = {}
+    end)
+
+    after_each(function ()
+      _G.mods = saved_mods
+    end)
+
+    it("removes lab-light layer and freezes animation", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_lab_modifications()
+      assert.are.equal(2, #animation.layers)
+      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
+      assert.are.same({ 1 }, animation.layers[1].frame_sequence)
+      assert.are.same({ 1 }, animation.layers[2].frame_sequence)
+    end)
+
+    it("also removes HD Age lab-light layer when mod is active", function ()
+      _G.mods["factorio_hd_age_base_game_production"] = "1.0.0"
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_lab_modifications()
+      assert.are.equal(1, #animation.layers)
+      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+    end)
+
+    it("does not remove HD Age layer when mod is not active", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_lab_modifications()
+      assert.are.equal(2, #animation.layers)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("apply_biolab_modifications", function ()
+    local saved_mods
+
+    before_each(function ()
+      saved_mods = _G.mods
+      _G.mods = {}
+    end)
+
+    after_each(function ()
+      _G.mods = saved_mods
+    end)
+
+    it("removes biolab-lights layer", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__space-age__/graphics/entity/biolab/biolab-lights.png" },
+        { filename = "__space-age__/graphics/entity/biolab/biolab-shadow.png" },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_biolab_modifications()
+      assert.are.equal(2, #animation.layers)
+      assert.are.equal("__space-age__/graphics/entity/biolab/biolab.png", animation.layers[1].filename)
+      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-shadow.png", animation.layers[2].filename)
+    end)
+
+    it("also removes HD Age biolab-lights layer when mod is active", function ()
+      _G.mods["factorio_hd_age_space_age_production"] = "1.0.0"
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_biolab_modifications()
+      assert.are.equal(1, #animation.layers)
+    end)
+
+    it("does not remove HD Age layer when mod is not active", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png" },
+        { filename = "__factorio_hd_age_space_age_production__/data/space-age/graphics/entity/biolab/biolab-lights.png" },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_biolab_modifications()
+      assert.are.equal(2, #animation.layers)
+    end)
+
+    it("does not freeze animation", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__space-age__/graphics/entity/biolab/biolab.png", frame_count = 33 },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_biolab_modifications()
+      assert.is_nil(animation.layers[1].frame_sequence)
     end)
   end)
 end)

@@ -14,11 +14,11 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("burner-lab", function (anim)
+    AnimationHelpers.modify_on_animation("burner-lab", function (modifier)
       local lab_overlay = data.raw["animation"][ "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]] ]
 
-      local light = anim:remove_layer("__aai-industry__/graphics/entity/burner-lab/burner-lab-light.png")
-      anim:freeze_animation()
+      local light = modifier:remove_layer("__aai-industry__/graphics/entity/burner-lab/burner-lab-light.png")
+      modifier:freeze_animation()
 
       if not (light and lab_overlay) then return end
       data:extend({

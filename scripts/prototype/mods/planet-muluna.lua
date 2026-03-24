@@ -19,9 +19,9 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("cryolab", function (anim)
-      local emission = anim:remove_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-emission-1.png")
-      local animation = anim:get_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-animation-1.png")
+    AnimationHelpers.modify_on_animation("cryolab", function (modifier)
+      local emission = modifier:remove_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-emission-1.png")
+      local animation = modifier:get_layer("__muluna-graphics__/graphics/photometric-lab/photometric-lab-hr-animation-1.png")
       if not (emission and animation) then return end
 
       data:extend({

@@ -19,12 +19,12 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("cerys-lab", function (anim)
-      anim:freeze_animation()
+    AnimationHelpers.modify_on_animation("cerys-lab", function (modifier)
+      modifier:freeze_animation()
 
-      local light = anim:remove_layer("__base__/graphics/entity/lab/lab-light.png")
-      local front_shadow = anim:remove_layer("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front-shadow.png")
-      local front = anim:remove_layer("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front.png")
+      local light = modifier:remove_layer("__base__/graphics/entity/lab/lab-light.png")
+      local front_shadow = modifier:remove_layer("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front-shadow.png")
+      local front = modifier:remove_layer("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-front.png")
       if not (light and front_shadow and front) then return end
 
       data:extend({

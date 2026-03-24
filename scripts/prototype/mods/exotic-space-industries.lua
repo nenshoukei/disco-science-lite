@@ -32,8 +32,8 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("ei-dark-age-lab", function (anim)
-      anim:apply_lab_modifications()
+    AnimationHelpers.modify_on_animation("ei-dark-age-lab", function (modifier)
+      modifier:apply_lab_modifications()
     end)
   end,
 }

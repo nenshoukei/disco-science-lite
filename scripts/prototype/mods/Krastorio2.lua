@@ -55,10 +55,10 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("kr-advanced-lab", function (anim)
-      local light = anim:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png")
-      anim:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png") -- If has two light anim, so remove twice
-      anim:insert_mask_layer(
+    AnimationHelpers.modify_on_animation("kr-advanced-lab", function (modifier)
+      local light = modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png")
+      modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png") -- If has two light anim, so remove twice
+      modifier:insert_mask_layer(
         "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
         "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]]
       )
@@ -74,14 +74,14 @@ return {
       })
     end)
 
-    AnimationHelpers.modify_on_animation("kr-singularity-lab", function (anim)
-      local glow_light = anim:get_layer("__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow-light.png")
+    AnimationHelpers.modify_on_animation("kr-singularity-lab", function (modifier)
+      local glow_light = modifier:get_layer("__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow-light.png")
       if not glow_light then return end
 
-      anim:remove_layer("__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow.png")
+      modifier:remove_layer("__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-glow.png")
 
       -- Use singularity-lab-glow-light.png (already grayscale) as a mask layer instead of a generated mask.
-      anim:insert_mask_layer(
+      modifier:insert_mask_layer(
         "__Krastorio2Assets__/buildings/singularity-lab/singularity-lab-working.png",
         glow_light.filename,
         AnimationHelpers.copy_geometric_properties(glow_light)

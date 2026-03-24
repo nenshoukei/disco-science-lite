@@ -16,9 +16,9 @@ return {
   on_data_final_fixes = function ()
     local hd = settings.startup["labomatic-hd"].value and "_x4" or ""
 
-    AnimationHelpers.modify_on_animation("labomatic", function (anim)
-      local light = anim:remove_layer("__LabOMatic__/graphics/lab_light_anim" .. hd .. ".png")
-      anim:insert_mask_layer(
+    AnimationHelpers.modify_on_animation("labomatic", function (modifier)
+      local light = modifier:remove_layer("__LabOMatic__/graphics/lab_light_anim" .. hd .. ".png")
+      modifier:insert_mask_layer(
         "__LabOMatic__/graphics/lab_albedo_anim_x4.png",
         "__disco-science-lite__/graphics/" --[[$GRAPHICS_DIR]] .. "laborat/lab_albedo_anim" .. hd .. "-mask.png"
       )

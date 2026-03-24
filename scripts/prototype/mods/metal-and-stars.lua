@@ -22,8 +22,8 @@ return {
   end,
 
   on_data_final_fixes = function ()
-    AnimationHelpers.modify_on_animation("microgravity-lab", function (anim)
-      local emission = anim:remove_layer("__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation-emission.png")
+    AnimationHelpers.modify_on_animation("microgravity-lab", function (modifier)
+      local emission = modifier:remove_layer("__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation-emission.png")
 
       if not emission then return end
       data:extend({
