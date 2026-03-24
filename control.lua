@@ -4,7 +4,7 @@ event_handler.add_libraries({
   require("scripts.runtime.control.lab-control"),
 })
 
--- This is for benchmarking on development
+-- This is for development
 if __DebugAdapter then
-  require("scripts.runtime.control.benchmark")
+  require("scripts.runtime.control.dev.ds-bench")
 end
