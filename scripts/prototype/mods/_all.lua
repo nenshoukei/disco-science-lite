@@ -16,6 +16,7 @@ return {
   require("scripts.prototype.mods.maraxis"),
   require("scripts.prototype.mods.metal-and-stars"),
   require("scripts.prototype.mods.Moshine"),
+  require("scripts.prototype.mods.one-more-tier"),
   require("scripts.prototype.mods.Paracelsin"),
   require("scripts.prototype.mods.planet-muluna"),
   require("scripts.prototype.mods.pyanodon"),
