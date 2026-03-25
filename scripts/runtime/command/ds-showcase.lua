@@ -56,23 +56,23 @@ commands.add_command(
     local x = 0
     local y = 0
     for _, proto in ipairs(lab_prototypes) do
-      x = x + proto.tile_width / 2
-      y = y + proto.tile_height / 2 + (top_offsets[proto.name] or 0)
+      local width = math.max(proto.tile_width, 1)
+      local height = math.max(proto.tile_height, 1)
+
+      y = y + (top_offsets[proto.name] or 0)
       while x < SHOWCASE_WIDTH do
         local lab = surface.create_entity({
           name = proto.name,
-          position = { x = x, y = y },
+          position = { x = x + width / 2, y = y + height / 2 },
           force = player.force,
           raise_built = true,
         })
         assert(lab, "Failed to create lab entity: " .. proto.name)
-
         CommandHelpers.fill_lab_entity_with_ingredients(lab)
-
-        x = x + proto.tile_width
+        x = x + width
       end
       x = 0
-      y = y + proto.tile_height / 2 + 1
+      y = y + height + 1
     end
   end
 )
