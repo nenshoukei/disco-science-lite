@@ -26,7 +26,7 @@ Create `scripts/prototype/mods/<Mod ID>.lua` using this template:
 --- <Mod name> by <Author name>
 --- https://mods.factorio.com/mod/<Mod ID>
 
-if not mods["<Mod ID>"] then return end
+if not mods["<Mod ID>"] then return {} end
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
