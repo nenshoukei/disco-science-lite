@@ -521,7 +521,8 @@ function LabOverlayRenderer:get_state_update_function()
 
                   for j = 1, #chunk do
                     local overlay = chunk[j]
-                    local status = overlay.entity.status
+                    local entity = overlay.entity
+                    local status = entity.valid and entity.status or nil
                     local lab_fs = force_state[overlay.force_index]
                     local colors = lab_fs and lab_fs.colors
                     local is_visible = (
