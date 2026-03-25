@@ -46,6 +46,9 @@ return {
       })
     end
 
+    -- No need to colorize because it only accepts basic tech cards
+    PrototypeLabRegistry.exclude("kr-spaceship-research-computer")
+
     PrototypeLabRegistry.register("kr-advanced-lab", {
       animation = "mks-dsl-kr-advanced-lab-overlay" --[[$NAME_PREFIX .. "kr-advanced-lab-overlay"]],
     })
