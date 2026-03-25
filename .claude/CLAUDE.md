@@ -37,7 +37,9 @@ This mod provides users with:
 - `make check`: Runs following:
     - `make consts`: Updates constant values for the special syntax
     - `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua)
+    - `make mod-description`: Updates the [mod description](/docs/mod-portal/description.md)
     - `make lint`: Lints codes by `luacheck`
     - `make test`: Runs unit tests by `busted`
     - `make typecheck`: Type-checks [disco-science-lite.d.ts](/disco-science-lite.d.ts) by `tsc`
 - `make graphics`: Updates graphics
+- `make graphics MOD=mod-name`: Updates mod-name graphics only

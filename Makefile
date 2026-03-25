@@ -19,7 +19,7 @@ consts:
 	@lua tasks/update-consts.lua
 
 graphics:
-	@uv run tasks/graphics/update-graphics.py
+	@MOD=$(MOD) uv run tasks/graphics/update-graphics.py
 
 mod-description:
 	@uv run tasks/update-mod-description.py
