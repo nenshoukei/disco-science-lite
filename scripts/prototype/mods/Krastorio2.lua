@@ -24,7 +24,7 @@ return {
       ["kr-biter-research-data"]   = { 0.33, 0.33, 0.33 },
       ["kr-matter-research-data"]  = { 0.44, 0.86, 0.87 },
       ["kr-space-research-data"]   = { 0.78, 0.68, 0.66 },
-      ["kr-basic-tech-card"]       = { 0.75, 0.46, 0.23 },
+      ["kr-basic-tech-card"]       = { 0.90, 0.56, 0.28 },
       ["kr-matter-tech-card"]      = { 0.04, 0.81, 0.87 },
       ["kr-advanced-tech-card"]    = { 1.00, 0.97, 0.27 },
       ["kr-singularity-tech-card"] = { 1.00, 0.00, 0.98 },
