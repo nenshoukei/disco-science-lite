@@ -41,6 +41,14 @@ local function setup_event_handlers()
   }, state_update_function)
 end
 
+local function validate_technology_prototypes()
+  -- Defer the validation for runtime color registration
+  script.on_nth_tick(90, function ()
+    renderer.color_registry:validate_technology_prototypes()
+    script.on_nth_tick(90, nil)
+  end)
+end
+
 --- Rebuild all overlays and refresh event handlers and registry bindings.
 local function rebuild_overlays()
   renderer:render_overlays_for_all_labs()
@@ -58,7 +66,7 @@ function LabControl.on_init()
   renderer = create_renderer()
   rebuild_overlays()
 
-  renderer.color_registry:validate_technology_prototypes()
+  validate_technology_prototypes()
 end
 
 function LabControl.on_load()
@@ -75,7 +83,7 @@ function LabControl.on_configuration_changed()
   renderer = create_renderer()
   rebuild_overlays() -- cancels the deferred render registered in on_load
 
-  renderer.color_registry:validate_technology_prototypes()
+  validate_technology_prototypes()
 end
 
 local TARGET_TYPE_ENTITY = defines.target_type.entity
