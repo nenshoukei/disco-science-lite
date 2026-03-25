@@ -221,12 +221,28 @@ function OnAnimationModifier:freeze_animation(frame_index)
 end
 
 --- Apply the same modifications as for the vanilla lab.
-function OnAnimationModifier:apply_lab_modifications()
-  self:remove_layer("__base__/graphics/entity/lab/lab-light.png")
+---
+--- @param filenames { lab: string?, lab_light: string? }?
+function OnAnimationModifier:apply_lab_modifications(filenames)
+  local lab_filename = filenames and filenames.lab or "__base__/graphics/entity/lab/lab.png"
+  local lab_light_filename = filenames and filenames.lab_light or "__base__/graphics/entity/lab/lab-light.png"
+
+  self:remove_layer(lab_light_filename)
+
+  --- Replace lab.png with a darkend mask image.
+  self:insert_mask_layer(
+    lab_filename,
+    "__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]],
+    { frame_count = 1, line_length = 1 }
+  )
+  self:remove_layer(lab_filename)
 
   --- Support Factorio HD Age
   if mods["factorio_hd_age_base_game_production"] then
     self:remove_layer("__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png")
+
+    -- We cannot create an HD mask image for HD Age because it requires GPLv3 license, so keep lab.png as-is.
+    -- Without mask, the lab will get brighter than the original, which does not matter so much.
   end
 
   -- Freeze entity animation at frame 1 (no light, no color in the overlay area).

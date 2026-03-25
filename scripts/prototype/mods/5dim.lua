@@ -18,12 +18,9 @@ return {
   on_data_final_fixes = function ()
     for _, n in ipairs(LAB_NUMBERS) do
       AnimationHelpers.modify_on_animation("5d-lab-" .. n, function (modifier)
-        -- Revert the colorized version on_animation to the default vanilla lab (gray), which is frozen at frame 1.
-        modifier:replace_filename(
-          "__5dim_automation__/graphics/entities/lab/lab-" .. n .. ".png",
-          "__base__/graphics/entity/lab/lab.png"
-        )
-        modifier:apply_lab_modifications()
+        modifier:apply_lab_modifications({
+          lab = "__5dim_automation__/graphics/entities/lab/lab-" .. n .. ".png",
+        })
       end)
     end
   end,

@@ -54,7 +54,7 @@ describe("mods/Cerys-Moon-of-Fulgora", function ()
 
       assert.are.equal(5, #on_animation.layers)
       assert.are.equal("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-back.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", on_animation.layers[2].filename)
+      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], on_animation.layers[2].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[3].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[4].filename)
       assert.are.equal("__Cerys-Moon-of-Fulgora__/graphics/entity/cerys-lab/cerys-lab-shadow.png", on_animation.layers[5].filename)

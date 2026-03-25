@@ -1,3 +1,4 @@
+local Helper = require("spec.helper")
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
 local OnAnimationModifier = AnimationHelpers.OnAnimationModifier
 
@@ -626,7 +627,7 @@ describe("OnAnimationModifier", function ()
       _G.mods = saved_mods
     end)
 
-    it("removes lab-light layer and freezes animation", function ()
+    it("replaces lab.png with mask, removes lab-light layer and freezes animation", function ()
       local animation = make_animation_with_layers({
         { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
         { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
@@ -635,10 +636,9 @@ describe("OnAnimationModifier", function ()
       local modifier = make_modifier(animation)
       modifier:apply_lab_modifications()
       assert.are.equal(2, #animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], animation.layers[1].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
-      assert.are.same({ 1 }, animation.layers[1].frame_sequence)
-      assert.are.same({ 1 }, animation.layers[2].frame_sequence)
+      Helper.assert_animation.frozen(1, animation)
     end)
 
     it("also removes HD Age lab-light layer when mod is active", function ()
@@ -650,7 +650,7 @@ describe("OnAnimationModifier", function ()
       local modifier = make_modifier(animation)
       modifier:apply_lab_modifications()
       assert.are.equal(1, #animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], animation.layers[1].filename)
     end)
 
     it("does not remove HD Age layer when mod is not active", function ()

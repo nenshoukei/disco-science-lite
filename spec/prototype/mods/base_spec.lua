@@ -43,14 +43,19 @@ describe("mods/base", function ()
       _G.data.raw.lab["lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
-    it("removes light layer and freezes remaining layers", function ()
+    it("applies vanilla lab modifications", function ()
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
-      Helper.assert_animation.frozen(1, on_animation)
+      Helper.assert_animation.is_vanilla_lab_modifications_applied(on_animation)
+    end)
+
+    it("mutates on_animation in-place", function ()
+      local layers = on_animation.layers
+
+      Mod.on_data_final_fixes()
+
+      assert.are.equal(on_animation, data.raw.lab["lab"].on_animation)
+      assert.are.equal(layers, data.raw.lab["lab"].on_animation.layers)
     end)
 
     it("does nothing when lab is not in data.raw", function ()

@@ -37,6 +37,7 @@ describe("mods/5dim", function ()
       on_animation = {
         layers = {
           { filename = "__5dim_automation__/graphics/entities/lab/lab-02.png", frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png",     frame_count = 1, repeat_count = 33 },
           { filename = "__base__/graphics/entity/lab/lab-light.png",           frame_count = 33 },
           { filename = "__base__/graphics/entity/lab/lab-shadow.png",          frame_count = 1, repeat_count = 33 },
         },
@@ -44,13 +45,10 @@ describe("mods/5dim", function ()
       _G.data.raw.lab["5d-lab-02"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
-    it("replaces 5dim filename with base lab and removes light layer and freezes", function ()
+    it("applies vanilla lab modifications to 5d-lab", function ()
       Mod.on_data_final_fixes()
 
-      assert.are.equal(2, #on_animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[2].filename)
-      Helper.assert_animation.frozen(1, on_animation)
+      Helper.assert_animation.is_vanilla_lab_modifications_applied(on_animation)
     end)
   end)
 end)

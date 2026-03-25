@@ -3,14 +3,24 @@
 import numpy as np
 from PIL import Image, ImageFilter
 
-from lib import FACTORIO_DATA, GRAPHICS_DIR, LAB_LIGHT_PNG, save_image
+from lib import FACTORIO_DATA, GRAPHICS_DIR, LAB_LIGHT_PNG, extract_frame, save_image
 
 # --- Lab ---
 
+LAB_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab.png"
+LAB_FRAME_W, LAB_FRAME_H = 194, 174
+LAB_COLS = 11
+
+LAB_MASK_DST = GRAPHICS_DIR / "factorio/lab-mask.png"
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
 
 
 def generate_lab_images():
+    lab = np.array(Image.open(LAB_SRC).convert("LA"))  # Grayscaled
+    mask = extract_frame(lab, 1, LAB_FRAME_W, LAB_FRAME_H, LAB_COLS)  # Extract first frame
+    mask[:, :, 0] = np.clip(0, 255, mask[:, :, 0] * 0.5)  # Darkening
+    save_image(Image.fromarray(mask.astype(np.uint8), "LA"), LAB_MASK_DST)
+
     light = np.array(Image.open(LAB_LIGHT_PNG).convert("L"))  # Grayscaled
     overlay = (light * 1.5).clip(0, 255)  # Brightening
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
@@ -25,7 +35,7 @@ BIOLAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/biolab-overlay.png"
 
 def generate_biolab_images():
     light = np.array(Image.open(BIOLAB_LIGHT_SRC).convert("L")).astype(np.float32)  # Grayscaled
-    light = np.clip(light * 4.0, 0, 255)  # Strong brightening
+    light = np.clip(light * 3.0, 0, 255)  # Brightening
 
     # Additive-blend a blurred version for glow effect — apply blur once on the full sheet.
     light_blurred = np.array(Image.fromarray(light.astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(radius=12))).astype(np.float32)

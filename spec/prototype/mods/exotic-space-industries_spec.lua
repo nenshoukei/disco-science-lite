@@ -52,10 +52,10 @@ describe("mods/exotic-space-industries", function ()
       -- ESI Remembrance Source: https://github.com/aRighteousGod/exotic-space-industries-remembrance/blob/master/exotic-space-industries-remembrance/prototypes/dark-age/lab.lua#L47
       on_animation = {
         layers = {
-          { filename = "__exotic-space-industries-remembrance__/graphics/entities/dark-age-lab_animation.png", frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png",                                     frame_count = 1, repeat_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-light.png",                                           frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                                          frame_count = 1, repeat_count = 33 },
+          { filename = "__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png", frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png",                                    frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-light.png",                                          frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                                         frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["ei-dark-age-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
@@ -64,11 +64,7 @@ describe("mods/exotic-space-industries", function ()
     it("removes light layer and freezes ei-dark-age-lab", function ()
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__exotic-space-industries-remembrance__/graphics/entities/dark-age-lab_animation.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
-      Helper.assert_animation.frozen(1, on_animation)
+      Helper.assert_animation.is_vanilla_lab_modifications_applied(on_animation)
     end)
 
     it("does nothing when lab is not in data.raw", function ()

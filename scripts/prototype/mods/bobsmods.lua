@@ -28,19 +28,22 @@ return {
   end,
 
   on_data_final_fixes = function ()
+    local vanilla_lab = data.raw["lab"]["lab"]
+    if not (vanilla_lab and vanilla_lab.on_animation) then return end
+
     AnimationHelpers.modify_on_animation("bob-lab-2", function (modifier)
-      modifier:remove_layer("__bobtech__/graphics/entity/lab/lab2-light.png")
-      modifier:freeze_animation()
+      --- Copy on_animation from vanilla lab
+      modifier.animation.layers = vanilla_lab.on_animation.layers
     end)
 
     AnimationHelpers.modify_on_animation("bob-burner-lab", function (modifier)
-      -- No light layer
+      -- Different shape from the vanilla lab with no light layer
       modifier:freeze_animation()
     end)
 
     AnimationHelpers.modify_on_animation("bob-lab-alien", function (modifier)
-      modifier:remove_layer("__bobtech__/graphics/entity/lab/lab-alien-light.png")
-      modifier:freeze_animation()
+      --- Copy on_animation from vanilla lab
+      modifier.animation.layers = vanilla_lab.on_animation.layers
     end)
   end,
 }
