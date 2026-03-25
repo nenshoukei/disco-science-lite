@@ -22,6 +22,8 @@ return {
       ["ei-fusion-quantum-age-tech"]    = { 1.00, 0.70, 0.47 },
       ["ei-exotic-age-tech"]            = { 0.78, 0.97, 0.17 },
       ["ei-black-hole-exotic-age-tech"] = { 1.00, 0.68, 0.37 },
+
+      ["space-science-pack"]            = { 0.84, 0.75, 0.21 },
     })
 
     PrototypeLabRegistry.register("ei-dark-age-lab") -- uses the vanilla lab overlay
