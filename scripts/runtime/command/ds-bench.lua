@@ -1,34 +1,10 @@
 local ColorFunctions = require("scripts.runtime.color-functions")
+local CommandHelpers = require("scripts.runtime.command.command-helpers")
 
 local N = 100000
 local ROUNDS = 10
 
 local MS_PER_TICK = 1000 / 60
-
--- ID-to-Name map for translation callbacks
-local pending_translations = {}
-
-script.on_event(defines.events.on_string_translated, function (event)
-  local result = event.result
-  local name = pending_translations[event.id]
-  if name then
-    local total_ms = tonumber(string.match(result, "([%d%.]+)"))
-    if total_ms then
-      local ms_per_op = total_ms / N
-      local ops_per_ms = 1 / ms_per_op
-      local ops_per_tick = ops_per_ms * MS_PER_TICK
-      print(string.format("%-30s: Total %7.2f ms, Avg %.8s ms; %9.4f ops/ms, %9.4f ops/tick", name, total_ms,
-        ms_per_op,
-        ops_per_ms, ops_per_tick))
-    else
-      print(string.format("%-30s: %s", name, result))
-    end
-    pending_translations[event.id] = nil
-  end
-  if not next(pending_translations) then
-    game.print("Finished benchmarks. See console for the results.")
-  end
-end)
 
 --- @generic T : { name: string }
 --- @param test_cases T[]
@@ -57,6 +33,28 @@ local function filter_test_cases(test_cases, parameter)
   end
 
   return filtered
+end
+
+--- @param player LuaPlayer
+--- @param results table<string, LuaProfiler>
+local function show_benchmark_results(player, results)
+  CommandHelpers.translate_strings(player, results, function (translated)
+    for name in pairs(results) do
+      local result = translated[name]
+      local total_ms = tonumber(string.match(result, "([%d%.]+)"))
+      if total_ms then
+        local ms_per_op = total_ms / N
+        local ops_per_ms = 1 / ms_per_op
+        local ops_per_tick = ops_per_ms * MS_PER_TICK
+        print(string.format("%-30s: Total %7.2f ms, Avg %.8s ms; %9.4f ops/ms, %9.4f ops/tick", name, total_ms,
+          ms_per_op,
+          ops_per_ms, ops_per_tick))
+      else
+        print(string.format("%-30s: %s", name, result))
+      end
+    end
+    player.print("Finished benchmarks. See console for the results.")
+  end)
 end
 
 commands.add_command(
@@ -204,12 +202,7 @@ commands.add_command(
       results[tc.name] = p
     end
 
-    for name, result in pairs(results) do
-      local id = player.request_translation(result)
-      if id then
-        pending_translations[id] = name
-      end
-    end
+    show_benchmark_results(player, results)
   end
 )
 
@@ -257,11 +250,6 @@ commands.add_command(
       results[tc.name] = p
     end
 
-    for name, result in pairs(results) do
-      local id = player.request_translation(result)
-      if id then
-        pending_translations[id] = name
-      end
-    end
+    show_benchmark_results(player, results)
   end
 )

@@ -98,4 +98,56 @@ function CommandHelpers.fill_lab_entity_with_ingredients(lab)
   end
 end
 
+local is_translating = false
+
+--- Translate localised strings by player.request_translation.
+---
+--- Because the translation process uses the global `on_string_translated` event,
+--- it throws error when another translation is running.
+---
+--- Result is returned by the callback asynchronously.
+--- Not guaranteed to be the same order as `strings`.
+--- If `strings` is empty, the callback is called with `{}` synchronously.
+---
+--- @generic K
+--- @param player LuaPlayer
+--- @param strings table<K, LocalisedString|LuaProfiler>
+--- @param callback fun(translated: table<K, string>)
+function CommandHelpers.translate_strings(player, strings, callback)
+  if next(strings) == nil then
+    callback({})
+    return
+  end
+
+  if is_translating then
+    error("Another traslation is running")
+  end
+  is_translating = true
+
+  local pending_translations = {}
+  for key, result in pairs(strings) do
+    local id = player.request_translation(result)
+    if not id then
+      is_translating = false
+      error("player.request_translation() failed for key " .. key)
+    end
+    pending_translations[id] = key
+  end
+
+  local results = {}
+  script.on_event(defines.events.on_string_translated, function (event)
+    local key = pending_translations[event.id]
+    if key then
+      results[key] = event.result
+      pending_translations[event.id] = nil
+    end
+
+    if not next(pending_translations) then
+      script.on_event(defines.events.on_string_translated, nil)
+      is_translating = false
+      callback(results)
+    end
+  end)
+end
+
 return CommandHelpers
