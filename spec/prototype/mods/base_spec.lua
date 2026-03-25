@@ -53,7 +53,11 @@ describe("mods/base", function ()
       Mod.on_data()
       Mod.on_data_final_fixes()
 
-      Helper.assert_animation.is_vanilla_lab_modifications_applied(on_animation)
+      assert.are.equal(3, #on_animation.layers)
+      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], on_animation.layers[1].filename)
+      assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
+      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
+      Helper.assert_animation.frozen(1, on_animation)
     end)
 
     it("mutates on_animation in-place", function ()
@@ -67,16 +71,12 @@ describe("mods/base", function ()
     end)
 
     it("does nothing when on_animation is replaced to different one", function ()
+      local copied_on_animation = Helper.table_deep_copy(_G.data.raw.lab["lab"].on_animation)
+
       Mod.on_data() -- this marks on_animation
 
-      _G.data.raw.lab["lab"].on_animation = {
-        layers = {
-          { filename = "__base__/graphics/entity/lab/lab.png",             frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-light.png",       frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
-        },
-      }
+      -- Sets to a copy that is not marked
+      _G.data.raw.lab["lab"].on_animation = copied_on_animation
 
       Mod.on_data_final_fixes()
 

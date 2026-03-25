@@ -12,13 +12,4 @@ function AnimationAssertion.frozen(expected_frame_index, animation)
   end
 end
 
---- @param animation data.Animation
-function AnimationAssertion.is_vanilla_lab_modifications_applied(animation)
-  luassert.are.equal(3, #animation.layers)
-  luassert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], animation.layers[1].filename)
-  luassert.are.equal("__base__/graphics/entity/lab/lab-integration.png", animation.layers[2].filename)
-  luassert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[3].filename)
-  AnimationAssertion.frozen(1, animation)
-end
-
 return AnimationAssertion
