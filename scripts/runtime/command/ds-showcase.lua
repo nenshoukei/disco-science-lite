@@ -52,6 +52,7 @@ commands.add_command(
 
     local top_offsets = {
       ["pressure-lab"] = 3,
+      ["cryolab"] = 1,
     }
     local x = 0
     local y = 0
