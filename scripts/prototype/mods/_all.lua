@@ -9,6 +9,7 @@ return {
   require("scripts.prototype.mods.Cerys-Moon-of-Fulgora"),
   require("scripts.prototype.mods.corrundum"),
   require("scripts.prototype.mods.exotic-space-industries"),
+  require("scripts.prototype.mods.Factorio-Tiberium"),
   require("scripts.prototype.mods.fusion-lab"),
   require("scripts.prototype.mods.Igrys"),
   require("scripts.prototype.mods.Krastorio2"),

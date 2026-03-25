@@ -34,6 +34,7 @@ These mods are supported out of the box.
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout
 - [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
+- [Factorio and Conquer: Tiberian Dawn](https://mods.factorio.com/mod/Factorio-Tiberium) by James-Fire
 - [Factorio HD Age](https://mods.factorio.com/mod/factorio_hd_age_modpack) by Ingo_Igel
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
