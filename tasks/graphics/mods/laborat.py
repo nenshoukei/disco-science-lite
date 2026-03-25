@@ -47,10 +47,10 @@ def generate_laborat_images():
         # starts from the current tick offset, not frame 0), so we use a single static frame.
         frames_stack = np.stack([extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS) for i in range(LABORAT_FRAMES)], axis=0)
         static_overlay = frames_stack.min(axis=0).clip(0, 90)  # Clipping makes pixels inside the dome flat
-        static_overlay = np.clip(static_overlay * 1.5, 0, 255)  # Brighten
         save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
 
         mask = make_mask_frame(anim.astype(np.uint8), overlay_grid > 10)
+        mask[:, :, 0] = mask[:, :, 0] * 0.8  # Darkening
         save_image(Image.fromarray(mask, "LA"), modified_dst)
 
     with open_mod_zip(LABORAT_SRC) as open_file:
