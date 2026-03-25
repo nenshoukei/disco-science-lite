@@ -1,5 +1,6 @@
 local LabControl = require("scripts.runtime.control.lab-control")
 local CommandHelpers = require("scripts.runtime.command.command-helpers")
+local table_merge = require("scripts.shared.utils").table_merge
 
 --- @class TestCase
 --- @field name string
@@ -16,7 +17,6 @@ local test_cases = {
         name = "lab",
         position = { x = 0, y = 0 },
         force = game.forces.player,
-        raise_built = true,
       })
       assert(lab, "lab entity is not created")
 
@@ -30,7 +30,7 @@ local test_cases = {
       assert(renderer.chunk_map.entries[lab.unit_number], "chunk_map.entries not added")
       assert(renderer.chunk_map.data[surface.index][0][0][1] == overlay, "chunk_map.data is not updated")
 
-      lab.destroy({ raise_destroy = true })
+      lab.destroy()
     end,
   },
   {
@@ -50,9 +50,9 @@ local test_cases = {
       CommandHelpers.clear_surface(surface)
 
       -- Create labs in different chunks: (0,0), (1,0), (0,1)
-      local lab1 = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
-      local lab2 = surface.create_entity({ name = "lab", position = { x = 40, y = 0 }, force = player.force, raise_built = true })
-      local lab3 = surface.create_entity({ name = "lab", position = { x = 0, y = 40 }, force = player.force, raise_built = true })
+      local lab1 = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
+      local lab2 = surface.create_entity({ name = "lab", position = { x = 40, y = 0 }, force = player.force })
+      local lab3 = surface.create_entity({ name = "lab", position = { x = 0, y = 40 }, force = player.force })
       assert(lab1, "lab1 entity is not created")
       assert(lab2, "lab2 entity is not created")
       assert(lab3, "lab3 entity is not created")
@@ -69,9 +69,9 @@ local test_cases = {
       assert(entry2 and entry2.chunk_x == 1 and entry2.chunk_y == 0, "lab2 not in chunk (1,0)")
       assert(entry3 and entry3.chunk_x == 0 and entry3.chunk_y == 1, "lab3 not in chunk (0,1)")
 
-      lab1.destroy({ raise_destroy = true })
-      lab2.destroy({ raise_destroy = true })
-      lab3.destroy({ raise_destroy = true })
+      lab1.destroy()
+      lab2.destroy()
+      lab3.destroy()
     end,
   },
   {
@@ -90,7 +90,7 @@ local test_cases = {
     test = function (renderer, surface, player)
       CommandHelpers.clear_surface(surface)
 
-      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
+      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
       assert(lab, "lab entity is not created")
 
       local entry_before = renderer.chunk_map.entries[lab.unit_number]
@@ -99,8 +99,7 @@ local test_cases = {
         "Expected initial chunk (0,0), got (" .. entry_before.chunk_x .. "," .. entry_before.chunk_y .. ")")
 
       -- Teleport to chunk (1,1): position (40, 40) -> floor(40/32) = 1
-      lab.teleport({ 40, 40 })
-      renderer:update_lab_position(lab)
+      lab.teleport({ 40, 40 }, nil, true)
 
       local entry_after = renderer.chunk_map.entries[lab.unit_number]
       assert(entry_after, "chunk_map.entries not found after teleport")
@@ -111,7 +110,7 @@ local test_cases = {
       local surface_chunks = renderer.chunk_map.data[surface.index]
       assert(not (surface_chunks and surface_chunks[0] and surface_chunks[0][0]), "Old chunk (0,0) still exists in chunk_map")
 
-      lab.destroy({ raise_destroy = true })
+      lab.destroy()
     end,
   },
   {
@@ -126,25 +125,40 @@ local test_cases = {
     end,
   },
   {
-    name = "Surface cleared removes overlays",
+    name = "Renders on a different surface",
     test = function (renderer, surface, player)
       CommandHelpers.clear_surface(surface)
 
-      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force, raise_built = true })
+      local map_gen_settings = table_merge(game.default_map_gen_settings, {
+        width = 32,
+        height = 32,
+        no_enemies_mode = true,
+      })
+
+      local new_surface = game.create_surface("mks-dsl-" --[[$NAME_PREFIX]] .. "test-surface", map_gen_settings)
+      CommandHelpers.clear_surface(new_surface)
+
+      local lab = new_surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
       assert(lab, "lab entity is not created")
-      assert(renderer.overlays[lab.unit_number], "overlay not created before surface clear")
+      assert(renderer.overlays[lab.unit_number], "overlay not created")
+      assert(renderer.chunk_map.entries[lab.unit_number].surface_index == new_surface.index, "overlay is created for different surface")
 
-      renderer:remove_overlays_on_surface(surface.index)
-
-      assert(next(renderer.overlays) == nil, "overlays is not empty after surface cleared")
-      assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty after surface cleared")
-      assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty after surface cleared")
+      new_surface.clear()
+    end,
+  },
+  {
+    name = "After new surface cleared",
+    test = function (renderer)
+      assert(next(renderer.overlays) == nil, "overlays is not empty")
+      assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
+      assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
       local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
-      assert(#objects == 0, "rendering objects remain after surface cleared")
+      assert(#objects == 0, "rendering object still remains")
 
-      -- Lab entity still exists; clean it up without raising events (overlays already cleared).
-      CommandHelpers.clear_surface(surface)
+      local new_surface = game.surfaces["mks-dsl-" --[[$NAME_PREFIX]] .. "test-surface"]
+      assert(new_surface, "New surface does not exist in game.surfaces")
+      game.delete_surface(new_surface)
     end,
   },
   {
@@ -154,7 +168,7 @@ local test_cases = {
       local force = player.force
 
       -- Create lab at origin
-      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = force, raise_built = true })
+      local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = force })
       assert(lab, "lab entity not created")
       CommandHelpers.fill_lab_entity_with_ingredients(lab)
 
@@ -216,7 +230,6 @@ local test_cases = {
           name = proto.name,
           position = { x = x, y = 0 },
           force = player.force,
-          raise_built = true,
         })
         assert(lab, "Failed to create lab entity: " .. proto.name)
         created_labs[#created_labs + 1] = lab
@@ -240,7 +253,7 @@ local test_cases = {
       end
 
       for i = 1, #created_labs do
-        created_labs[i].destroy({ raise_destroy = true })
+        created_labs[i].destroy()
       end
     end,
   },
