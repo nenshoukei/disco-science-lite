@@ -8,7 +8,6 @@ from lib import (
     GRAPHICS_DIR,
     fill_black_background,
     extract_frame,
-    resize_mask,
     open_mod_zip,
     save_image,
 )
@@ -36,11 +35,7 @@ def generate_krastorio2_images():
 
     light = np.array(fill_black_background(light_img).convert("L")).astype(np.float32)
 
-    static_overlay = np.zeros((K2_ANIM_FRAME_H, K2_ANIM_FRAME_W), dtype=np.float32)
-    for i in range(K2_FRAMES):
-        light_frame = extract_frame(light, i, K2_GLOW_LIGHT_FRAME_W, K2_GLOW_LIGHT_FRAME_H, K2_GLOW_LIGHT_COLS)
-        sized = resize_mask(light_frame, K2_ANIM_FRAME_W, K2_ANIM_FRAME_H, K2_ANIM_FRAME_SHIFT, K2_GLOW_LIGHT_FRAME_SHIFT)
-        static_overlay = np.maximum(static_overlay, sized)
-
+    frames_stack = np.stack([extract_frame(light, i, K2_GLOW_LIGHT_FRAME_W, K2_GLOW_LIGHT_FRAME_H, K2_GLOW_LIGHT_COLS) for i in range(K2_FRAMES)], axis=0)
+    static_overlay = frames_stack.max(axis=0)
     static_overlay = np.clip(static_overlay * 0.8, 0, 255)
     save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), K2_OVERLAY_DST)
