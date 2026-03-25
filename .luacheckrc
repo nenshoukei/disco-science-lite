@@ -29,5 +29,6 @@ globals = {
     "commands",
     "mods",
     "util",
+    "table_size",
     "__DebugAdapter"
 }
