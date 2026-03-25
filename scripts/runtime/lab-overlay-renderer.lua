@@ -256,7 +256,7 @@ function LabOverlayRenderer:render_overlays_for_all_labs(force)
     local entities = surface.find_entities_filtered(entity_filter)
     for i = 1, #entities do
       local lab = entities[i]
-      local unit_number = lab.unit_number
+      local unit_number = lab.valid and lab.unit_number or nil
       if unit_number then
         local existing_overlay = existing_overlays[unit_number]
         local existing_companion = existing_companions[unit_number]

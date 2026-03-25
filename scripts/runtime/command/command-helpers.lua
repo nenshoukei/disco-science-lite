@@ -4,7 +4,7 @@ local CommandHelpers = {}
 --- @param surface LuaSurface
 function CommandHelpers.clear_surface(surface)
   for _, entity in ipairs(surface.find_entities()) do
-    if entity.name ~= "electric-energy-interface" then
+    if entity.valid and entity.name ~= "electric-energy-interface" then
       entity.destroy()
     end
   end
