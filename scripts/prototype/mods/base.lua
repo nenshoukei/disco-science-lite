@@ -17,11 +17,20 @@ return {
     })
 
     PrototypeLabRegistry.register("lab")
+
+    -- Mark the vanilla lab on_animation so that we can detect on_animation replaced by mods.
+    local lab = data.raw.lab["lab"]
+    if lab and lab.on_animation then
+      lab.on_animation["_dsl_is_original"] = true
+    end
   end,
 
   on_data_final_fixes = function ()
     AnimationHelpers.modify_on_animation("lab", function (modifier)
-      modifier:apply_lab_modifications()
+      -- Applies modifications only if the on_animation is the original one.
+      if modifier.animation["_dsl_is_original"] then
+        modifier:apply_lab_modifications()
+      end
     end)
   end,
 }

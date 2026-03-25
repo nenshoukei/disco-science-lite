@@ -24,6 +24,12 @@ describe("mods/base", function ()
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["lab"])
     end)
+
+    it("marks the on_animation as original", function ()
+      _G.data.raw.lab["lab"] = ({ on_animation = {} }) --[[@as data.LabPrototype]]
+      Mod.on_data()
+      assert.is_true(_G.data.raw.lab["lab"].on_animation["_dsl_is_original"])
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -44,6 +50,7 @@ describe("mods/base", function ()
     end)
 
     it("applies vanilla lab modifications", function ()
+      Mod.on_data()
       Mod.on_data_final_fixes()
 
       Helper.assert_animation.is_vanilla_lab_modifications_applied(on_animation)
@@ -52,16 +59,38 @@ describe("mods/base", function ()
     it("mutates on_animation in-place", function ()
       local layers = on_animation.layers
 
+      Mod.on_data()
       Mod.on_data_final_fixes()
 
       assert.are.equal(on_animation, data.raw.lab["lab"].on_animation)
       assert.are.equal(layers, data.raw.lab["lab"].on_animation.layers)
     end)
 
+    it("does nothing when on_animation is replaced to different one", function ()
+      Mod.on_data() -- this marks on_animation
+
+      _G.data.raw.lab["lab"].on_animation = {
+        layers = {
+          { filename = "__base__/graphics/entity/lab/lab.png",             frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-light.png",       frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
+        },
+      }
+
+      Mod.on_data_final_fixes()
+
+      local modified = _G.data.raw.lab["lab"].on_animation
+      assert.is_not_nil(modified) --- @cast modified -nil
+      assert.are.equal(4, #modified.layers)
+      assert.is_nil(modified.layers[1].frame_sequence)
+    end)
+
     it("does nothing when lab is not in data.raw", function ()
       _G.data.raw.lab["lab"] = nil
 
       assert.no_error(function ()
+        Mod.on_data()
         Mod.on_data_final_fixes()
       end)
     end)
