@@ -58,6 +58,10 @@ These mods are supported out of the box.
     - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
     - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 
+In addition to the mods listed above, mods that support the original Disco Science mod should work out of the box as well.
+
+If you'd like support for a specific mod, feel free to reach out via the Discussion on the Mod Portal. No promises, but I'll do my best!
+
 ## Compatibility
 
 It is safe to add or remove this mod in mid-game.
