@@ -7,10 +7,21 @@ local PrototypeColorRegistry = require("scripts.prototype.prototype-color-regist
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
+local COMPRESS_LEVEL = { "compact", "nanite", "quantum", "singularity" }
+
 return {
   on_data = function ()
     if mods["omnimatter_compression"] then
       PrototypeColorRegistry.add_prefix("compressed-")
+
+      -- Suffixes for compressed labs
+      local level = settings.startup["omnicompression_building_levels"]
+      if level and level.value then
+        -- Assumes that `omnicompression_building_levels` is an integer setting.
+        for i = 1, math.min(level.value --[[@as integer]], #COMPRESS_LEVEL) do
+          PrototypeLabRegistry.add_suffix("-compressed-" .. COMPRESS_LEVEL[i])
+        end
+      end
     end
 
     if mods["omnimatter_science"] and mods["omnimatter_crystal"] then
