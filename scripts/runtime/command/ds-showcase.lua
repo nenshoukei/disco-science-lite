@@ -77,3 +77,41 @@ commands.add_command(
     end
   end
 )
+
+local MEGA_WIDTH = 320 --[[$CHUNK_SIZE * 10]]
+local MEGA_HEIGHT = 320 --[[$CHUNK_SIZE * 10]]
+
+commands.add_command(
+  "ds-showcase2",
+  "Set up showcase of vanilla labs in mega-base",
+  function (event)
+    local player = game.get_player(event.player_index)
+    if not player then return end
+
+    local surface = player.surface
+    CommandHelpers.setup_test_surface(surface)
+
+    --- Use "spidertron" technology for research
+    CommandHelpers.set_current_research(player.force, "spidertron")
+
+    local proto = prototypes.entity["lab"]
+    local x = 0
+    local y = 0
+    local width = math.max(proto.tile_width, 1)
+    local height = math.max(proto.tile_height, 1)
+    while y < MEGA_HEIGHT do
+      while x < MEGA_WIDTH do
+        local lab = surface.create_entity({
+          name = proto.name,
+          position = { x = x + width / 2, y = y + height / 2 },
+          force = player.force,
+        })
+        assert(lab, "Failed to create lab entity: " .. proto.name)
+        CommandHelpers.fill_lab_entity_with_ingredients(lab)
+        x = x + width
+      end
+      x = 0
+      y = y + height
+    end
+  end
+)
