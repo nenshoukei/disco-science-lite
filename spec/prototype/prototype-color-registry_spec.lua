@@ -142,5 +142,41 @@ describe("PrototypeColorRegistry", function ()
       PrototypeColorRegistry.reset()
       assert.are_not.equal(before, PrototypeColorRegistry.registered_colors)
     end)
+
+    it("clears registered_prefixes", function ()
+      PrototypeColorRegistry.add_prefix("compressed-")
+      PrototypeColorRegistry.reset()
+      assert.are.same({}, PrototypeColorRegistry.registered_prefixes)
+    end)
+
+    it("returns independent prefix tables after each reset (no shared state)", function ()
+      local before = PrototypeColorRegistry.registered_prefixes
+      PrototypeColorRegistry.reset()
+      assert.are_not.equal(before, PrototypeColorRegistry.registered_prefixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("registered_prefixes", function ()
+    it("is empty by default", function ()
+      assert.are.same({}, PrototypeColorRegistry.registered_prefixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("add_prefix", function ()
+    it("adds a prefix to registered_prefixes", function ()
+      PrototypeColorRegistry.add_prefix("compressed-")
+      assert.are.equal(1, #PrototypeColorRegistry.registered_prefixes)
+      assert.are.equal("compressed-", PrototypeColorRegistry.registered_prefixes[1])
+    end)
+
+    it("can add multiple prefixes in order", function ()
+      PrototypeColorRegistry.add_prefix("compressed-")
+      PrototypeColorRegistry.add_prefix("expensive-")
+      assert.are.equal(2, #PrototypeColorRegistry.registered_prefixes)
+      assert.are.equal("compressed-", PrototypeColorRegistry.registered_prefixes[1])
+      assert.are.equal("expensive-", PrototypeColorRegistry.registered_prefixes[2])
+    end)
   end)
 end)

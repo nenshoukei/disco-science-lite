@@ -17,4 +17,9 @@ data:extend({
     name = "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]],
     data = PrototypeColorRegistry.registered_colors,
   },
+  {
+    type = "mod-data",
+    name = "mks-dsl-ingredient-color-prefixes" --[[$INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME]],
+    data = PrototypeColorRegistry.registered_prefixes,
+  },
 })

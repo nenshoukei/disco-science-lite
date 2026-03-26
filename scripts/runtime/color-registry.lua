@@ -1,4 +1,23 @@
 local Utils = require("scripts.shared.utils")
+local string_sub = string.sub
+
+--- Resolve an ingredient color by prefixes.
+---
+--- @param name string Ingredient name to look up.
+--- @param ingredient_colors table<string, ColorTuple>
+--- @param color_prefixes string[]
+--- @param n_prefixes number Length of color_prefixes (pre-computed by caller).
+--- @return ColorTuple|nil
+local function resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
+  for j = 1, n_prefixes do
+    local prefix = color_prefixes[j]
+    local prefix_len = #prefix
+    if string_sub(name, 1, prefix_len) == prefix then
+      local color = ingredient_colors[string_sub(name, prefix_len + 1)]
+      if color then return color end
+    end
+  end
+end
 
 --- Registry for colors of research ingredients
 ---
@@ -21,6 +40,9 @@ function ColorRegistry.new(color_overrides)
     --- Runtime overrides persisted in storage. Reference to storage.color_overrides.
     --- @type table<string, ColorTuple>
     overrides = color_overrides or {},
+    --- Ingredient color prefixes for fallback lookup. Loaded from prototype mod-data.
+    --- @type string[]
+    color_prefixes = {},
   }
   return setmetatable(self, ColorRegistry)
 end
@@ -54,15 +76,18 @@ end
 function ColorRegistry:validate_technology_prototypes(all_prototypes)
   all_prototypes = all_prototypes or prototypes
   local ingredient_colors = self.ingredient_colors
+  local color_prefixes = self.color_prefixes
+  local n_prefixes = #color_prefixes
 
   --- @type table<string, boolean>
   local not_found = {}
   for _, tech in pairs(all_prototypes.technology) do
     local ingredients = tech.research_unit_ingredients
     for i = 1, #ingredients do
-      local ingredient = ingredients[i]
-      if not ingredient_colors[ingredient.name] then
-        not_found[ingredient.name] = true
+      local name = ingredients[i].name
+      local color = ingredient_colors[name] or resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
+      if not color then
+        not_found[name] = true
       end
     end
   end
@@ -100,6 +125,15 @@ function ColorRegistry:load_prototype_colors()
   for name, color in pairs(self.overrides) do
     self.ingredient_colors[name] = color
   end
+
+  local prefixes_data = prototypes.mod_data[ "mks-dsl-ingredient-color-prefixes" --[[$INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME]] ]
+  if prefixes_data then
+    --- @type string[]
+    local prefixes = prefixes_data.data
+    self.color_prefixes = Utils.table_deep_copy(prefixes)
+  else
+    self.color_prefixes = {}
+  end
 end
 
 --- Get colors of ingredients for research of technology.
@@ -115,9 +149,12 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
   local colors = {}
   local n_colors = 0
   local ingredient_colors = self.ingredient_colors
+  local color_prefixes = self.color_prefixes
+  local n_prefixes = #color_prefixes
   local ingredients = technology.research_unit_ingredients
   for i = 1, #ingredients do
-    local color = ingredient_colors[ingredients[i].name]
+    local name = ingredients[i].name
+    local color = ingredient_colors[name] or resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
     if color then
       n_colors = n_colors + 1
       colors[n_colors] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }

@@ -25,6 +25,7 @@ local consts = {
   REGISTERED_LABS_MOD_DATA_NAME = NAME_PREFIX .. "registered-labs",
   EXCLUDED_LABS_MOD_DATA_NAME = NAME_PREFIX .. "excluded-labs",
   INGREDIENT_COLORS_MOD_DATA_NAME = NAME_PREFIX .. "ingredient-colors",
+  INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME = NAME_PREFIX .. "ingredient-color-prefixes",
 
   -- animations
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",

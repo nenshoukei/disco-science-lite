@@ -32,6 +32,16 @@ local function set_mod_data(colors)
   end
 end
 
+--- Set up mock mod_data for prefix tests.
+--- @param prefixes string[]|nil nil to remove mod_data
+local function set_prefix_mod_data(prefixes)
+  if prefixes then
+    _G.prototypes.mod_data[ "mks-dsl-ingredient-color-prefixes" --[[$INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME]] ] = ({ data = prefixes }) --[[@as LuaModData]]
+  else
+    _G.prototypes.mod_data[ "mks-dsl-ingredient-color-prefixes" --[[$INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME]] ] = nil
+  end
+end
+
 describe("ColorRegistry", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
@@ -122,6 +132,7 @@ describe("ColorRegistry", function ()
   describe("load_prototype_colors", function ()
     before_each(function ()
       set_mod_data(nil)
+      set_prefix_mod_data(nil)
     end)
 
     it("does nothing when mod_data prototype is absent", function ()
@@ -187,6 +198,30 @@ describe("ColorRegistry", function ()
       local color = r:get_ingredient_color("custom-pack")
       assert.is_not_nil(color)  --- @cast color -nil
       assert.are.equal(0.5, color.r)
+    end)
+
+    it("loads color_prefixes from mod_data", function ()
+      set_prefix_mod_data({ "compressed-" })
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      assert.are.equal(1, #r.color_prefixes)
+      assert.are.equal("compressed-", r.color_prefixes[1])
+    end)
+
+    it("sets color_prefixes to empty table when prefix mod_data is absent", function ()
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      assert.are.same({}, r.color_prefixes)
+    end)
+
+    it("replaces previously loaded color_prefixes on re-load", function ()
+      set_prefix_mod_data({ "old-prefix-" })
+      local r = ColorRegistry.new()
+      r:load_prototype_colors()
+      set_prefix_mod_data({ "new-prefix-" })
+      r:load_prototype_colors()
+      assert.are.equal(1, #r.color_prefixes)
+      assert.are.equal("new-prefix-", r.color_prefixes[1])
     end)
   end)
 
@@ -284,6 +319,68 @@ describe("ColorRegistry", function ()
         assert.are.equal(dc[3] * 0.5, colors[1][3])
       end)
     end)
+
+    describe("with color_prefixes", function ()
+      it("finds color via prefix when exact name is not registered", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r.color_prefixes = { "compressed-" }
+        local tech = make_tech("compressed-automation-science-pack")
+        local colors = r:get_colors_for_research(tech)
+        assert.are.equal(1, #colors)
+        assert.are.equal(0.91, colors[1][1])
+        assert.are.equal(0.16, colors[1][2])
+        assert.are.equal(0.20, colors[1][3])
+      end)
+
+      it("applies intensity to prefix-resolved color", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 1.0, 0.0, 0.5 })
+        r.color_prefixes = { "compressed-" }
+        local tech = make_tech("compressed-automation-science-pack")
+        local colors = r:get_colors_for_research(tech, 0.5)
+        assert.are.equal(0.5, colors[1][1])
+        assert.are.equal(0.0, colors[1][2])
+        assert.are.equal(0.25, colors[1][3])
+      end)
+
+      it("exact match takes priority over prefix match", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r:set_ingredient_color("compressed-automation-science-pack", { 0.1, 0.1, 0.1 })
+        r.color_prefixes = { "compressed-" }
+        local tech = make_tech("compressed-automation-science-pack")
+        local colors = r:get_colors_for_research(tech)
+        assert.are.equal(0.1, colors[1][1])
+      end)
+
+      it("falls back to default when prefix base name is also not registered", function ()
+        local r = ColorRegistry.new()
+        r.color_prefixes = { "compressed-" }
+        local tech = make_tech("compressed-unknown-pack")
+        local colors = r:get_colors_for_research(tech)
+        assert.are.equal(1, #colors)
+        assert.are.same(ColorRegistry.default_research_color, colors[1])
+      end)
+
+      it("tries multiple prefixes in order and uses first match", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r.color_prefixes = { "expensive-", "compressed-" }
+        local tech = make_tech("compressed-automation-science-pack")
+        local colors = r:get_colors_for_research(tech)
+        assert.are.equal(1, #colors)
+        assert.are.equal(0.91, colors[1][1])
+      end)
+
+      it("does not try prefix lookup when color_prefixes is empty", function ()
+        local r = ColorRegistry.new()
+        local tech = make_tech("compressed-automation-science-pack")
+        local colors = r:get_colors_for_research(tech)
+        assert.are.equal(1, #colors)
+        assert.are.same(ColorRegistry.default_research_color, colors[1])
+      end)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -327,6 +424,28 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       local protos = make_prototypes({})
       assert.is_nil(r:validate_technology_prototypes(protos))
+    end)
+
+    it("does not report ingredient resolvable via prefix as unregistered", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+      r.color_prefixes = { "compressed-" }
+      local protos = make_prototypes({
+        make_tech("compressed-automation-science-pack"),
+      })
+      assert.is_nil(r:validate_technology_prototypes(protos))
+    end)
+
+    it("reports ingredient not resolvable via prefix as unregistered", function ()
+      local r = ColorRegistry.new()
+      r.color_prefixes = { "compressed-" }
+      local protos = make_prototypes({
+        make_tech("compressed-unknown-pack"),
+      })
+      local names = r:validate_technology_prototypes(protos)
+      assert.is_not_nil(names) --- @cast names -nil
+      assert.are.equal(1, #names)
+      assert.are.equal("compressed-unknown-pack", names[1])
     end)
   end)
 end)

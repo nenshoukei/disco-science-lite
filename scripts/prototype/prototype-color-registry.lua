@@ -11,12 +11,22 @@ local PrototypeColorRegistry = {
   --- This table is stored as mod-data prototype for runtime stage.
   --- @type table<string, ColorTuple>
   registered_colors = {},
+
+  --- Registered ingredient color prefixes for fallback lookup.
+  ---
+  --- When an ingredient color is not found by exact name, each prefix is tried.
+  --- If the ingredient name starts with a prefix, the prefix is stripped and the base name is looked up.
+  ---
+  --- This table is stored as mod-data prototype for runtime stage.
+  --- @type string[]
+  registered_prefixes = {},
 }
 _G.DiscoSciencePrototypeColorRegistry = PrototypeColorRegistry
 
 --- Resets the registry. Just for testing.
 function PrototypeColorRegistry.reset()
   PrototypeColorRegistry.registered_colors = {}
+  PrototypeColorRegistry.registered_prefixes = {}
 end
 
 --- Get color for an ingredient (science pack).
@@ -48,6 +58,17 @@ function PrototypeColorRegistry.set_by_table(item_name_to_color)
   for item_name, color in pairs(item_name_to_color) do
     registered_colors[item_name] = color
   end
+end
+
+--- Register a color prefix for fallback lookup.
+---
+--- When an ingredient color is not found by exact name, each registered prefix is tried.
+--- If the ingredient name starts with the prefix, the prefix is stripped and the base name is looked up.
+---
+--- @param prefix string Prefix string, e.g. "compressed-"
+function PrototypeColorRegistry.add_prefix(prefix)
+  local registered_prefixes = PrototypeColorRegistry.registered_prefixes
+  registered_prefixes[#registered_prefixes + 1] = prefix
 end
 
 return PrototypeColorRegistry
