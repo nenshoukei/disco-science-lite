@@ -83,17 +83,13 @@ end
 ---
 --- Excluded labs are removed from registered_labs and stored in excluded_labs.
 function LabRegistry:load_prototype_registrations()
-  local excluded_mod_data = prototypes.mod_data[ "mks-dsl-excluded-labs" --[[$EXCLUDED_LABS_MOD_DATA_NAME]] ]
-  if excluded_mod_data then
-    self.excluded_labs = excluded_mod_data.data --[[@as table<string, boolean>]]
+  local mod_data = prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ]
+  if mod_data then
+    local data = mod_data.data --[[@as DiscoSciencePrototypeData]]
+    self.excluded_labs = data.excluded_labs
+    self.registered_labs = Utils.table_deep_copy(data.registered_labs)
   else
     self.excluded_labs = {}
-  end
-
-  local registred_mod_data = prototypes.mod_data[ "mks-dsl-registered-labs" --[[$REGISTERED_LABS_MOD_DATA_NAME]] ]
-  if registred_mod_data then
-    self.registered_labs = Utils.table_deep_copy(registred_mod_data.data --[[@as table<string, LabRegistration>]])
-  else
     self.registered_labs = {}
   end
 

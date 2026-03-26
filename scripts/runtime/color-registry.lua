@@ -119,24 +119,18 @@ end
 --- Always replaces existing colors with a fresh copy from the prototype data,
 --- then re-applies runtime overrides on top.
 function ColorRegistry:load_prototype_colors()
-  local mod_data = prototypes.mod_data[ "mks-dsl-ingredient-colors" --[[$INGREDIENT_COLORS_MOD_DATA_NAME]] ]
+  local mod_data = prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ]
   if mod_data then
-    self.ingredient_colors = Utils.table_deep_copy(mod_data.data --[[@as table<string, ColorTuple>]])
+    local data = mod_data.data --[[@as DiscoSciencePrototypeData]]
+    self.ingredient_colors = Utils.table_deep_copy(data.registered_colors)
+    self.color_prefixes = Utils.table_deep_copy(data.registered_prefixes)
   else
     self.ingredient_colors = {}
+    self.color_prefixes = {}
   end
   -- Re-apply runtime overrides on top of prototype data.
   for name, color in pairs(self.overrides) do
     self.ingredient_colors[name] = color
-  end
-
-  local prefixes_data = prototypes.mod_data[ "mks-dsl-ingredient-color-prefixes" --[[$INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME]] ]
-  if prefixes_data then
-    --- @type string[]
-    local prefixes = prefixes_data.data
-    self.color_prefixes = Utils.table_deep_copy(prefixes)
-  else
-    self.color_prefixes = {}
   end
 end
 

@@ -22,10 +22,7 @@ local consts = {
   LAB_CREATED_EFFECT_ID = "ds-create-lab", -- For compatibility with DS
 
   -- mod-data
-  REGISTERED_LABS_MOD_DATA_NAME = NAME_PREFIX .. "registered-labs",
-  EXCLUDED_LABS_MOD_DATA_NAME = NAME_PREFIX .. "excluded-labs",
-  INGREDIENT_COLORS_MOD_DATA_NAME = NAME_PREFIX .. "ingredient-colors",
-  INGREDIENT_COLOR_PREFIXES_MOD_DATA_NAME = NAME_PREFIX .. "ingredient-color-prefixes",
+  PROTOTYPE_DATA_MOD_DATA_NAME = NAME_PREFIX .. "prototype-data",
 
   -- animations
   LAB_OVERLAY_ANIMATION_NAME = NAME_PREFIX .. "lab-overlay",

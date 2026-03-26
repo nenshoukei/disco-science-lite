@@ -12,6 +12,14 @@ _G.consts = {}
 --- @field is_companion_under_overlay boolean? If `true`, the companion will be rendered under the overlay.
 --- @field scale number? Scale of the overlay.
 
+--- Prototype-stage data passed to the runtime stage via mod-data.
+---
+--- @class (exact) DiscoSciencePrototypeData
+--- @field registered_labs table<string, LabRegistration>
+--- @field excluded_labs table<string, boolean>
+--- @field registered_colors table<string, ColorTuple>
+--- @field registered_prefixes string[]
+
 --- @alias ColorTuple [number, number, number]
 --- @alias ColorStruct Color.0
 
