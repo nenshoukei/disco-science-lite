@@ -15,7 +15,8 @@ This mod provides users with:
 
 - A `research ingredient` is an ingredient consumed by labs for reasearching technologies. One technology has 0+ ingredients. In vanilla Factorio, the ingredients are called "science packs".
 - A `color function` is a function that calculates colors of labs. This calculation chooses a color from the colors of research ingredients, and changes it by a formula. Defined in `scripts/runtime/color-functions.lua`.
-- A `lab overlay` is an object that is rendered on a lab for colorizing it. One lab overlay for one lab.
+- An `overlay` is an object that is rendered on a lab for colorizing it. One overlay for one lab.
+- A `companion` is an object that is rendered above or beneath the overlay, to provide a non-colorized layer that is animated in sync with the overlay. Same lifecycle as the overlay. One overlay has zero or one companion.
 
 ## Directory Structure
 
