@@ -1,6 +1,6 @@
 # API for Mod Authors
 
-Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the stage. These are drop-in compatible with the original Disco Science mod, so existing mods targeting Disco Science can work without code changes.
+Disco Science Lite exposes APIs for other mods to integrate with. Two APIs are available depending on the loading stage (Prototype or Runtime). These are drop-in compatible with the original Disco Science mod, so existing mods targeting Disco Science can work without code changes.
 
 ## Quick Start
 
@@ -14,7 +14,7 @@ To use the APIs, add `"? disco-science-lite"` to your mod's [dependencies](https
 }
 ```
 
-Prefix `? ` means an optional dependency. Use `(?) ` instead if you want to hide it from the dependency list shown in the mod browser.
+The prefix `? ` indicates an optional dependency. Use `(?) ` instead if you want to hide it from the dependency list shown in the mod browser.
 
 ### If your mod adds custom science packs
 
@@ -33,7 +33,7 @@ This code is compatible with both the original Disco Science mod and Disco Scien
 
 The `if remote.interfaces["DiscoScience"] then` guard is required because Disco Science Lite is an optional dependency — if the player has not installed it, the interface will not be registered.
 
-### If your mod adds a custom lab
+### If your mod adds a custom lab with the same shape as the vanilla lab
 
 Register your lab in `data.lua`:
 
@@ -105,7 +105,7 @@ Both Disco Science and Disco Science Lite expose the same `DiscoScience` global 
 
 The following calls work as-is with Disco Science Lite — no modifications required:
 
-- `DiscoScience.prepareLab(lab)` — uses the vanilla lab overlay and freezes `lab.on_animation`, matching the original mod's behavior
+- `DiscoScience.prepareLab(lab)` — uses the vanilla lab overlay and freezes `lab.on_animation` on the first frame, matching the original mod's behavior
 - `remote.call("DiscoScience", "setLabScale", lab_name, scale)` — works identically
 - `remote.call("DiscoScience", "setIngredientColor", item_name, color)` — works identically
 - `remote.call("DiscoScience", "getIngredientColor", item_name)` — works identically
