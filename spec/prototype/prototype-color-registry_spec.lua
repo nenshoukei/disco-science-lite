@@ -154,6 +154,18 @@ describe("PrototypeColorRegistry", function ()
       PrototypeColorRegistry.reset()
       assert.are_not.equal(before, PrototypeColorRegistry.registered_prefixes)
     end)
+
+    it("clears registered_suffixes", function ()
+      PrototypeColorRegistry.add_suffix("-compressed")
+      PrototypeColorRegistry.reset()
+      assert.are.same({}, PrototypeColorRegistry.registered_suffixes)
+    end)
+
+    it("returns independent suffix tables after each reset (no shared state)", function ()
+      local before = PrototypeColorRegistry.registered_suffixes
+      PrototypeColorRegistry.reset()
+      assert.are_not.equal(before, PrototypeColorRegistry.registered_suffixes)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -177,6 +189,30 @@ describe("PrototypeColorRegistry", function ()
       assert.are.equal(2, #PrototypeColorRegistry.registered_prefixes)
       assert.are.equal("compressed-", PrototypeColorRegistry.registered_prefixes[1])
       assert.are.equal("expensive-", PrototypeColorRegistry.registered_prefixes[2])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("registered_suffixes", function ()
+    it("is empty by default", function ()
+      assert.are.same({}, PrototypeColorRegistry.registered_suffixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("add_suffix", function ()
+    it("adds a suffix to registered_suffixes", function ()
+      PrototypeColorRegistry.add_suffix("-compressed")
+      assert.are.equal(1, #PrototypeColorRegistry.registered_suffixes)
+      assert.are.equal("-compressed", PrototypeColorRegistry.registered_suffixes[1])
+    end)
+
+    it("can add multiple suffixes in order", function ()
+      PrototypeColorRegistry.add_suffix("-compressed")
+      PrototypeColorRegistry.add_suffix("-expensive")
+      assert.are.equal(2, #PrototypeColorRegistry.registered_suffixes)
+      assert.are.equal("-compressed", PrototypeColorRegistry.registered_suffixes[1])
+      assert.are.equal("-expensive", PrototypeColorRegistry.registered_suffixes[2])
     end)
   end)
 end)

@@ -92,4 +92,40 @@ function Utils.map_position_struct(position)
   }
 end
 
+--- Pre-expand a table by adding prefix/suffix derived entries from a base snapshot.
+---
+--- For each prefix in `prefixes`, derives `prefix..name` entries.
+--- For each suffix in `suffixes`, derives `name..suffix` entries.
+--- Priority: exact > prefix[1] > prefix[2] > ... > suffix[1] > suffix[2] > ...
+--- Existing entries are never overwritten (earlier entries take priority).
+---
+--- @generic T
+--- @param base_table table<string, T>
+--- @param prefixes string[]
+--- @param suffixes string[]
+function Utils.pre_expand_with_affixes(base_table, prefixes, suffixes)
+  local base_snapshot = {}
+  for name, value in pairs(base_table) do
+    base_snapshot[name] = value
+  end
+  for j = 1, #prefixes do
+    local prefix = prefixes[j]
+    for name, value in pairs(base_snapshot) do
+      local derived = prefix .. name
+      if base_table[derived] == nil then
+        base_table[derived] = value
+      end
+    end
+  end
+  for j = 1, #suffixes do
+    local suffix = suffixes[j]
+    for name, value in pairs(base_snapshot) do
+      local derived = name .. suffix
+      if base_table[derived] == nil then
+        base_table[derived] = value
+      end
+    end
+  end
+end
+
 return Utils

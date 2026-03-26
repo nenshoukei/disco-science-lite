@@ -100,5 +100,77 @@ describe("PrototypeLabRegistry", function ()
       PrototypeLabRegistry.reset()
       assert.are_not.equal(before_labs, PrototypeLabRegistry.registered_labs)
     end)
+
+    it("clears registered_prefixes", function ()
+      PrototypeLabRegistry.add_prefix("compressed-")
+      PrototypeLabRegistry.reset()
+      assert.are.same({}, PrototypeLabRegistry.registered_prefixes)
+    end)
+
+    it("clears registered_suffixes", function ()
+      PrototypeLabRegistry.add_suffix("-compressed-compact")
+      PrototypeLabRegistry.reset()
+      assert.are.same({}, PrototypeLabRegistry.registered_suffixes)
+    end)
+
+    it("returns independent prefix tables after each reset (no shared state)", function ()
+      local before = PrototypeLabRegistry.registered_prefixes
+      PrototypeLabRegistry.reset()
+      assert.are_not.equal(before, PrototypeLabRegistry.registered_prefixes)
+    end)
+
+    it("returns independent suffix tables after each reset (no shared state)", function ()
+      local before = PrototypeLabRegistry.registered_suffixes
+      PrototypeLabRegistry.reset()
+      assert.are_not.equal(before, PrototypeLabRegistry.registered_suffixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("registered_prefixes", function ()
+    it("is empty by default", function ()
+      assert.are.same({}, PrototypeLabRegistry.registered_prefixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("add_prefix", function ()
+    it("adds a prefix to registered_prefixes", function ()
+      PrototypeLabRegistry.add_prefix("compressed-")
+      assert.are.equal(1, #PrototypeLabRegistry.registered_prefixes)
+      assert.are.equal("compressed-", PrototypeLabRegistry.registered_prefixes[1])
+    end)
+
+    it("can add multiple prefixes in order", function ()
+      PrototypeLabRegistry.add_prefix("compressed-")
+      PrototypeLabRegistry.add_prefix("expensive-")
+      assert.are.equal(2, #PrototypeLabRegistry.registered_prefixes)
+      assert.are.equal("compressed-", PrototypeLabRegistry.registered_prefixes[1])
+      assert.are.equal("expensive-", PrototypeLabRegistry.registered_prefixes[2])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("registered_suffixes", function ()
+    it("is empty by default", function ()
+      assert.are.same({}, PrototypeLabRegistry.registered_suffixes)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("add_suffix", function ()
+    it("adds a suffix to registered_suffixes", function ()
+      PrototypeLabRegistry.add_suffix("-compressed-compact")
+      assert.are.equal(1, #PrototypeLabRegistry.registered_suffixes)
+      assert.are.equal("-compressed-compact", PrototypeLabRegistry.registered_suffixes[1])
+    end)
+
+    it("can add multiple suffixes in order", function ()
+      PrototypeLabRegistry.add_suffix("-compressed-compact")
+      PrototypeLabRegistry.add_suffix("-compressed-quantum")
+      assert.are.equal(2, #PrototypeLabRegistry.registered_suffixes)
+      assert.are.equal("-compressed-compact", PrototypeLabRegistry.registered_suffixes[1])
+      assert.are.equal("-compressed-quantum", PrototypeLabRegistry.registered_suffixes[2])
+    end)
   end)
 end)

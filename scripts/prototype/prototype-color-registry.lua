@@ -20,6 +20,15 @@ local PrototypeColorRegistry = {
   --- This table is stored as mod-data prototype for runtime stage.
   --- @type string[]
   registered_prefixes = {},
+
+  --- Registered ingredient color suffixes for fallback lookup.
+  ---
+  --- When an ingredient color is not found by exact name or prefix, each suffix is tried.
+  --- If the ingredient name ends with a suffix, the suffix is stripped and the base name is looked up.
+  ---
+  --- This table is stored as mod-data prototype for runtime stage.
+  --- @type string[]
+  registered_suffixes = {},
 }
 _G.DiscoSciencePrototypeColorRegistry = PrototypeColorRegistry
 
@@ -27,6 +36,7 @@ _G.DiscoSciencePrototypeColorRegistry = PrototypeColorRegistry
 function PrototypeColorRegistry.reset()
   PrototypeColorRegistry.registered_colors = {}
   PrototypeColorRegistry.registered_prefixes = {}
+  PrototypeColorRegistry.registered_suffixes = {}
 end
 
 --- Get color for an ingredient (science pack).
@@ -69,6 +79,17 @@ end
 function PrototypeColorRegistry.add_prefix(prefix)
   local registered_prefixes = PrototypeColorRegistry.registered_prefixes
   registered_prefixes[#registered_prefixes + 1] = prefix
+end
+
+--- Register a color suffix for fallback lookup.
+---
+--- When an ingredient color is not found by exact name or prefix, each registered suffix is tried.
+--- If the ingredient name ends with the suffix, the suffix is stripped and the base name is looked up.
+---
+--- @param suffix string Suffix string, e.g. "-compressed"
+function PrototypeColorRegistry.add_suffix(suffix)
+  local registered_suffixes = PrototypeColorRegistry.registered_suffixes
+  registered_suffixes[#registered_suffixes + 1] = suffix
 end
 
 return PrototypeColorRegistry

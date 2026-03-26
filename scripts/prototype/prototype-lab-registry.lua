@@ -15,6 +15,24 @@ local PrototypeLabRegistry = {
   --- This table is stored as mod-data prototype for runtime stage.
   --- @type table<string, boolean>
   excluded_labs = {},
+
+  --- Registered lab name prefixes for fallback lookup.
+  ---
+  --- When a lab registration is not found by exact name, each prefix is tried.
+  --- If the lab name starts with a prefix, the prefix is stripped and the base name is looked up.
+  ---
+  --- This table is stored as mod-data prototype for runtime stage.
+  --- @type string[]
+  registered_prefixes = {},
+
+  --- Registered lab name suffixes for fallback lookup.
+  ---
+  --- When a lab registration is not found by exact name or prefix, each suffix is tried.
+  --- If the lab name ends with a suffix, the suffix is stripped and the base name is looked up.
+  ---
+  --- This table is stored as mod-data prototype for runtime stage.
+  --- @type string[]
+  registered_suffixes = {},
 }
 _G.DiscoSciencePrototypeLabRegistry = PrototypeLabRegistry
 
@@ -22,6 +40,8 @@ _G.DiscoSciencePrototypeLabRegistry = PrototypeLabRegistry
 function PrototypeLabRegistry.reset()
   PrototypeLabRegistry.registered_labs = {}
   PrototypeLabRegistry.excluded_labs = {}
+  PrototypeLabRegistry.registered_prefixes = {}
+  PrototypeLabRegistry.registered_suffixes = {}
 end
 
 --- Exclude a lab from colorization.
@@ -50,6 +70,28 @@ function PrototypeLabRegistry.register(lab_name, registration)
   registration = registration or {}
   PrototypeLabRegistry.excluded_labs[lab_name] = nil
   PrototypeLabRegistry.registered_labs[lab_name] = registration
+end
+
+--- Register a lab name prefix for fallback lookup.
+---
+--- When a lab registration is not found by exact name, each registered prefix is tried.
+--- If the lab name starts with the prefix, the prefix is stripped and the base name is looked up.
+---
+--- @param prefix string Prefix string, e.g. "compressed-"
+function PrototypeLabRegistry.add_prefix(prefix)
+  local registered_prefixes = PrototypeLabRegistry.registered_prefixes
+  registered_prefixes[#registered_prefixes + 1] = prefix
+end
+
+--- Register a lab name suffix for fallback lookup.
+---
+--- When a lab registration is not found by exact name or prefix, each registered suffix is tried.
+--- If the lab name ends with the suffix, the suffix is stripped and the base name is looked up.
+---
+--- @param suffix string Suffix string, e.g. "-compressed-compact"
+function PrototypeLabRegistry.add_suffix(suffix)
+  local registered_suffixes = PrototypeLabRegistry.registered_suffixes
+  registered_suffixes[#registered_suffixes + 1] = suffix
 end
 
 --- Check all registrations have valid animations.

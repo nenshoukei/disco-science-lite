@@ -3,14 +3,19 @@ local LabRegistry = require("scripts.runtime.lab-registry")
 --- Set up mock mod_data for load_prototype_registrations tests.
 --- @param registrations table<string, LabRegistration>|nil
 --- @param excluded table<string, boolean>|nil
-local function set_prototype_data(registrations, excluded)
-  if registrations or excluded then
+--- @param lab_prefixes string[]|nil
+--- @param lab_suffixes string[]|nil
+local function set_prototype_data(registrations, excluded, lab_prefixes, lab_suffixes)
+  if registrations or excluded or lab_prefixes or lab_suffixes then
     _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ] = ({
       data = {
         registered_labs = registrations or {},
         excluded_labs = excluded or {},
         registered_colors = {},
-        registered_prefixes = {},
+        registered_color_prefixes = {},
+        registered_color_suffixes = {},
+        registered_lab_prefixes = lab_prefixes or {},
+        registered_lab_suffixes = lab_suffixes or {},
       }
     }) --[[@as LuaModData]]
   else
@@ -67,6 +72,147 @@ describe("LabRegistry", function ()
       assert.is_not_nil(registration) --- @cast registration -nil
       assert.are.equal("custom-anim", registration.animation)
       assert.are.equal(3, registration.scale)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("get_registration with lab_prefixes", function ()
+    it("finds registration via prefix when exact name is not registered", function ()
+      set_prototype_data(
+        { ["biolab"] = { animation = "biolab-anim", scale = 1 } },
+        nil,
+        { "compressed-" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("compressed-biolab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
+    end)
+
+    it("exact match takes priority over prefix match", function ()
+      set_prototype_data(
+        {
+          ["biolab"] = { animation = "biolab-anim" },
+          ["compressed-biolab"] = { animation = "compressed-anim" },
+        },
+        nil,
+        { "compressed-" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("compressed-biolab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("compressed-anim", registration.animation)
+    end)
+
+    it("returns nil when prefix base name is also not registered", function ()
+      set_prototype_data(nil, nil, { "compressed-" })
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      assert.is_nil(r:get_registration("compressed-unknown-lab"))
+    end)
+
+    it("tries multiple prefixes in order and uses first match", function ()
+      set_prototype_data(
+        { ["biolab"] = { animation = "biolab-anim" } },
+        nil,
+        { "expensive-", "compressed-" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("compressed-biolab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("get_registration with lab_suffixes", function ()
+    it("finds registration via suffix when exact name is not registered", function ()
+      set_prototype_data(
+        { ["biolab"] = { animation = "biolab-anim", scale = 1 } },
+        nil,
+        nil,
+        { "-compressed-compact" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("biolab-compressed-compact")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
+    end)
+
+    it("exact match takes priority over suffix match", function ()
+      set_prototype_data(
+        {
+          ["biolab"] = { animation = "biolab-anim" },
+          ["biolab-compressed-compact"] = { animation = "compact-anim" },
+        },
+        nil,
+        nil,
+        { "-compressed-compact" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("biolab-compressed-compact")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("compact-anim", registration.animation)
+    end)
+
+    it("prefix match takes priority over suffix match", function ()
+      set_prototype_data(
+        { ["lab"] = { animation = "lab-anim" } },
+        nil,
+        { "compressed-" },
+        { "-compact" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      -- "compressed-lab-compact":
+      --   prefix "compressed-" -> base "lab-compact" (not in base) -> not expanded by prefix
+      --   suffix "-compact" -> base "compressed-lab" (not in base) -> not expanded by suffix
+      --   -> nil
+      assert.is_nil(r:get_registration("compressed-lab-compact"))
+    end)
+
+    it("returns nil when suffix base name is also not registered", function ()
+      set_prototype_data(nil, nil, nil, { "-compressed-compact" })
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      assert.is_nil(r:get_registration("unknown-lab-compressed-compact"))
+    end)
+
+    it("tries multiple suffixes in order and uses first match", function ()
+      set_prototype_data(
+        { ["biolab"] = { animation = "biolab-anim" } },
+        nil,
+        nil,
+        { "-compressed-quantum", "-compressed-compact" }
+      )
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("biolab-compressed-compact")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
+    end)
+
+    it("loads lab_suffixes from mod_data via load_prototype_registrations", function ()
+      set_prototype_data({ ["biolab"] = { animation = "biolab-anim" } }, nil, nil, { "-compressed-compact" })
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("biolab-compressed-compact")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
+    end)
+
+    it("loads lab_prefixes from mod_data via load_prototype_registrations", function ()
+      set_prototype_data({ ["biolab"] = { animation = "biolab-anim" } }, nil, { "compressed-" })
+      local r = LabRegistry.new()
+      r:load_prototype_registrations()
+      local registration = r:get_registration("compressed-biolab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal("biolab-anim", registration.animation)
     end)
   end)
 

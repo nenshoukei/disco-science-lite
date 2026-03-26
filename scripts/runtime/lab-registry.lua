@@ -12,6 +12,7 @@ function LabRegistry.new(lab_scale_overrides)
   --- @class LabRegistry
   local self = {
     --- Registrations by LabPrototype name.
+    --- Includes pre-expanded entries for all registered prefix/suffix combinations.
     --- @type table<string, LabRegistration>
     registered_labs = {},
     --- Runtime scale overrides persisted in storage. Reference to storage.lab_scale_overrides.
@@ -20,6 +21,12 @@ function LabRegistry.new(lab_scale_overrides)
     --- Labs excluded from colorization. Loaded from prototype mod-data on each load.
     --- @type table<string, boolean>
     excluded_labs = {},
+    --- Lab name prefixes for fallback lookup. Loaded from prototype mod-data.
+    --- @type string[]
+    lab_prefixes = {},
+    --- Lab name suffixes for fallback lookup. Loaded from prototype mod-data.
+    --- @type string[]
+    lab_suffixes = {},
   }
   return setmetatable(self, LabRegistry)
 end
@@ -61,6 +68,7 @@ end
 --- Get the LabRegistration for the given lab name.
 ---
 --- Returns `nil` for excluded labs.
+--- Pre-expanded entries for prefix/suffix combinations are stored directly in registered_labs.
 ---
 --- @param lab_name string LabPrototype name.
 --- @return LabRegistration|nil
@@ -79,7 +87,7 @@ end
 --- Load lab registrations from the mod-data prototype.
 ---
 --- Always replaces existing registrations with a fresh copy from the prototype data,
---- then re-applies runtime scale overrides on top.
+--- then re-applies runtime scale overrides on top, then pre-expands prefix/suffix entries.
 ---
 --- Excluded labs are removed from registered_labs and stored in excluded_labs.
 function LabRegistry:load_prototype_registrations()
@@ -88,9 +96,13 @@ function LabRegistry:load_prototype_registrations()
     local data = mod_data.data --[[@as DiscoSciencePrototypeData]]
     self.excluded_labs = data.excluded_labs
     self.registered_labs = Utils.table_deep_copy(data.registered_labs)
+    self.lab_prefixes = Utils.table_deep_copy(data.registered_lab_prefixes)
+    self.lab_suffixes = Utils.table_deep_copy(data.registered_lab_suffixes)
   else
     self.excluded_labs = {}
     self.registered_labs = {}
+    self.lab_prefixes = {}
+    self.lab_suffixes = {}
   end
 
   -- Remove excluded labs from registered_labs.
@@ -109,6 +121,8 @@ function LabRegistry:load_prototype_registrations()
       end
     end
   end
+
+  Utils.pre_expand_with_affixes(self.registered_labs, self.lab_prefixes, self.lab_suffixes)
 end
 
 return LabRegistry

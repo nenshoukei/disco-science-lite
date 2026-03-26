@@ -1,23 +1,4 @@
 local Utils = require("scripts.shared.utils")
-local string_sub = string.sub
-
---- Resolve an ingredient color by prefixes.
----
---- @param name string Ingredient name to look up.
---- @param ingredient_colors table<string, ColorTuple>
---- @param color_prefixes string[]
---- @param n_prefixes number Length of color_prefixes (pre-computed by caller).
---- @return ColorTuple|nil
-local function resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
-  for j = 1, n_prefixes do
-    local prefix = color_prefixes[j]
-    local prefix_len = #prefix
-    if string_sub(name, 1, prefix_len) == prefix then
-      local color = ingredient_colors[string_sub(name, prefix_len + 1)]
-      if color then return color end
-    end
-  end
-end
 
 --- Registry for colors of research ingredients
 ---
@@ -35,6 +16,7 @@ function ColorRegistry.new(color_overrides)
   --- @class ColorRegistry
   local self = {
     --- Dictionary of ingredient colors. Key is ingredient's ItemPrototype name.
+    --- Includes pre-expanded entries for all registered prefix/suffix combinations.
     --- @type table<string, ColorTuple>
     ingredient_colors = {},
     --- Runtime overrides persisted in storage. Reference to storage.color_overrides.
@@ -43,6 +25,9 @@ function ColorRegistry.new(color_overrides)
     --- Ingredient color prefixes for fallback lookup. Loaded from prototype mod-data.
     --- @type string[]
     color_prefixes = {},
+    --- Ingredient color suffixes for fallback lookup. Loaded from prototype mod-data.
+    --- @type string[]
+    color_suffixes = {},
   }
   return setmetatable(self, ColorRegistry)
 end
@@ -53,8 +38,24 @@ end
 --- @param color Color Color for the ingredient.
 function ColorRegistry:set_ingredient_color(item_name, color)
   local tuple = Utils.color_tuple(color)
-  self.ingredient_colors[item_name] = tuple
+  local ingredient_colors = self.ingredient_colors
+  ingredient_colors[item_name] = tuple
   self.overrides[item_name] = tuple
+  -- Expand derived entries for all loaded prefixes and suffixes.
+  local color_prefixes = self.color_prefixes
+  for j = 1, #color_prefixes do
+    local derived = color_prefixes[j] .. item_name
+    if ingredient_colors[derived] == nil then
+      ingredient_colors[derived] = tuple
+    end
+  end
+  local color_suffixes = self.color_suffixes
+  for j = 1, #color_suffixes do
+    local derived = item_name .. color_suffixes[j]
+    if ingredient_colors[derived] == nil then
+      ingredient_colors[derived] = tuple
+    end
+  end
 end
 
 --- Get color for an ingredient (science pack)
@@ -62,11 +63,7 @@ end
 --- @param item_name string Name of ItemPrototype of the ingredient
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
 function ColorRegistry:get_ingredient_color(item_name)
-  --- @type Color|nil
   local color = self.ingredient_colors[item_name]
-  if not color then
-    color = resolve_color_by_prefixes(item_name, self.ingredient_colors, self.color_prefixes, #self.color_prefixes)
-  end
   return color and Utils.color_struct(color)
 end
 
@@ -80,8 +77,6 @@ end
 function ColorRegistry:validate_technology_prototypes(all_prototypes)
   all_prototypes = all_prototypes or prototypes
   local ingredient_colors = self.ingredient_colors
-  local color_prefixes = self.color_prefixes
-  local n_prefixes = #color_prefixes
 
   --- @type table<string, boolean>
   local not_found = {}
@@ -89,8 +84,7 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
     local ingredients = tech.research_unit_ingredients
     for i = 1, #ingredients do
       local name = ingredients[i].name
-      local color = ingredient_colors[name] or resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
-      if not color then
+      if not ingredient_colors[name] then
         not_found[name] = true
       end
     end
@@ -117,21 +111,24 @@ end
 --- Load ingredient colors from the prototype stage mod-data.
 ---
 --- Always replaces existing colors with a fresh copy from the prototype data,
---- then re-applies runtime overrides on top.
+--- then re-applies runtime overrides on top, then pre-expands prefix/suffix entries.
 function ColorRegistry:load_prototype_colors()
   local mod_data = prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ]
   if mod_data then
     local data = mod_data.data --[[@as DiscoSciencePrototypeData]]
     self.ingredient_colors = Utils.table_deep_copy(data.registered_colors)
-    self.color_prefixes = Utils.table_deep_copy(data.registered_prefixes)
+    self.color_prefixes = Utils.table_deep_copy(data.registered_color_prefixes)
+    self.color_suffixes = Utils.table_deep_copy(data.registered_color_suffixes)
   else
     self.ingredient_colors = {}
     self.color_prefixes = {}
+    self.color_suffixes = {}
   end
   -- Re-apply runtime overrides on top of prototype data.
   for name, color in pairs(self.overrides) do
     self.ingredient_colors[name] = color
   end
+  Utils.pre_expand_with_affixes(self.ingredient_colors, self.color_prefixes, self.color_suffixes)
 end
 
 --- Get colors of ingredients for research of technology.
@@ -147,12 +144,10 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
   local colors = {}
   local n_colors = 0
   local ingredient_colors = self.ingredient_colors
-  local color_prefixes = self.color_prefixes
-  local n_prefixes = #color_prefixes
   local ingredients = technology.research_unit_ingredients
   for i = 1, #ingredients do
     local name = ingredients[i].name
-    local color = ingredient_colors[name] or resolve_color_by_prefixes(name, ingredient_colors, color_prefixes, n_prefixes)
+    local color = ingredient_colors[name]
     if color then
       n_colors = n_colors + 1
       colors[n_colors] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
