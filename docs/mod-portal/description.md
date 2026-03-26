@@ -1,4 +1,4 @@
-Get those biolabs on the dance floor — with a performance twist.
+_The Disco Must Grow — into Space, with a performance twist._
 
 Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age DLC support.
 
@@ -56,6 +56,10 @@ These mods are supported out of the box.
     - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
     - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 
+In addition to the mods listed above, mods that support the original Disco Science mod should work out of the box as well.
+
+If you'd like support for a specific mod, feel free to reach out via the Discussion on the Mod Portal. No promises, but I'll do my best!
+
 ## Compatibility
 
 It is safe to add or remove this mod in mid-game.
@@ -68,7 +72,7 @@ If you are using the original Disco Science mod, you have to disable it to use D
 
 Thanks to these amazing creators for their work:
 
-- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all. _The disco must grow!_
+- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all.
 - **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
 - **[raiguard](https://mods.factorio.com/user/raiguard)** — for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
 - **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
