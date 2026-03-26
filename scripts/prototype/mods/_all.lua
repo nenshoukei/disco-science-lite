@@ -26,5 +26,6 @@ return {
   require("scripts.prototype.mods.pyanodon"),
   require("scripts.prototype.mods.rubia"),
   require("scripts.prototype.mods.secretas"),
+  require("scripts.prototype.mods.slp-dyson-sphere-reworked"),
   require("scripts.prototype.mods.space-exploration"),
 }
