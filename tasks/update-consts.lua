@@ -25,7 +25,7 @@ local BOOLEAN_LITERAL = "\\b(?:true|false)\\b"
 local LITERAL = "(?:" .. STRING_LITERAL .. "|" .. NUMERIC_LITERAL .. "|" .. BOOLEAN_LITERAL .. ")"
 
 local NAKED_CONST = "\\b(?:consts\\.([A-Z0-9_]+))"
-local TAGGED_LITERAL = LITERAL .. "(\\s*--\\s*\\[\\[\\s*\\$([^]]+?)\\s*\\]\\])"
+local TAGGED_LITERAL = LITERAL .. "(\\s*(?:,\\s*)?--\\s*\\[\\[\\s*\\$([^]]+?)\\s*\\]\\])"
 
 --- For `expr --[[$const_expr]]`, captures: [1] = --[[$const_expr]], [2] = const_expr
 --- For `consts.CONST_NAME`, captures: [3] = CONST_NAME

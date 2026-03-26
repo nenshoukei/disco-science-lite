@@ -50,6 +50,12 @@ describe("tasks/update-consts", function ()
       assert.equal(expected, task.update_content(input))
     end)
 
+    it("preserves comma between literal and tag", function ()
+      local input = "local x = {\n  999, --[[$FOO]]\n}"
+      local expected = "local x = {\n  123, --[[$FOO]]\n}"
+      assert.equal(expected, task.update_content(input))
+    end)
+
     it("handles multiple constants in one file", function ()
       local input = "local x = consts.FOO\nlocal y = consts.BAR"
       local expected = 'local x = 123 --[[$FOO]]\nlocal y = "hello" --[[$BAR]]'
