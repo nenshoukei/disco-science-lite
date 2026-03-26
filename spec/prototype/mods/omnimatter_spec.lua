@@ -46,9 +46,9 @@ describe("mods/omnimatter", function ()
       on_animation = {
         layers = {
           { filename = "__omnimatter_energy__/graphics/entity/omnitor-lab/omnitor-lab.png", frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png",                  frame_count = 1, repeat_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-light.png",                        frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                       frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png",                  frame_count = 1,  repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-light.png",                        frame_count = 33, width = 216,      height = 194 },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                       frame_count = 1,  repeat_count = 33 },
         },
       }
       _G.data.raw.lab["omnitor-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
