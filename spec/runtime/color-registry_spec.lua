@@ -80,6 +80,52 @@ describe("ColorRegistry", function ()
       assert.is_number(color.g)
       assert.is_number(color.b)
     end)
+
+    describe("with color_prefixes", function ()
+      it("finds color via prefix when exact name is not registered", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r.color_prefixes = { "compressed-" }
+        local color = r:get_ingredient_color("compressed-automation-science-pack")
+        assert.is_not_nil(color) --- @cast color -nil
+        assert.are.equal(0.91, color.r)
+        assert.are.equal(0.16, color.g)
+        assert.are.equal(0.20, color.b)
+      end)
+
+      it("exact match takes priority over prefix match", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r:set_ingredient_color("compressed-automation-science-pack", { 0.1, 0.1, 0.1 })
+        r.color_prefixes = { "compressed-" }
+        local color = r:get_ingredient_color("compressed-automation-science-pack")
+        assert.is_not_nil(color) --- @cast color -nil
+        assert.are.equal(0.1, color.r)
+      end)
+
+      it("returns nil when prefix base name is also not registered", function ()
+        local r = ColorRegistry.new()
+        r.color_prefixes = { "compressed-" }
+        local color = r:get_ingredient_color("compressed-unknown-pack")
+        assert.is_nil(color)
+      end)
+
+      it("tries multiple prefixes in order and uses first match", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        r.color_prefixes = { "expensive-", "compressed-" }
+        local color = r:get_ingredient_color("compressed-automation-science-pack")
+        assert.is_not_nil(color) --- @cast color -nil
+        assert.are.equal(0.91, color.r)
+      end)
+
+      it("does not try prefix lookup when color_prefixes is empty", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
+        local color = r:get_ingredient_color("compressed-automation-science-pack")
+        assert.is_nil(color)
+      end)
+    end)
   end)
 
   -- -------------------------------------------------------------------

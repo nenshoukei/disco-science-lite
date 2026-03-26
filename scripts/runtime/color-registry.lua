@@ -62,7 +62,11 @@ end
 --- @param item_name string Name of ItemPrototype of the ingredient
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
 function ColorRegistry:get_ingredient_color(item_name)
+  --- @type Color|nil
   local color = self.ingredient_colors[item_name]
+  if not color then
+    color = resolve_color_by_prefixes(item_name, self.ingredient_colors, self.color_prefixes, #self.color_prefixes)
+  end
   return color and Utils.color_struct(color)
 end
 
