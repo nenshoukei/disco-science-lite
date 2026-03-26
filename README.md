@@ -45,10 +45,12 @@ These mods are supported out of the box.
 - [Omnimatter](https://mods.factorio.com/user/OmnissiahZelos) mods by OmnissiahZelos
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
+- [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
 - Space-Age Planet Mods
     - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
     - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
+    - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
     - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
     - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
     - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher

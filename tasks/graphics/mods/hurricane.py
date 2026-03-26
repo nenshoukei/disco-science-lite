@@ -26,6 +26,16 @@ FR_FRAME_W, FR_FRAME_H = 400, 400
 HURRICANE_DST_DIR = GRAPHICS_DIR / "hurricane"
 
 
+def generate_hurricane_arc_furnace_images():
+    emission_img = Image.open(HURRICANE_SRC_DIR / "arc-furnace-hr-emission-1.png").convert("RGBA")
+    emission_img = fill_black_background(emission_img)
+
+    # Overlay: grayscale + brighten
+    grayscale = np.array(emission_img.convert("L")).astype(np.float32)
+    overlay = np.clip(grayscale * 1.2, 0, 255)  # Brighten
+    save_image(Image.fromarray(overlay.astype(np.uint8), "L"), HURRICANE_DST_DIR / "arc-furnace-hr-overlay.png")
+
+
 def generate_hurricane_fusion_reactor_images():
     emission_img = Image.open(HURRICANE_SRC_DIR / "fusion-reactor-hr-emission-1.png").convert("RGBA")
     emission_img = fill_black_background(emission_img)
