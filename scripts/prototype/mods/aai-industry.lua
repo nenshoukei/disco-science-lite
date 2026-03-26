@@ -26,6 +26,7 @@ return {
           name = "mks-dsl-burner-lab-overlay" --[[$NAME_PREFIX .. "burner-lab-overlay"]],
           filename = "__disco-science-lite__/graphics/factorio/aai-burner-lab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/aai-burner-lab-overlay.png"]],
           blend_mode = "additive",
+          draw_as_light = false,
           draw_as_glow = true,
           frame_sequence = lab_overlay and lab_overlay.frame_sequence,
         }),
