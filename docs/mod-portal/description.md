@@ -58,6 +58,8 @@ These mods are supported out of the box.
     - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
     - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
     - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
+    - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
+    - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 
 In addition to the mods listed above, mods that support the original Disco Science mod should work out of the box as well.
 

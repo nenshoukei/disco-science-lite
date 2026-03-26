@@ -28,4 +28,5 @@ return {
   require("scripts.prototype.mods.secretas"),
   require("scripts.prototype.mods.slp-dyson-sphere-reworked"),
   require("scripts.prototype.mods.space-exploration"),
+  require("scripts.prototype.mods.tenebris"),
 }
