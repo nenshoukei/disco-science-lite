@@ -49,6 +49,7 @@ These mods are supported out of the box.
     - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
     - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
     - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
+    - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
     - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
     - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
     - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
