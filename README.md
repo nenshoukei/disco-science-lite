@@ -41,6 +41,7 @@ These mods are supported out of the box.
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
+- [Omnimatter](https://mods.factorio.com/user/OmnissiahZelos) mods by OmnissiahZelos
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
