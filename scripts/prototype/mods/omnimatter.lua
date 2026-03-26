@@ -38,14 +38,21 @@ return {
 
       if not (light and lab_overlay) then return end
       data:extend({
-        AnimationHelpers.convert_to_animation_prototype(light, {
+        {
+          type = "animation",
           name = "mks-dsl-omnitor-lab-overlay" --[[$NAME_PREFIX .. "omnitor-lab-overlay"]],
           filename = "__disco-science-lite__/graphics/factorio/aai-burner-lab-overlay.png" --[[$GRAPHICS_DIR .. "factorio/aai-burner-lab-overlay.png"]],
           blend_mode = "additive",
           draw_as_glow = true,
-          draw_as_light = false,
+          width = 194,
+          height = 174,
+          frame_count = 33,
+          line_length = 11,
           frame_sequence = lab_overlay and lab_overlay.frame_sequence,
-        }),
+          animation_speed = light.animation_speed,
+          shift = light.shift,
+          scale = 194 / light.width * 0.5,
+        },
       })
     end)
   end,
