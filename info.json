@@ -4,7 +4,7 @@
   "title": "Disco Science Lite",
   "author": "mokkosu55",
   "homepage": "https://github.com/nenshoukei/disco-science-lite",
-  "description": "Science labs and Biolabs light up with the colour of the ingredients they're consuming, instead of always blue.\n\nRewritten version of the original Disco Science mod by Daniel Brauer to be more UPS-friendly and to support Biolabs.",
+  "description": "Science labs light up with the colous of the science packs they're consuming, instead of always blue.\n\nAn unofficial variant of the original Disco Science mod by Daniel Brauer to be more UPS-friendly and to support Space-Age mods.",
   "factorio_version": "2.0",
   "dependencies": ["base >= 2.0", "! DiscoScience"]
 }

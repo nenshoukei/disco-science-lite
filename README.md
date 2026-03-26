@@ -1,20 +1,20 @@
 # Disco Science Lite
 
-_The Disco Must Grow — into Space, with a performance twist._
+_The Disco Must Grow. Into Space, with a performance twist._
 
-Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age DLC support.
+Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age mods support.
 
 This mod is not officially affiliated with or endorsed by the original mod author.
 
 ## What It Does
 
-Your science labs glow with the color of the science packs they're consuming — and the colors shift and pulse dynamically, disco-style. One glance at your factory floor tells you exactly what's being researched.
+Your science labs glow with the color of the science packs they're consuming, shifting and pulsing dynamically, disco-style. One glance at your factory floor tells you exactly what's being researched.
 
 ## Features
 
 - **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](docs/ups-optimization.md))
 
-- **Out-of-the-Box Mod Support**: Over 20 mods are supported out of the box with properly fitted color animations — including Space Age Biolabs, Planet mods (e.g. Maraxis, Cerys), Krastorio 2, Exotic Space Industries, and many more. See the full list below.
+- **Built-in Mod Support**: Over 20 mods are natively supported with properly fitted color animations, including Space Age Biolabs, Planet mods (e.g. Maraxis, Cerys), Krastorio 2, Exotic Space Industries, and many more. See the full list below.
 
 - **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
@@ -22,7 +22,7 @@ Your science labs glow with the color of the science packs they're consuming —
 
 - **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 
-- **Mod API Compatibility**: Compatible with the original Disco Science mod's API, so mods supporting Disco Science should work out of the box.
+- **Mod API Compatibility**: Compatible with the original Disco Science mod's API, so most mods that support Disco Science will work with this one too. Some mods may not recognize it as a compatible replacement if they specifically check for the original mod by name.
 
 If you are a modder, see the [full API reference](docs/api.md) for quick start examples and prototype/runtime stage APIs.
 
@@ -65,7 +65,7 @@ These mods are supported out of the box.
     - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
     - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 
-In addition to the mods listed above, mods that support the original Disco Science mod should work out of the box as well.
+In addition to the mods listed above, mods that support the original Disco Science mod may still work, unless it specifically checks for the original mod by name and doesn't recognize Disco Science Lite as a compatible mod.
 
 If you'd like support for a specific mod, feel free to reach out via the Discussion on the Mod Portal. No promises, but I'll do my best!
 
@@ -121,8 +121,8 @@ In order to maximize performance, we use special syntax which allows to embed co
 
 Special syntax is `value --[[$expr]]` where `value` is the pre-evaluated literal and `expr` is a Lua expression evaluated in the `consts` scope at `make consts` time.
 
-- `"xyz" --[[$ABC]]` — simple constant reference (`consts.ABC = "xyz"`)
-- `"mks-dsl-foo" --[[$NAME_PREFIX .. "foo"]]` — expression (`consts.NAME_PREFIX .. "foo"` evaluated at `make consts` time)
+- `"xyz" --[[$ABC]]`: simple constant reference (`consts.ABC = "xyz"`)
+- `"mks-dsl-foo" --[[$NAME_PREFIX .. "foo"]]`: expression (`consts.NAME_PREFIX .. "foo"` evaluated at `make consts` time)
 
 All constants are defined in [scripts/shared/consts.lua](scripts/shared/consts.lua).
 
@@ -151,11 +151,11 @@ To generate these images, you have to install:
 
 Thanks to these amazing creators for their work:
 
-- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)** — for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all.
-- **[BiusArt](https://mods.factorio.com/user/BiusArt)** — for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
-- **[raiguard](https://mods.factorio.com/user/raiguard)** — for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
-- **[Hurricane](https://mods.factorio.com/user/Hurricane046)** — for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
-- **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)** — for the graphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
+- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)**: for theoriginal [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all.
+- **[BiusArt](https://mods.factorio.com/user/BiusArt)**: for thegraphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
+- **[raiguard](https://mods.factorio.com/user/raiguard)**: for thegraphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
+- **[Hurricane](https://mods.factorio.com/user/Hurricane046)**: for thegraphics from [Factorio Buildings](https://shorturl.at/AFcDm).
+- **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)**: for thegraphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
 
 ## License
 
