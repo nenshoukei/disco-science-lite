@@ -77,8 +77,12 @@ _G.DiscoScience = {
 
   --- Prepare a lab prototype for Disco Science colorization.
   ---
-  --- When `options.animation` is omitted, the vanilla lab overlay is used.
-  --- This preserves compatibility with the original Disco Science mod.
+  --- When `options.animation` is omitted, the vanilla lab overlay is used and `lab.on_animation`
+  --- is frozen on the first frame (matching the original Disco Science mod behavior of
+  --- `lab.on_animation = lab.off_animation`).
+  ---
+  --- When `options.animation` is provided, the custom overlay is used and `lab.on_animation`
+  --- is left unchanged. You are responsible for freezing or modifying it as needed.
   ---
   --- To use a custom overlay aligned to your lab's unique shape, specify `options.animation`.
   ---

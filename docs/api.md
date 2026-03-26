@@ -105,7 +105,7 @@ Both Disco Science and Disco Science Lite expose the same `DiscoScience` global 
 
 The following calls work as-is with Disco Science Lite — no modifications required:
 
-- `DiscoScience.prepareLab(lab)` — uses the vanilla lab overlay, matching the original mod's behavior
+- `DiscoScience.prepareLab(lab)` — uses the vanilla lab overlay and freezes `lab.on_animation`, matching the original mod's behavior
 - `remote.call("DiscoScience", "setLabScale", lab_name, scale)` — works identically
 - `remote.call("DiscoScience", "setIngredientColor", item_name, color)` — works identically
 - `remote.call("DiscoScience", "getIngredientColor", item_name)` — works identically
@@ -186,6 +186,10 @@ end
 Prepare a lab prototype for Disco Science colorization.
 
 If the lab was excluded by `DiscoScience.excludeLab()`, this cancels the exclusion.
+
+When `options.animation` is omitted, `lab.on_animation` is frozen on the first frame. This matches the original Disco Science mod behavior (`lab.on_animation = lab.off_animation`), so the lab stays visually static while the overlay animates.
+
+When `options.animation` is provided, `lab.on_animation` is left unchanged. You are responsible for freezing or modifying it as needed.
 
 **Parameters:**
 

@@ -13,6 +13,21 @@ local function make_lab(created_effect)
   }) --[[@as data.LabPrototype]]
 end
 
+--- @return data.LabPrototype
+local function make_lab_with_layers()
+  return ({
+    type = "lab",
+    name = "test-lab",
+    on_animation = {
+      layers = {
+        { filename = "on.png", frame_count = 8 },
+        { filename = "on-light.png", frame_count = 8 },
+      },
+    },
+    off_animation = { filename = "off.png" },
+  }) --[[@as data.LabPrototype]]
+end
+
 --- Assert that a trigger item is the expected disco-science-lite script trigger.
 --- @param trigger any
 local function assert_is_dsl_trigger(trigger)
@@ -34,6 +49,51 @@ describe("LabPrototypeModifier", function ()
       local lab = make_lab(nil)
       lab.on_animation = nil --[[@as any]]
       assert.no_error(function () LabPrototypeModifier.modify_lab(lab) end)
+    end)
+
+    describe("on_animation freeze", function ()
+      before_each(function ()
+        PrototypeLabRegistry.reset()
+      end)
+
+      it("freezes on_animation layers when registered without animation", function ()
+        local lab = make_lab_with_layers()
+        _G.data.raw["lab"][lab.name] = lab
+        PrototypeLabRegistry.register(lab.name)
+        LabPrototypeModifier.modify_lab(lab)
+        local layers = lab.on_animation.layers --- @cast layers -nil
+        assert.are.same({ 1 }, layers[1].frame_sequence)
+        assert.are.same({ 1 }, layers[2].frame_sequence)
+        assert.is_nil(layers[1].repeat_count)
+        assert.is_nil(layers[2].repeat_count)
+      end)
+
+      it("does not freeze when on_animation has no layers", function ()
+        local lab = make_lab(nil)
+        _G.data.raw["lab"][lab.name] = lab
+        PrototypeLabRegistry.register(lab.name)
+        assert.no_error(function () LabPrototypeModifier.modify_lab(lab) end)
+        assert.are.equal("on.png", lab.on_animation.filename)
+      end)
+
+      it("does not freeze when registered with a custom animation", function ()
+        local lab = make_lab_with_layers()
+        _G.data.raw["lab"][lab.name] = lab
+        PrototypeLabRegistry.register(lab.name, { animation = "custom-anim" })
+        LabPrototypeModifier.modify_lab(lab)
+        local layers = lab.on_animation.layers --- @cast layers -nil
+        assert.is_nil(layers[1].frame_sequence)
+        assert.is_nil(layers[2].frame_sequence)
+      end)
+
+      it("does not freeze when lab is not registered (fallback)", function ()
+        local lab = make_lab_with_layers()
+        _G.data.raw["lab"][lab.name] = lab
+        LabPrototypeModifier.modify_lab(lab)
+        local layers = lab.on_animation.layers --- @cast layers -nil
+        assert.is_nil(layers[1].frame_sequence)
+        assert.is_nil(layers[2].frame_sequence)
+      end)
     end)
 
     it("does nothing when the lab prototype is already modified", function ()

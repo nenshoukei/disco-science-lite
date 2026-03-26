@@ -1,4 +1,5 @@
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local AnimationHelpers = require("scripts.prototype.animation-helpers")
 
 if _G.DiscoScienceLabPrototypeModifier then
   return _G.DiscoScienceLabPrototypeModifier
@@ -65,6 +66,7 @@ end
 --- Modify LabPrototype for this mod.
 ---
 --- * Adds the lab creation trigger.
+--- * Freezes the lab on_animation if it is registered without a custom animation.
 ---
 --- If the prototype is already modified, it does nothing.
 ---
@@ -73,6 +75,15 @@ function LabPrototypeModifier.modify_lab(lab)
   if LabPrototypeModifier.modified_labs[lab] then return end
 
   add_lab_trigger(lab)
+
+  -- When registered without a custom animation (e.g. via prepareLab without options.animation),
+  -- freeze on_animation to match original DiscoScience behavior (lab stays static while overlay animates).
+  local registration = PrototypeLabRegistry.registered_labs[lab.name]
+  if registration and not registration.animation then
+    AnimationHelpers.modify_on_animation(lab.name, function (modifier)
+      modifier:freeze_animation()
+    end)
+  end
 
   LabPrototypeModifier.modified_labs[lab] = true
 end
