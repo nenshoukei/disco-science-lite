@@ -18,7 +18,7 @@ Your science labs glow with the color of the science packs they're consuming, sh
 
 - **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
-- **Color Customization**: Adjust color intensity through mod settings to get the brightness that suits your taste.
+- **Color Customization**: Adjust color saturation (how vivid) and brightness through mod settings to get the look that suits your taste.
 
 - **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 

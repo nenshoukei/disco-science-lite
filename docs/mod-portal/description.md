@@ -20,7 +20,7 @@ Your science labs glow with the color of the science packs they're consuming, sh
 
 - **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
-- **Color Customization**: Adjust color intensity through mod settings to get the brightness that suits your taste.
+- **Color Customization**: Adjust color saturation (how vivid) and brightness through mod settings to get the look that suits your taste.
 
 - **New Color Patterns**: In addition to the color patterns from the original mod, Disco Science Lite includes new ones that offer different visual rhythms and blending styles.
 
@@ -130,7 +130,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 
 - **未対応の研究所の自動着色**: 未対応の Mod が追加した研究所も 汎用的な発光エフェクトで自動的に着色します。Mod 設定でオン・オフを切り替えられます。
 
-- **色のカスタマイズ**: Mod 設定から色の鮮やかさを調整して、好みの明るさに設定できます。
+- **色のカスタマイズ**: Mod 設定から色の彩度や明度を調整して、好みの色に設定できます。
 
 - **新しい色パターン**: 原作 Mod のパターンに加え、異なる視覚効果を持つ新しい色パターンを追加しています。
 

@@ -23,12 +23,21 @@ data:extend({
   },
   {
     type = "int-setting",
-    name = "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]],
+    name = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]],
     setting_type = "runtime-global",
     default_value = 100,
     minimum_value = 1,
     maximum_value = 100,
     order = "rg-a[visual]-c",
+  },
+  {
+    type = "int-setting",
+    name = "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]],
+    setting_type = "runtime-global",
+    default_value = 100,
+    minimum_value = 1,
+    maximum_value = 100,
+    order = "rg-a[visual]-d",
   },
   {
     type = "int-setting",

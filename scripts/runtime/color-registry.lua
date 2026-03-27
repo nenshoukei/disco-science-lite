@@ -135,11 +135,17 @@ end
 ---
 --- If calling on the same technology multiple times, the result should be cached by the caller.
 ---
+--- Saturation blends each color toward its perceived luminance (gray), using the formula:
+---   result = luminance + (component - luminance) * saturation
+--- Brightness then scales all components uniformly.
+---
 --- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
---- @param intensity number? Intensity multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return ColorTuple[]
-function ColorRegistry:get_colors_for_research(technology, intensity)
-  intensity = intensity or 1.0
+function ColorRegistry:get_colors_for_research(technology, saturation, brightness)
+  saturation = saturation or 1.0
+  brightness = brightness or 1.0
   --- @type ColorTuple[]
   local colors = {}
   local n_colors = 0
@@ -150,12 +156,24 @@ function ColorRegistry:get_colors_for_research(technology, intensity)
     local color = registered_colors[name]
     if color then
       n_colors = n_colors + 1
-      colors[n_colors] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
+      local r, g, b = color[1], color[2], color[3]
+      local lum = 0.299 * r + 0.587 * g + 0.114 * b
+      colors[n_colors] = {
+        (lum + (r - lum) * saturation) * brightness,
+        (lum + (g - lum) * saturation) * brightness,
+        (lum + (b - lum) * saturation) * brightness,
+      }
     end
   end
   if n_colors == 0 then
     local color = self.default_research_color
-    colors[1] = { color[1] * intensity, color[2] * intensity, color[3] * intensity }
+    local r, g, b = color[1], color[2], color[3]
+    local lum = 0.299 * r + 0.587 * g + 0.114 * b
+    colors[1] = {
+      (lum + (r - lum) * saturation) * brightness,
+      (lum + (g - lum) * saturation) * brightness,
+      (lum + (b - lum) * saturation) * brightness,
+    }
   end
   return colors
 end

@@ -350,10 +350,18 @@ describe("LabControl events", function ()
       assert.is_nil(captured_tick_handler)
     end)
 
-    it("re-registers event handlers when a matching setting changes", function ()
+    it("re-registers event handlers when color-saturation setting changes", function ()
       captured_tick_handler = nil
 
-      handler(({ setting = "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(({ setting = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+
+      assert.is_not_nil(captured_tick_handler)
+    end)
+
+    it("re-registers event handlers when color-brightness setting changes", function ()
+      captured_tick_handler = nil
+
+      handler(({ setting = "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
       assert.is_not_nil(captured_tick_handler)
     end)

@@ -367,7 +367,7 @@ function LabOverlayRenderer:update_force_current_research(force)
   fs.current_research = force_current_research
 
   if force_current_research then
-    local colors = self.color_registry:get_colors_for_research(force_current_research, Settings.color_intensity)
+    local colors = self.color_registry:get_colors_for_research(force_current_research, Settings.color_saturation, Settings.color_brightness)
     local n_colors = #colors
 
     -- Flatten the color tuples into a single array for performance in the hot tick function.

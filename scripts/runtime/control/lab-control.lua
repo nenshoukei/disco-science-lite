@@ -127,8 +127,9 @@ LabControl.events = {
     if string.sub(setting_name, 1, #prefix) == prefix then
       Settings.reload()
 
-      if setting_name == "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] then
-        -- This resets color palette using new color intensity.
+      if setting_name == "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]]
+        or setting_name == "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] then
+        -- This resets color palette using new saturation/brightness values.
         renderer:update_all_forces_current_research()
       elseif setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
         -- Force re-render all overlays.

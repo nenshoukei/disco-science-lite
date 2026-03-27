@@ -26,10 +26,16 @@ describe("Settings", function ()
       assert.are.equal(false, Settings.is_development)
     end)
 
-    it("reads color_intensity from global and scales by 0.01", function ()
-      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ] = { value = 50 }
+    it("reads color_saturation from global and scales by 0.01", function ()
+      _G.settings.global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ] = { value = 50 }
       Settings.reload()
-      assert.are.equal(0.5, Settings.color_intensity)
+      assert.are.equal(0.5, Settings.color_saturation)
+    end)
+
+    it("reads color_brightness from global and scales by 0.01", function ()
+      _G.settings.global[ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ] = { value = 75 }
+      Settings.reload()
+      assert.are.equal(0.75, Settings.color_brightness)
     end)
 
     it("reads color_pattern_duration from global", function ()
@@ -51,8 +57,12 @@ describe("Settings", function ()
         Settings.reload()
       end)
 
-      it("uses default color_intensity of 1.0", function ()
-        assert.are.equal(1.0, Settings.color_intensity)
+      it("uses default color_saturation of 1.0", function ()
+        assert.are.equal(1.0, Settings.color_saturation)
+      end)
+
+      it("uses default color_brightness of 1.0", function ()
+        assert.are.equal(1.0, Settings.color_brightness)
       end)
 
       it("uses default color_pattern_duration of 180", function ()
@@ -72,11 +82,11 @@ describe("Settings", function ()
 
         _G.settings.startup = nil
         -- Change a global value to confirm global fields also remain unchanged
-        _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ] = { value = 0 }
+        _G.settings.global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ] = { value = 0 }
         Settings.reload()
 
         assert.are.equal(prev_fallback, Settings.is_fallback_enabled)
-        assert.are_not.equal(0.0, Settings.color_intensity)
+        assert.are_not.equal(0.0, Settings.color_saturation)
       end)
     end)
 
