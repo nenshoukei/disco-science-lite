@@ -41,10 +41,11 @@ data:extend({
   },
   {
     type = "int-setting",
-    name = "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]],
+    name = "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]],
     setting_type = "runtime-global",
-    default_value = 500 --[[$DEFAULT_MAX_UPDATES_PER_TICK]],
+    default_value = 1,
     minimum_value = 1,
+    maximum_value = 29,
     order = "rg-b[performance]-a",
   },
   {

@@ -30,9 +30,9 @@ To balance responsiveness with performance, the mod separates tasks into two mai
 
 Writing color data to the Factorio engine is one of the most "expensive" parts of a visual mod. If you zoom out to see 1,000 labs at once, updating all of them in a single tick could cause a noticeable "stutter" (CPU spike).
 
-To prevent this, the mod uses an **Automatic Stride System**. If the number of visible labs exceeds the `Max lab color updates per tick` setting (default 500), the mod automatically spreads the updates over multiple ticks.
+To prevent this, the mod uses an **Automatic Stride System**. The mod processes up to 500 visible labs per tick, and automatically spreads the remaining updates over subsequent ticks.
 
-For example, if you are looking at 1,000 labs and the limit is 500:
+For example, if you are looking at 1,000 labs:
 
 - The mod will update 500 labs on Tick A.
 - The mod will update the other 500 labs on Tick B.

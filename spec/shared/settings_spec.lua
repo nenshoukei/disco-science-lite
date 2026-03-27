@@ -44,10 +44,10 @@ describe("Settings", function ()
       assert.are.equal(360, Settings.color_pattern_duration)
     end)
 
-    it("reads max_updates_per_tick from global", function ()
-      _G.settings.global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ] = { value = 200 }
+    it("reads color_update_interval from global", function ()
+      _G.settings.global[ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ] = { value = 5 }
       Settings.reload()
-      assert.are.equal(200, Settings.max_updates_per_tick)
+      assert.are.equal(5, Settings.color_update_interval)
     end)
 
     -- -------------------------------------------------------------------
@@ -69,9 +69,10 @@ describe("Settings", function ()
         assert.are.equal(180 --[[$DEFAULT_COLOR_PATTERN_DURATION]], Settings.color_pattern_duration)
       end)
 
-      it("uses default max_updates_per_tick of 500", function ()
-        assert.are.equal(500 --[[$DEFAULT_MAX_UPDATES_PER_TICK]], Settings.max_updates_per_tick)
+      it("uses default color_update_interval of 1", function ()
+        assert.are.equal(1, Settings.color_update_interval)
       end)
+
     end)
 
     -- -------------------------------------------------------------------

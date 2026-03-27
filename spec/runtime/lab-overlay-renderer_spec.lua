@@ -640,10 +640,9 @@ describe("LabOverlayRenderer", function ()
       assert.is_nil(r.visible_overlays[2])
     end)
 
-    it("sets current_interval to 1 when visible labs fit within max_updates_per_tick", function ()
+    it("sets current_interval to 1 when visible labs fit within 500", function ()
       local r = make_renderer()
       local force = make_force(1)
-      Settings.max_updates_per_tick = 500
       for i = 1, 10 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
@@ -654,32 +653,31 @@ describe("LabOverlayRenderer", function ()
       assert.are.equal(1, r.current_interval)
     end)
 
-    it("increases current_interval when visible labs exceed max_updates_per_tick", function ()
+    it("increases current_interval when visible labs exceed 500", function ()
       local r = make_renderer()
       local force = make_force(1)
-      Settings.max_updates_per_tick = 10
-      for i = 1, 30 do
+      for i = 1, 1000 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
       add_connected_player(force, 1)
 
       r:get_state_update_function()()
 
-      -- ceil(30 / 10) = 3
-      assert.are.equal(3, r.current_interval)
+      -- ceil(1000 / 500) = 2
+      assert.are.equal(2, r.current_interval)
     end)
 
     it("caps current_interval at 60", function ()
       local r = make_renderer()
       local force = make_force(1)
-      Settings.max_updates_per_tick = 1
-      for i = 1, 300 do
+      for i = 1, 30001 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
       add_connected_player(force, 1)
 
       r:get_state_update_function()()
 
+      -- ceil(30001 / 500) = 61, capped at 60
       assert.are.equal(60, r.current_interval)
     end)
 
@@ -824,6 +822,22 @@ describe("LabOverlayRenderer", function ()
         tick() -- 1
         tick() -- 2
         tick() -- 3 >= 3, switch! cf_calls = 2
+        assert.are.equal(2, cf_calls)
+      end)
+
+      it("divides color_pattern_duration by color_update_interval", function ()
+        local r = make_renderer()
+        Settings.color_pattern_duration = 6
+        Settings.color_update_interval = 3
+        r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
+        r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+
+        -- ceil(6 / 3) = 2 ticks per epoch, not 6
+        local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        -- starts with cf_calls = 1
+        tick() -- elapsed=1, no switch yet
+        assert.are.equal(1, cf_calls)
+        tick() -- elapsed=2 >= 2, switch! cf_calls = 2
         assert.are.equal(2, cf_calls)
       end)
     end)

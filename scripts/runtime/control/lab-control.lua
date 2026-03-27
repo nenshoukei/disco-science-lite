@@ -30,7 +30,7 @@ local function setup_event_handlers()
   if not ds_storage.anim_state then
     ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
   end
-  script.on_event(defines.events.on_tick, renderer:get_tick_function(ds_storage.anim_state))
+  script.on_nth_tick(Settings.color_update_interval, renderer:get_tick_function(ds_storage.anim_state))
 
   local state_update_function = renderer:get_state_update_function()
   script.on_nth_tick(30, state_update_function)
@@ -76,13 +76,16 @@ function LabControl.on_load()
   -- on_load cannot modify game state, so defer rendering and registry binding to the first tick.
   -- bind_registries flushes pending remote calls (e.g. setLabScale), which write to storage.
   script.on_event(defines.events.on_tick, function ()
-    rebuild_overlays() -- overwrites on_tick event handler
+    script.on_event(defines.events.on_tick, nil)
+    rebuild_overlays()
   end)
 end
 
 function LabControl.on_configuration_changed()
   renderer = create_renderer()
-  rebuild_overlays() -- cancels the deferred render registered in on_load
+
+  script.on_event(defines.events.on_tick, nil) -- cancels the deferred render registered in on_load
+  rebuild_overlays()
 
   validate_technology_prototypes()
 end
@@ -125,6 +128,11 @@ LabControl.events = {
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
     local setting_name = event.setting
     if string.sub(setting_name, 1, #prefix) == prefix then
+      -- Remove old tick function if tick interval has changed.
+      if setting_name == "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] then
+        script.on_nth_tick(Settings.color_update_interval, nil)
+      end
+
       Settings.reload()
 
       if setting_name == "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]]

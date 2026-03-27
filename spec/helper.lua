@@ -116,7 +116,7 @@ local function reset_mocks()
       [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]] },
       [ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ]             = { value = 100 },
       [ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ]             = { value = 100 },
-      [ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ]     = { value = 500 --[[$DEFAULT_MAX_UPDATES_PER_TICK]] },
+      [ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ]   = { value = 1 },
     },
   })
 

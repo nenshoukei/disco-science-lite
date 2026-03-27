@@ -34,10 +34,12 @@ local consts = {
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
   COLOR_SATURATION_NAME = NAME_PREFIX .. "color-saturation",
   COLOR_BRIGHTNESS_NAME = NAME_PREFIX .. "color-brightness",
-  MAX_UPDATES_PER_TICK_NAME = NAME_PREFIX .. "max-updates-per-tick",
+  COLOR_UPDATE_INTERVAL_NAME = NAME_PREFIX .. "color-update-interval",
   IS_DEVELOPMENT_NAME = NAME_PREFIX .. "is-development",
   DEFAULT_COLOR_PATTERN_DURATION = 180,
-  DEFAULT_MAX_UPDATES_PER_TICK = 500,
+
+  --- Maximum lab updates per tick
+  MAX_UPDATES_PER_TICK = 500,
 
   --- Size of each chunk in tiles. Matches Factorio's built-in chunk size.
   CHUNK_SIZE = 32,

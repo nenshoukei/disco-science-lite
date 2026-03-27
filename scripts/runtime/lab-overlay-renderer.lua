@@ -556,8 +556,8 @@ function LabOverlayRenderer:get_state_update_function()
     end
 
     -- Update dynamic interval based on the number of visible overlays.
-    -- Automatically extend the interval if there are more labs than the `max_updates_per_tick`.
-    local max_updates = Settings.max_updates_per_tick
+    -- Automatically extend the interval if there are more than 500 visible labs.
+    local max_updates = 500 --[[$MAX_UPDATES_PER_TICK]]
     local interval = (visible_overlay_count > max_updates) and ceil(visible_overlay_count / max_updates) or 1
     if interval > 60 then interval = 60 end
     self.current_interval = interval
@@ -600,7 +600,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   local visible_overlays = self.visible_overlays
   local force_state = self.force_state
-  local color_pattern_duration = Settings.color_pattern_duration
+  local color_pattern_duration = ceil(Settings.color_pattern_duration / Settings.color_update_interval)
 
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
   -- This ensures animation is continuous across load/configuration_changed transitions.

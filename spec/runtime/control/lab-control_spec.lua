@@ -43,6 +43,10 @@ end
 --- @type fun()|nil
 local captured_tick_handler
 
+--- Last on_nth_tick handler registered via script.on_nth_tick.
+--- @type table<number, fun()|nil>
+local captured_nth_tick_handler
+
 --- Common test environment setup shared by both describe blocks.
 local function setup_common()
   reset_mocks()
@@ -52,6 +56,15 @@ local function setup_common()
   _G.script.on_event = function (event_id, handler)
     if event_id == defines.events.on_tick then
       captured_tick_handler = handler
+    end
+  end
+
+  captured_nth_tick_handler = {}
+  _G.script.on_nth_tick = function (tick, handler)
+    if tick then
+      captured_nth_tick_handler[tick] = handler
+    else
+      captured_nth_tick_handler = {}
     end
   end
 
@@ -342,28 +355,28 @@ describe("LabControl events", function ()
     local handler = LabControl.events[defines.events.on_runtime_mod_setting_changed]
 
     it("ignores settings with a non-matching prefix", function ()
-      captured_tick_handler = nil
+      captured_nth_tick_handler = {}
 
       handler(({ setting = "other-mod-setting" }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
       -- setup_event_handlers must NOT have been called.
-      assert.is_nil(captured_tick_handler)
+      assert.is_nil(next(captured_nth_tick_handler))
     end)
 
     it("re-registers event handlers when color-saturation setting changes", function ()
-      captured_tick_handler = nil
+      captured_nth_tick_handler = {}
 
       handler(({ setting = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
-      assert.is_not_nil(captured_tick_handler)
+      assert.is_not_nil(next(captured_nth_tick_handler))
     end)
 
     it("re-registers event handlers when color-brightness setting changes", function ()
-      captured_tick_handler = nil
+      captured_nth_tick_handler = {}
 
       handler(({ setting = "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
-      assert.is_not_nil(captured_tick_handler)
+      assert.is_not_nil(next(captured_nth_tick_handler))
     end)
 
     it("force re-renders all overlays when lab-blinking-disabled setting changes", function ()
@@ -376,6 +389,28 @@ describe("LabControl events", function ()
       handler(({ setting = "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
       assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+    end)
+
+    it("clears the old interval tick handler when color-update-interval changes", function ()
+      -- on_init registers the tick handler at the default interval (1).
+      assert.is_not_nil(captured_nth_tick_handler[1])
+
+      -- Change the setting to a new interval before firing the event.
+      _G.settings.global[ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ].value = 5
+
+      handler(({ setting = "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+
+      -- Old interval (1) must have been cleared via on_nth_tick(1, nil).
+      assert.is_nil(captured_nth_tick_handler[1])
+    end)
+
+    it("registers the new interval tick handler when color-update-interval changes", function ()
+      _G.settings.global[ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ].value = 5
+
+      handler(({ setting = "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+
+      -- New interval (5) must be registered after Settings.reload() and setup_event_handlers().
+      assert.is_not_nil(captured_nth_tick_handler[5])
     end)
   end)
 end)

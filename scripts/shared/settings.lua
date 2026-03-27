@@ -7,7 +7,7 @@
 --- @field color_saturation         number   Color saturation. [0, 1]
 --- @field color_brightness         number   Color brightness. [0, 1]
 --- @field color_pattern_duration   integer  Color function duration in ticks.
---- @field max_updates_per_tick     integer  Maximum number of labs to update per tick. Controls automatic interval scaling.
+--- @field color_update_interval    integer  Color update interval in ticks.
 local Settings = {}
 
 function Settings.reload()
@@ -29,9 +29,9 @@ function Settings.reload()
   Settings.color_pattern_duration = global and
     global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as number]]
     or 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]]
-  Settings.max_updates_per_tick = global and
-    global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value --[[@as number]]
-    or 500 --[[$DEFAULT_MAX_UPDATES_PER_TICK]]
+  Settings.color_update_interval = global and
+    global[ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ].value --[[@as number]]
+    or 1
 end
 
 Settings.reload()
