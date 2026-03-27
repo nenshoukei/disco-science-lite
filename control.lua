@@ -4,8 +4,7 @@ event_handler.add_libraries({
   require("scripts.runtime.control.lab-control"),
 })
 
--- This is for development
-if __DebugAdapter then
+if settings.startup[ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ].value then
   require("scripts.runtime.command.ds-bench")
   require("scripts.runtime.command.ds-force-render")
   require("scripts.runtime.command.ds-set-tech")

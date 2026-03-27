@@ -38,4 +38,12 @@ data:extend({
     minimum_value = 1,
     order = "rg-b[performance]-a",
   },
+  {
+    type = "bool-setting",
+    name = "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]],
+    setting_type = "startup",
+    default_value = false,
+    hidden = true,
+    order = "su-z[development]-a",
+  },
 })
