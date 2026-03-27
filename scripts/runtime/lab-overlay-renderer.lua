@@ -56,6 +56,10 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- @type table<number, ForceState|nil>
     force_state = {},
 
+    --- Cached player positions updated every 30 ticks. Key is player.index.
+    --- @type table<number, MapPositionTuple|nil>
+    player_positions = {},
+
     --- Flattened list of lab overlays currently in any player's view.
     --- @type LabOverlay[]
     visible_overlays = {},
@@ -407,6 +411,8 @@ end
 --- @return integer chunk_top
 --- @return integer chunk_right
 --- @return integer chunk_bottom
+--- @return number px Player X position.
+--- @return number py Player Y position.
 local function compute_player_view(player)
   local player_position = player.position
   local px = player_position.x or player_position[1]
@@ -421,13 +427,15 @@ local function compute_player_view(player)
     floor((px - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
     floor((py - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
     floor((px + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
-    floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
+    floor((py + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]),
+    px, py
 end
 
 --- Get a state update function to be called every 30 ticks.
 ---
 --- The returned function:
 ---   - Tracks current_research per force and updates force_state when it changes.
+---   - Updates player_positions for each connected player.
 ---   - Checks lab entity.status and updates overlay.visible and animation.visible.
 ---   - Rebuilds self.visible_overlays for the tick function to iterate.
 ---   - Sets overlay.player_index for each visible overlay.
@@ -437,6 +445,7 @@ function LabOverlayRenderer:get_state_update_function()
   local force_state = self.force_state
   local chunk_map = self.chunk_map
   local visible_overlays = self.visible_overlays
+  local player_positions = self.player_positions
 
   --- A weak-key table to check if a chunk is updated in the current call. Key is a chunk (table) itself.
   --- Value is a generation counter to avoid clearing between calls: stale entries are ignored.
@@ -478,7 +487,14 @@ function LabOverlayRenderer:get_state_update_function()
 
         local player_index = player.index
         local surface_index = player.surface_index
-        local chunk_left, chunk_top, chunk_right, chunk_bottom = compute_player_view(player)
+        local chunk_left, chunk_top, chunk_right, chunk_bottom, px, py = compute_player_view(player)
+        local pos = player_positions[player_index]
+        if not pos then
+          player_positions[player_index] = { px, py }
+        else
+          pos[1] = px
+          pos[2] = py
+        end
 
         -- Iterate chunks in this player's view and build visible_overlays.
         local surface_chunks = chunk_map_data[surface_index]
@@ -600,6 +616,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   local visible_overlays = self.visible_overlays
   local force_state = self.force_state
+  local player_positions = self.player_positions
   local color_pattern_duration = ceil(Settings.color_pattern_duration / Settings.color_update_interval)
 
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
@@ -664,11 +681,10 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         local player_index = overlay.player_index
         if player_index ~= last_player_index then
           last_player_index = player_index
-          local player = game.get_player(player_index)
-          if player then
-            local pos = player.position
-            player_x = pos.x or pos[1]
-            player_y = pos.y or pos[2]
+          local pos = player_positions[player_index]
+          if pos then
+            player_x = pos[1]
+            player_y = pos[2]
           else
             player_x = 0
             player_y = 0
