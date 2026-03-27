@@ -358,14 +358,14 @@ describe("LabControl events", function ()
       assert.is_not_nil(captured_tick_handler)
     end)
 
-    it("force re-renders all overlays when disable-lab-blinking setting changes", function ()
+    it("force re-renders all overlays when lab-blinking-disabled setting changes", function ()
       LabControl.events[defines.events.on_script_trigger_effect](
         ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(42, 1) }) --[[@as EventData.on_script_trigger_effect]]
       )
       assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
 
       -- Force re-render clears all objects (game.surfaces is empty so nothing is recreated).
-      handler(({ setting = "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(({ setting = "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
 
       assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
     end)

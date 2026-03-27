@@ -15,7 +15,7 @@ describe("Settings", function ()
     end)
 
     it("reads is_lab_blinking_disabled from startup", function ()
-      _G.settings.startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ] = { value = true }
+      _G.settings.startup[ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ] = { value = true }
       Settings.reload()
       assert.are.equal(true, Settings.is_lab_blinking_disabled)
     end)

@@ -8,7 +8,7 @@ data:extend({
   },
   {
     type = "bool-setting",
-    name = "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]],
+    name = "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]],
     setting_type = "startup",
     default_value = false,
     order = "su-a[visual]-b",

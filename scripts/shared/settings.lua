@@ -16,7 +16,7 @@ function Settings.reload()
   if not startup then return end
 
   Settings.is_fallback_enabled = startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
-  Settings.is_lab_blinking_disabled = startup[ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ].value --[[@as boolean]]
+  Settings.is_lab_blinking_disabled = startup[ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ].value --[[@as boolean]]
   Settings.is_development = startup[ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ].value --[[@as boolean]]
 
   Settings.color_intensity = global and

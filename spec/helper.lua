@@ -109,7 +109,7 @@ local function reset_mocks()
   _G.settings = ({
     startup = {
       [ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true },
-      [ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ] = { value = false },
+      [ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ] = { value = false },
       [ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ] = { value = true },
     },
     global = {
