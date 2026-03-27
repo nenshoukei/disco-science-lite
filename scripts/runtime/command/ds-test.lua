@@ -1,5 +1,6 @@
 local LabControl = require("scripts.runtime.control.lab-control")
 local CommandHelpers = require("scripts.runtime.command.command-helpers")
+local Settings = require("scripts.shared.settings")
 local table_merge = require("scripts.shared.utils").table_merge
 
 --- @class TestCase
@@ -241,7 +242,7 @@ local test_cases = {
         local lab_name = lab.name
         local is_excluded = renderer.lab_registry:is_excluded(lab_name)
         local has_registration = renderer.lab_registry:get_registration(lab_name) ~= nil
-        local should_have_overlay = not is_excluded and (has_registration or renderer.is_fallback_enabled)
+        local should_have_overlay = not is_excluded and (has_registration or Settings.is_fallback_enabled)
         if should_have_overlay then
           local overlay = renderer.overlays[lab.unit_number]
           assert(overlay, "overlay not found for lab: " .. lab_name)
