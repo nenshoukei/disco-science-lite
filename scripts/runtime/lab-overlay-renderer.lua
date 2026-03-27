@@ -476,6 +476,7 @@ function LabOverlayRenderer:get_state_update_function()
     local gen = generation
 
     local chunk_map_data = chunk_map.data
+    local remove_unit_numbers = nil --- @type number[]|nil
     local visible_overlay_count = 0
     for _, force in pairs(game.forces) do
       local connected_players = force.connected_players
@@ -522,7 +523,15 @@ function LabOverlayRenderer:get_state_update_function()
                   for j = 1, #chunk do
                     local overlay = chunk[j]
                     local entity = overlay.entity
-                    local status = entity.valid and entity.status or nil
+
+                    -- If entity is invalid, remove the overlay later
+                    if not entity.valid then
+                      if not remove_unit_numbers then remove_unit_numbers = {} end
+                      remove_unit_numbers[#remove_unit_numbers + 1] = overlay.unit_number
+                      goto next_overlay
+                    end
+
+                    local status = entity.status
                     local lab_fs = force_state[overlay.force_index]
                     local colors = lab_fs and lab_fs.colors
                     local is_visible = (
@@ -542,6 +551,8 @@ function LabOverlayRenderer:get_state_update_function()
                       visible_overlays[visible_overlay_count] = overlay
                       overlay.player_index = player_index
                     end
+
+                    ::next_overlay::
                   end
 
                   ::next_chunk::
@@ -562,6 +573,13 @@ function LabOverlayRenderer:get_state_update_function()
     for i = visible_overlay_count + 1, #visible_overlays do
       if visible_overlays[i] == nil then break end
       visible_overlays[i] = nil
+    end
+
+    -- Remove overlays for invalid entities
+    if remove_unit_numbers then
+      for i = 1, #remove_unit_numbers do
+        self:remove_overlay_from_lab(remove_unit_numbers[i])
+      end
     end
 
     -- Update dynamic interval based on the number of visible overlays.
