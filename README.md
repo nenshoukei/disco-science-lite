@@ -4,7 +4,7 @@ _The Disco Must Grow. Into Space, with a performance twist._
 
 Disco Science Lite is an unofficial variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age mods support.
 
-This mod is not officially affiliated with or endorsed by the original mod author.
+This mod is not officially affiliated with or endorsed by the original mod author. Please **DO NOT** contact the original mod author with questions or issues about this mod.
 
 ## What It Does
 

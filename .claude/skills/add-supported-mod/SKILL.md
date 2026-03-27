@@ -123,9 +123,9 @@ end)
 - The `on_data_final_fixes` test has no assert lines either — just calls `Mod.on_data_final_fixes()`. The user will add asserts once the implementation is written.
 - If `on_data_final_fixes` creates overlay or companion animations, `Helper.load_animation_definitions()` must be called at the top of the `before_each`. Add it if you can tell from the source that this will be needed; otherwise, omit it and let the user add it later.
 
-## Step 4: Update README.md
+## Step 4: Update README.md and README.ja.md
 
-Add the following line to the `## Supported Mods` section of `README.md`:
+Add the following line to the `## Supported Mods` section of `README.md`, ad to the `## 対応 Mod` section of `README.ja.md`:
 
 ```markdown
 - [<Mod name>](https://mods.factorio.com/mod/<Mod ID>) by <Author name>

@@ -1,4 +1,4 @@
-"""Generate docs/mod-portal/description.md from README.md.
+"""Generate docs/mod-portal/description.md from README.md and README.ja.md.
 
 Sections excluded from output:
   - h1 title
@@ -12,7 +12,8 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
-README = REPO_ROOT / "README.md"
+README_EN = REPO_ROOT / "README.md"
+README_JA = REPO_ROOT / "README.ja.md"
 OUTPUT = REPO_ROOT / "docs/mod-portal/description.md"
 
 GITHUB_BASE = "https://github.com/nenshoukei/disco-science-lite"
@@ -43,18 +44,12 @@ def heading_level(line: str) -> int:
     return len(m.group(1)) if m else 0
 
 
-def main():
-    lines = README.read_text().splitlines()
+def parse_readme(path: Path, output: list[str]):
+    lines = path.read_text().splitlines()
 
-    output: list[str] = []
     skipping: bool = False
-
     for line in lines:
         level = heading_level(line)
-
-        # Skip h1 title
-        if level == 1:
-            continue
 
         # Check for excluded h2 heading
         if level == 2:
@@ -68,9 +63,17 @@ def main():
 
         output.append(convert_links(line))
 
-    # Strip leading blank lines (artifact of skipping the h1 title)
-    while output and output[0] == "":
-        output.pop(0)
+
+def main():
+    output: list[str] = []
+
+    output.append("日本語の説明は下部にあります。")
+    output.append("")
+    parse_readme(README_EN, output)
+    output.append("")
+    output.append("---")
+    output.append("")
+    parse_readme(README_JA, output)
 
     result = "\n".join(output).rstrip("\n") + "\n"
     if result != OUTPUT.read_text():
