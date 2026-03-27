@@ -4,6 +4,7 @@
 local cjson = require("cjson.safe")
 local serpent = require("serpent")
 local table_deep_copy = require("scripts.shared.utils").table_deep_copy
+local Settings = require("scripts.shared.settings")
 local AnimationAssertion = require("spec.helper.animation-assertion")
 require("spec.helper.rendering")
 
@@ -109,11 +110,12 @@ local function reset_mocks()
     startup = {
       [ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true },
       [ "mks-dsl-disable-lab-blinking" --[[$DISABLE_LAB_BLINKING_NAME]] ] = { value = false },
+      [ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ] = { value = true },
     },
     global = {
-      [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 },
+      [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]] },
       [ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ]               = { value = 100 },
-      [ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ]     = { value = 500 },
+      [ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ]     = { value = 500 --[[$DEFAULT_MAX_UPDATES_PER_TICK]] },
     },
   })
 
@@ -133,6 +135,8 @@ local function reset_mocks()
       end
     end,
   }
+
+  Settings.reload()
 end
 
 local function load_animation_definitions()

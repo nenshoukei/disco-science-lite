@@ -1,5 +1,6 @@
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
+local Settings = require("scripts.shared.settings")
 
 if _G.DiscoScienceLabPrototypeModifier then
   return _G.DiscoScienceLabPrototypeModifier
@@ -54,10 +55,9 @@ end
 function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
   local registered_labs = PrototypeLabRegistry.registered_labs
   local excluded_labs = PrototypeLabRegistry.excluded_labs
-  local fallback_enabled = settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ]
-    .value
+  local is_fallback_enabled = Settings.is_fallback_enabled
   for name, proto in pairs(lab_prototypes) do
-    if not excluded_labs[name] and (fallback_enabled or registered_labs[name]) then
+    if not excluded_labs[name] and (is_fallback_enabled or registered_labs[name]) then
       LabPrototypeModifier.modify_lab(proto)
     end
   end

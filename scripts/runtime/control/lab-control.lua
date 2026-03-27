@@ -2,6 +2,7 @@ local RemoteInterface = require("scripts.runtime.remote-interface")
 local ColorRegistry = require("scripts.runtime.color-registry")
 local LabRegistry = require("scripts.runtime.lab-registry")
 local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
+local Settings = require("scripts.shared.settings")
 
 --- @class LabControl : event_handler
 local LabControl = {}
@@ -124,7 +125,7 @@ LabControl.events = {
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
     local setting_name = event.setting
     if string.sub(setting_name, 1, #prefix) == prefix then
-      renderer:load_settings()
+      Settings.reload()
 
       if setting_name == "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] then
         -- This resets color palette using new color intensity.

@@ -2,6 +2,7 @@ local ColorRegistry = require("scripts.runtime.color-registry")
 local LabRegistry = require("scripts.runtime.lab-registry")
 local ColorFunctions = require("scripts.runtime.color-functions")
 local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
+local Settings = require("scripts.shared.settings")
 local reset_mocks = require("spec.helper").reset_mocks
 
 -- -----------------------------------------------------------------------
@@ -146,25 +147,6 @@ describe("LabOverlayRenderer", function ()
   end)
 
   -- -------------------------------------------------------------------
-  describe("load_settings", function ()
-    it("updates instance variables from global settings", function ()
-      local r = make_renderer()
-
-      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value = false
-      _G.settings.global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value = 50
-      _G.settings.global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value = 120
-      _G.settings.global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value = 500
-
-      r:load_settings()
-
-      assert.is_false(r.is_fallback_enabled)
-      assert.are.equal(0.5, r.color_intensity)
-      assert.are.equal(120, r.color_pattern_duration)
-      assert.are.equal(500, r.max_updates_per_tick)
-    end)
-  end)
-
-  -- -------------------------------------------------------------------
   describe("render_overlay_for_lab", function ()
     it("returns nil when lab has no unit_number", function ()
       local r = make_renderer()
@@ -175,14 +157,14 @@ describe("LabOverlayRenderer", function ()
 
     it("returns nil when lab is excluded", function ()
       local r = make_renderer()
-      r.is_fallback_enabled = true
+      Settings.is_fallback_enabled = true
       r.lab_registry.excluded_labs["lab"] = true
       assert.is_nil(r:render_overlay_for_lab(make_entity(1, 1, 0, 0)))
     end)
 
     it("returns nil when lab is not registered and fallback disabled", function ()
       local r = make_renderer()
-      r.is_fallback_enabled = false
+      Settings.is_fallback_enabled = false
       -- lab_registry has no registration for "lab"
       local result = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
       assert.is_nil(result)
@@ -231,7 +213,7 @@ describe("LabOverlayRenderer", function ()
 
     it("creates overlay using general overlay when no registration but fallback enabled", function ()
       local r = make_renderer()
-      r.is_fallback_enabled = true
+      Settings.is_fallback_enabled = true
       -- lab_registry has no registration for "lab"
       local overlay = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
       assert.is_not_nil(overlay) --- @cast overlay -nil
@@ -521,7 +503,6 @@ describe("LabOverlayRenderer", function ()
       r.force_state[1] = { current_research = nil, colors = nil, n_colors = 0 }
       r.color_registry:set_ingredient_color("automation-science-pack", { 1, 0, 0 })
       r.color_registry:set_ingredient_color("logistic-science-pack", { 0, 1, 0 })
-      r.color_intensity = 1.0
 
       r:update_force_current_research(force)
 
@@ -662,7 +643,7 @@ describe("LabOverlayRenderer", function ()
     it("sets current_interval to 1 when visible labs fit within max_updates_per_tick", function ()
       local r = make_renderer()
       local force = make_force(1)
-      r.max_updates_per_tick = 500
+      Settings.max_updates_per_tick = 500
       for i = 1, 10 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
@@ -676,7 +657,7 @@ describe("LabOverlayRenderer", function ()
     it("increases current_interval when visible labs exceed max_updates_per_tick", function ()
       local r = make_renderer()
       local force = make_force(1)
-      r.max_updates_per_tick = 10
+      Settings.max_updates_per_tick = 10
       for i = 1, 30 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
@@ -691,7 +672,7 @@ describe("LabOverlayRenderer", function ()
     it("caps current_interval at 60", function ()
       local r = make_renderer()
       local force = make_force(1)
-      r.max_updates_per_tick = 1
+      Settings.max_updates_per_tick = 1
       for i = 1, 300 do
         r:render_overlay_for_lab(make_entity(i, 1, 0, 0))
       end
@@ -834,7 +815,7 @@ describe("LabOverlayRenderer", function ()
 
       it("switches color function when duration is reached", function ()
         local r = make_renderer()
-        r.color_pattern_duration = 3
+        Settings.color_pattern_duration = 3
         r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
         r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
 
@@ -913,7 +894,7 @@ describe("LabOverlayRenderer", function ()
 
       it("writes back phase and saved_tick to anim_state at epoch end", function ()
         local r = make_renderer_with_overlay()
-        r.color_pattern_duration = 3
+        Settings.color_pattern_duration = 3
         local anim_state = make_anim_state(0.0, 0.25, 0)
 
         local tick = r:get_tick_function(anim_state)
@@ -928,7 +909,7 @@ describe("LabOverlayRenderer", function ()
 
       it("new tick function resumes with elapsed ticks after write-back", function ()
         local r = make_renderer_with_overlay()
-        r.color_pattern_duration = 2
+        Settings.color_pattern_duration = 2
         local anim_state = make_anim_state(0.0, 0.25, 0)
 
         -- Run first tick function until epoch end

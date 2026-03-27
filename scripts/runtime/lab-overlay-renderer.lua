@@ -1,5 +1,6 @@
 local ColorFunctions = require("scripts.runtime.color-functions")
 local ChunkMap = require("scripts.runtime.chunk-map")
+local Settings = require("scripts.shared.settings")
 
 --- @class LabOverlayRenderer
 local LabOverlayRenderer = {}
@@ -59,39 +60,11 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- @type LabOverlay[]
     visible_overlays = {},
 
-    --- Whether the fallback overlay is enabled.
-    is_fallback_enabled = true,
-
-    --- Color intensity. [0, 1]
-    color_intensity = 1.0,
-
-    --- Color function duration in ticks.
-    color_pattern_duration = 180,
-
-    --- Maximum number of labs to update per tick. Controls automatic interval scaling.
-    max_updates_per_tick = 500,
-
     --- Current dynamic interval (throttled based on load).
     current_interval = 1,
   }
   self = setmetatable(self, LabOverlayRenderer)
-  self:load_settings()
   return self
-end
-
---- Load settings from the `settings` global variable.
-function LabOverlayRenderer:load_settings()
-  local startup = settings.startup
-  local global = settings.global
-
-  self.is_fallback_enabled =
-    startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
-  self.color_intensity =
-    global[ "mks-dsl-color-intensity" --[[$COLOR_INTENSITY_NAME]] ].value * 0.01
-  self.color_pattern_duration =
-    global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as integer]]
-  self.max_updates_per_tick =
-    global[ "mks-dsl-max-updates-per-tick" --[[$MAX_UPDATES_PER_TICK_NAME]] ].value --[[@as integer]]
 end
 
 --- Render an overlay for a lab entity.
@@ -105,7 +78,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   if self.lab_registry:is_excluded(lab_name) then return nil end
 
   local registration = self.lab_registry:get_registration(lab_name)
-  if not registration and not self.is_fallback_enabled then
+  if not registration and not Settings.is_fallback_enabled then
     return nil
   end
 
@@ -394,7 +367,7 @@ function LabOverlayRenderer:update_force_current_research(force)
   fs.current_research = force_current_research
 
   if force_current_research then
-    local colors = self.color_registry:get_colors_for_research(force_current_research, self.color_intensity)
+    local colors = self.color_registry:get_colors_for_research(force_current_research, Settings.color_intensity)
     local n_colors = #colors
 
     -- Flatten the color tuples into a single array for performance in the hot tick function.
@@ -584,7 +557,7 @@ function LabOverlayRenderer:get_state_update_function()
 
     -- Update dynamic interval based on the number of visible overlays.
     -- Automatically extend the interval if there are more labs than the `max_updates_per_tick`.
-    local max_updates = self.max_updates_per_tick
+    local max_updates = Settings.max_updates_per_tick
     local interval = (visible_overlay_count > max_updates) and ceil(visible_overlay_count / max_updates) or 1
     if interval > 60 then interval = 60 end
     self.current_interval = interval
@@ -627,7 +600,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   local visible_overlays = self.visible_overlays
   local force_state = self.force_state
-  local color_pattern_duration = self.color_pattern_duration
+  local color_pattern_duration = Settings.color_pattern_duration
 
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
   -- This ensures animation is continuous across load/configuration_changed transitions.

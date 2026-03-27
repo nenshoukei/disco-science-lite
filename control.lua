@@ -1,10 +1,11 @@
 local event_handler = require("__core__.lualib.event_handler")
+local Settings = require("scripts.shared.settings")
 
 event_handler.add_libraries({
   require("scripts.runtime.control.lab-control"),
 })
 
-if settings.startup[ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ].value then
+if Settings.is_development then
   require("scripts.runtime.command.ds-bench")
   require("scripts.runtime.command.ds-force-render")
   require("scripts.runtime.command.ds-set-tech")

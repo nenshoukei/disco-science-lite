@@ -1,5 +1,6 @@
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+local Settings = require("scripts.shared.settings")
 
 --- @param created_effect data.Trigger|nil
 --- @return data.LabPrototype
@@ -20,7 +21,7 @@ local function make_lab_with_layers()
     name = "test-lab",
     on_animation = {
       layers = {
-        { filename = "on.png", frame_count = 8 },
+        { filename = "on.png",       frame_count = 8 },
         { filename = "on-light.png", frame_count = 8 },
       },
     },
@@ -147,7 +148,7 @@ describe("LabPrototypeModifier", function ()
   -- -------------------------------------------------------------------
   describe("modify_registered_labs", function ()
     before_each(function ()
-      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true }
+      Settings.is_fallback_enabled = true
       PrototypeLabRegistry.reset()
     end)
 
@@ -183,7 +184,7 @@ describe("LabPrototypeModifier", function ()
     end)
 
     it("ignores non-target labs when fallback is disabled", function ()
-      _G.settings.startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value = false
+      Settings.is_fallback_enabled = false
       local lab = make_lab(nil)
       LabPrototypeModifier.modify_registered_labs({ [lab.name] = lab })
       assert.are.equal("on.png", lab.on_animation.filename)
