@@ -19,6 +19,7 @@ To balance responsiveness with performance, the mod separates tasks into two mai
 - **Heavy Update (Every 30 Ticks):**
     - Checks what technology is currently being researched and updates the available color palette.
     - Checks each lab's status (e.g., if it's working or has low power).
+    - Checks each connected player's position.
     - Rebuilds the list of visible labs based on player positions and zoom levels.
     - Recalculates the load-balancing "Stride" (see below).
 
