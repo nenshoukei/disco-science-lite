@@ -37,7 +37,7 @@ local function set_prototype_data(colors, prefixes, suffixes)
         registered_lab_suffixes = {},
         registered_labs = {},
         excluded_labs = {},
-      }
+      },
     }) --[[@as LuaModData]]
   else
     _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ] = nil
@@ -49,7 +49,7 @@ describe("ColorRegistry", function ()
   describe("new", function ()
     it("creates an instance with empty ingredient colors", function ()
       local r = ColorRegistry.new()
-      -- ingredient_colors starts empty; colors are loaded via load_prototype_colors()
+      -- registered_colors starts empty; colors are loaded via load_prototype_colors()
       local color = r:get_ingredient_color("automation-science-pack")
       assert.is_nil(color)
     end)
@@ -341,7 +341,7 @@ describe("ColorRegistry", function ()
       r:load_prototype_colors()
       local proto_data = _G.prototypes.mod_data
         [ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ].data.registered_colors
-      assert.are_not.equal(proto_data["pack"], r.ingredient_colors["pack"])
+      assert.are_not.equal(proto_data["pack"], r.registered_colors["pack"])
     end)
 
     it("replaces previously loaded colors on re-load", function ()
