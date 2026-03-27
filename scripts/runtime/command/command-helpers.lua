@@ -1,10 +1,10 @@
 local CommandHelpers = {}
 
---- Clear the given surface except for electric energy interface.
+--- Clear the given surface except for characters and electric energy interface.
 --- @param surface LuaSurface
 function CommandHelpers.clear_surface(surface)
   for _, entity in ipairs(surface.find_entities()) do
-    if entity.valid and entity.name ~= "electric-energy-interface" then
+    if entity.valid and entity.type ~= "character" and entity.name ~= "electric-energy-interface" then
       entity.destroy()
     end
   end
@@ -24,10 +24,9 @@ function CommandHelpers.setup_test_surface(surface)
   CommandHelpers.clear_surface(surface)
   surface.destroy_decoratives({})
   for chunk in surface.get_chunks() do
-    if surface.is_chunk_generated(chunk) then
-      surface.build_checkerboard(chunk.area)
-    end
+    surface.build_checkerboard(chunk.area)
   end
+  surface.set_default_cover_tile("player", "lab-dark-1", "lab-dark-2")
   surface.always_day = true
   surface.create_global_electric_network()
   surface.create_entity({
