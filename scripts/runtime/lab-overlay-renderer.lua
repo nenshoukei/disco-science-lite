@@ -624,7 +624,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   return function ()
     -- Return early when no overlays are visible (no player active, or no research in progress).
     -- `visible_overlays` is captured once at closure creation; it is mutated in-place by get_state_update_function().
-    if #visible_overlays == 0 then return end
+    local n_visible_overlays = #visible_overlays
+    if n_visible_overlays == 0 then return end
 
     phase = phase + phase_speed
 
@@ -655,7 +656,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     local player_y = 0
 
     -- Update colors of the visible overlays using stride iteration
-    for i = lab_update_offset, #visible_overlays, current_interval do
+    for i = lab_update_offset, n_visible_overlays, current_interval do
       local overlay = visible_overlays[i]
       local force_index = overlay.force_index
       if force_index ~= last_force_index then
