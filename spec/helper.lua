@@ -1,6 +1,10 @@
 -- Helper functions for busted tests
 -- This file is automatically loaded by busted
 
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+  require("lldebugger").start()
+end
+
 local cjson = require("cjson.safe")
 local serpent = require("serpent")
 local table_deep_copy = require("scripts.shared.utils").table_deep_copy

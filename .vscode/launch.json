@@ -35,6 +35,18 @@
       "request": "launch",
       "name": "Factorio Mod Debug (Profile)",
       "hookMode": "profile"
+    },
+    {
+      "type": "lua-local",
+      "request": "launch",
+      "name": "Busted Debug (Current File)",
+      "program": {
+        "command": "busted"
+      },
+      "cwd": "${workspaceFolder}",
+      "args": ["${relativeFile}"],
+      "stopOnEntry": false,
+      "ignorePatterns": ["/lua_modules/", "/spec/helper.lua$"]
     }
   ]
 }
