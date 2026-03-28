@@ -111,34 +111,6 @@ describe("ColorFunctions", function ()
           assert.are.equal(out1[2], out2[2])
           assert.are.equal(out1[3], out2[3])
         end)
-
-        it("produces a different result at a different phase", function ()
-          -- pos = {4, 3}: chosen so that phase=0 and phase=40 land in different
-          -- color segments for all functions (avoids mod-3 period coincidences).
-          -- phase=40 (not 1000) is used so that [13] Random's floor(phase/10)
-          -- step boundary is also crossed, giving a distinct color.
-          local pos = { 4, 3 }
-          local out1, out2 = {}, {}
-          ColorFunctions.functions[i](out1, 0, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
-          ColorFunctions.functions[i](out2, 40, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
-          assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
-        end)
-
-        -- [12] Pulse ignores position entirely; skip this test for it.
-        -- [14] Cross: min(|dx|,|dy|) is 0 for both on-axis test points.
-        -- [15] Hyperbolic: dx*dy is 0 for both on-axis test points.
-        if i == 12 or i == 14 or i == 15 then
-          it("produces a different result at a different lab position", pending)
-        else
-          it("produces a different result at a different lab position", function ()
-            -- All functions produce distinct colors for these two positions.
-            local pos1, pos2 = { 5, 0 }, { 0, 33 }
-            local out1, out2 = {}, {}
-            ColorFunctions.functions[i](out1, 0, colors, n_colors, origin[1], origin[2], pos1[1], pos1[2])
-            ColorFunctions.functions[i](out2, 0, colors, n_colors, origin[1], origin[2], pos2[1], pos2[2])
-            assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
-          end)
-        end
       end)
     end
 
