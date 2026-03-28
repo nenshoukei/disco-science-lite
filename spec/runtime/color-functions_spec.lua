@@ -87,12 +87,12 @@ describe("ColorFunctions", function ()
   describe("functions", function ()
     local origin = { 0, 0 }
 
-    it("provides exactly 13 color functions", function ()
-      assert.are.equal(13, #ColorFunctions.functions)
+    it("provides exactly 16 color functions", function ()
+      assert.are.equal(16, #ColorFunctions.functions)
     end)
 
-    -- Generic properties shared by all 13 functions
-    for i = 1, 13 do
+    -- Generic properties shared by all 16 functions
+    for i = 1, 16 do
       describe(string.format("[%d]", i), function ()
         it("writes three numeric values into output", function ()
           local out = {}
@@ -125,7 +125,9 @@ describe("ColorFunctions", function ()
         end)
 
         -- [12] Pulse ignores position entirely; skip this test for it.
-        if i == 12 then
+        -- [14] Cross: min(|dx|,|dy|) is 0 for both on-axis test points.
+        -- [15] Hyperbolic: dx*dy is 0 for both on-axis test points.
+        if i == 12 or i == 14 or i == 15 then
           it("produces a different result at a different lab position", pending)
         else
           it("produces a different result at a different lab position", function ()
@@ -342,6 +344,134 @@ describe("ColorFunctions", function ()
         local out1, out2 = {}, {}
         ColorFunctions.functions[13](out1, 0.1, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
         ColorFunctions.functions[13](out2, 0.9, colors, n_colors, origin[1], origin[2], pos[1], pos[2])
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+    end)
+
+    describe("[14] Cross", function ()
+      it("returns the same color for labs on the same min-distance ring", function ()
+        -- min(|dx|, |dy|) = 4 for both
+        local lab_a = { 4, 10 } -- min(4, 10) = 4
+        local lab_b = { 8, 4 }  -- min(8, 4) = 4
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[14](out1, 0, colors, n_colors, origin[1], origin[2], lab_a[1], lab_a[2])
+        ColorFunctions.functions[14](out2, 0, colors, n_colors, origin[1], origin[2], lab_b[1], lab_b[2])
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("extends the same color along both axes (cross shape)", function ()
+        -- On the x-axis: min(|10|, |0|) = 0
+        -- On the y-axis: min(|0|, |10|) = 0
+        -- Both are 0, same color
+        local lab_x = { 10, 0 }
+        local lab_y = { 0, 10 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[14](out1, 0, colors, n_colors, origin[1], origin[2], lab_x[1], lab_x[2])
+        ColorFunctions.functions[14](out2, 0, colors, n_colors, origin[1], origin[2], lab_y[1], lab_y[2])
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("has 4-fold symmetry", function ()
+        local out_ne, out_nw, out_se, out_sw = {}, {}, {}, {}
+        ColorFunctions.functions[14](out_ne, 0, colors, n_colors, origin[1], origin[2], 5, 3)
+        ColorFunctions.functions[14](out_nw, 0, colors, n_colors, origin[1], origin[2], -5, 3)
+        ColorFunctions.functions[14](out_se, 0, colors, n_colors, origin[1], origin[2], 5, -3)
+        ColorFunctions.functions[14](out_sw, 0, colors, n_colors, origin[1], origin[2], -5, -3)
+        assert.are.equal(out_ne[1], out_nw[1])
+        assert.are.equal(out_ne[2], out_nw[2])
+        assert.are.equal(out_ne[3], out_nw[3])
+        assert.are.equal(out_ne[1], out_se[1])
+        assert.are.equal(out_ne[2], out_se[2])
+        assert.are.equal(out_ne[3], out_se[3])
+        assert.are.equal(out_ne[1], out_sw[1])
+        assert.are.equal(out_ne[2], out_sw[2])
+        assert.are.equal(out_ne[3], out_sw[3])
+      end)
+    end)
+
+    describe("[15] Hyperbolic", function ()
+      it("returns the same color for labs on the same hyperbolic contour", function ()
+        -- dx * dy = 24 for both
+        local lab_a = { 4, 6 }  -- 4 * 6 = 24
+        local lab_b = { 3, 8 }  -- 3 * 8 = 24
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[15](out1, 0, colors, n_colors, origin[1], origin[2], lab_a[1], lab_a[2])
+        ColorFunctions.functions[15](out2, 0, colors, n_colors, origin[1], origin[2], lab_b[1], lab_b[2])
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("returns the same color on both axes (dx*dy = 0)", function ()
+        local lab_x = { 10, 0 }
+        local lab_y = { 0, 10 }
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[15](out1, 0, colors, n_colors, origin[1], origin[2], lab_x[1], lab_x[2])
+        ColorFunctions.functions[15](out2, 0, colors, n_colors, origin[1], origin[2], lab_y[1], lab_y[2])
+        assert.are.equal(out1[1], out2[1])
+        assert.are.equal(out1[2], out2[2])
+        assert.are.equal(out1[3], out2[3])
+      end)
+
+      it("opposite quadrants have the same color (sign of product is the same)", function ()
+        -- NE: 5*3=15, SW: (-5)*(-3)=15
+        local out_ne, out_sw = {}, {}
+        ColorFunctions.functions[15](out_ne, 0, colors, n_colors, origin[1], origin[2], 5, 3)
+        ColorFunctions.functions[15](out_sw, 0, colors, n_colors, origin[1], origin[2], -5, -3)
+        assert.are.equal(out_ne[1], out_sw[1])
+        assert.are.equal(out_ne[2], out_sw[2])
+        assert.are.equal(out_ne[3], out_sw[3])
+      end)
+
+      it("adjacent quadrants differ (sign of product flips)", function ()
+        -- NE: 5*3=15, NW: (-5)*3=-15
+        local out_ne, out_nw = {}, {}
+        ColorFunctions.functions[15](out_ne, 0, colors, n_colors, origin[1], origin[2], 5, 3)
+        ColorFunctions.functions[15](out_nw, 0, colors, n_colors, origin[1], origin[2], -5, 3)
+        assert.is_true(out_ne[1] ~= out_nw[1] or out_ne[2] ~= out_nw[2] or out_ne[3] ~= out_nw[3])
+      end)
+    end)
+
+    describe("[16] Pinwheel", function ()
+      it("labs at the same position in different quadrants have different colors", function ()
+        -- Each quadrant gets a different offset (q * n_colors * 0.25)
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[16](out1, 0, colors, n_colors, origin[1], origin[2], 5, 3)
+        ColorFunctions.functions[16](out2, 0, colors, n_colors, origin[1], origin[2], -5, 3)
+        assert.is_true(out1[1] ~= out2[1] or out1[2] ~= out2[2] or out1[3] ~= out2[3])
+      end)
+
+      it("all four quadrants produce distinct colors", function ()
+        local outs = {}
+        local positions = { { 5, 3 }, { -5, 3 }, { 5, -3 }, { -5, -3 } }
+        for j = 1, 4 do
+          outs[j] = {}
+          ColorFunctions.functions[16](outs[j], 0, colors, n_colors, origin[1], origin[2], positions[j][1], positions[j][2])
+        end
+        -- Each pair should differ
+        for a = 1, 3 do
+          for b = a + 1, 4 do
+            assert.is_true(
+              outs[a][1] ~= outs[b][1] or outs[a][2] ~= outs[b][2] or outs[a][3] ~= outs[b][3],
+              string.format("quadrant %d and %d should differ", a, b)
+            )
+          end
+        end
+      end)
+
+      it("within the same quadrant, labs at the same Manhattan distance have the same color", function ()
+        -- Both in quadrant q=0 (dx>0, dy>0), Manhattan distance = 8
+        local lab_a = { 5, 3 } -- 5 + 3 = 8
+        local lab_b = { 2, 6 } -- 2 + 6 = 8
+        local out1, out2 = {}, {}
+        ColorFunctions.functions[16](out1, 0, colors, n_colors, origin[1], origin[2], lab_a[1], lab_a[2])
+        ColorFunctions.functions[16](out2, 0, colors, n_colors, origin[1], origin[2], lab_b[1], lab_b[2])
         assert.are.equal(out1[1], out2[1])
         assert.are.equal(out1[2], out2[2])
         assert.are.equal(out1[3], out2[3])

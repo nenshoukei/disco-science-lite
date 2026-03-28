@@ -202,6 +202,32 @@ local functions = {
     local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 / 1024
     t = r * n_colors
   ]], 20),
+
+  -- [14] Cross: same color extends along both axes forming a cross/plus shape.
+  compile_function("Cross", [[
+    local dx = lx - px
+    local dy = ly - py
+    dx = dx < 0 and -dx or dx
+    dy = dy < 0 and -dy or dy
+    t = (dx < dy and dx or dy) / 8 + phase
+  ]], 2),
+
+  -- [15] Hyperbolic: four curved quadrants with hyperbolic contour lines.
+  compile_function("Hyperbolic", [[
+    local dx = lx - px
+    local dy = ly - py
+    t = dx * dy / 64 + phase
+  ]], 2),
+
+  -- [16] Pinwheel: windmill pattern, rotational symmetry where each quadrant offsets the color by a quarter cycle.
+  compile_function("Pinwheel", [[
+    local dx = lx - px
+    local dy = ly - py
+    local q = 0
+    if dx < 0 then q = q + 1; dx = -dx end
+    if dy < 0 then q = q + 2; dy = -dy end
+    t = (dx + dy) / 8 + q * n_colors * 0.25 + phase
+  ]], 2),
 }
 ColorFunctions.functions = functions
 local n_functions = #functions
