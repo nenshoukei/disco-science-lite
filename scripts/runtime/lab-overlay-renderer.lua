@@ -517,10 +517,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         n_visible_overlays = visible_overlay_count
 
         -- Update color_update_stride based on the number of visible overlays.
-        -- Automatically extend the interval if there are more than 500 visible labs.
-        local interval = (n_visible_overlays > 500 --[[$MAX_UPDATES_PER_TICK]]) and ceil(n_visible_overlays / 500 --[[$MAX_UPDATES_PER_TICK]]) or 1
-        if interval > 60 then interval = 60 end
-        color_update_stride = interval
+        -- Automatically extend the stride if there are more than 500 visible labs.
+        color_update_stride = (n_visible_overlays > 500 --[[$MAX_UPDATES_PER_TICK]]) and ceil(n_visible_overlays / 500 --[[$MAX_UPDATES_PER_TICK]]) or 1
+        if color_update_stride > 60 then color_update_stride = 60 end
       end
     end
 
