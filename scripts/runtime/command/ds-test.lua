@@ -21,7 +21,7 @@ local test_cases = {
       })
       assert(lab, "lab entity is not created")
 
-      local _, overlay = next(renderer.overlays)
+      local overlay = renderer.chunk_map:get(lab.unit_number)
       assert(overlay, "overlay is not rendered")
       assert(overlay.entity == lab, "overlay.entity is not lab entity")
       assert(overlay.animation.valid, "overlay.animation is not valid")
@@ -37,7 +37,6 @@ local test_cases = {
   {
     name = "After lab entity destroyed",
     test = function (renderer)
-      assert(next(renderer.overlays) == nil, "overlays is not empty")
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
@@ -58,10 +57,10 @@ local test_cases = {
       assert(lab2, "lab2 entity is not created")
       assert(lab3, "lab3 entity is not created")
 
-      assert(table_size(renderer.overlays) == 3, "Expected 3 overlays, got " .. table_size(renderer.overlays))
-      assert(renderer.overlays[lab1.unit_number], "overlay for lab1 not found")
-      assert(renderer.overlays[lab2.unit_number], "overlay for lab2 not found")
-      assert(renderer.overlays[lab3.unit_number], "overlay for lab3 not found")
+      assert(table_size(renderer.chunk_map.entries) == 3, "Expected 3 overlays, got " .. table_size(renderer.chunk_map.entries))
+      assert(renderer.chunk_map:get(lab1.unit_number), "overlay for lab1 not found")
+      assert(renderer.chunk_map:get(lab2.unit_number), "overlay for lab2 not found")
+      assert(renderer.chunk_map:get(lab3.unit_number), "overlay for lab3 not found")
 
       local entry1 = renderer.chunk_map.entries[lab1.unit_number]
       local entry2 = renderer.chunk_map.entries[lab2.unit_number]
@@ -78,7 +77,6 @@ local test_cases = {
   {
     name = "After multiple labs destroyed",
     test = function (renderer)
-      assert(next(renderer.overlays) == nil, "overlays is not empty")
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
@@ -117,7 +115,6 @@ local test_cases = {
   {
     name = "After teleported lab destroyed",
     test = function (renderer)
-      assert(next(renderer.overlays) == nil, "overlays is not empty")
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
@@ -141,7 +138,7 @@ local test_cases = {
 
       local lab = new_surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
       assert(lab, "lab entity is not created")
-      assert(renderer.overlays[lab.unit_number], "overlay not created")
+      assert(renderer.chunk_map:get(lab.unit_number), "overlay not created")
       assert(renderer.chunk_map.entries[lab.unit_number].surface_index == new_surface.index, "overlay is created for different surface")
 
       new_surface.clear()
@@ -150,7 +147,6 @@ local test_cases = {
   {
     name = "After new surface cleared",
     test = function (renderer)
-      assert(next(renderer.overlays) == nil, "overlays is not empty")
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
@@ -190,27 +186,17 @@ local test_cases = {
       assert(#labs >= 1, "Expected at least 1 lab on surface")
       local lab = labs[1]
 
-      local overlay = renderer.overlays[lab.unit_number]
+      local overlay = renderer.chunk_map:get(lab.unit_number)
       assert(overlay, "overlay not found for lab")
-
-      -- Verify that colors are computed from current_research
-      assert(renderer.current_research, "current_research not set")
-      assert(renderer.colors, "renderer.colors not set (research color not computed)")
 
       -- Verify the overlay is visible (lab is working/low_power and research is active)
       assert(overlay.visible,
         "overlay is not visible (entity.status=" .. tostring(lab.status)
         .. ", current_research=" .. tostring(force.current_research and force.current_research.name) .. ")")
 
-      -- Verify the overlay was added to visible_overlays (state_update confirmed it in viewport)
-      local found_in_visible = false
-      for i = 1, #renderer.visible_overlays do
-        if renderer.visible_overlays[i] == overlay then
-          found_in_visible = true
-          break
-        end
-      end
-      assert(found_in_visible, "overlay not found in renderer.visible_overlays")
+      -- Verify the overlay animation has a color applied (not default black)
+      local color = overlay.animation.color
+      assert(color and (color.r > 0 or color.g > 0 or color.b > 0), "overlay animation color is not set")
 
       -- Cleanup: cancel research, destroy all entities
       force.cancel_current_research()
@@ -243,12 +229,12 @@ local test_cases = {
         local has_registration = renderer.lab_registry:get_registration(lab_name) ~= nil
         local should_have_overlay = not is_excluded and (has_registration or Settings.is_fallback_enabled)
         if should_have_overlay then
-          local overlay = renderer.overlays[lab.unit_number]
+          local overlay = renderer.chunk_map:get(lab.unit_number)
           assert(overlay, "overlay not found for lab: " .. lab_name)
           assert(overlay.animation.valid, "overlay animation not valid for lab: " .. lab_name)
           assert(renderer.chunk_map.entries[lab.unit_number], "chunk_map entry not found for lab: " .. lab_name)
         else
-          assert(not renderer.overlays[lab.unit_number], "excluded lab should not have overlay: " .. lab_name)
+          assert(not renderer.chunk_map:get(lab.unit_number), "excluded lab should not have overlay: " .. lab_name)
         end
       end
 
@@ -260,7 +246,6 @@ local test_cases = {
   {
     name = "After all lab prototypes destroyed",
     test = function (renderer)
-      assert(next(renderer.overlays) == nil, "overlays is not empty")
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
