@@ -149,9 +149,16 @@ local functions = {
 
   -- [7] Spiral: color follows a clockwise spiral outward from the player; the spiral slowly rotates over time.
   compile_function("Spiral", [[
+    -- Uses diamond angle instead of expensive atan2 call.
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) / 8 - (atan2(dy, dx) / TWO_PI + 0.5) * n_colors + phase
+    local ax = dx < 0 and -dx or dx
+    local ay = dy < 0 and -dy or dy
+    local s = ax + ay
+    local a = s > 0 and ay / s * 0.25 or 0
+    if dx < 0 then a = 0.5 - a end
+    if dy < 0 then a = 1 - a end
+    t = sqrt(dx * dx + dy * dy) / 8 - a * n_colors + phase
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
