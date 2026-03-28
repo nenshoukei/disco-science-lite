@@ -137,10 +137,10 @@ local functions = {
     t = (d < 0 and -d or d) / 10 + phase
   ]], 2),
 
-  -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x8 units) relative to the player.
+  -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x9 units) relative to the player.
   compile_function("Grid", [[
     local dx = (lx - px) / 9
-    local dy = (ly - py) / 8
+    local dy = (ly - py) / 9
     local fdx = dx - dx % 1
     local fdy = dy - dy % 1
     local val = fdx + fdy
