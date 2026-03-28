@@ -193,10 +193,9 @@ local test_cases = {
       local overlay = renderer.overlays[lab.unit_number]
       assert(overlay, "overlay not found for lab")
 
-      -- Verify that force_state has colors computed from current_research
-      local fs = renderer.force_state[lab.force_index]
-      assert(fs, "force_state not initialized for this force")
-      assert(fs.colors, "force_state.colors not set (research color not computed)")
+      -- Verify that colors are computed from current_research
+      assert(renderer.current_research, "current_research not set")
+      assert(renderer.colors, "renderer.colors not set (research color not computed)")
 
       -- Verify the overlay is visible (lab is working/low_power and research is active)
       assert(overlay.visible,

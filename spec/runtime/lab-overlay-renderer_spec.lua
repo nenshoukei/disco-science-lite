@@ -60,25 +60,21 @@ end
 --- @param surface_index number?
 --- @param x number?
 --- @param y number?
---- @param force_index number?
 --- @return LabOverlay
-local function make_overlay(unit_number, surface_index, x, y, force_index)
+local function make_overlay(unit_number, surface_index, x, y)
   x = x or 0
   y = y or 0
   surface_index = surface_index or 1
-  force_index = force_index or 1
-  local entity = make_entity(unit_number, surface_index, x, y, force_index)
+  local entity = make_entity(unit_number, surface_index, x, y)
   local anim = { valid = true, visible = false, color = { 0, 0, 0 } }
   anim.destroy = function () anim.valid = false end
   return {
-    entity       = entity,
-    animation    = anim --[[@as LuaRenderObject]],
-    x            = x,
-    y            = y,
-    visible      = false,
-    unit_number  = unit_number,
-    force_index  = force_index,
-    player_index = 0,
+    entity      = entity,
+    animation   = anim --[[@as LuaRenderObject]],
+    x           = x,
+    y           = y,
+    visible     = false,
+    unit_number = unit_number,
   }
 end
 
@@ -105,23 +101,16 @@ local function make_player(force, surface_index, px, py)
   }) --[[@as LuaPlayer]]
 end
 
---- Add a connected player to game.forces for state_update tests.
+--- Set the single connected player in game.players[1].
 --- @param force LuaForce
 --- @param surface_index number
---- @param player_index number?
 --- @param px number?
 --- @param py number?
 --- @return LuaPlayer
-local function add_connected_player(force, surface_index, player_index, px, py)
-  player_index = player_index or 1
+local function add_connected_player(force, surface_index, px, py)
   local player = make_player(force, surface_index, px, py)
-  player.index = player_index --[[@as integer]]
-  if not force.connected_players then
-    force.connected_players = {} --[[@as LuaPlayer[] ]]
-    _G.game.forces[force.index] = force
-  end
-  force.connected_players[#force.connected_players + 1] = player
-  _G.game.players[player_index] = player
+  player.index = 1 --[[@as integer]]
+  _G.game.players[1] = player
   return player
 end
 
@@ -142,7 +131,9 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
       assert.are.same({}, r.overlays)
       assert.are.same({}, r.visible_overlays)
-      assert.are.same({}, r.force_state)
+      assert.is_nil(r.colors)
+      assert.are.equal(0, r.n_colors)
+      assert.is_nil(r.current_research)
     end)
   end)
 
@@ -173,11 +164,10 @@ describe("LabOverlayRenderer", function ()
     it("creates and returns an overlay with correct initial values", function ()
       local r = make_renderer()
       r.lab_registry:register("lab", { animation = "lab-anim", scale = 1.5 })
-      local ov = r:render_overlay_for_lab(make_entity(77, 1, 0, 0, 3))
+      local ov = r:render_overlay_for_lab(make_entity(77, 1, 0, 0))
 
       assert.is_not_nil(ov) --- @cast ov -nil
       assert.are.equal(77, ov.unit_number)
-      assert.are.equal(3, ov.force_index)
       assert.is_false(ov.visible)
       assert.are.equal("lab-anim", ov.animation.animation)
       assert.are.equal(1.5, ov.animation.x_scale)
@@ -333,18 +323,24 @@ describe("LabOverlayRenderer", function ()
       assert.is_not_nil(_G.rendering.objects[new_anim_id])
     end)
 
-    it("resets force_state when force=true", function ()
+    it("resets research state when force=true", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)
       _G.game.surfaces = { [1] = lab.surface }
       lab.surface.find_entities_filtered = function () return { lab } end
 
       r:render_overlays_for_all_labs()
-      r.force_state[1] = { current_research = nil, colors = nil, n_colors = 0 }
+      -- Set colors to a non-nil value to verify reset.
+      r.colors = { 1, 0, 0 }
+      r.n_colors = 1
+      r.current_research = make_tech()
 
+      -- No player set: update_current_research will reset to nil.
       r:render_overlays_for_all_labs(true)
 
-      assert.are.same({}, r.force_state)
+      assert.is_nil(r.colors)
+      assert.are.equal(0, r.n_colors)
+      assert.is_nil(r.current_research)
     end)
   end)
 
@@ -493,52 +489,50 @@ describe("LabOverlayRenderer", function ()
   end)
 
   -- -------------------------------------------------------------------
-  describe("update_force_current_research", function ()
-    it("updates research and flattens colors in force_state", function ()
+  describe("update_current_research", function ()
+    it("updates research and flattens colors", function ()
       local r = make_renderer()
       local force = make_force(1)
       local tech = make_tech({ "automation-science-pack", "logistic-science-pack" })
       force.current_research = tech
+      _G.game.players[1] = make_player(force, 1)
 
-      r.force_state[1] = { current_research = nil, colors = nil, n_colors = 0 }
       r.color_registry:set_ingredient_color("automation-science-pack", { 1, 0, 0 })
       r.color_registry:set_ingredient_color("logistic-science-pack", { 0, 1, 0 })
 
-      r:update_force_current_research(force)
+      r:update_current_research()
 
-      local fs = r.force_state[1]
-      assert.is_not_nil(fs) --- @cast fs -nil
-      assert.are.equal(tech, fs.current_research)
-      assert.are.same({ 1, 0, 0, 0, 1, 0 }, fs.colors)
-      assert.are.equal(2, fs.n_colors)
+      assert.are.equal(tech, r.current_research)
+      assert.are.same({ 1, 0, 0, 0, 1, 0 }, r.colors)
+      assert.are.equal(2, r.n_colors)
     end)
 
     it("clears colors when research is nil", function ()
       local r = make_renderer()
       local force = make_force(1)
       force.current_research = nil
-      r.force_state[1] = { current_research = nil, colors = { 1, 1, 1 }, n_colors = 1 }
+      _G.game.players[1] = make_player(force, 1)
+      r.colors = { 1, 1, 1 }
+      r.n_colors = 1
 
-      r:update_force_current_research(force)
+      r:update_current_research()
 
-      assert.is_nil(r.force_state[1].colors)
-      assert.are.equal(0, r.force_state[1].n_colors)
+      assert.is_nil(r.colors)
+      assert.are.equal(0, r.n_colors)
     end)
-  end)
 
-  -- -------------------------------------------------------------------
-  describe("update_all_forces_current_research", function ()
-    it("updates each force in self.force_state", function ()
+    it("clears state when player does not exist", function ()
       local r = make_renderer()
-      _G.game.forces = { [1] = make_force(1), [2] = make_force(2) }
-      r.force_state[1] = { current_research = nil, colors = nil, n_colors = 0 }
-      r.force_state[2] = { current_research = nil, colors = nil, n_colors = 0 }
+      r.colors = { 1, 0, 0 }
+      r.n_colors = 1
+      r.current_research = make_tech()
+      -- game.players[1] is nil (not set)
 
-      local update_calls = 0
-      r.update_force_current_research = function () update_calls = update_calls + 1 end
+      r:update_current_research()
 
-      r:update_all_forces_current_research()
-      assert.are.equal(2, update_calls)
+      assert.is_nil(r.colors)
+      assert.are.equal(0, r.n_colors)
+      assert.is_nil(r.current_research)
     end)
   end)
 
@@ -601,41 +595,41 @@ describe("LabOverlayRenderer", function ()
       assert.is_false(companion.visible)
     end)
 
-    it("manages force_state and research changes", function ()
+    it("updates current_research and colors based on force research changes", function ()
       local r = make_renderer()
       local force = make_force(1)
       local tech = make_tech({ "automation-science-pack" })
       force.current_research = tech
       r.color_registry:set_ingredient_color("automation-science-pack", { 1, 1, 1 })
 
-      add_connected_player(force, 1, 1, 10, 20)
+      add_connected_player(force, 1, 10, 20)
 
       local update = r:get_state_update_function()
       update()
 
-      local fs = r.force_state[1]
-      assert.is_not_nil(fs) --- @cast fs -nil
-      assert.are.equal(tech, fs.current_research)
+      assert.are.equal(tech, r.current_research)
+      assert.is_not_nil(r.colors)
 
       force.current_research = nil
       update()
-      assert.is_nil(fs.current_research)
-      assert.are.equal(0, fs.n_colors)
+      assert.is_nil(r.current_research)
+      assert.are.equal(0, r.n_colors)
     end)
 
-    it("deduplicates overlays visible to multiple players and clears trailing entries", function ()
+    it("replaces stale visible_overlays entries and clears trailing entries", function ()
       local r = make_renderer()
       local force = make_force(1)
       r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
 
-      -- Stale entry
+      -- Stale entries from a previous state update.
       r.visible_overlays[1] = make_overlay(99, 1, 0, 0)
+      r.visible_overlays[2] = make_overlay(98, 1, 0, 0)
 
-      add_connected_player(force, 1, 1)
-      add_connected_player(force, 1, 2)
+      add_connected_player(force, 1)
 
       r:get_state_update_function()()
 
+      -- Only the 1 real lab should be present; stale entry at [2] must be cleared.
       assert.are.equal(1, #r.visible_overlays)
       assert.is_nil(r.visible_overlays[2])
     end)
@@ -705,7 +699,7 @@ describe("LabOverlayRenderer", function ()
         local force = make_force(1)
         -- Lab at x=32 is in chunk 1, which is outside the view range [−1, 0].
         r:render_overlay_for_lab(make_entity(1, 1, 32, 0))
-        add_connected_player(force, 1, 1, 0, 0)
+        add_connected_player(force, 1, 0, 0)
 
         r:get_state_update_function()()
 
@@ -717,7 +711,7 @@ describe("LabOverlayRenderer", function ()
         local force = make_force(1)
         -- Lab at x=0 is in chunk 0, which is inside the view range [−1, 0].
         r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-        add_connected_player(force, 1, 1, 0, 0)
+        add_connected_player(force, 1, 0, 0)
 
         r:get_state_update_function()()
 
@@ -730,7 +724,7 @@ describe("LabOverlayRenderer", function ()
         -- Lab at x=32 (chunk 1) is outside at zoom=1 but inside at zoom=0.25:
         --   f = 16, half_vw = ceil(40) = 40, chunk_right = floor(46 * 0.03125) = 1
         r:render_overlay_for_lab(make_entity(1, 1, 32, 0))
-        local player = add_connected_player(force, 1, 1, 0, 0)
+        local player = add_connected_player(force, 1, 0, 0)
         player.zoom = 0.25
 
         r:get_state_update_function()()
@@ -745,7 +739,8 @@ describe("LabOverlayRenderer", function ()
     it("updates animation.color for visible overlays", function ()
       local r = make_renderer()
       r.current_interval = 1
-      r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.5 }, n_colors = 1 }
+      r.colors = { 1.0, 0.0, 0.5 }
+      r.n_colors = 1
 
       local written = false
       local mock_anim = setmetatable({}, {
@@ -755,7 +750,7 @@ describe("LabOverlayRenderer", function ()
           rawset(t, k, v)
         end,
       })
-      local ov = make_overlay(1, 1, 0, 0, 1)
+      local ov = make_overlay(1, 1, 0, 0)
       ov.animation = mock_anim --[[@as LuaRenderObject]]
       r.visible_overlays[1] = ov
 
@@ -766,7 +761,8 @@ describe("LabOverlayRenderer", function ()
     it("uses stride: updates only 1/N overlays per tick when current_interval=N", function ()
       local r = make_renderer()
       r.current_interval = 3
-      r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.5 }, n_colors = 1 }
+      r.colors = { 1.0, 0.0, 0.5 }
+      r.n_colors = 1
 
       local colored = {}
       for i = 1, 3 do
@@ -778,7 +774,7 @@ describe("LabOverlayRenderer", function ()
             rawset(t, k, v)
           end,
         })
-        local ov = make_overlay(i, 1, 0, 0, 1)
+        local ov = make_overlay(i, 1, 0, 0)
         ov.animation = anim --[[@as LuaRenderObject]]
         r.visible_overlays[i] = ov
       end
@@ -814,8 +810,9 @@ describe("LabOverlayRenderer", function ()
       it("switches color function when duration is reached", function ()
         local r = make_renderer()
         Settings.color_pattern_duration = 3
-        r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
-        r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+        r.colors = { 1.0, 0.0, 0.0 }
+        r.n_colors = 1
+        r.visible_overlays[1] = make_overlay(1, 1, 0, 0)
 
         local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
         -- starts with cf_calls = 1
@@ -829,8 +826,9 @@ describe("LabOverlayRenderer", function ()
         local r = make_renderer()
         Settings.color_pattern_duration = 6
         Settings.color_update_interval = 3
-        r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
-        r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+        r.colors = { 1.0, 0.0, 0.0 }
+        r.n_colors = 1
+        r.visible_overlays[1] = make_overlay(1, 1, 0, 0)
 
         -- ceil(6 / 3) = 2 ticks per epoch, not 6
         local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
@@ -879,8 +877,9 @@ describe("LabOverlayRenderer", function ()
       local function make_renderer_with_overlay()
         local r = make_renderer()
         r.current_interval = 1
-        r.force_state[1] = { current_research = make_tech(), colors = { 1.0, 0.0, 0.0 }, n_colors = 1 }
-        r.visible_overlays[1] = make_overlay(1, 1, 0, 0, 1)
+        r.colors = { 1.0, 0.0, 0.0 }
+        r.n_colors = 1
+        r.visible_overlays[1] = make_overlay(1, 1, 0, 0)
         return r
       end
 
