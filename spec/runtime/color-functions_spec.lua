@@ -370,8 +370,8 @@ describe("ColorFunctions", function ()
     describe("[15] Hyperbolic", function ()
       it("returns the same color for labs on the same hyperbolic contour", function ()
         -- dx * dy = 24 for both
-        local lab_a = { 4, 6 }  -- 4 * 6 = 24
-        local lab_b = { 3, 8 }  -- 3 * 8 = 24
+        local lab_a = { 4, 6 } -- 4 * 6 = 24
+        local lab_b = { 3, 8 } -- 3 * 8 = 24
         local out1, out2 = {}, {}
         ColorFunctions.functions[15](out1, 0, colors, n_colors, origin[1], origin[2], lab_a[1], lab_a[2])
         ColorFunctions.functions[15](out2, 0, colors, n_colors, origin[1], origin[2], lab_b[1], lab_b[2])
@@ -429,7 +429,7 @@ describe("ColorFunctions", function ()
         -- Each pair should differ
         for a = 1, 3 do
           for b = a + 1, 4 do
-            assert.is_true(
+            assert(
               outs[a][1] ~= outs[b][1] or outs[a][2] ~= outs[b][2] or outs[a][3] ~= outs[b][3],
               string.format("quadrant %d and %d should differ", a, b)
             )
