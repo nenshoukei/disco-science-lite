@@ -2,7 +2,13 @@
 
 [Code Style Guide](/.claude/rules/code-style-guide.md)
 
-Requirements: `lua`, `luarocks`, `pcre2`
+Requirements:
+
+- `lua` 5.2
+- `luarocks`
+- `lua-language-server` + [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)
+- `pcre2`
+- [Factorio Modding Tool Kit](https://marketplace.visualstudio.com/items?itemName=justarandomgeek.factoriomod-debug)
 
 This project's directory (or its symlink) should be located in the `mods` directory of [Factorio's use data directory](https://wiki.factorio.com/Application_directory) to be loaded by Factorio.
 

@@ -1,4 +1,4 @@
-.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check
+.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check full-check
 
 dev:
 	# If pcre2 is installed by Homebrew
@@ -12,9 +12,6 @@ lint:
 test:
 	@busted
 
-typecheck:
-	@tsc -p tasks/typecheck/tsconfig.json
-
 consts:
 	@lua tasks/update-consts.lua
 
@@ -27,7 +24,13 @@ mod-description:
 mods:
 	@tasks/update-all-mods.sh
 
-check: consts mods mod-description lint test typecheck
+check: consts mods mod-description lint test
+
+typecheck:
+	@tsc -p tasks/typecheck/tsconfig.json
+	@lua-language-server --check_format=pretty --configpath=.vscode/settings.json --check=.
+
+full-check: check typecheck
 
 benchmark:
 	@echo "## Color Functions"
