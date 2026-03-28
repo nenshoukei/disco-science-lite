@@ -101,66 +101,61 @@ end
 
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
-LabControl.events = {
-  [defines.events.on_player_created] = setup_event_handlers,
-  [defines.events.on_player_changed_force] = setup_event_handlers,
-  [defines.events.on_singleplayer_init] = setup_event_handlers,
-  [defines.events.on_multiplayer_init] = warn_on_multiplayer,
+--- @type event_handler.events
+local events = {}
+LabControl.events = events
 
-  --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
-  [defines.events.on_surface_cleared] = function (event)
-    if renderer then
-      renderer:remove_overlays_on_surface(event.surface_index)
+events[defines.events.on_player_created] = setup_event_handlers
+events[defines.events.on_player_changed_force] = setup_event_handlers
+events[defines.events.on_singleplayer_init] = setup_event_handlers
+events[defines.events.on_multiplayer_init] = warn_on_multiplayer
+
+events[defines.events.on_surface_cleared] = function (event)
+  if renderer then
+    renderer:remove_overlays_on_surface(event.surface_index)
+  end
+end
+events[defines.events.on_surface_deleted] = events[defines.events.on_surface_cleared]
+
+events[defines.events.on_script_trigger_effect] = function (event)
+  local target_entity = event.target_entity
+  if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and target_entity then
+    renderer:render_overlay_for_lab(target_entity)
+  end
+end
+
+events[defines.events.on_object_destroyed] = function (event)
+  if renderer and event.type == TARGET_TYPE_ENTITY then
+    renderer:remove_overlay_from_lab(event.useful_id)
+  end
+end
+
+events[defines.events.script_raised_teleported] = function (event)
+  if renderer then
+    renderer:update_lab_position(event.entity)
+  end
+end
+
+events[defines.events.on_runtime_mod_setting_changed] = function (event)
+  if not renderer then return end
+  local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
+  local setting_name = event.setting
+  if string.sub(setting_name, 1, #prefix) == prefix then
+    -- Remove old tick function if tick interval has changed.
+    if setting_name == "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] then
+      script.on_nth_tick(Settings.color_update_interval, nil)
     end
-  end,
 
-  --- @param event EventData.on_script_trigger_effect
-  [defines.events.on_script_trigger_effect] = function (event)
-    local target_entity = event.target_entity
-    if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and target_entity then
-      renderer:render_overlay_for_lab(target_entity)
+    Settings.reload()
+
+    if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
+      -- Force re-render all overlays.
+      renderer:render_overlays_for_all_labs(true)
     end
-  end,
 
-  --- @param event EventData.on_object_destroyed
-  [defines.events.on_object_destroyed] = function (event)
-    if renderer and event.type == TARGET_TYPE_ENTITY then
-      renderer:remove_overlay_from_lab(event.useful_id)
-    end
-  end,
-
-  --- @param event EventData.script_raised_teleported
-  [defines.events.script_raised_teleported] = function (event)
-    if renderer then
-      renderer:update_lab_position(event.entity)
-    end
-  end,
-
-  --- @param event EventData.on_runtime_mod_setting_changed
-  [defines.events.on_runtime_mod_setting_changed] = function (event)
-    if not renderer then return end
-    local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
-    local setting_name = event.setting
-    if string.sub(setting_name, 1, #prefix) == prefix then
-      -- Remove old tick function if tick interval has changed.
-      if setting_name == "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] then
-        script.on_nth_tick(Settings.color_update_interval, nil)
-      end
-
-      Settings.reload()
-
-      if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
-        -- Force re-render all overlays.
-        renderer:render_overlays_for_all_labs(true)
-      end
-
-      setup_event_handlers()
-    end
-  end,
-}
-
--- Same handler for both surface cleared and deleted events.
-LabControl.events[defines.events.on_surface_deleted] = LabControl.events[defines.events.on_surface_cleared]
+    setup_event_handlers()
+  end
+end
 
 --- Get the current renderer. Just for testing.
 --- @return LabOverlayRenderer
