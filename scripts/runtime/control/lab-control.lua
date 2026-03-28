@@ -10,6 +10,9 @@ local LabControl = {}
 --- @type LabOverlayRenderer
 local renderer
 
+local TARGET_TYPE_ENTITY = defines.target_type.entity
+local TARGET_TYPE_RENDER_OBJECT = defines.target_type.render_object
+
 -- Compatible with original DiscoScience interface
 remote.add_interface("DiscoScience", RemoteInterface.functions)
 
@@ -25,6 +28,15 @@ local function create_renderer()
   return LabOverlayRenderer.new(color_registry, lab_registry)
 end
 
+local function warn_on_multiplayer()
+  if game.is_multiplayer() then
+    game.print("Warning: Disco Science Lite is not supporting multiplayers.", {
+      color = { 1.0, 0, 0 },
+      game_state = false,
+    })
+  end
+end
+
 local function setup_event_handlers()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   if not ds_storage.anim_state then
@@ -32,12 +44,66 @@ local function setup_event_handlers()
   end
   local tick_function, request_state_update = renderer:get_tick_function(ds_storage.anim_state)
   script.on_event(defines.events.on_tick, tick_function)
+
   script.on_event({
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
-    defines.events.on_player_display_resolution_changed,
   }, request_state_update)
+
+  script.on_event({
+    defines.events.on_player_created,
+    defines.events.on_singleplayer_init,
+    defines.events.on_player_display_resolution_changed,
+    defines.events.on_player_changed_force,
+  }, setup_event_handlers)
+
+  script.on_event(defines.events.on_script_trigger_effect, function (event)
+    local target_entity = event.target_entity
+    if event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and target_entity then
+      renderer:render_overlay_for_lab(target_entity)
+    end
+  end)
+
+  script.on_event(defines.events.on_object_destroyed, function (event)
+    if event.type == TARGET_TYPE_ENTITY then
+      renderer:remove_overlay_from_lab(event.useful_id)
+      request_state_update()
+    elseif event.type == TARGET_TYPE_RENDER_OBJECT then
+      renderer:on_render_object_destroyed(event.useful_id)
+      request_state_update()
+    end
+  end)
+
+  --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
+  local function on_surface_cleared(event)
+    renderer:remove_overlays_on_surface(event.surface_index)
+    request_state_update()
+  end
+  script.on_event(defines.events.on_surface_cleared, on_surface_cleared)
+  script.on_event(defines.events.on_surface_deleted, on_surface_cleared)
+
+  script.on_event(defines.events.script_raised_teleported, function (event)
+    renderer:update_lab_position(event.entity)
+    request_state_update()
+  end)
+
+  script.on_event(defines.events.on_multiplayer_init, warn_on_multiplayer)
+
+  script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
+    local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
+    local setting_name = event.setting
+    if string.sub(setting_name, 1, #prefix) == prefix then
+      Settings.reload()
+
+      if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
+        -- Force re-render all overlays.
+        renderer:render_overlays_for_all_labs(true)
+      end
+
+      setup_event_handlers()
+    end
+  end)
 end
 
 local function validate_technology_prototypes()
@@ -46,15 +112,6 @@ local function validate_technology_prototypes()
     renderer.color_registry:validate_technology_prototypes()
     script.on_nth_tick(90, nil)
   end)
-end
-
-local function warn_on_multiplayer()
-  if game.is_multiplayer() then
-    game.print("Warning: Disco Science Lite is not supporting multiplayers.", {
-      color = { 1.0, 0, 0 },
-      game_state = false,
-    })
-  end
 end
 
 --- Rebuild all overlays and refresh event handlers and registry bindings.
@@ -97,59 +154,6 @@ function LabControl.on_configuration_changed()
   warn_on_multiplayer()
 
   validate_technology_prototypes()
-end
-
-local TARGET_TYPE_ENTITY = defines.target_type.entity
-
---- @type event_handler.events
-local events = {}
-LabControl.events = events
-
-events[defines.events.on_player_created] = setup_event_handlers
-events[defines.events.on_player_changed_force] = setup_event_handlers
-events[defines.events.on_singleplayer_init] = setup_event_handlers
-events[defines.events.on_multiplayer_init] = warn_on_multiplayer
-
-events[defines.events.on_surface_cleared] = function (event)
-  if renderer then
-    renderer:remove_overlays_on_surface(event.surface_index)
-  end
-end
-events[defines.events.on_surface_deleted] = events[defines.events.on_surface_cleared]
-
-events[defines.events.on_script_trigger_effect] = function (event)
-  local target_entity = event.target_entity
-  if renderer and event.effect_id == "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]] and target_entity then
-    renderer:render_overlay_for_lab(target_entity)
-  end
-end
-
-events[defines.events.on_object_destroyed] = function (event)
-  if renderer and event.type == TARGET_TYPE_ENTITY then
-    renderer:remove_overlay_from_lab(event.useful_id)
-  end
-end
-
-events[defines.events.script_raised_teleported] = function (event)
-  if renderer then
-    renderer:update_lab_position(event.entity)
-  end
-end
-
-events[defines.events.on_runtime_mod_setting_changed] = function (event)
-  if not renderer then return end
-  local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
-  local setting_name = event.setting
-  if string.sub(setting_name, 1, #prefix) == prefix then
-    Settings.reload()
-
-    if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
-      -- Force re-render all overlays.
-      renderer:render_overlays_for_all_labs(true)
-    end
-
-    setup_event_handlers()
-  end
 end
 
 --- Get the current renderer. Just for testing.

@@ -41,6 +41,10 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     --- Spatial chunk-based map for the overlays.
     --- @type ChunkMap
     chunk_map = ChunkMap.new(),
+
+    --- Overlay animation RenderObject.id to lab entity unit_number.
+    --- @type table<integer, integer>
+    render_object_id_to_unit_number = {},
   }
   self = setmetatable(self, LabOverlayRenderer)
   return self
@@ -113,6 +117,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       visible = is_visible,
       animation_offset = random() * 300,
     })
+    script.register_on_object_destroyed(render_object)
+    self.render_object_id_to_unit_number[render_object.id] = lab_unit_number
   end
 
   local companion_object --- @type LuaRenderObject?
@@ -142,6 +148,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       visible = is_visible,
       animation_offset = render_object.animation_offset,
     })
+    script.register_on_object_destroyed(companion_object)
+    self.render_object_id_to_unit_number[companion_object.id] = lab_unit_number
   end
 
   local lab_position = lab.position
@@ -201,8 +209,9 @@ function LabOverlayRenderer:render_overlays_for_all_labs(force)
     end
   end
 
-  -- Reset chunk map.
+  -- Reset chunk map and render object tracking.
   self.chunk_map = ChunkMap.new()
+  self.render_object_id_to_unit_number = {}
 
   local entity_filter = { type = "lab" }
   for _, surface in pairs(game.surfaces) do
@@ -239,8 +248,12 @@ end
 
 --- Remove the overlay from the lab entity.
 ---
+--- The `request_state_update` returned by `get_tick_function()` should be called afterwards
+--- to update `visible_overlays` in tick function.
+---
 --- @param lab_unit_number number The unit_number of the removed lab entity.
-function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
+--- @param skip_chunk_map_remove boolean? If `true`, skips removing from chunk_map. (Default: false)
+function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number, skip_chunk_map_remove)
   if not lab_unit_number then return end
 
   local overlay = self.chunk_map:get(lab_unit_number)
@@ -248,24 +261,29 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number)
 
   local animation = overlay.animation
   if animation.valid then
+    --- Remove RenderObject registration first to avoid nested loop
+    self.render_object_id_to_unit_number[animation.id] = nil
     animation.destroy()
   end
 
   local companion = overlay.companion
   if companion and companion.valid then
+    self.render_object_id_to_unit_number[companion.id] = nil
     companion.destroy()
   end
 
-  self.chunk_map:remove(lab_unit_number)
-
-  -- We do not remove the overlay from the visible_overlays here because it is rebuilt every ~30 state updates.
-  -- The color update checks animation.valid so it does not crash by setting a color on a destroyed object.
+  if not skip_chunk_map_remove then
+    self.chunk_map:remove(lab_unit_number)
+  end
 end
 
 --- Remove all overlays on the given surface.
 ---
 --- Call this on `on_surface_deleted` or `on_surface_cleared`.
 --- Destroys render objects if still valid (e.g. on surface clear), and cleans up Lua data structures.
+---
+--- The `request_state_update` returned by `get_tick_function()` should be called afterwards
+--- to update `visible_overlays` in tick function.
 ---
 --- @param surface_index number
 function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
@@ -276,16 +294,8 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
   for _, col in pairs(surface_chunks) do
     for _, chunk in pairs(col) do
       for i = 1, #chunk do
-        local overlay = chunk[i]
-        local unit_number = overlay.unit_number
-        local animation = overlay.animation
-        if animation.valid then
-          animation.destroy()
-        end
-        local companion = overlay.companion
-        if companion and companion.valid then
-          companion.destroy()
-        end
+        local unit_number = chunk[i].unit_number
+        self:remove_overlay_from_lab(unit_number, true)
         entries[unit_number] = nil
       end
     end
@@ -326,6 +336,31 @@ function LabOverlayRenderer:update_lab_position(lab)
     animation.destroy()
     if companion then companion.destroy() end
     self:render_overlay_for_lab(lab)
+  end
+end
+
+--- Called on `on_object_destroyed` event for RenderObject.
+---
+--- The `request_state_update` returned by `get_tick_function()` should be called afterwards
+--- to update `visible_overlays` in tick function.
+---
+--- @param object_id number
+function LabOverlayRenderer:on_render_object_destroyed(object_id)
+  local unit_number = self.render_object_id_to_unit_number[object_id]
+  if not unit_number then return end
+
+  self.render_object_id_to_unit_number[object_id] = nil -- Remove it to avoid memory-leaks
+
+  local overlay = self.chunk_map:get(unit_number)
+  if not overlay then return end
+
+  if overlay.entity.valid then
+    -- Lab entity still exists, but overlay (companion) animation is destroyed. Re-render it.
+    self:remove_overlay_from_lab(unit_number)
+    self:render_overlay_for_lab(overlay.entity)
+  else
+    -- Lab entity is also destroyed. Remove the overlay.
+    self:remove_overlay_from_lab(unit_number)
   end
 end
 
@@ -384,6 +419,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local n_visible_overlays = 0
   local player_x = 0
   local player_y = 0
+  local viewport_width = player.display_resolution.width
+  local viewport_height = player.display_resolution.height
   local in_chart_mode = false
 
   -- Capture chunk_map.data (mutated in-place by ChunkMap)
@@ -461,9 +498,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
       -- Compute visible chunk range in player's view
       local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
-      local display_resolution = player.display_resolution
-      local half_vw = display_resolution.width / f
-      local half_vh = display_resolution.height / f
+      local half_vw = viewport_width / f
+      local half_vh = viewport_height / f
       local chunk_left = floor((player_x - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
       local chunk_top = floor((player_y - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
       local chunk_right = floor((player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
@@ -482,13 +518,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
                 for j = #chunk, 1, -1 do
                   local overlay = chunk[j]
                   local entity = overlay.entity
-
-                  -- If entity is invalid, remove the overlay.
-                  if not entity.valid then
-                    self:remove_overlay_from_lab(overlay.unit_number)
-                    goto next_overlay
-                  end
-
                   local status = entity.status
                   local is_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
                   if overlay.visible ~= is_visible then
@@ -503,8 +532,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
                     visible_overlay_count = visible_overlay_count + 1
                     visible_overlays[visible_overlay_count] = overlay
                   end
-
-                  ::next_overlay::
                 end
               end
             end
@@ -533,7 +560,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
     -- ========== Color update (every color_update_interval ticks) ==========
 
-    if in_chart_mode or n_visible_overlays == 0 or not colors then return end
+    if in_chart_mode or n_visible_overlays == 0 or colors == nil then return end
     if current_tick < next_color_update_tick then return end
     next_color_update_tick = current_tick + color_update_interval
 
@@ -562,15 +589,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     for i = color_update_offset, n_visible_overlays, color_update_stride do
       local overlay = visible_overlays[i]
       color_function(color, phase, colors, n_colors, player_x, player_y, overlay.x, overlay.y)
-
-      local animation = overlay.animation
-      if animation.valid then
-        animation.color = color
-      elseif overlay.entity.valid then
-        self:render_overlay_for_lab(overlay.entity)
-      else
-        self:remove_overlay_from_lab(overlay.unit_number)
-      end
+      overlay.animation.color = color
     end
   end
 
