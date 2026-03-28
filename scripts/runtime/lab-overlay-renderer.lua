@@ -392,8 +392,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_registry = self.color_registry
 
   -- Research state
-  local state_update_counter = 0
   local force_state_update = true --- always force update at first tick
+  local last_state_update_tick = 0
   local current_research = nil    --- @type LuaTechnology|nil
   local colors = nil              --- @type number[]|nil
   local n_colors = 0
@@ -414,10 +414,10 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   --- @param event EventData.on_tick
   local function tick_function(event)
-    -- ========== State update (every ~30 calls or on demand) ==========
-    state_update_counter = state_update_counter + 1
-    if state_update_counter > 30 or force_state_update then
-      state_update_counter = 0
+    -- ========== State update (every ~30 ticks or on demand) ==========
+    local current_tick = event.tick
+    if current_tick - last_state_update_tick >= 30 or force_state_update then
+      last_state_update_tick = current_tick
       force_state_update = false
 
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
@@ -528,7 +528,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
     if in_chart_mode or n_visible_overlays == 0 or not colors then return end
 
-    local current_tick = event.tick
     local elapsed_tick = current_tick - color_pattern_saved_tick
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
