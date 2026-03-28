@@ -400,6 +400,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   -- Animation state
   local color_pattern_duration = Settings.color_pattern_duration
+  local color_update_interval = Settings.color_update_interval
   local color_update_offset = 1
   local color_update_stride = 1
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
@@ -529,7 +530,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
     local current_tick = event.tick
     local elapsed_tick = current_tick - color_pattern_saved_tick
-    local phase = phase_base + phase_speed * elapsed_tick
+    -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
+    -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
+    local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
 
     if elapsed_tick >= color_pattern_duration then
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
