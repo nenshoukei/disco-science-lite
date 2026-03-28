@@ -392,15 +392,17 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_registry = self.color_registry
 
   -- Research state
-  local force_state_update = true --- always force update at first tick
-  local last_state_update_tick = 0
-  local current_research = nil    --- @type LuaTechnology|nil
-  local colors = nil              --- @type number[]|nil
+  local next_state_update_tick = 0 --- always force update at first tick
+  local current_research = nil     --- @type LuaTechnology|nil
+  local colors = nil               --- @type number[]|nil
   local n_colors = 0
 
   -- Animation state
   local color_pattern_duration = Settings.color_pattern_duration
-  local color_update_interval = Settings.color_update_interval
+  local color_update_budget = Settings.color_update_budget
+  local color_update_max_per_call = Settings.color_update_max_per_call
+  local color_update_interval = 1
+  local next_color_update_tick = 0
   local color_update_offset = 1
   local color_update_stride = 1
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
@@ -416,9 +418,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local function tick_function(event)
     -- ========== State update (every ~30 ticks or on demand) ==========
     local current_tick = event.tick
-    if current_tick - last_state_update_tick >= 30 or force_state_update then
-      last_state_update_tick = current_tick
-      force_state_update = false
+    if current_tick >= next_state_update_tick then
+      next_state_update_tick = current_tick + 30 --[[$STATE_UPDATE_INTERVAL]]
 
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
       if in_chart_mode then return end -- Skip updates in chart mode
@@ -518,15 +519,23 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         n_visible_overlays = visible_overlay_count
 
         -- Update color_update_stride based on the number of visible overlays.
-        -- Automatically extend the stride if there are more than 500 visible labs.
-        color_update_stride = (n_visible_overlays > 500 --[[$MAX_UPDATES_PER_TICK]]) and ceil(n_visible_overlays / 500 --[[$MAX_UPDATES_PER_TICK]]) or 1
-        if color_update_stride > 60 then color_update_stride = 60 end
+        -- Automatically extend the stride if there are more than color_update_max_per_call visible labs.
+        color_update_stride = (n_visible_overlays > color_update_max_per_call) and ceil(n_visible_overlays / color_update_max_per_call) or 1
+        if color_update_stride > 60 --[[$MAX_COLOR_UPDATE_STRIDE]] then color_update_stride = 60 --[[$MAX_COLOR_UPDATE_STRIDE]] end
+
+        -- Auto-adjust color_update_interval based on budget and stride.
+        -- Budget is the max color updates per tick derived from the user's preset.
+        -- interval = ceil(n / (budget * stride)), so that updates_per_tick = n / (stride * interval) <= budget.
+        color_update_interval = max(1, ceil(n_visible_overlays / (color_update_budget * color_update_stride)))
+        if color_update_interval > 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] then color_update_interval = 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] end
       end
     end
 
-    -- ========== Color update (every call) ==========
+    -- ========== Color update (every color_update_interval ticks) ==========
 
     if in_chart_mode or n_visible_overlays == 0 or not colors then return end
+    if current_tick < next_color_update_tick then return end
+    next_color_update_tick = current_tick + color_update_interval
 
     local elapsed_tick = current_tick - color_pattern_saved_tick
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
@@ -566,7 +575,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   end
 
   local function request_state_update()
-    force_state_update = true
+    next_state_update_tick = 0
   end
 
   return tick_function, request_state_update

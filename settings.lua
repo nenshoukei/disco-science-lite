@@ -40,12 +40,11 @@ data:extend({
     order = "rg-a[visual]-d",
   },
   {
-    type = "int-setting",
-    name = "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]],
+    type = "string-setting",
+    name = "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]],
     setting_type = "runtime-global",
-    default_value = 1,
-    minimum_value = 1,
-    maximum_value = 29,
+    default_value = "balanced",
+    allowed_values = { "smooth", "balanced", "performance" },
     order = "rg-b[performance]-a",
   },
   {

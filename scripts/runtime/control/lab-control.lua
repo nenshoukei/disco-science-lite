@@ -31,7 +31,7 @@ local function setup_event_handlers()
     ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
   end
   local tick_function, request_state_update = renderer:get_tick_function(ds_storage.anim_state)
-  script.on_nth_tick(Settings.color_update_interval, tick_function)
+  script.on_event(defines.events.on_tick, tick_function)
   script.on_event({
     defines.events.on_research_started,
     defines.events.on_research_finished,
@@ -141,11 +141,6 @@ events[defines.events.on_runtime_mod_setting_changed] = function (event)
   local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
   local setting_name = event.setting
   if string.sub(setting_name, 1, #prefix) == prefix then
-    -- Remove old tick function if tick interval has changed.
-    if setting_name == "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] then
-      script.on_nth_tick(Settings.color_update_interval, nil)
-    end
-
     Settings.reload()
 
     if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then

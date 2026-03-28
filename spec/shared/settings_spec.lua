@@ -44,10 +44,38 @@ describe("Settings", function ()
       assert.are.equal(360, Settings.color_pattern_duration)
     end)
 
-    it("reads color_update_interval from global", function ()
-      _G.settings.global[ "mks-dsl-color-update-interval" --[[$COLOR_UPDATE_INTERVAL_NAME]] ] = { value = 5 }
+    it("reads color_update_preset from global", function ()
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "performance" }
       Settings.reload()
-      assert.are.equal(5, Settings.color_update_interval)
+      assert.are.equal("performance", Settings.color_update_preset)
+    end)
+
+    it("derives color_update_budget from color_update_preset", function ()
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "smooth" }
+      Settings.reload()
+      assert.are.equal(500, Settings.color_update_budget)
+
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "balanced" }
+      Settings.reload()
+      assert.are.equal(200, Settings.color_update_budget)
+
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "performance" }
+      Settings.reload()
+      assert.are.equal(50, Settings.color_update_budget)
+    end)
+
+    it("derives color_update_max_per_call from color_update_preset", function ()
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "smooth" }
+      Settings.reload()
+      assert.are.equal(1000, Settings.color_update_max_per_call)
+
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "balanced" }
+      Settings.reload()
+      assert.are.equal(500, Settings.color_update_max_per_call)
+
+      _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ] = { value = "performance" }
+      Settings.reload()
+      assert.are.equal(100, Settings.color_update_max_per_call)
     end)
 
     -- -------------------------------------------------------------------
@@ -69,10 +97,17 @@ describe("Settings", function ()
         assert.are.equal(180 --[[$DEFAULT_COLOR_PATTERN_DURATION]], Settings.color_pattern_duration)
       end)
 
-      it("uses default color_update_interval of 1", function ()
-        assert.are.equal(1, Settings.color_update_interval)
+      it("uses default color_update_preset of 'balanced'", function ()
+        assert.are.equal("balanced", Settings.color_update_preset)
       end)
 
+      it("uses default color_update_budget of 200", function ()
+        assert.are.equal(200, Settings.color_update_budget)
+      end)
+
+      it("uses default color_update_max_per_call of 500", function ()
+        assert.are.equal(500, Settings.color_update_max_per_call)
+      end)
     end)
 
     -- -------------------------------------------------------------------
