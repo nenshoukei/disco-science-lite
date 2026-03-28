@@ -16,7 +16,7 @@ Your science labs glow with the color of the science packs they're consuming, sh
 
 - **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/ups-optimization.md))
 
-- **Built-in Mod Support**: Over 20 mods are natively supported with properly fitted color animations, including Space Age Biolabs, Planet mods (e.g. Maraxis, Cerys), Krastorio 2, Exotic Space Industries, and many more. See the full list below.
+- **Built-in Mod Support**: Over 30 mods are natively supported with properly fitted color animations, including Space Age Biolabs, Planet mods (e.g. Maraxis, Cerys), Krastorio 2, Exotic Space Industries, and many more. See the full list below.
 
 - **Automatic Colorization for Unsupported Mods**: Any labs added by unsupported mods are automatically colorized too using a generic glow effect. This can be toggled in mod settings.
 
