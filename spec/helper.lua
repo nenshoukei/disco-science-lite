@@ -59,6 +59,8 @@ _G.defines = setmetatable({
     on_player_display_resolution_changed = 206,
     on_player_left_game = 207,
     on_player_kicked = 208,
+    on_singleplayer_init = 209,
+    on_multiplayer_init = 210,
     on_research_started = 300,
     on_research_finished = 301,
     on_research_cancelled = 302,
@@ -84,11 +86,13 @@ local function reset_mocks()
 
   --- @diagnostic disable-next-line: missing-fields
   _G.game = {
-    tick = 0,
+    tick = 100,
     players = {},
+    connected_players = {},
     forces = {},
     surfaces = {},
     get_player = function (index) return _G.game.players[index] end,
+    is_multiplayer = function () return false end,
   }
 
   --- @diagnostic disable-next-line: missing-fields

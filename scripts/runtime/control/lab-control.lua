@@ -30,16 +30,14 @@ local function setup_event_handlers()
   if not ds_storage.anim_state then
     ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
   end
-  script.on_nth_tick(Settings.color_update_interval, renderer:get_tick_function(ds_storage.anim_state))
-
-  local state_update_function = renderer:get_state_update_function()
-  script.on_nth_tick(30, state_update_function)
+  local tick_function, request_state_update = renderer:get_tick_function(ds_storage.anim_state)
+  script.on_nth_tick(Settings.color_update_interval, tick_function)
   script.on_event({
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
     defines.events.on_player_display_resolution_changed,
-  }, state_update_function)
+  }, request_state_update)
 end
 
 local function validate_technology_prototypes()
@@ -48,6 +46,15 @@ local function validate_technology_prototypes()
     renderer.color_registry:validate_technology_prototypes()
     script.on_nth_tick(90, nil)
   end)
+end
+
+local function warn_on_multiplayer()
+  if game.is_multiplayer() then
+    game.print("Warning: Disco Science Lite is not supporting multiplayers.", {
+      color = { 1.0, 0, 0 },
+      game_state = false,
+    })
+  end
 end
 
 --- Rebuild all overlays and refresh event handlers and registry bindings.
@@ -78,6 +85,7 @@ function LabControl.on_load()
   script.on_event(defines.events.on_tick, function ()
     script.on_event(defines.events.on_tick, nil)
     rebuild_overlays()
+    warn_on_multiplayer()
   end)
 end
 
@@ -86,6 +94,7 @@ function LabControl.on_configuration_changed()
 
   script.on_event(defines.events.on_tick, nil) -- cancels the deferred render registered in on_load
   rebuild_overlays()
+  warn_on_multiplayer()
 
   validate_technology_prototypes()
 end
@@ -93,6 +102,11 @@ end
 local TARGET_TYPE_ENTITY = defines.target_type.entity
 
 LabControl.events = {
+  [defines.events.on_player_created] = setup_event_handlers,
+  [defines.events.on_player_changed_force] = setup_event_handlers,
+  [defines.events.on_singleplayer_init] = setup_event_handlers,
+  [defines.events.on_multiplayer_init] = warn_on_multiplayer,
+
   --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
   [defines.events.on_surface_cleared] = function (event)
     if renderer then
@@ -135,11 +149,7 @@ LabControl.events = {
 
       Settings.reload()
 
-      if setting_name == "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]]
-        or setting_name == "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] then
-        -- This resets color palette using new saturation/brightness values.
-        renderer:update_current_research()
-      elseif setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
+      if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
         -- Force re-render all overlays.
         renderer:render_overlays_for_all_labs(true)
       end

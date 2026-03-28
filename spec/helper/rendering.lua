@@ -20,7 +20,7 @@ _G.rendering = {
     local obj = {
       id               = id,
       valid            = true,
-      visible          = false,
+      visible          = params.visible,
       color            = { 0, 0, 0 },
       surface          = params.surface,
       target           = { entity = params.target },

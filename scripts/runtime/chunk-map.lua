@@ -93,6 +93,14 @@ function ChunkMap:insert(entity, overlay)
   }
 end
 
+--- Get an overlay for the given unit_number.
+---
+--- @return LabOverlay|nil
+function ChunkMap:get(unit_number)
+  local entry = self.entries[unit_number]
+  return entry and entry.overlay
+end
+
 --- Remove an entity from the map.
 ---
 --- @param unit_number number

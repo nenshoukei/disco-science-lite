@@ -30,6 +30,7 @@ local function make_entity(unit_number, surface_index)
     unit_number   = unit_number,
     surface_index = surface_index,
     force_index   = 1,
+    force         = { index = 1 },
     position      = { x = 0, y = 0 },
     tile_width    = 3,
     tile_height   = 3,
