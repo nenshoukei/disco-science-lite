@@ -7,8 +7,6 @@
 local ChunkMap = {}
 ChunkMap.__index = ChunkMap
 
-local floor = math.floor
-
 --- An entry stored in the chunk map for a single entity.
 --- @class (exact) ChunkMapEntry
 --- @field surface_index number     Surface index of the entity.
@@ -48,8 +46,10 @@ function ChunkMap:insert(entity, overlay)
 
   local surface_index = entity.surface_index
   local position = entity.position
-  local chunk_x = floor((position.x or position[1]) / 32 --[[$CHUNK_SIZE]])
-  local chunk_y = floor((position.y or position[2]) / 32 --[[$CHUNK_SIZE]])
+  local chunk_x = (position.x or position[1]) / 32 --[[$CHUNK_SIZE]]
+  local chunk_y = (position.y or position[2]) / 32 --[[$CHUNK_SIZE]]
+  chunk_x = chunk_x - chunk_x % 1 -- equivalent to math.floor()
+  chunk_y = chunk_y - chunk_y % 1
 
   local entries = self.entries
   local existing = entries[unit_number]

@@ -10,7 +10,6 @@ local random = math.random
 local max = math.max
 local min = math.min
 local ceil = math.ceil
-local floor = math.floor
 local rendering_clear = rendering.clear
 local rendering_get_all_objects = rendering.get_all_objects
 local draw_animation = rendering.draw_animation
@@ -500,10 +499,14 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
       local half_vw = viewport_width / f
       local half_vh = viewport_height / f
-      local chunk_left = floor((player_x - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
-      local chunk_top = floor((player_y - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
-      local chunk_right = floor((player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
-      local chunk_bottom = floor((player_y + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
+      local chunk_left = (player_x - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+      local chunk_top = (player_y - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+      local chunk_right = (player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+      local chunk_bottom = (player_y + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+      chunk_left = chunk_left - chunk_left % 1 -- equivalent to math.floor(chunk_left)
+      chunk_top = chunk_top - chunk_top % 1
+      chunk_right = chunk_right - chunk_right % 1
+      chunk_bottom = chunk_bottom - chunk_bottom % 1
 
       -- Rebuild all_overlays_in_view only when chunk range changed or full scan is required.
       if (
