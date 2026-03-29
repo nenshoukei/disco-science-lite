@@ -26,8 +26,6 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field visible      boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
 --- @field unit_number  number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
 
---- Constructor
----
 --- @param color_registry ColorRegistry
 --- @param lab_registry LabRegistry
 --- @return LabOverlayRenderer
@@ -90,9 +88,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
 
   local render_object --- @type LuaRenderObject
   if existing_overlay then
-    -- If existing rendering object given, just update it with the registered values.
     render_object = existing_overlay
-    -- Check if settings change for avoiding setting same value which forces re-rendering.
+    -- Check if settings changed; avoid setting the same value, which forces re-rendering.
     if render_object.animation ~= animation then
       render_object.animation = animation
     end
@@ -114,7 +111,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       y_scale = scale,
       render_layer = "higher-object-under",
       visible = is_visible,
-      animation_offset = random() * 300,
+      animation_offset = random() * 300, -- randomize start frame so labs don't all animate in sync
     })
     script.register_on_object_destroyed(render_object)
     self.render_object_id_to_unit_number[render_object.id] = lab_unit_number
@@ -145,7 +142,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       -- "object" < "cargo-hatch" < "higher-object-under" < "higher-object-above"
       render_layer = is_companion_under_overlay and "cargo-hatch" or "higher-object-above",
       visible = is_visible,
-      animation_offset = render_object.animation_offset,
+      animation_offset = render_object.animation_offset, -- sync with the overlay so they animate together
     })
     script.register_on_object_destroyed(companion_object)
     self.render_object_id_to_unit_number[companion_object.id] = lab_unit_number
@@ -162,7 +159,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
     companion   = companion_object,
     x           = lab_x,
     y           = lab_y,
-    visible     = false, -- authoritative visible state is set by the tick scan
+    visible     = false, -- start as hidden; tick scan will synchronize this with entity.status
     unit_number = lab_unit_number,
   }
 
@@ -260,7 +257,7 @@ function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number, skip_chunk_
 
   local animation = overlay.animation
   if animation.valid then
-    --- Remove RenderObject registration first to avoid nested loop
+    -- Remove RenderObject registration first to avoid re-entrant loop via on_object_destroyed
     self.render_object_id_to_unit_number[animation.id] = nil
     animation.destroy()
   end
@@ -384,13 +381,15 @@ end
 
 --- Get a tick function and a state update request function.
 ---
---- The tick function performs two roles:
----   1. State update (every ~30 calls, or on demand via request_state_update):
----      - Tracks current_research for the player's force and updates colors when it changes.
----      - Updates player_position for the player.
----      - Checks lab entity.status and updates overlay visibility.
----      - Rebuilds visible_overlays for the color update to iterate.
----   2. Color update (every call):
+--- The tick function performs three phases each tick:
+---   1. Viewport update (every ~30 ticks, or on demand via request_state_update):
+---      - Checks current_research for the player's force; refreshes colors when it changes.
+---      - Updates player position and viewport chunk range.
+---      - Rebuilds all_overlays_in_view from the chunk map when the viewport moves.
+---   2. Incremental status scan (every tick):
+---      - Checks entity.status for a small budget of overlays per tick, spread evenly across the ~30-tick cycle.
+---      - Updates overlay.visible and n_visible_overlays when status changes.
+---   3. Color update (every color_update_interval ticks):
 ---      - Updates colors of visible overlays using stride iteration.
 ---
 --- The tick function should be refreshed after `render_overlays_for_all_labs()`.
@@ -433,7 +432,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   -- Pre-calculate max viewport reach for surface bounds early-exit check.
   chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
 
-  -- For inlined update_current_research
+  -- Captured for inlined research color lookup in tick_function.
   local color_registry = self.color_registry
 
   -- Research state
@@ -488,7 +487,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         end
       else
         current_research = new_current_research
-        needs_full_scan = true -- needs full scan for updating all overlays
+        needs_full_scan = true
 
         if current_research then
           colors, n_colors = color_registry:get_flattened_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
@@ -503,10 +502,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       player_x = player_position.x or player_position[1]
       player_y = player_position.y or player_position[2]
 
-      -- Compute visible chunk range in player's view
-      local surface_index = player.surface_index
-
       -- Update stale surface bounds if labs were added or removed since last check.
+      local surface_index = player.surface_index
       if surface_bounds_dirty[surface_index] then
         chunk_map:update_surface_bounds(surface_index)
       end
