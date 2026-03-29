@@ -478,20 +478,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         needs_full_status_scan = true -- needs full scan for updating all overlays
 
         if current_research then
-          local raw_colors = color_registry:get_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
-          local raw_n_colors = #raw_colors
-          -- Flatten the color tuples into a single array for performance in the hot color update loop.
-          local flat_colors = {}
-          local ci = 1
-          for i = 1, raw_n_colors do
-            local c = raw_colors[i]
-            flat_colors[ci] = c[1]
-            flat_colors[ci + 1] = c[2]
-            flat_colors[ci + 2] = c[3]
-            ci = ci + 3
-          end
-          colors = flat_colors
-          n_colors = raw_n_colors
+          colors, n_colors = color_registry:get_flattened_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
         else
           colors = nil
           n_colors = 0

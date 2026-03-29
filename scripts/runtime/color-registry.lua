@@ -131,7 +131,7 @@ function ColorRegistry:load_prototype_colors()
   Utils.pre_expand_with_affixes(self.registered_colors, self.color_prefixes, self.color_suffixes)
 end
 
---- Get colors of ingredients for research of technology.
+--- Get flattened color array of ingredients for research of technology.
 ---
 --- If calling on the same technology multiple times, the result should be cached by the caller.
 ---
@@ -142,12 +142,14 @@ end
 --- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
 --- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
---- @return ColorTuple[]
-function ColorRegistry:get_colors_for_research(technology, saturation, brightness)
+--- @return number[] flattened_colors Flattened color array: `{ r, g, b, r, g, b, ... }`
+--- @return integer  n_colors         Number of colors: `#flattened_colors / 3`
+function ColorRegistry:get_flattened_colors_for_research(technology, saturation, brightness)
   saturation = saturation or 1.0
   brightness = brightness or 1.0
-  --- @type ColorTuple[]
-  local colors = {}
+  --- @type number[]
+  local flattened_colors = {}
+  local index = 1
   local n_colors = 0
   local registered_colors = self.registered_colors
   local ingredients = technology.research_unit_ingredients
@@ -158,24 +160,45 @@ function ColorRegistry:get_colors_for_research(technology, saturation, brightnes
       n_colors = n_colors + 1
       local r, g, b = color[1], color[2], color[3]
       local lum = 0.299 * r + 0.587 * g + 0.114 * b
-      colors[n_colors] = {
-        (lum + (r - lum) * saturation) * brightness,
-        (lum + (g - lum) * saturation) * brightness,
-        (lum + (b - lum) * saturation) * brightness,
-      }
+      flattened_colors[index] = (lum + (r - lum) * saturation) * brightness
+      flattened_colors[index + 1] = (lum + (g - lum) * saturation) * brightness
+      flattened_colors[index + 2] = (lum + (b - lum) * saturation) * brightness
+      index = index + 3
     end
   end
   if n_colors == 0 then
+    n_colors = 1
     local color = self.default_research_color
     local r, g, b = color[1], color[2], color[3]
     local lum = 0.299 * r + 0.587 * g + 0.114 * b
-    colors[1] = {
-      (lum + (r - lum) * saturation) * brightness,
-      (lum + (g - lum) * saturation) * brightness,
-      (lum + (b - lum) * saturation) * brightness,
-    }
+    flattened_colors[1] = (lum + (r - lum) * saturation) * brightness
+    flattened_colors[2] = (lum + (g - lum) * saturation) * brightness
+    flattened_colors[3] = (lum + (b - lum) * saturation) * brightness
   end
-  return colors
+  return flattened_colors, n_colors
+end
+
+--- Get colors of ingredients for research of technology.
+---
+--- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
+--- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @return ColorTuple[] colors
+--- @return integer      n_colors
+function ColorRegistry:get_colors_for_research(technology, saturation, brightness)
+  local flattened_colors, n_colors = self:get_flattened_colors_for_research(technology, saturation, brightness)
+  --- @type ColorTuple[]
+  local colors = {}
+  local index = 1
+  for i = 1, n_colors do
+    colors[i] = {
+      flattened_colors[index],
+      flattened_colors[index + 1],
+      flattened_colors[index + 2],
+    }
+    index = index + 3
+  end
+  return colors, n_colors
 end
 
 return ColorRegistry
