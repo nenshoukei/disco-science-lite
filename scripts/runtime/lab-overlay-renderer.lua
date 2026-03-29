@@ -415,7 +415,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   end
 
   local force = player.force --[[@as LuaForce]]
-  local visible_overlays = {} --- @type LabOverlay[]
+  local all_overlays_in_view = {} --- @type LabOverlay[]
+  local n_all_in_view = 0
   local n_visible_overlays = 0
   local player_x = 0
   local player_y = 0
@@ -429,9 +430,11 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_registry = self.color_registry
 
   -- Research state
-  local next_state_update_tick = 0 --- always force update at first tick
-  local current_research = nil     --- @type LuaTechnology|nil
-  local colors = nil               --- @type number[]|nil
+  local next_state_update_tick = 0    --- always force update at first tick
+  local needs_full_status_scan = true --- force full scan at first tick and on request_state_update
+  local status_cursor = 0
+  local current_research = nil        --- @type LuaTechnology|nil
+  local colors = nil                  --- @type number[]|nil
   local n_colors = 0
 
   -- Animation state
@@ -453,9 +456,11 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   --- @param event EventData.on_tick
   local function tick_function(event)
-    -- ========== State update (every ~30 ticks or on demand) ==========
     local current_tick = event.tick
-    if current_tick >= next_state_update_tick then
+    local prev_n_visible_overlays = n_visible_overlays
+
+    -- ========== Viewport update (every ~30 ticks, or forced by request_state_update) ==========
+    if current_tick >= next_state_update_tick or needs_full_status_scan then
       next_state_update_tick = current_tick + 30 --[[$STATE_UPDATE_INTERVAL]]
 
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
@@ -464,12 +469,14 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       -- Update current_research and colors if changed.
       local new_current_research = force.current_research
       if new_current_research == current_research then
-        if new_current_research == nil then
-          -- If current_research remains nil, we can safely skip visiblility and color updates. (all invisible)
+        if new_current_research == nil and not needs_full_status_scan then
+          -- If current_research remains nil, we can safely skip visibility and color updates. (all invisible)
           return
         end
       else
         current_research = new_current_research
+        needs_full_status_scan = true -- needs full scan for updating all overlays
+
         if current_research then
           local raw_colors = color_registry:get_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
           local raw_n_colors = #raw_colors
@@ -505,9 +512,10 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       local chunk_right = floor((player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
       local chunk_bottom = floor((player_y + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
 
-      -- Scan visible chunks for overlays and update their visibility
+      -- Update all_overlays_in_view and count visible overlays
       local surface_chunks = chunk_map_data[player.surface_index]
-      local visible_overlay_count = 0
+      local all_count = 0
+      n_visible_overlays = 0
       if surface_chunks then
         for cx = chunk_left, chunk_right do
           local col = surface_chunks[cx]
@@ -515,50 +523,67 @@ function LabOverlayRenderer:get_tick_function(anim_state)
             for cy = chunk_top, chunk_bottom do
               local chunk = col[cy]
               if chunk then
-                for j = #chunk, 1, -1 do
+                for j = 1, #chunk do
                   local overlay = chunk[j]
-                  local entity = overlay.entity
-                  local status = entity.status
-                  local is_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
-                  if overlay.visible ~= is_visible then
-                    overlay.visible = is_visible
-                    overlay.animation.visible = is_visible
-                    if overlay.companion then
-                      overlay.companion.visible = is_visible
-                    end
-                  end
-
-                  if is_visible then
-                    visible_overlay_count = visible_overlay_count + 1
-                    visible_overlays[visible_overlay_count] = overlay
+                  all_count = all_count + 1
+                  all_overlays_in_view[all_count] = overlay
+                  if overlay.visible then
+                    n_visible_overlays = n_visible_overlays + 1
                   end
                 end
               end
             end
           end
         end
+      end
+      -- Clear trailing references to prevent memory leaks and GC issues.
+      for i = all_count + 1, n_all_in_view do
+        if all_overlays_in_view[i] == nil then break end
+        all_overlays_in_view[i] = nil
+      end
+      n_all_in_view = all_count
 
-        -- Clear trailing lab overlay references from the table to prevent memory leaks and GC issues.
-        for i = visible_overlay_count + 1, n_visible_overlays do
-          if visible_overlays[i] == nil then break end
-          visible_overlays[i] = nil
+      -- Reset status cursor so incremental scan starts from the beginning.
+      status_cursor = 0
+    end
+
+    -- ========== Incremental status scan (every tick) ==========
+    -- Spread entity.status C bridge calls evenly across ticks instead of doing them all at once.
+    -- Budget: ceil(n_all / 30) ensures all overlays are scanned within one state update cycle.
+    --         If full scan is required, use n_all_in_view instead for iterating all overlays in view.
+    if (n_all_in_view > 0 and current_research ~= nil) or needs_full_status_scan then
+      local budget = needs_full_status_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
+      needs_full_status_scan = false
+      for _ = 1, budget do
+        status_cursor = status_cursor + 1
+        if status_cursor > n_all_in_view then status_cursor = 1 end
+        local overlay = all_overlays_in_view[status_cursor]
+        local status = overlay.entity.status
+        local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
+        if overlay.visible ~= should_be_visible then
+          overlay.visible = should_be_visible
+          overlay.animation.visible = should_be_visible
+          if overlay.companion then
+            overlay.companion.visible = should_be_visible
+          end
+          if should_be_visible then
+            n_visible_overlays = n_visible_overlays + 1
+          else
+            n_visible_overlays = n_visible_overlays - 1
+          end
         end
-        n_visible_overlays = visible_overlay_count
-
-        -- Update color_update_stride based on the number of visible overlays.
-        -- Automatically extend the stride if there are more than color_update_max_per_call visible labs.
-        color_update_stride = (n_visible_overlays > color_update_max_per_call) and ceil(n_visible_overlays / color_update_max_per_call) or 1
-        if color_update_stride > 60 --[[$MAX_COLOR_UPDATE_STRIDE]] then color_update_stride = 60 --[[$MAX_COLOR_UPDATE_STRIDE]] end
-
-        -- Auto-adjust color_update_interval based on budget and stride.
-        -- Budget is the max color updates per tick derived from the user's preset.
-        -- interval = ceil(n / (budget * stride)), so that updates_per_tick = n / (stride * interval) <= budget.
-        color_update_interval = max(1, ceil(n_visible_overlays / (color_update_budget * color_update_stride)))
-        if color_update_interval > 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] then color_update_interval = 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] end
       end
     end
 
     -- ========== Color update (every color_update_interval ticks) ==========
+
+    if n_visible_overlays ~= prev_n_visible_overlays then
+      -- Recalculate stride and interval if n_visible_overlays has changed.
+      color_update_stride = (n_visible_overlays > color_update_max_per_call) and ceil(n_visible_overlays / color_update_max_per_call) or 1
+      if color_update_stride > 60 --[[$MAX_COLOR_UPDATE_STRIDE]] then color_update_stride = 60 --[[$MAX_COLOR_UPDATE_STRIDE]] end
+      color_update_interval = max(1, ceil(n_visible_overlays / (color_update_budget * color_update_stride)))
+      if color_update_interval > 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] then color_update_interval = 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] end
+    end
 
     if in_chart_mode or n_visible_overlays == 0 or colors == nil then return end
     if current_tick < next_color_update_tick then return end
@@ -585,16 +610,18 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end
 
-    -- Update colors of the visible overlays using stride iteration.
-    for i = color_update_offset, n_visible_overlays, color_update_stride do
-      local overlay = visible_overlays[i]
-      color_function(color, phase, colors, n_colors, player_x, player_y, overlay.x, overlay.y)
-      overlay.animation.color = color
+    -- Update colors of visible overlays using stride iteration over all overlays in view.
+    for i = color_update_offset, n_all_in_view, color_update_stride do
+      local overlay = all_overlays_in_view[i]
+      if overlay.visible then
+        color_function(color, phase, colors, n_colors, player_x, player_y, overlay.x, overlay.y)
+        overlay.animation.color = color
+      end
     end
   end
 
   local function request_state_update()
-    next_state_update_tick = 0
+    needs_full_status_scan = true
   end
 
   return tick_function, request_state_update
