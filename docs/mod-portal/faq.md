@@ -1,8 +1,8 @@
 ## What is the relationship to the original Disco Science mod?
 
-Disco Science Lite is an unofficial variant of the original Disco Science mod.
+Disco Science Lite is a variant of the original Disco Science mod.
 
-This mod is not officially affiliated with or endorsed by the original mod author. Please **DO NOT** contact the original mod author with questions or issues about this mod.
+This mod is not officially affiliated with the original mod author. Please **DO NOT** contact the original mod author with questions or issues about this mod.
 
 ## Is it safe to add or remove this mod in mid-game?
 
