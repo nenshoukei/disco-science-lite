@@ -6,7 +6,7 @@ _The Disco Must Grow. Into Space, with a performance twist._
 
 Disco Science Lite is a variant of the beloved [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod by Daniel Brauer, featuring algorithmic UPS optimizations and additional features including Space Age mods support.
 
-**This mod is single-player only. Multiplayer is not supported.**
+**This mod is currently single-player only. Non-PvP multiplayer will be supported in an upcoming version.**
 
 This mod is not officially affiliated with the original mod author. Please **DO NOT** contact the original mod author with questions or issues about this mod.
 
@@ -51,23 +51,25 @@ These mods are supported out of the box.
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
-- Space-Age Planet Mods
-    - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
-    - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
-    - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
-    - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
-    - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
-    - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
-    - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
-    - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
-    - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
-    - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
-    - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
-    - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
-    - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
-    - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
-    - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
-    - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
+
+Supported Space-Age Planet Mods:
+
+- [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
+- [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
+- [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
+- [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
+- [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
+- [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
+- [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
+- [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+- [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
+- [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
+- [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
+- [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
+- [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
+- [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
+- [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 
 In addition to the mods listed above, mods that support the original Disco Science mod may still work, unless it specifically checks for the original mod by name and doesn't recognize Disco Science Lite as a compatible mod.
 
@@ -118,7 +120,7 @@ _The Disco Must Grow. 宇宙へ、そしてパフォーマンスの進化とと�
 
 Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://mods.factorio.com/mod/DiscoScience) の非公式派生版です。アルゴリズムによる UPS 最適化と、Space Age Mod 対応などの追加機能を備えています。
 
-**この Mod はシングルプレイヤー専用です。マルチプレイには対応していません。**
+**この Mod は現在シングルプレイヤー専用です。非 PvP のマルチプレイヤーには対応する予定です。**
 
 この Mod は原作者とは関係ありません。この Mod に関する問い合わせやバグ報告を、原作者や原作の Discussion に送らないでください。
 
@@ -161,23 +163,25 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel（ただし宇宙科学研究所は対象外）
-- Space-Age 惑星追加 Mod
-    - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
-    - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
-    - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
-    - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
-    - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
-    - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
-    - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
-    - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
-    - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
-    - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
-    - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
-    - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
-    - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
-    - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
-    - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
-    - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
+
+Space-Age 惑星追加 Mod:
+
+- [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
+- [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
+- [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
+- [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
+- [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
+- [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
+- [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
+- [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+- [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
+- [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
+- [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
+- [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
+- [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
+- [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
+- [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 
 上記以外にも、原作の Disco Science に対応している Mod であれば引き続き動作する可能性があります。ただし、Mod 名を明示的にチェックしていて Disco Science Lite を互換 Mod として認識しないものは除きます。
 

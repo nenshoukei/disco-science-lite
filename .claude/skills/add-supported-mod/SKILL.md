@@ -133,8 +133,8 @@ Add the following line to the `## Supported Mods` section of `README.md`, ad to 
 
 **Insertion rules:**
 
-- If **not** a planet mod: Insert among the top-level bullet list items, in alphabetical order by mod name (case-insensitive, ignore leading symbols like 🌐).
-- If **a planet mod**: Insert as a sub-item under `- Space-Age Planet Mods`, in alphabetical order by mod name (case-insensitive, ignore leading symbols).
+- If **not** a planet mod: Insert into the fist list in the section, in alphabetical order by mod name (case-insensitive, ignore leading symbols like 🌐).
+- If **a planet mod**: Insert into the list after `Supported Space-Age Planet Mods:`, in alphabetical order by mod name (case-insensitive, ignore leading symbols).
 
 ## Step 5: Run make check
 
