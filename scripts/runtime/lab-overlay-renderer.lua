@@ -18,13 +18,14 @@ local STATUS_LOW_POWER = defines.entity_status.low_power
 local RENDER_MODE_CHART = defines.render_mode.chart
 
 --- @class (exact) LabOverlay
---- @field entity       LuaEntity        Lab entity.
---- @field animation    LuaRenderObject  Render object for the overlay.
---- @field companion    LuaRenderObject? Render object for the companion, which is rendered over the overlay but not colorized.
---- @field x            number           X coordinate.
---- @field y            number           Y coordinate.
---- @field visible      boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
---- @field unit_number  number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field entity        LuaEntity        Lab entity.
+--- @field animation     LuaRenderObject  Render object for the overlay.
+--- @field companion     LuaRenderObject? Render object for the companion, which is rendered over the overlay but not colorized.
+--- @field x             number           X coordinate.
+--- @field y             number           Y coordinate.
+--- @field visible       boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
+--- @field unit_number   number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field surface_index number           Surface index of the lab entity (used in multiplayer for per-surface player reference).
 
 --- @param color_registry ColorRegistry
 --- @param lab_registry LabRegistry
@@ -154,13 +155,14 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
 
   --- @type LabOverlay
   local new_overlay = {
-    entity      = lab,
-    animation   = render_object,
-    companion   = companion_object,
-    x           = lab_x,
-    y           = lab_y,
-    visible     = false, -- start as hidden; tick scan will synchronize this with entity.status
-    unit_number = lab_unit_number,
+    entity        = lab,
+    animation     = render_object,
+    companion     = companion_object,
+    x             = lab_x,
+    y             = lab_y,
+    visible       = false, -- start as hidden; tick scan will synchronize this with entity.status
+    unit_number   = lab_unit_number,
+    surface_index = lab.surface_index,
   }
 
   self.chunk_map:insert(lab, new_overlay)
@@ -379,6 +381,9 @@ function LabOverlayRenderer.create_anim_state()
   }) --[[@as AnimState]]
 end
 
+--- No-op function
+local function noop() end
+
 --- Get a tick function and a state update request function.
 ---
 --- The tick function performs three phases each tick:
@@ -394,6 +399,9 @@ end
 ---
 --- The tick function should be refreshed after `render_overlays_for_all_labs()`.
 ---
+--- Note: `[[SYNC:name]] .. [[END_SYNC]]` sections must be in sync between singleplayer and multiplayer (_get_mp_tick_function).
+---       `make check-sync` checks these sections with the same name has the same contents.
+---
 --- @param anim_state AnimState
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
@@ -407,43 +415,34 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   -- * Avoid creating a new object.
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
+  if game.is_multiplayer() then
+    return self:_get_multiplayer_tick_function(anim_state)
+  end
+
   local player = game.connected_players[1]
-  if not player or game.is_multiplayer() then
-    -- Return empty functions when player is not created yet or in multiplayer mode
-    return function () end, function () end, function () end
+  if not player then
+    -- Return empty functions when player is not created yet (e.g. before on_player_created fires)
+    return noop, noop, noop
   end
 
   local force = player.force --[[@as LuaForce]]
-  local all_overlays_in_view = {} --- @type LabOverlay[]
-  local n_all_in_view = 0
-  local n_visible_overlays = 0
-  local player_x = 0
-  local player_y = 0
-  local viewport_width = player.display_resolution.width
-  local viewport_height = player.display_resolution.height
-  local in_chart_mode = false
+
+  --[[SYNC:upvalues]]
 
   -- Capture chunk_map fields (mutated in-place by ChunkMap)
   local chunk_map = self.chunk_map
   local chunk_map_data = chunk_map.data
-  local surface_bounds = chunk_map.surface_bounds
-  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
-
-  -- Pre-calculate max viewport reach for surface bounds early-exit check.
-  chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
 
   -- Captured for inlined research color lookup in tick_function.
   local color_registry = self.color_registry
 
+  local all_overlays_in_view = {} --- @type LabOverlay[]
+  local n_all_in_view = 0
+  local n_visible_overlays = 0
+
   -- Research state
   local next_state_update_tick = 0 --- always force update at first tick
   local needs_full_scan = true     --- force full scan at first tick and on request_state_update
-  local prev_chunk_left = 0
-  local prev_chunk_top = 0
-  local prev_chunk_right = 0
-  local prev_chunk_bottom = 0
-  local prev_surface_index = 0
-  local bounds_was_outside = false -- true after early-exit; forces chunk rescan on player's return
   local status_cursor = 0
   local current_research = nil     --- @type LuaTechnology|nil
   local colors = nil               --- @type number[]|nil
@@ -466,6 +465,25 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_function = ColorFunctions.functions[color_function_index]
   local color = { 0, 0, 0 }
 
+  --[[END_SYNC]]
+
+  local player_x = 0
+  local player_y = 0
+  local viewport_width = player.display_resolution.width
+  local viewport_height = player.display_resolution.height
+  local in_chart_mode = false
+  local surface_bounds = chunk_map.surface_bounds
+  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+  -- Pre-calculate max viewport reach for surface bounds early-exit check.
+  chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
+
+  local prev_chunk_left = 0
+  local prev_chunk_top = 0
+  local prev_chunk_right = 0
+  local prev_chunk_bottom = 0
+  local prev_surface_index = 0
+  local bounds_was_outside = false -- true after early-exit; forces chunk rescan on player's return
+
   --- @param event EventData.on_tick
   local function tick_function(event)
     local current_tick = event.tick
@@ -478,6 +496,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
       if in_chart_mode then return end -- Skip updates in chart mode
 
+      --[[SYNC:research-update]]
       -- Update current_research and colors if changed.
       local new_current_research = force.current_research
       if new_current_research == current_research then
@@ -496,6 +515,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
           n_colors = 0
         end
       end
+      --[[END_SYNC]]
 
       -- Update player position.
       local player_position = player.position
@@ -526,6 +546,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         return
       end
 
+      --[[SYNC:calc-viewport]]
       local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
       local half_vw = viewport_width / f
       local half_vh = viewport_height / f
@@ -537,6 +558,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       chunk_top = chunk_top - chunk_top % 1
       chunk_right = chunk_right - chunk_right % 1
       chunk_bottom = chunk_bottom - chunk_bottom % 1
+      --[[END_SYNC]]
 
       -- Rebuild all_overlays_in_view only when chunk range changed or full scan is required.
       if (
@@ -555,9 +577,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         prev_chunk_bottom = chunk_bottom
         prev_surface_index = surface_index
 
-        local surface_chunks = chunk_map_data[surface_index]
-        local all_count = 0
         n_visible_overlays = 0
+        local all_count = 0
+        local surface_chunks = chunk_map_data[surface_index]
         if surface_chunks then
           for cx = chunk_left, chunk_right do
             local col = surface_chunks[cx]
@@ -596,6 +618,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     --         If full scan is required, use n_all_in_view instead for iterating all overlays in view.
     if (n_all_in_view > 0 and current_research ~= nil) or needs_full_scan then
       local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
+      --[[SYNC:status-scan-body]]
       needs_full_scan = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
@@ -616,6 +639,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
           end
         end
       end
+      --[[END_SYNC]]
     end
 
     -- ========== Color update (every color_update_interval ticks) ==========
@@ -632,6 +656,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     if current_tick < next_color_update_tick then return end
     next_color_update_tick = current_tick + color_update_interval
 
+    --[[SYNC:color-epoch]]
     local elapsed_tick = current_tick - color_pattern_saved_tick
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
@@ -653,6 +678,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end
+    --[[END_SYNC]]
 
     -- Update colors of visible overlays using stride iteration over all overlays in view.
     for i = color_update_offset, n_all_in_view, color_update_stride do
@@ -664,9 +690,11 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     end
   end
 
+  --[[SYNC:request-state-update]]
   local function request_state_update()
     needs_full_scan = true
   end
+  --[[END_SYNC]]
 
   --- Check if furthest_game_view changed and recompute max_reach if so.
   --- Should be called periodically (e.g. via on_nth_tick) since zoom limits rarely change.
@@ -675,6 +703,274 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   end
 
   return tick_function, request_state_update, update_zoom_reach
+end
+
+--- Multiplayer tick function. Handles multiple connected players across multiple surfaces.
+--- Budgets are scaled by n_connected to keep total per-tick CPU load comparable to singleplayer.
+--- Surface bounds early-exit is skipped; empty chunks return nil immediately from chunk_map_data.
+---
+--- @param anim_state AnimState
+--- @return fun(event: EventData.on_tick) tick_function
+--- @return fun() request_state_update
+--- @return fun() update_zoom_reach
+function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
+  local first_connected_player = game.connected_players[1]
+  if not first_connected_player then
+    -- No connected players
+    return noop, noop, noop
+  end
+
+  -- Use the first connected player's force as primary.
+  local force = first_connected_player.force --[[@as LuaForce]]
+
+  --[[SYNC:upvalues]]
+
+  -- Capture chunk_map fields (mutated in-place by ChunkMap)
+  local chunk_map = self.chunk_map
+  local chunk_map_data = chunk_map.data
+
+  -- Captured for inlined research color lookup in tick_function.
+  local color_registry = self.color_registry
+
+  local all_overlays_in_view = {} --- @type LabOverlay[]
+  local n_all_in_view = 0
+  local n_visible_overlays = 0
+
+  -- Research state
+  local next_state_update_tick = 0 --- always force update at first tick
+  local needs_full_scan = true     --- force full scan at first tick and on request_state_update
+  local status_cursor = 0
+  local current_research = nil     --- @type LuaTechnology|nil
+  local colors = nil               --- @type number[]|nil
+  local n_colors = 0
+
+  -- Animation state
+  local color_pattern_duration = Settings.color_pattern_duration
+  local color_update_budget = Settings.color_update_budget
+  local color_update_max_per_call = Settings.color_update_max_per_call
+  local color_update_interval = 1
+  local next_color_update_tick = 0
+  local color_update_offset = 1
+  local color_update_stride = 1
+  -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
+  -- This ensures animation is continuous across load/configuration_changed transitions.
+  local color_pattern_saved_tick = min(anim_state.saved_tick, game.tick)
+  local phase_base = anim_state.phase_base
+  local phase_speed = anim_state.phase_speed
+  local color_function_index = anim_state.color_function_index
+  local color_function = ColorFunctions.functions[color_function_index]
+  local color = { 0, 0, 0 }
+
+  --[[END_SYNC]]
+
+  --- Number of connected players. (will be updated at first tick)
+  local n_connected = 1
+  --- Per-surface first-player position for color calculation; reused across Phase 1 calls.
+  --- @type table<number, MapPositionTuple>
+  local player_xy_by_surface = {}
+
+  --- @type table<LabOverlay[], number> chunk to last visited tick
+  local visited_chunks = {}
+  setmetatable(visited_chunks, { __mode = "k" }) -- weak key reference
+
+  --- @param event EventData.on_tick
+  local function tick_function(event)
+    local current_tick = event.tick
+    local prev_n_visible_overlays = n_visible_overlays
+
+    -- ========== Viewport update (every ~30 ticks, or forced by request_state_update) ==========
+    if current_tick >= next_state_update_tick or needs_full_scan then
+      next_state_update_tick = current_tick + 30 --[[$STATE_UPDATE_INTERVAL]]
+
+      local connected_players = game.connected_players
+      if not connected_players[1] then return end -- all players disconnected
+
+      --[[SYNC:research-update]]
+      -- Update current_research and colors if changed.
+      local new_current_research = force.current_research
+      if new_current_research == current_research then
+        if new_current_research == nil and not needs_full_scan then
+          -- If current_research remains nil, we can safely skip visibility and color updates. (all invisible)
+          return
+        end
+      else
+        current_research = new_current_research
+        needs_full_scan = true
+
+        if current_research then
+          colors, n_colors = color_registry:get_flattened_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
+        else
+          colors = nil
+          n_colors = 0
+        end
+      end
+      --[[END_SYNC]]
+
+      -- Rebuild all_overlays_in_view from all connected players' viewport.
+      n_connected = 0
+      n_visible_overlays = 0
+      local all_count = 0
+      for _, player in pairs(connected_players) do
+        n_connected = n_connected + 1
+        local surface_index = player.surface_index
+        local position = player.position
+        local player_x = position.x or position[1]
+        local player_y = position.y or position[2]
+
+        -- Compute this player's chunk range
+        local res = player.display_resolution
+        local viewport_width = res.width
+        local viewport_height = res.height
+
+        --[[SYNC:calc-viewport]]
+        local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
+        local half_vw = viewport_width / f
+        local half_vh = viewport_height / f
+        local chunk_left = (player_x - half_vw - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+        local chunk_top = (player_y - half_vh - 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+        local chunk_right = (player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+        local chunk_bottom = (player_y + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]]
+        chunk_left = chunk_left - chunk_left % 1 -- equivalent to math.floor(chunk_left)
+        chunk_top = chunk_top - chunk_top % 1
+        chunk_right = chunk_right - chunk_right % 1
+        chunk_bottom = chunk_bottom - chunk_bottom % 1
+        --[[END_SYNC]]
+
+        local surface_chunks = chunk_map_data[surface_index]
+        if surface_chunks then
+          for cx = chunk_left, chunk_right do
+            local col = surface_chunks[cx]
+            if col then
+              for cy = chunk_top, chunk_bottom do
+                local chunk = col[cy]
+                local visited_tick = chunk and visited_chunks[chunk]
+                if chunk and (not visited_tick or visited_tick < current_tick) then
+                  visited_chunks[chunk] = current_tick
+                  for j = 1, #chunk do
+                    local overlay = chunk[j]
+                    all_count = all_count + 1
+                    all_overlays_in_view[all_count] = overlay
+                    if overlay.visible then
+                      n_visible_overlays = n_visible_overlays + 1
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+
+      -- Clear trailing references to prevent memory leaks and GC issues.
+      for i = all_count + 1, n_all_in_view do
+        if all_overlays_in_view[i] == nil then break end
+        all_overlays_in_view[i] = nil
+      end
+      n_all_in_view = all_count
+
+      -- Reset status cursor so incremental scan starts from the beginning.
+      status_cursor = 0
+    end
+
+    -- ========== Incremental status scan (every tick) ==========
+    -- Budget scaled by n_connected: n_connected players bring n_connected times as many labs into view,
+    -- so dividing by n_connected keeps total C bridge calls per tick comparable to singleplayer.
+    if (n_all_in_view > 0 and current_research ~= nil) or needs_full_scan then
+      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected))
+      if budget < 1 then budget = 1 end
+      --[[SYNC:status-scan-body]]
+      needs_full_scan = false
+      for _ = 1, budget do
+        status_cursor = status_cursor + 1
+        if status_cursor > n_all_in_view then status_cursor = 1 end
+        local overlay = all_overlays_in_view[status_cursor]
+        local status = overlay.entity.status
+        local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
+        if overlay.visible ~= should_be_visible then
+          overlay.visible = should_be_visible
+          overlay.animation.visible = should_be_visible
+          if overlay.companion then
+            overlay.companion.visible = should_be_visible
+          end
+          if should_be_visible then
+            n_visible_overlays = n_visible_overlays + 1
+          else
+            n_visible_overlays = n_visible_overlays - 1
+          end
+        end
+      end
+      --[[END_SYNC]]
+    end
+
+    -- ========== Color update (every color_update_interval ticks) ==========
+
+    if n_visible_overlays ~= prev_n_visible_overlays then
+      -- Recalculate stride and interval using effective budgets scaled by n_connected.
+      local effective_budget = color_update_budget / n_connected
+      local effective_max_per_call = color_update_max_per_call / n_connected
+      color_update_stride = (n_visible_overlays > effective_max_per_call) and ceil(n_visible_overlays / effective_max_per_call) or 1
+      if color_update_stride > 60 --[[$MAX_COLOR_UPDATE_STRIDE]] then color_update_stride = 60 --[[$MAX_COLOR_UPDATE_STRIDE]] end
+      color_update_interval = max(1, ceil(n_visible_overlays / (effective_budget * color_update_stride)))
+      if color_update_interval > 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] then color_update_interval = 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] end
+    end
+
+    if n_visible_overlays == 0 or colors == nil then return end
+    if current_tick < next_color_update_tick then return end
+    next_color_update_tick = current_tick + color_update_interval
+
+    --[[SYNC:color-epoch]]
+    local elapsed_tick = current_tick - color_pattern_saved_tick
+    -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
+    -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
+    local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
+
+    if elapsed_tick >= color_pattern_duration then
+      color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
+      phase_speed = random_phase_speed()
+      phase_base = phase
+      color_pattern_saved_tick = current_tick
+      color_update_offset = 0
+
+      -- Persist so that the next tick function (after reload or settings change) can resume mid-epoch.
+      anim_state.phase_base = phase
+      anim_state.phase_speed = phase_speed
+      anim_state.color_function_index = color_function_index
+      anim_state.saved_tick = current_tick
+    end
+
+    color_update_offset = color_update_offset + 1
+    if color_update_offset > color_update_stride then color_update_offset = 1 end
+    --[[END_SYNC]]
+
+    -- Update colors using stride iteration.
+    -- Use per-surface player reference for spatial color functions (radial, angular, etc.).
+    -- cached_surface_index caches the last surface so lookup is skipped for same-surface runs.
+    local cached_surface_index = 0
+    local cached_player_x = 0
+    local cached_player_y = 0
+    for i = color_update_offset, n_all_in_view, color_update_stride do
+      local overlay = all_overlays_in_view[i]
+      if overlay.visible then
+        local si = overlay.surface_index
+        if si ~= cached_surface_index then
+          cached_surface_index = si
+          local pxy = player_xy_by_surface[si]
+          cached_player_x = pxy[1]
+          cached_player_y = pxy[2]
+        end
+        color_function(color, phase, colors, n_colors, cached_player_x, cached_player_y, overlay.x, overlay.y)
+        overlay.animation.color = color
+      end
+    end
+  end
+
+  --[[SYNC:request-state-update]]
+  local function request_state_update()
+    needs_full_scan = true
+  end
+  --[[END_SYNC]]
+
+  return tick_function, request_state_update, noop
 end
 
 return LabOverlayRenderer

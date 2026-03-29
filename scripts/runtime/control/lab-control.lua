@@ -28,15 +28,6 @@ local function create_renderer()
   return LabOverlayRenderer.new(color_registry, lab_registry)
 end
 
-local function warn_on_multiplayer()
-  if game.is_multiplayer() then
-    game.print("Warning: Disco Science Lite is not supporting multiplayers.", {
-      color = { 1.0, 0, 0 },
-      game_state = false,
-    })
-  end
-end
-
 local function setup_event_handlers()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   if not ds_storage.anim_state then
@@ -89,7 +80,12 @@ local function setup_event_handlers()
     request_state_update()
   end)
 
-  script.on_event(defines.events.on_multiplayer_init, warn_on_multiplayer)
+  script.on_event(defines.events.on_multiplayer_init, setup_event_handlers)
+
+  script.on_event({
+    defines.events.on_player_joined_game,
+    defines.events.on_player_left_game,
+  }, request_state_update)
 
   script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]
@@ -143,7 +139,6 @@ function LabControl.on_load()
   script.on_event(defines.events.on_tick, function ()
     script.on_event(defines.events.on_tick, nil)
     rebuild_overlays()
-    warn_on_multiplayer()
   end)
 end
 
@@ -152,7 +147,6 @@ function LabControl.on_configuration_changed()
 
   script.on_event(defines.events.on_tick, nil) -- cancels the deferred render registered in on_load
   rebuild_overlays()
-  warn_on_multiplayer()
 
   validate_technology_prototypes()
 end

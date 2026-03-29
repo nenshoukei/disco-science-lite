@@ -57,6 +57,7 @@ _G.defines = setmetatable({
     on_player_changed_surface = 204,
     on_player_changed_force = 205,
     on_player_display_resolution_changed = 206,
+    on_player_joined_game = 211,
     on_player_left_game = 207,
     on_player_kicked = 208,
     on_singleplayer_init = 209,
