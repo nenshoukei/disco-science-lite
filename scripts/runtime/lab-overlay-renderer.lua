@@ -430,11 +430,16 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_registry = self.color_registry
 
   -- Research state
-  local next_state_update_tick = 0    --- always force update at first tick
-  local needs_full_status_scan = true --- force full scan at first tick and on request_state_update
+  local next_state_update_tick = 0 --- always force update at first tick
+  local needs_full_scan = true     --- force full scan at first tick and on request_state_update
+  local prev_chunk_left = 0
+  local prev_chunk_top = 0
+  local prev_chunk_right = 0
+  local prev_chunk_bottom = 0
+  local prev_surface_index = 0
   local status_cursor = 0
-  local current_research = nil        --- @type LuaTechnology|nil
-  local colors = nil                  --- @type number[]|nil
+  local current_research = nil --- @type LuaTechnology|nil
+  local colors = nil           --- @type number[]|nil
   local n_colors = 0
 
   -- Animation state
@@ -460,7 +465,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     local prev_n_visible_overlays = n_visible_overlays
 
     -- ========== Viewport update (every ~30 ticks, or forced by request_state_update) ==========
-    if current_tick >= next_state_update_tick or needs_full_status_scan then
+    if current_tick >= next_state_update_tick or needs_full_scan then
       next_state_update_tick = current_tick + 30 --[[$STATE_UPDATE_INTERVAL]]
 
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
@@ -469,13 +474,13 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       -- Update current_research and colors if changed.
       local new_current_research = force.current_research
       if new_current_research == current_research then
-        if new_current_research == nil and not needs_full_status_scan then
+        if new_current_research == nil and not needs_full_scan then
           -- If current_research remains nil, we can safely skip visibility and color updates. (all invisible)
           return
         end
       else
         current_research = new_current_research
-        needs_full_status_scan = true -- needs full scan for updating all overlays
+        needs_full_scan = true -- needs full scan for updating all overlays
 
         if current_research then
           colors, n_colors = color_registry:get_flattened_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
@@ -491,6 +496,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       player_y = player_position.y or player_position[2]
 
       -- Compute visible chunk range in player's view
+      local surface_index = player.surface_index
       local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
       local half_vw = viewport_width / f
       local half_vh = viewport_height / f
@@ -499,36 +505,51 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       local chunk_right = floor((player_x + half_vw + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
       local chunk_bottom = floor((player_y + half_vh + 6 --[[$VIEW_RECT_MARGIN]]) / 32 --[[$CHUNK_SIZE]])
 
-      -- Update all_overlays_in_view and count visible overlays
-      local surface_chunks = chunk_map_data[player.surface_index]
-      local all_count = 0
-      n_visible_overlays = 0
-      if surface_chunks then
-        for cx = chunk_left, chunk_right do
-          local col = surface_chunks[cx]
-          if col then
-            for cy = chunk_top, chunk_bottom do
-              local chunk = col[cy]
-              if chunk then
-                for j = 1, #chunk do
-                  local overlay = chunk[j]
-                  all_count = all_count + 1
-                  all_overlays_in_view[all_count] = overlay
-                  if overlay.visible then
-                    n_visible_overlays = n_visible_overlays + 1
+      -- Rebuild all_overlays_in_view only when chunk range changed or full scan is required.
+      if (
+          needs_full_scan
+          or chunk_left ~= prev_chunk_left
+          or chunk_top ~= prev_chunk_top
+          or chunk_right ~= prev_chunk_right
+          or chunk_bottom ~= prev_chunk_bottom
+          or surface_index ~= prev_surface_index
+        ) then
+        prev_chunk_left = chunk_left
+        prev_chunk_top = chunk_top
+        prev_chunk_right = chunk_right
+        prev_chunk_bottom = chunk_bottom
+        prev_surface_index = surface_index
+
+        local surface_chunks = chunk_map_data[surface_index]
+        local all_count = 0
+        n_visible_overlays = 0
+        if surface_chunks then
+          for cx = chunk_left, chunk_right do
+            local col = surface_chunks[cx]
+            if col then
+              for cy = chunk_top, chunk_bottom do
+                local chunk = col[cy]
+                if chunk then
+                  for j = 1, #chunk do
+                    local overlay = chunk[j]
+                    all_count = all_count + 1
+                    all_overlays_in_view[all_count] = overlay
+                    if overlay.visible then
+                      n_visible_overlays = n_visible_overlays + 1
+                    end
                   end
                 end
               end
             end
           end
         end
+        -- Clear trailing references to prevent memory leaks and GC issues.
+        for i = all_count + 1, n_all_in_view do
+          if all_overlays_in_view[i] == nil then break end
+          all_overlays_in_view[i] = nil
+        end
+        n_all_in_view = all_count
       end
-      -- Clear trailing references to prevent memory leaks and GC issues.
-      for i = all_count + 1, n_all_in_view do
-        if all_overlays_in_view[i] == nil then break end
-        all_overlays_in_view[i] = nil
-      end
-      n_all_in_view = all_count
 
       -- Reset status cursor so incremental scan starts from the beginning.
       status_cursor = 0
@@ -538,9 +559,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     -- Spread entity.status C bridge calls evenly across ticks instead of doing them all at once.
     -- Budget: ceil(n_all / 30) ensures all overlays are scanned within one state update cycle.
     --         If full scan is required, use n_all_in_view instead for iterating all overlays in view.
-    if (n_all_in_view > 0 and current_research ~= nil) or needs_full_status_scan then
-      local budget = needs_full_status_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
-      needs_full_status_scan = false
+    if (n_all_in_view > 0 and current_research ~= nil) or needs_full_scan then
+      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
+      needs_full_scan = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
         if status_cursor > n_all_in_view then status_cursor = 1 end
@@ -586,6 +607,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       phase_speed = random_phase_speed()
       phase_base = phase
       color_pattern_saved_tick = current_tick
+      color_update_offset = 0
 
       -- Persist so that the next tick function (after reload or settings change) can resume mid-epoch.
       anim_state.phase_base = phase
@@ -608,7 +630,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   end
 
   local function request_state_update()
-    needs_full_status_scan = true
+    needs_full_scan = true
+    needs_view_rebuild = true
   end
 
   return tick_function, request_state_update
