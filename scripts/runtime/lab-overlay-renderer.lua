@@ -631,7 +631,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   local function request_state_update()
     needs_full_scan = true
-    needs_view_rebuild = true
   end
 
   return tick_function, request_state_update
