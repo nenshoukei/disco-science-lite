@@ -22,6 +22,18 @@ local function make_entity(unit_number, surface_index, x, y)
   }) --[[@as LuaEntity]]
 end
 
+--- Create a mock LuaPlayer for furthest_game_view tests.
+--- @param zoom_spec ZoomSpecification
+--- @param width number
+--- @param height number
+--- @return LuaPlayer
+local function make_player(zoom_spec, width, height)
+  return ({
+    zoom_limits = { furthest_game_view = zoom_spec },
+    display_resolution = { width = width, height = height },
+  }) --[[@as LuaPlayer]]
+end
+
 describe("ChunkMap", function ()
   -- -------------------------------------------------------------------
   describe("new", function ()
@@ -425,6 +437,63 @@ describe("ChunkMap", function ()
       -- max_reach_x = 640/(0.25*64)+6 = 640/16+6 = 40+6 = 46
       assert.are.equal(46, m.max_reach_x)
       assert.is_true(m.surface_bounds_dirty[1])
+    end)
+
+    it("updates reach and marks dirty when resolution changes at same zoom", function ()
+      local m = ChunkMap.new()
+      m:insert(make_entity(1, 1, 0, 0), make_overlay(1))
+      m:set_furthest_game_view({ zoom = 0.5 }, 640, 480)
+      m.surface_bounds_dirty[1] = nil -- clear dirty
+      m:set_furthest_game_view({ zoom = 0.5 }, 1280, 720)
+
+      -- max_reach_x = 1280/(0.5*64)+6 = 40+6 = 46
+      assert.are.equal(46, m.max_reach_x)
+      assert.is_true(m.surface_bounds_dirty[1])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("set_furthest_game_view_for_players", function ()
+    it("uses conservative aggregate reach across players", function ()
+      local m = ChunkMap.new()
+
+      local players = {
+        make_player({ zoom = 0.5 }, 640, 480),
+        make_player({ zoom = 0.25 }, 640, 480),
+        make_player({ zoom = 0.5 }, 1280, 720),
+      }
+      m:set_furthest_game_view_for_players(players)
+
+      -- furthest_zoom = min(0.5, 0.25, 0.5) = 0.25
+      -- max_reach_x = max(26, 46, 46) = 46
+      -- max_reach_y = max(21, 36, 28.5) = 36
+      assert.are.equal(0.25, m.furthest_zoom)
+      assert.are.equal(46, m.max_reach_x)
+      assert.are.equal(36, m.max_reach_y)
+    end)
+
+    it("marks surfaces dirty when aggregate reach changes", function ()
+      local m = ChunkMap.new()
+      m:insert(make_entity(1, 1, 0, 0), make_overlay(1))
+      m:set_furthest_game_view_for_players({
+        make_player({ zoom = 0.5 }, 640, 480),
+      })
+      m.surface_bounds_dirty[1] = nil -- clear dirty
+
+      m:set_furthest_game_view_for_players({
+        make_player({ zoom = 0.25 }, 640, 480),
+      })
+      assert.is_true(m.surface_bounds_dirty[1])
+    end)
+
+    it("does not update cached reach when players is empty", function ()
+      local m = ChunkMap.new()
+      m:set_furthest_game_view({ zoom = 0.5 }, 640, 480)
+
+      m:set_furthest_game_view_for_players({})
+      assert.are.equal(0.5, m.furthest_zoom)
+      assert.are.equal(26, m.max_reach_x)
+      assert.are.equal(21, m.max_reach_y)
     end)
   end)
 end)

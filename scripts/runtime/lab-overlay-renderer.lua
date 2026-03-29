@@ -528,12 +528,15 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         chunk_map:update_surface_bounds(surface_index)
       end
 
-      -- Early-exit: skip viewport scan if player is definitely outside the max possible
-      -- view range of any lab on this surface (player.zoom at furthest_game_view + margin).
+      -- Early-exit: skip viewport scan if no labs on the surface, or player is definitely outside
+      -- the max possible view range of any lab on this surface (player.zoom at furthest_game_view + margin).
+      local surface_chunks = chunk_map_data[surface_index]
       local bounds = surface_bounds[surface_index]
-      if bounds and (
-          player_x < bounds[1] or player_x > bounds[3] or
-          player_y < bounds[2] or player_y > bounds[4]
+      if not surface_chunks or (
+          bounds and (
+            player_x < bounds[1] or player_x > bounds[3] or
+            player_y < bounds[2] or player_y > bounds[4]
+          )
         ) then
         if not bounds_was_outside then
           for i = 1, n_all_in_view do all_overlays_in_view[i] = nil end
@@ -579,21 +582,18 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
         n_visible_overlays = 0
         local all_count = 0
-        local surface_chunks = chunk_map_data[surface_index]
-        if surface_chunks then
-          for cx = chunk_left, chunk_right do
-            local col = surface_chunks[cx]
-            if col then
-              for cy = chunk_top, chunk_bottom do
-                local chunk = col[cy]
-                if chunk then
-                  for j = 1, #chunk do
-                    local overlay = chunk[j]
-                    all_count = all_count + 1
-                    all_overlays_in_view[all_count] = overlay
-                    if overlay.visible then
-                      n_visible_overlays = n_visible_overlays + 1
-                    end
+        for cx = chunk_left, chunk_right do
+          local col = surface_chunks[cx]
+          if col then
+            for cy = chunk_top, chunk_bottom do
+              local chunk = col[cy]
+              if chunk then
+                for j = 1, #chunk do
+                  local overlay = chunk[j]
+                  all_count = all_count + 1
+                  all_overlays_in_view[all_count] = overlay
+                  if overlay.visible then
+                    n_visible_overlays = n_visible_overlays + 1
                   end
                 end
               end
@@ -706,8 +706,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 end
 
 --- Multiplayer tick function. Handles multiple connected players across multiple surfaces.
---- Budgets are scaled by n_connected to keep total per-tick CPU load comparable to singleplayer.
---- Surface bounds early-exit is skipped; empty chunks return nil immediately from chunk_map_data.
 ---
 --- @param anim_state AnimState
 --- @return fun(event: EventData.on_tick) tick_function
@@ -763,15 +761,19 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
   --[[END_SYNC]]
 
+  local surface_bounds = chunk_map.surface_bounds
+  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+  chunk_map:set_furthest_game_view_for_players(game.connected_players)
+
   --- Number of connected players. (will be updated at first tick)
   local n_connected = 1
   --- Per-surface first-player position for color calculation; reused across Phase 1 calls.
-  --- @type table<number, MapPositionTuple>
+  --- @type table<number, [number, number, number]> Key is surface_index and value is { x, y, updated tick }
   local player_xy_by_surface = {}
 
   --- @type table<LabOverlay[], number> chunk to last visited tick
-  local visited_chunks = {}
-  setmetatable(visited_chunks, { __mode = "k" }) -- weak key reference
+  local chunk_to_visited_tick = {}
+  setmetatable(chunk_to_visited_tick, { __mode = "k" }) -- weak key reference
 
   --- @param event EventData.on_tick
   local function tick_function(event)
@@ -806,16 +808,51 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       end
       --[[END_SYNC]]
 
+      -- Recompute conservative max reach from all connected players.
+      chunk_map:set_furthest_game_view_for_players(connected_players)
+
       -- Rebuild all_overlays_in_view from all connected players' viewport.
       n_connected = 0
       n_visible_overlays = 0
       local all_count = 0
       for _, player in pairs(connected_players) do
         n_connected = n_connected + 1
+        if player.render_mode == RENDER_MODE_CHART then goto next_player end
+
         local surface_index = player.surface_index
+
+        -- Update stale surface bounds if labs were added or removed since last check.
+        if surface_bounds_dirty[surface_index] then
+          chunk_map:update_surface_bounds(surface_index)
+        end
+
+        -- Early-exit: if no labs on this surface.
+        local surface_chunks = chunk_map_data[surface_index]
+        if not surface_chunks then goto next_player end
+
         local position = player.position
         local player_x = position.x or position[1]
         local player_y = position.y or position[2]
+
+        -- Early-exit: if player is definitely outside all labs on this surface.
+        local bounds = surface_bounds[surface_index]
+        if not bounds or
+          player_x < bounds[1] or player_x > bounds[3] or
+          player_y < bounds[2] or player_y > bounds[4]
+        then
+          goto next_player
+        end
+
+        -- Preserve first player position per surface for spatial color functions.
+        local pos = player_xy_by_surface[surface_index]
+        if not pos then
+          player_xy_by_surface[surface_index] = { player_x, player_y, current_tick }
+        elseif pos[3] < current_tick then
+          -- Update by the first connected player for each surface.
+          pos[1] = player_x
+          pos[2] = player_y
+          pos[3] = current_tick
+        end
 
         -- Compute this player's chunk range
         local res = player.display_resolution
@@ -836,29 +873,29 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         chunk_bottom = chunk_bottom - chunk_bottom % 1
         --[[END_SYNC]]
 
-        local surface_chunks = chunk_map_data[surface_index]
-        if surface_chunks then
-          for cx = chunk_left, chunk_right do
-            local col = surface_chunks[cx]
-            if col then
-              for cy = chunk_top, chunk_bottom do
-                local chunk = col[cy]
-                local visited_tick = chunk and visited_chunks[chunk]
-                if chunk and (not visited_tick or visited_tick < current_tick) then
-                  visited_chunks[chunk] = current_tick
-                  for j = 1, #chunk do
-                    local overlay = chunk[j]
-                    all_count = all_count + 1
-                    all_overlays_in_view[all_count] = overlay
-                    if overlay.visible then
-                      n_visible_overlays = n_visible_overlays + 1
-                    end
+        for cx = chunk_left, chunk_right do
+          local col = surface_chunks[cx]
+          if col then
+            for cy = chunk_top, chunk_bottom do
+              local chunk = col[cy]
+              -- Skip duplicated chunks in multiple players by checking last visited tick.
+              local visited_tick = chunk and chunk_to_visited_tick[chunk]
+              if chunk and (not visited_tick or visited_tick < current_tick) then
+                chunk_to_visited_tick[chunk] = current_tick
+                for j = 1, #chunk do
+                  local overlay = chunk[j]
+                  all_count = all_count + 1
+                  all_overlays_in_view[all_count] = overlay
+                  if overlay.visible then
+                    n_visible_overlays = n_visible_overlays + 1
                   end
                 end
               end
             end
           end
         end
+
+        ::next_player::
       end
 
       -- Clear trailing references to prevent memory leaks and GC issues.
@@ -875,7 +912,9 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     -- ========== Incremental status scan (every tick) ==========
     -- Budget scaled by n_connected: n_connected players bring n_connected times as many labs into view,
     -- so dividing by n_connected keeps total C bridge calls per tick comparable to singleplayer.
-    if (n_all_in_view > 0 and current_research ~= nil) or needs_full_scan then
+    if n_all_in_view == 0 then
+      needs_full_scan = false
+    elseif current_research ~= nil or needs_full_scan then
       local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected))
       if budget < 1 then budget = 1 end
       --[[SYNC:status-scan-body]]
@@ -955,8 +994,14 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         if si ~= cached_surface_index then
           cached_surface_index = si
           local pxy = player_xy_by_surface[si]
-          cached_player_x = pxy[1]
-          cached_player_y = pxy[2]
+          if pxy then
+            cached_player_x = pxy[1]
+            cached_player_y = pxy[2]
+          else
+            -- Keep color update robust even if per-surface player reference is missing.
+            cached_player_x = overlay.x
+            cached_player_y = overlay.y
+          end
         end
         color_function(color, phase, colors, n_colors, cached_player_x, cached_player_y, overlay.x, overlay.y)
         overlay.animation.color = color
@@ -970,7 +1015,11 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   end
   --[[END_SYNC]]
 
-  return tick_function, request_state_update, noop
+  local function update_zoom_reach()
+    chunk_map:set_furthest_game_view_for_players(game.connected_players)
+  end
+
+  return tick_function, request_state_update, update_zoom_reach
 end
 
 return LabOverlayRenderer

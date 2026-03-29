@@ -82,17 +82,28 @@ local function make_player(force, surface_index, px, py)
 end
 
 --- Set the single connected player in game.players[1].
+--- @param index integer
+--- @param force LuaForce
+--- @param surface_index number
+--- @param px number?
+--- @param py number?
+--- @return LuaPlayer
+local function add_connected_player_at(index, force, surface_index, px, py)
+  local player = make_player(force, surface_index, px, py)
+  player.index = index --[[@as integer]]
+  _G.game.players[index] = player
+  _G.game.connected_players[index] = player
+  return player
+end
+
+--- Set the single connected player in game.players[1].
 --- @param force LuaForce
 --- @param surface_index number
 --- @param px number?
 --- @param py number?
 --- @return LuaPlayer
 local function add_connected_player(force, surface_index, px, py)
-  local player = make_player(force, surface_index, px, py)
-  player.index = 1 --[[@as integer]]
-  _G.game.players[1] = player
-  _G.game.connected_players[1] = player
-  return player
+  return add_connected_player_at(1, force, surface_index, px, py)
 end
 
 --- Set up a renderer with visible overlays and active research, ready for tick testing.
@@ -620,6 +631,50 @@ describe("LabOverlayRenderer", function ()
           r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
 
           assert.is_true(r.chunk_map:get(1).visible)
+        end)
+      end)
+
+      describe("multiplayer", function ()
+        it("update_zoom_reach aggregates furthest game view across connected players", function ()
+          local r = make_renderer()
+          local force = make_force(1)
+
+          _G.game.is_multiplayer = function () return true end
+          local p1 = add_connected_player_at(1, force, 1, 0, 0)
+          p1.zoom_limits.furthest_game_view = { zoom = 0.5 }
+          p1.display_resolution = { width = 640, height = 480 }
+
+          local _, _, update_zoom_reach = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          assert.are.equal(26, r.chunk_map.max_reach_x)
+
+          local p2 = add_connected_player_at(2, force, 1, 0, 0)
+          p2.zoom_limits.furthest_game_view = { zoom = 0.5 }
+          p2.display_resolution = { width = 1280, height = 720 }
+
+          update_zoom_reach()
+          assert.are.equal(46, r.chunk_map.max_reach_x)
+        end)
+
+        it("skips chunk scan when all players are outside surface bounds", function ()
+          local r = make_renderer()
+          local force = make_force(1)
+
+          _G.game.is_multiplayer = function () return true end
+          add_connected_player_at(1, force, 1, 1000, 1000)
+          add_connected_player_at(2, force, 1, 1200, 1200)
+
+          r.chunk_map.surface_bounds[1] = { -10, -10, 10, 10 }
+          r.chunk_map.surface_bounds_dirty[1] = nil
+          r.chunk_map.data[1] = setmetatable({}, {
+            __index = function ()
+              error("chunk scan should be skipped when all players are outside bounds")
+            end,
+          })
+
+          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          assert.no_error(function ()
+            tick(event)
+          end)
         end)
       end)
     end)
