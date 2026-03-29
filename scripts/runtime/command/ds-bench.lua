@@ -66,25 +66,100 @@ commands.add_command(
 
     local pi = math.pi
     local inv_pi = 1 / pi
+    local positive = 12345
+    local negative = -12345
+    local n, m = 123, 456
     local h_table = { x = 1, y = 2, z = 3 }
     local a_table = { 1, 2, 3 }
     local upvalue = 1
     local test_table = {}
     local test_counter = 1
     local table_insert = table.insert
+    local floor = math.floor
+    local rshift = bit32.rshift
+    local abs = math.abs
+    local max = math.max
+    local min = math.min
 
     --- @type { name: string, setup: fun()?, func: fun() }[]
     local test_cases = {
       {
-        name = "math: Division",
+        name = "math: 1 / pi",
         func = function ()
           local _ = 1 / pi
         end,
       },
       {
-        name = "math: Multiplication",
+        name = "math: 1 * inv_pi",
         func = function ()
           local _ = 1 * inv_pi
+        end,
+      },
+      {
+        name = "math: math.floor(n)",
+        func = function ()
+          local _ = floor(pi)
+        end,
+      },
+      {
+        name = "math: n = n - n % 1",
+        func = function ()
+          local _ = pi - (pi % 1)
+        end,
+      },
+      {
+        name = "math: math.floor(n / 32)",
+        func = function ()
+          local _ = floor(positive / 32)
+        end,
+      },
+      {
+        name = "math: n = n / 32; n = n - n%1",
+        func = function ()
+          local _ = positive / 32
+          _ = _ - _ % 1
+        end,
+      },
+      {
+        name = "math: bit32.rshift(n, 5)",
+        func = function ()
+          local _ = rshift(positive, 5)
+        end,
+      },
+      {
+        name = "math: math.abs(n)",
+        func = function ()
+          local _ = abs(negative)
+        end,
+      },
+      {
+        name = "math: n < 0 and -n or n",
+        func = function ()
+          local _ = negative < 0 and -negative or negative
+        end,
+      },
+      {
+        name = "math: math.max(n, m)",
+        func = function ()
+          local _ = max(n, m)
+        end,
+      },
+      {
+        name = "math: n > m and n or m",
+        func = function ()
+          local _ = n > m and n or m
+        end,
+      },
+      {
+        name = "math: math.min(n, m)",
+        func = function ()
+          local _ = min(n, m)
+        end,
+      },
+      {
+        name = "math: n < m and n or m",
+        func = function ()
+          local _ = n < m and n or m
         end,
       },
       {
