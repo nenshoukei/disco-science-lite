@@ -1,5 +1,3 @@
-# FAQ
-
 ## What is the relationship to the original Disco Science mod?
 
 Disco Science Lite is an unofficial variant of the original Disco Science mod.
@@ -22,4 +20,4 @@ Detail: To colorize a lab without glowing, an image file of the exact shape for 
 
 That may be because the mod checks for the original Disco Science by the explicit mod name (`DiscoScience`). Disco Science Lite has a different mod name (`disco-science-lite`), so the mod cannot detect it.
 
-To fix this, please send me a request to support the mod in the mod portal Discussion. No promises, but I'll do my best!
+To fix this, please send me a request to support the mod in the mod portal [Discussion](https://mods.factorio.com/mod/disco-science-lite/discussion). No promises, but I'll do my best!

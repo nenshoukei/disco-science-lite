@@ -65,7 +65,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 
 上記以外にも、原作の Disco Science に対応している Mod であれば引き続き動作する可能性があります。ただし、Mod 名を明示的にチェックしていて Disco Science Lite を互換 Mod として認識しないものは除きます。
 
-特定の Mod への対応を希望する場合は、Mod Portal の Discussion からお気軽にご連絡ください。お約束はできませんが、できる限り対応します！
+特定の Mod への対応を希望する場合は、Mod Portal の [Discussion](https://mods.factorio.com/mod/disco-science-lite/discussion) からお気軽にご連絡ください。お約束はできませんが、できる限り対応します！
 
 ## 互換性
 

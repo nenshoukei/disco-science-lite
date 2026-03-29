@@ -67,7 +67,7 @@ These mods are supported out of the box.
 
 In addition to the mods listed above, mods that support the original Disco Science mod may still work, unless it specifically checks for the original mod by name and doesn't recognize Disco Science Lite as a compatible mod.
 
-If you'd like support for a specific mod, feel free to reach out via the Discussion on the Mod Portal. No promises, but I'll do my best!
+If you'd like support for a specific mod, feel free to reach out via the [Discussion](https://mods.factorio.com/mod/disco-science-lite/discussion) on the Mod Portal. No promises, but I'll do my best!
 
 ## Compatibility
 
@@ -87,11 +87,11 @@ For development of this mod, see [docs/development.md](docs/development.md).
 
 Thanks to these amazing creators for their work:
 
-- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)**: for theoriginal [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all.
-- **[BiusArt](https://mods.factorio.com/user/BiusArt)**: for thegraphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
-- **[raiguard](https://mods.factorio.com/user/raiguard)**: for thegraphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
-- **[Hurricane](https://mods.factorio.com/user/Hurricane046)**: for thegraphics from [Factorio Buildings](https://shorturl.at/AFcDm).
-- **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)**: for thegraphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
+- **[Daniel Brauer](https://mods.factorio.com/user/danielbrauer)**: for the original [Disco Science](https://mods.factorio.com/mod/DiscoScience) mod that started it all.
+- **[BiusArt](https://mods.factorio.com/user/BiusArt)**: for the graphics from [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat).
+- **[raiguard](https://mods.factorio.com/user/raiguard)**: for the graphics from [Krastorio 2](https://mods.factorio.com/mod/Krastorio2).
+- **[Hurricane](https://mods.factorio.com/user/Hurricane046)**: for the graphics from [Factorio Buildings](https://shorturl.at/AFcDm).
+- **[Zach Kolansky](https://mods.factorio.com/user/AnotherZach)**: for the graphics from [🌐Corrundum](https://mods.factorio.com/mod/corrundum).
 
 ## License
 
