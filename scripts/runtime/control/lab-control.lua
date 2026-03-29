@@ -42,8 +42,9 @@ local function setup_event_handlers()
   if not ds_storage.anim_state then
     ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
   end
-  local tick_function, request_state_update = renderer:get_tick_function(ds_storage.anim_state)
+  local tick_function, request_state_update, update_zoom_reach = renderer:get_tick_function(ds_storage.anim_state)
   script.on_event(defines.events.on_tick, tick_function)
+  script.on_nth_tick(180, update_zoom_reach)
 
   script.on_event({
     defines.events.on_research_started,

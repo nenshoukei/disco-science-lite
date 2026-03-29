@@ -300,7 +300,7 @@ function LabOverlayRenderer:remove_overlays_on_surface(surface_index)
     end
   end
 
-  self.chunk_map.data[surface_index] = nil
+  self.chunk_map:clear_surface(surface_index)
 end
 
 --- Update the lab entity position for updating its overlay.
@@ -398,6 +398,7 @@ end
 --- @param anim_state AnimState
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
+--- @return fun() update_zoom_reach
 function LabOverlayRenderer:get_tick_function(anim_state)
   -- Because a tick function is critical for UPS (Updates Per Second), we should optimize it very tightly.
   --
@@ -410,7 +411,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local player = game.connected_players[1]
   if not player or game.is_multiplayer() then
     -- Return empty functions when player is not created yet or in multiplayer mode
-    return function () end, function () end
+    return function () end, function () end, function () end
   end
 
   local force = player.force --[[@as LuaForce]]
@@ -423,8 +424,15 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local viewport_height = player.display_resolution.height
   local in_chart_mode = false
 
-  -- Capture chunk_map.data (mutated in-place by ChunkMap)
-  local chunk_map_data = self.chunk_map.data
+  -- Capture chunk_map fields (mutated in-place by ChunkMap)
+  local chunk_map = self.chunk_map
+  local chunk_map_data = chunk_map.data
+  local surface_bounds = chunk_map.surface_bounds
+  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+
+  -- Pre-calculate max viewport reach for surface bounds early-exit check.
+  chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
+
   -- For inlined update_current_research
   local color_registry = self.color_registry
 
@@ -436,9 +444,10 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local prev_chunk_right = 0
   local prev_chunk_bottom = 0
   local prev_surface_index = 0
+  local bounds_was_outside = false -- true after early-exit; forces chunk rescan on player's return
   local status_cursor = 0
-  local current_research = nil --- @type LuaTechnology|nil
-  local colors = nil           --- @type number[]|nil
+  local current_research = nil     --- @type LuaTechnology|nil
+  local colors = nil               --- @type number[]|nil
   local n_colors = 0
 
   -- Animation state
@@ -496,6 +505,30 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
       -- Compute visible chunk range in player's view
       local surface_index = player.surface_index
+
+      -- Update stale surface bounds if labs were added or removed since last check.
+      if surface_bounds_dirty[surface_index] then
+        chunk_map:update_surface_bounds(surface_index)
+      end
+
+      -- Early-exit: skip viewport scan if player is definitely outside the max possible
+      -- view range of any lab on this surface (player.zoom at furthest_game_view + margin).
+      local bounds = surface_bounds[surface_index]
+      if bounds and (
+          player_x < bounds[1] or player_x > bounds[3] or
+          player_y < bounds[2] or player_y > bounds[4]
+        ) then
+        if not bounds_was_outside then
+          for i = 1, n_all_in_view do all_overlays_in_view[i] = nil end
+          n_all_in_view = 0
+          n_visible_overlays = 0
+          bounds_was_outside = true -- force chunk rescan when player returns
+          needs_full_scan = false
+          status_cursor = 0
+        end
+        return
+      end
+
       local f = player.zoom * 64 --[[$TILE_SIZE * 2]]
       local half_vw = viewport_width / f
       local half_vh = viewport_height / f
@@ -511,12 +544,14 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       -- Rebuild all_overlays_in_view only when chunk range changed or full scan is required.
       if (
           needs_full_scan
+          or bounds_was_outside
           or chunk_left ~= prev_chunk_left
           or chunk_top ~= prev_chunk_top
           or chunk_right ~= prev_chunk_right
           or chunk_bottom ~= prev_chunk_bottom
           or surface_index ~= prev_surface_index
         ) then
+        bounds_was_outside = false
         prev_chunk_left = chunk_left
         prev_chunk_top = chunk_top
         prev_chunk_right = chunk_right
@@ -636,7 +671,13 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     needs_full_scan = true
   end
 
-  return tick_function, request_state_update
+  --- Check if furthest_game_view changed and recompute max_reach if so.
+  --- Should be called periodically (e.g. via on_nth_tick) since zoom limits rarely change.
+  local function update_zoom_reach()
+    chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
+  end
+
+  return tick_function, request_state_update, update_zoom_reach
 end
 
 return LabOverlayRenderer

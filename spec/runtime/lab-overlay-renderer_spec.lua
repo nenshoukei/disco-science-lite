@@ -76,6 +76,7 @@ local function make_player(force, surface_index, px, py)
     surface_index = surface_index,
     position = { x = px or 0, y = py or 0 },
     zoom = 1,
+    zoom_limits = { furthest_game_view = { zoom = 0.1 } },
     display_resolution = { width = 640, height = 480 },
   }) --[[@as LuaPlayer]]
 end
