@@ -25,7 +25,9 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field y             number           Y coordinate.
 --- @field visible       boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
 --- @field unit_number   number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
---- @field surface_index number           Surface index of the lab entity (used in multiplayer for per-surface player reference).
+--- @field surface_index number           Surface index of the lab entity.
+--- @field viewer_x      number           Reference player X used by spatial color functions in multiplayer.
+--- @field viewer_y      number           Reference player Y used by spatial color functions in multiplayer.
 
 --- @param color_registry ColorRegistry
 --- @param lab_registry LabRegistry
@@ -160,6 +162,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
     companion     = companion_object,
     x             = lab_x,
     y             = lab_y,
+    viewer_x      = lab_x,
+    viewer_y      = lab_y,
     visible       = false, -- start as hidden; tick scan will synchronize this with entity.status
     unit_number   = lab_unit_number,
     surface_index = lab.surface_index,
@@ -767,9 +771,6 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
   --- Number of connected players. (will be updated at first tick)
   local n_connected = 1
-  --- Per-surface first-player position for color calculation; reused across Phase 1 calls.
-  --- @type table<number, [number, number, number]> Key is surface_index and value is { x, y, updated tick }
-  local player_xy_by_surface = {}
 
   --- @type table<LabOverlay[], number> chunk to last visited tick
   local chunk_to_visited_tick = {}
@@ -815,7 +816,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       n_connected = 0
       n_visible_overlays = 0
       local all_count = 0
-      for _, player in pairs(connected_players) do
+      for i = 1, #connected_players do
+        local player = connected_players[i]
         n_connected = n_connected + 1
         if player.render_mode == RENDER_MODE_CHART then goto next_player end
 
@@ -841,17 +843,6 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
           player_y < bounds[2] or player_y > bounds[4]
         then
           goto next_player
-        end
-
-        -- Preserve first player position per surface for spatial color functions.
-        local pos = player_xy_by_surface[surface_index]
-        if not pos then
-          player_xy_by_surface[surface_index] = { player_x, player_y, current_tick }
-        elseif pos[3] < current_tick then
-          -- Update by the first connected player for each surface.
-          pos[1] = player_x
-          pos[2] = player_y
-          pos[3] = current_tick
         end
 
         -- Compute this player's chunk range
@@ -884,6 +875,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
                 chunk_to_visited_tick[chunk] = current_tick
                 for j = 1, #chunk do
                   local overlay = chunk[j]
+                  overlay.viewer_x = player_x -- first-writer wins for overlapping views in this tick
+                  overlay.viewer_y = player_y
                   all_count = all_count + 1
                   all_overlays_in_view[all_count] = overlay
                   if overlay.visible then
@@ -982,28 +975,10 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     --[[END_SYNC]]
 
     -- Update colors using stride iteration.
-    -- Use per-surface player reference for spatial color functions (radial, angular, etc.).
-    -- cached_surface_index caches the last surface so lookup is skipped for same-surface runs.
-    local cached_surface_index = 0
-    local cached_player_x = 0
-    local cached_player_y = 0
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
-        local si = overlay.surface_index
-        if si ~= cached_surface_index then
-          cached_surface_index = si
-          local pxy = player_xy_by_surface[si]
-          if pxy then
-            cached_player_x = pxy[1]
-            cached_player_y = pxy[2]
-          else
-            -- Keep color update robust even if per-surface player reference is missing.
-            cached_player_x = overlay.x
-            cached_player_y = overlay.y
-          end
-        end
-        color_function(color, phase, colors, n_colors, cached_player_x, cached_player_y, overlay.x, overlay.y)
+        color_function(color, phase, colors, n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
         overlay.animation.color = color
       end
     end

@@ -676,6 +676,30 @@ describe("LabOverlayRenderer", function ()
             tick(event)
           end)
         end)
+
+        it("stores viewer coordinates per overlay from the first player who sees it", function ()
+          local r = make_renderer()
+          local force = make_force(1)
+
+          _G.game.is_multiplayer = function () return true end
+          r:render_overlay_for_lab(make_entity(1, 1, 0, 0, force))
+          r:render_overlay_for_lab(make_entity(2, 1, 100, 0, force))
+
+          add_connected_player_at(1, force, 1, 0, 0)
+          add_connected_player_at(2, force, 1, 100, 0)
+
+          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          tick(event)
+
+          local ov1 = r.chunk_map:get(1)
+          local ov2 = r.chunk_map:get(2)
+          assert.is_not_nil(ov1) --- @cast ov1 -nil
+          assert.is_not_nil(ov2) --- @cast ov2 -nil
+          assert.are.equal(0, ov1.viewer_x)
+          assert.are.equal(0, ov1.viewer_y)
+          assert.are.equal(100, ov2.viewer_x)
+          assert.are.equal(0, ov2.viewer_y)
+        end)
       end)
     end)
 
