@@ -996,12 +996,13 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     end
 
     -- ========== Incremental status scan (every tick) ==========
-    -- Budget scaled by n_connected: n_connected players bring n_connected times as many labs into view,
-    -- so dividing by n_connected keeps total C bridge calls per tick comparable to singleplayer.
+    -- Budget: ceil(n_all / 30) ensures all overlays are scanned within one state update cycle.
+    -- NOTE: Do NOT divide by n_connected_players here. The status_cursor resets every 30 ticks,
+    -- so if budget * 30 < n_all_in_view, labs at the end of all_overlays_in_view are never scanned.
     if n_all_in_view == 0 then
       needs_full_scan = false
     elseif has_any_research or needs_full_scan then
-      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected_players))
+      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
       if budget < 1 then budget = 1 end
       needs_full_scan = false
       for _ = 1, budget do
