@@ -696,21 +696,24 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     -- Spread entity.status C bridge calls evenly across ticks instead of doing them all at once.
     -- Budget: ceil(n_all / 30) ensures all overlays are scanned within one state update cycle.
     --         If full scan is required, use n_all_in_view instead for iterating all overlays in view.
-    if (n_all_in_view > 0 and has_any_research) or needs_full_scan then
+    --[[SYNC:status-update]]
+    if n_all_in_view == 0 then
+      needs_full_scan = false
+    elseif has_any_research or needs_full_scan then
       local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
+      if budget < 1 then budget = 1 end
       needs_full_scan = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
         if status_cursor > n_all_in_view then status_cursor = 1 end
         local overlay = all_overlays_in_view[status_cursor]
-        local status = overlay.entity.status
-        --[[SYNC:resolve-force-visibility]]
+        local entity = overlay.entity
+        if not entity.valid then goto continue end
+
+        local status = entity.status
         local force_index = overlay.force_index
         local force_state = force_states[force_index]
         local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and force_state ~= nil and force_state.current_research ~= nil
-        --[[END_SYNC]]
-
-        --[[SYNC:status-update]]
         if overlay.visible ~= should_be_visible then
           overlay.visible = should_be_visible
           overlay.animation.visible = should_be_visible
@@ -723,9 +726,11 @@ function LabOverlayRenderer:get_tick_function(anim_state)
             n_visible_overlays = n_visible_overlays - 1
           end
         end
-        --[[END_SYNC]]
+
+        ::continue::
       end
     end
+    --[[END_SYNC]]
 
     -- ========== Color update (every color_update_interval ticks) ==========
 
@@ -738,10 +743,11 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     end
 
     if in_chart_mode or n_visible_overlays == 0 or not has_any_research then return end
+
+    --[[SYNC:color-update-1]]
     if current_tick < next_color_update_tick then return end
     next_color_update_tick = current_tick + color_update_interval
 
-    --[[SYNC:color-epoch]]
     local elapsed_tick = current_tick - color_pattern_saved_tick
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
@@ -763,7 +769,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end
-    --[[END_SYNC]]
 
     -- Update colors of visible overlays using stride iteration over all overlays in view.
     local cached_force_index = 0
@@ -772,7 +777,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
-        --[[SYNC:color-cache-by-force]]
         local force_index = overlay.force_index
         if force_index ~= cached_force_index then
           cached_force_index = force_index
@@ -785,14 +789,19 @@ function LabOverlayRenderer:get_tick_function(anim_state)
             cached_n_colors = 0
           end
         end
-        --[[END_SYNC]]
         if cached_colors then
-          color_function(color, phase, cached_colors, cached_n_colors, player_x, player_y, overlay.x, overlay.y)
-          overlay.animation.color = color
+          local animation = overlay.animation
+          if animation.valid then
+            --[[END_SYNC]]
+            color_function(color, phase, cached_colors, cached_n_colors, player_x, player_y, overlay.x, overlay.y)
+            --[[SYNC:color-update-2]]
+            animation.color = color
+          end
         end
       end
     end
   end
+  --[[END_SYNC]]
 
   --[[SYNC:request-state-update]]
   local function request_state_update()
@@ -1017,6 +1026,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     -- Budget: ceil(n_all / 30) ensures all overlays are scanned within one state update cycle.
     -- NOTE: Do NOT divide by n_connected_players here. The status_cursor resets every 30 ticks,
     -- so if budget * 30 < n_all_in_view, labs at the end of all_overlays_in_view are never scanned.
+    --[[SYNC:status-update]]
     if n_all_in_view == 0 then
       needs_full_scan = false
     elseif has_any_research or needs_full_scan then
@@ -1027,14 +1037,13 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         status_cursor = status_cursor + 1
         if status_cursor > n_all_in_view then status_cursor = 1 end
         local overlay = all_overlays_in_view[status_cursor]
-        local status = overlay.entity.status
-        --[[SYNC:resolve-force-visibility]]
+        local entity = overlay.entity
+        if not entity.valid then goto continue end
+
+        local status = entity.status
         local force_index = overlay.force_index
         local force_state = force_states[force_index]
         local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and force_state ~= nil and force_state.current_research ~= nil
-        --[[END_SYNC]]
-
-        --[[SYNC:status-update]]
         if overlay.visible ~= should_be_visible then
           overlay.visible = should_be_visible
           overlay.animation.visible = should_be_visible
@@ -1047,9 +1056,11 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
             n_visible_overlays = n_visible_overlays - 1
           end
         end
-        --[[END_SYNC]]
+
+        ::continue::
       end
     end
+    --[[END_SYNC]]
 
     -- ========== Color update (every color_update_interval ticks) ==========
 
@@ -1064,10 +1075,11 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     end
 
     if n_visible_overlays == 0 or not has_any_research then return end
+
+    --[[SYNC:color-update-1]]
     if current_tick < next_color_update_tick then return end
     next_color_update_tick = current_tick + color_update_interval
 
-    --[[SYNC:color-epoch]]
     local elapsed_tick = current_tick - color_pattern_saved_tick
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
@@ -1089,16 +1101,14 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end
-    --[[END_SYNC]]
 
-    -- Update colors using stride iteration.
+    -- Update colors of visible overlays using stride iteration over all overlays in view.
     local cached_force_index = 0
     local cached_colors = nil --- @type number[]|nil
     local cached_n_colors = 0
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
-        --[[SYNC:color-cache-by-force]]
         local force_index = overlay.force_index
         if force_index ~= cached_force_index then
           cached_force_index = force_index
@@ -1111,14 +1121,19 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
             cached_n_colors = 0
           end
         end
-        --[[END_SYNC]]
         if cached_colors then
-          color_function(color, phase, cached_colors, cached_n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
-          overlay.animation.color = color
+          local animation = overlay.animation
+          if animation.valid then
+            --[[END_SYNC]]
+            color_function(color, phase, cached_colors, cached_n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
+            --[[SYNC:color-update-2]]
+            animation.color = color
+          end
         end
       end
     end
   end
+  --[[END_SYNC]]
 
   --[[SYNC:request-state-update]]
   local function request_state_update()
