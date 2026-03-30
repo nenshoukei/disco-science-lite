@@ -123,8 +123,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       animation_offset = random() * 300, -- randomize start frame so labs don't all animate in sync
     })
     script.register_on_object_destroyed(render_object)
-    self.render_object_id_to_unit_number[render_object.id] = lab_unit_number
   end
+  self.render_object_id_to_unit_number[render_object.id] = lab_unit_number
 
   local companion_object --- @type LuaRenderObject?
   if companion and existing_companion then
@@ -154,6 +154,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
       animation_offset = render_object.animation_offset, -- sync with the overlay so they animate together
     })
     script.register_on_object_destroyed(companion_object)
+  end
+  if companion_object then
     self.render_object_id_to_unit_number[companion_object.id] = lab_unit_number
   end
 
