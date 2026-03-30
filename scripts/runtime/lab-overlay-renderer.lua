@@ -405,6 +405,24 @@ function LabOverlayRenderer:on_render_object_destroyed(object_id)
   end
 end
 
+--- Hide all overlays that are currently visible.
+---
+--- Called when a player leaves the game to ensure labs from their viewport
+--- do not remain colorized after they disconnect.
+--- The tick function will re-show overlays for labs in the remaining players' viewports.
+function LabOverlayRenderer:hide_all_overlays()
+  for _, entry in pairs(self.chunk_map.entries) do
+    local overlay = entry.overlay
+    if overlay.visible then
+      overlay.visible = false
+      overlay.animation.visible = false
+      if overlay.companion then
+        overlay.companion.visible = false
+      end
+    end
+  end
+end
+
 --- Returns a random phase_speed value in { [-3.0, -0.5) or [0.5, 3.0) } / 40.
 --- @return number
 local function random_phase_speed()

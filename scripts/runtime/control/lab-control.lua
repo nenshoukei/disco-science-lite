@@ -47,13 +47,22 @@ local function setup_event_handlers()
     defines.events.on_player_created,
     defines.events.on_singleplayer_init,
     defines.events.on_player_joined_game,
-    defines.events.on_player_left_game,
-    defines.events.on_player_display_resolution_changed,
     defines.events.on_player_changed_force,
     defines.events.on_multiplayer_init,
     defines.events.on_force_created,
     defines.events.on_forces_merged,
   }, setup_event_handlers)
+
+  -- When a player leaves, hide all overlays first so labs from their viewport
+  -- don't remain colorized. Same for a player's viewport being small.
+  -- The new tick function will re-show labs in the remaining players' viewports on the next tick.
+  script.on_event({
+    defines.events.on_player_left_game,
+    defines.events.on_player_display_resolution_changed,
+  }, function ()
+    renderer:hide_all_overlays()
+    setup_event_handlers()
+  end)
 
   script.on_event(defines.events.on_script_trigger_effect, function (event)
     local target_entity = event.target_entity
