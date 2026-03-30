@@ -345,8 +345,12 @@ function LabOverlayRenderer:update_lab_position(lab)
     self.chunk_map:insert(lab, overlay) -- updates the existing entry
   else
     -- The entity is teleported to another surface!
+    self.render_object_id_to_unit_number[animation.id] = nil
     animation.destroy()
-    if companion then companion.destroy() end
+    if companion then
+      self.render_object_id_to_unit_number[companion.id] = nil
+      companion.destroy()
+    end
     self:render_overlay_for_lab(lab)
   end
 end
