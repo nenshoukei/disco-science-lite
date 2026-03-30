@@ -26,7 +26,10 @@ end
 --- @param index number
 --- @return LuaForce
 local function make_force(index)
-  return ({ index = index, current_research = make_tech() }) --[[@as LuaForce]]
+  local name = "force_" .. index
+  local force = ({ index = index, name = name, current_research = make_tech() }) --[[@as LuaForce]]
+  _G.game.forces[name] = force
+  return force
 end
 
 --- Build a mock LuaEntity representing a lab on a given surface.
@@ -635,6 +638,29 @@ describe("LabOverlayRenderer", function ()
       end)
 
       describe("multiplayer", function ()
+        it("updates overlay visibility per force research state", function ()
+          local r = make_renderer()
+          local force1 = make_force(1)
+          local force2 = make_force(2)
+          force2.current_research = nil
+
+          _G.game.is_multiplayer = function () return true end
+          r:render_overlay_for_lab(make_entity(1, 1, 0, 0, force1))
+          r:render_overlay_for_lab(make_entity(2, 1, 2, 0, force2))
+          add_connected_player_at(1, force1, 1, 0, 0)
+          add_connected_player_at(2, force2, 1, 0, 0)
+
+          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          tick(event)
+
+          local ov1 = r.chunk_map:get(1)
+          local ov2 = r.chunk_map:get(2)
+          assert.is_not_nil(ov1) --- @cast ov1 -nil
+          assert.is_not_nil(ov2) --- @cast ov2 -nil
+          assert.is_true(ov1.visible)
+          assert.is_false(ov2.visible)
+        end)
+
         it("update_zoom_reach aggregates furthest game view across connected players", function ()
           local r = make_renderer()
           local force = make_force(1)

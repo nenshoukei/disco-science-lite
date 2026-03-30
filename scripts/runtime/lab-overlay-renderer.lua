@@ -25,9 +25,15 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field y             number           Y coordinate.
 --- @field visible       boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
 --- @field unit_number   number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
+--- @field force_index   number           Force index of the lab entity.
 --- @field surface_index number           Surface index of the lab entity.
 --- @field viewer_x      number           Reference player X used by spatial color functions in multiplayer.
 --- @field viewer_y      number           Reference player Y used by spatial color functions in multiplayer.
+
+--- @class (exact) ForceResearchState
+--- @field current_research LuaTechnology|nil Current researching technology in force.
+--- @field colors           number[]|nil      Flatten colors for the research.
+--- @field n_colors         integer           Number of colors. (#colors / 3)
 
 --- @param color_registry ColorRegistry
 --- @param lab_registry LabRegistry
@@ -166,6 +172,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
     viewer_y      = lab_y,
     visible       = false, -- start as hidden; tick scan will synchronize this with entity.status
     unit_number   = lab_unit_number,
+    force_index   = lab.force_index,
     surface_index = lab.surface_index,
   }
 
@@ -321,6 +328,7 @@ function LabOverlayRenderer:update_lab_position(lab)
   local lab_y = lab_position.y or lab_position[2]
   overlay.x = lab_x
   overlay.y = lab_y
+  overlay.force_index = lab.force_index
 
   local animation = overlay.animation
   local companion = overlay.companion
@@ -444,13 +452,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local n_all_in_view = 0
   local n_visible_overlays = 0
 
-  -- Research state
   local next_state_update_tick = 0 --- always force update at first tick
   local needs_full_scan = true     --- force full scan at first tick and on request_state_update
   local status_cursor = 0
-  local current_research = nil     --- @type LuaTechnology|nil
-  local colors = nil               --- @type number[]|nil
-  local n_colors = 0
 
   -- Animation state
   local color_pattern_duration = Settings.color_pattern_duration
@@ -470,6 +474,10 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color = { 0, 0, 0 }
 
   --[[END_SYNC]]
+
+  local current_research = nil --- @type LuaTechnology|nil
+  local colors = nil           --- @type number[]|nil
+  local n_colors = 0
 
   local player_x = 0
   local player_y = 0
@@ -500,7 +508,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       in_chart_mode = player.render_mode == RENDER_MODE_CHART
       if in_chart_mode then return end -- Skip updates in chart mode
 
-      --[[SYNC:research-update]]
       -- Update current_research and colors if changed.
       local new_current_research = force.current_research
       if new_current_research == current_research then
@@ -519,7 +526,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
           n_colors = 0
         end
       end
-      --[[END_SYNC]]
 
       -- Update player position.
       local player_position = player.position
@@ -622,7 +628,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     --         If full scan is required, use n_all_in_view instead for iterating all overlays in view.
     if (n_all_in_view > 0 and current_research ~= nil) or needs_full_scan then
       local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
-      --[[SYNC:status-scan-body]]
       needs_full_scan = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
@@ -630,6 +635,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         local overlay = all_overlays_in_view[status_cursor]
         local status = overlay.entity.status
         local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
+
+        --[[SYNC:status-update]]
         if overlay.visible ~= should_be_visible then
           overlay.visible = should_be_visible
           overlay.animation.visible = should_be_visible
@@ -642,8 +649,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
             n_visible_overlays = n_visible_overlays - 1
           end
         end
+        --[[END_SYNC]]
       end
-      --[[END_SYNC]]
     end
 
     -- ========== Color update (every color_update_interval ticks) ==========
@@ -716,14 +723,10 @@ end
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
 function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
-  local first_connected_player = game.connected_players[1]
-  if not first_connected_player then
+  if not game.connected_players[1] then
     -- No connected players
     return noop, noop, noop
   end
-
-  -- Use the first connected player's force as primary.
-  local force = first_connected_player.force --[[@as LuaForce]]
 
   --[[SYNC:upvalues]]
 
@@ -738,13 +741,9 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   local n_all_in_view = 0
   local n_visible_overlays = 0
 
-  -- Research state
   local next_state_update_tick = 0 --- always force update at first tick
   local needs_full_scan = true     --- force full scan at first tick and on request_state_update
   local status_cursor = 0
-  local current_research = nil     --- @type LuaTechnology|nil
-  local colors = nil               --- @type number[]|nil
-  local n_colors = 0
 
   -- Animation state
   local color_pattern_duration = Settings.color_pattern_duration
@@ -764,6 +763,9 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   local color = { 0, 0, 0 }
 
   --[[END_SYNC]]
+
+  local force_states = {} --- @type table<number, ForceResearchState>
+  local has_any_research = false
 
   local surface_bounds = chunk_map.surface_bounds
   local surface_bounds_dirty = chunk_map.surface_bounds_dirty
@@ -788,26 +790,42 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       local connected_players = game.connected_players
       if not connected_players[1] then return end -- all players disconnected
 
-      --[[SYNC:research-update]]
-      -- Update current_research and colors if changed.
-      local new_current_research = force.current_research
-      if new_current_research == current_research then
-        if new_current_research == nil and not needs_full_scan then
-          -- If current_research remains nil, we can safely skip visibility and color updates. (all invisible)
-          return
+      -- Update current_research and colors per force.
+      has_any_research = false
+      for _, force in pairs(game.forces) do
+        local force_index = force.index
+        local state = force_states[force_index]
+        if not state then
+          state = ({
+            current_research = nil,
+            colors = nil,
+            n_colors = 0,
+          }) --[[@as ForceResearchState]]
+          force_states[force_index] = state
         end
-      else
-        current_research = new_current_research
-        needs_full_scan = true
 
-        if current_research then
-          colors, n_colors = color_registry:get_flattened_colors_for_research(current_research, Settings.color_saturation, Settings.color_brightness)
-        else
-          colors = nil
-          n_colors = 0
+        local new_current_research = force.current_research
+        if new_current_research ~= state.current_research then
+          state.current_research = new_current_research
+          needs_full_scan = true
+          if new_current_research then
+            state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, Settings.color_saturation,
+              Settings.color_brightness)
+          else
+            state.colors = nil
+            state.n_colors = 0
+          end
+        end
+
+        if new_current_research ~= nil then
+          has_any_research = true
         end
       end
-      --[[END_SYNC]]
+
+      if not has_any_research and not needs_full_scan then
+        -- If all forces are idle, we can safely skip visibility and color updates. (all invisible)
+        return
+      end
 
       -- Recompute conservative max reach from all connected players.
       chunk_map:set_furthest_game_view_for_players(connected_players)
@@ -907,17 +925,25 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     -- so dividing by n_connected keeps total C bridge calls per tick comparable to singleplayer.
     if n_all_in_view == 0 then
       needs_full_scan = false
-    elseif current_research ~= nil or needs_full_scan then
+    elseif has_any_research or needs_full_scan then
       local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected))
       if budget < 1 then budget = 1 end
-      --[[SYNC:status-scan-body]]
       needs_full_scan = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
         if status_cursor > n_all_in_view then status_cursor = 1 end
         local overlay = all_overlays_in_view[status_cursor]
         local status = overlay.entity.status
-        local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and current_research ~= nil
+        local force_index = overlay.force_index
+        if not force_index then
+          -- Backward compatibility for overlays loaded from older versions.
+          force_index = overlay.entity.force_index
+          overlay.force_index = force_index
+        end
+        local force_state = force_states[force_index]
+        local should_be_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and force_state ~= nil and force_state.current_research ~= nil
+
+        --[[SYNC:status-update]]
         if overlay.visible ~= should_be_visible then
           overlay.visible = should_be_visible
           overlay.animation.visible = should_be_visible
@@ -930,8 +956,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
             n_visible_overlays = n_visible_overlays - 1
           end
         end
+        --[[END_SYNC]]
       end
-      --[[END_SYNC]]
     end
 
     -- ========== Color update (every color_update_interval ticks) ==========
@@ -946,7 +972,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       if color_update_interval > 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] then color_update_interval = 30 --[[$MAX_COLOR_UPDATE_INTERVAL]] end
     end
 
-    if n_visible_overlays == 0 or colors == nil then return end
+    if n_visible_overlays == 0 or not has_any_research then return end
     if current_tick < next_color_update_tick then return end
     next_color_update_tick = current_tick + color_update_interval
 
@@ -975,11 +1001,28 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     --[[END_SYNC]]
 
     -- Update colors using stride iteration.
+    local cached_force_index = 0
+    local cached_colors = nil --- @type number[]|nil
+    local cached_n_colors = 0
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
-        color_function(color, phase, colors, n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
-        overlay.animation.color = color
+        local force_index = overlay.force_index -- force_index is guaranteed by status scan.
+        if force_index ~= cached_force_index then
+          cached_force_index = force_index
+          local force_state = force_states[force_index]
+          if force_state then
+            cached_colors = force_state.colors
+            cached_n_colors = force_state.n_colors
+          else
+            cached_colors = nil
+            cached_n_colors = 0
+          end
+        end
+        if cached_colors then
+          color_function(color, phase, cached_colors, cached_n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
+          overlay.animation.color = color
+        end
       end
     end
   end

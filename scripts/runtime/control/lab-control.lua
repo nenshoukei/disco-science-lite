@@ -41,6 +41,8 @@ local function setup_event_handlers()
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
+    defines.events.on_player_joined_game,
+    defines.events.on_player_left_game,
   }, request_state_update)
 
   script.on_event({
@@ -48,6 +50,8 @@ local function setup_event_handlers()
     defines.events.on_singleplayer_init,
     defines.events.on_player_display_resolution_changed,
     defines.events.on_player_changed_force,
+    defines.events.on_multiplayer_init,
+    defines.events.on_forces_merged,
   }, setup_event_handlers)
 
   script.on_event(defines.events.on_script_trigger_effect, function (event)
@@ -67,25 +71,19 @@ local function setup_event_handlers()
     end
   end)
 
-  --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
-  local function on_surface_cleared(event)
+  script.on_event({
+    defines.events.on_surface_cleared,
+    defines.events.on_surface_deleted,
+  }, function (event)
+    --- @cast event EventData.on_surface_cleared|EventData.on_surface_deleted
     renderer:remove_overlays_on_surface(event.surface_index)
     request_state_update()
-  end
-  script.on_event(defines.events.on_surface_cleared, on_surface_cleared)
-  script.on_event(defines.events.on_surface_deleted, on_surface_cleared)
+  end)
 
   script.on_event(defines.events.script_raised_teleported, function (event)
     renderer:update_lab_position(event.entity)
     request_state_update()
   end)
-
-  script.on_event(defines.events.on_multiplayer_init, setup_event_handlers)
-
-  script.on_event({
-    defines.events.on_player_joined_game,
-    defines.events.on_player_left_game,
-  }, request_state_update)
 
   script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
     local prefix = "mks-dsl-" --[[$NAME_PREFIX]]

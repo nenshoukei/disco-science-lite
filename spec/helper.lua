@@ -71,6 +71,7 @@ _G.defines = setmetatable({
     on_object_destroyed = 501,
     script_raised_teleported = 502,
     on_runtime_mod_setting_changed = 503,
+    on_forces_merged = 600,
   }, missing_mock_check),
 }, missing_mock_check)
 
