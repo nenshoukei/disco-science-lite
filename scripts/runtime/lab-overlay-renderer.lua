@@ -74,6 +74,25 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   local lab_unit_number = lab.unit_number
   if not lab_unit_number then return nil end
 
+  -- If called without explicit reuse objects, try to reuse currently tracked objects for this lab.
+  if not existing_overlay or not existing_companion then
+    local current_overlay = self.chunk_map:get(lab_unit_number)
+    if current_overlay then
+      if not existing_overlay then
+        local current_animation = current_overlay.animation
+        if current_animation and current_animation.valid then
+          existing_overlay = current_animation
+        end
+      end
+      if not existing_companion then
+        local current_companion = current_overlay.companion
+        if current_companion and current_companion.valid then
+          existing_companion = current_companion
+        end
+      end
+    end
+  end
+
   local status = lab.status
   local is_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and lab.force.current_research ~= nil
 
@@ -157,6 +176,12 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   end
   if companion_object then
     self.render_object_id_to_unit_number[companion_object.id] = lab_unit_number
+  end
+
+  -- Companion was previously present but is not needed anymore (e.g. registration changed).
+  if not companion and existing_companion and existing_companion.valid then
+    self.render_object_id_to_unit_number[existing_companion.id] = nil
+    existing_companion.destroy()
   end
 
   local lab_position = lab.position

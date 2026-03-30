@@ -245,14 +245,30 @@ describe("LabOverlayRenderer", function ()
       assert.is_not_nil(r.chunk_map.entries[42])
     end)
 
-    it("always creates a new animation object", function ()
+    it("reuses existing animation object when called repeatedly for same lab", function ()
       local r = make_renderer()
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
       local ov2 = r:render_overlay_for_lab(lab)
       assert.is_not_nil(ov1) --- @cast ov1 -nil
       assert.is_not_nil(ov2) --- @cast ov2 -nil
-      assert.are_not.equal(ov1.animation, ov2.animation)
+      assert.are.equal(ov1.animation, ov2.animation)
+    end)
+
+    it("destroys existing companion when registration no longer has companion", function ()
+      local r = make_renderer()
+      r.lab_registry:register("lab", { companion = "comp-anim" })
+      local lab = make_entity(1, 1, 0, 0)
+      local ov1 = r:render_overlay_for_lab(lab)
+      assert.is_not_nil(ov1) --- @cast ov1 -nil
+      local old_companion = ov1.companion
+      assert.is_not_nil(old_companion) --- @cast old_companion -nil
+
+      r.lab_registry:register("lab", {})
+      local ov2 = r:render_overlay_for_lab(lab)
+      assert.is_not_nil(ov2) --- @cast ov2 -nil
+      assert.is_nil(ov2.companion)
+      assert.is_false(old_companion.valid)
     end)
   end)
 
