@@ -894,6 +894,30 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
   chunk_map:set_furthest_game_view_for_players(connected_players)
 
+  --- Per-player viewport state for chunk range change detection.
+  --- @class (exact) PlayerViewportState
+  --- @field chunk_left    number
+  --- @field chunk_top     number
+  --- @field chunk_right   number
+  --- @field chunk_bottom  number
+  --- @field surface_index number
+  --- @field was_skipped   boolean  true if player was in chart mode or outside surface bounds
+  --- @field player_x      number   viewer X stored for overlay.viewer_x assignment
+  --- @field player_y      number   viewer Y stored for overlay.viewer_y assignment
+  local player_viewport_states = {} --- @type PlayerViewportState[]
+  for i = 1, n_connected_players do
+    player_viewport_states[i] = {
+      chunk_left = 0,
+      chunk_top = 0,
+      chunk_right = 0,
+      chunk_bottom = 0,
+      surface_index = 0,
+      was_skipped = true,
+      player_x = 0,
+      player_y = 0,
+    }
+  end
+
   --- @type table<LabOverlay[], number> chunk to last visited tick
   local chunk_to_visited_tick = {}
   setmetatable(chunk_to_visited_tick, { __mode = "k" }) -- weak key reference
@@ -945,15 +969,19 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       end
       --[[END_SYNC]]
 
-      -- Recompute conservative max reach from all connected players.
-      chunk_map:set_furthest_game_view_for_players(connected_players)
-
-      -- Rebuild all_overlays_in_view from all connected players' viewport.
-      n_visible_overlays = 0
-      local all_count = 0
+      -- Check if any player's viewport chunk range changed.
+      local viewport_changed = false
       for i = 1, n_connected_players do
         local player = connected_players[i]
-        if player.render_mode == RENDER_MODE_CHART then goto next_player end
+        local pstate = player_viewport_states[i]
+
+        if player.render_mode == RENDER_MODE_CHART then
+          if not pstate.was_skipped then
+            pstate.was_skipped = true
+            viewport_changed = true
+          end
+          goto check_next_player
+        end
 
         -- Update stale surface bounds if labs were added or removed since last check.
         local surface_index = player.surface_index
@@ -961,24 +989,33 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
           chunk_map:update_surface_bounds(surface_index)
         end
 
-        -- Early-exit: if no labs on this surface.
+        -- Skip: if no labs on this surface.
         local surface_chunks = chunk_map_data[surface_index]
-        if not surface_chunks then goto next_player end
+        if not surface_chunks then
+          if not pstate.was_skipped then
+            pstate.was_skipped = true
+            viewport_changed = true
+          end
+          goto check_next_player
+        end
 
         local position = player.position
         local player_x = position.x or position[1]
         local player_y = position.y or position[2]
 
-        -- Early-exit: if player is definitely outside all labs on this surface.
+        -- Skip: if player is definitely outside all labs on this surface.
         local bounds = surface_bounds[surface_index]
         if not bounds or
           player_x < bounds[1] or player_x > bounds[3] or
           player_y < bounds[2] or player_y > bounds[4]
         then
-          goto next_player
+          if not pstate.was_skipped then
+            pstate.was_skipped = true
+            viewport_changed = true
+          end
+          goto check_next_player
         end
 
-        -- Compute this player's chunk range
         local res = player.display_resolution
         local viewport_width = res.width
         local viewport_height = res.height
@@ -997,42 +1034,76 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         chunk_bottom = chunk_bottom - chunk_bottom % 1
         --[[END_SYNC]]
 
-        for cx = chunk_left, chunk_right do
-          local col = surface_chunks[cx]
-          if col then
-            for cy = chunk_top, chunk_bottom do
-              local chunk = col[cy]
-              -- Skip duplicated chunks in multiple players by checking last visited tick.
-              local visited_tick = chunk and chunk_to_visited_tick[chunk]
-              if chunk and (not visited_tick or visited_tick < current_tick) then
-                chunk_to_visited_tick[chunk] = current_tick
-                for j = 1, #chunk do
-                  local overlay = chunk[j]
-                  overlay.viewer_x = player_x -- first-writer wins for overlapping views in this tick
-                  overlay.viewer_y = player_y
-                  all_count = all_count + 1
-                  all_overlays_in_view[all_count] = overlay
-                  if overlay.visible then
-                    n_visible_overlays = n_visible_overlays + 1
+        if pstate.was_skipped
+          or chunk_left ~= pstate.chunk_left
+          or chunk_top ~= pstate.chunk_top
+          or chunk_right ~= pstate.chunk_right
+          or chunk_bottom ~= pstate.chunk_bottom
+          or surface_index ~= pstate.surface_index
+        then
+          viewport_changed = true
+          pstate.was_skipped = false
+          pstate.chunk_left = chunk_left
+          pstate.chunk_top = chunk_top
+          pstate.chunk_right = chunk_right
+          pstate.chunk_bottom = chunk_bottom
+          pstate.surface_index = surface_index
+        end
+        pstate.player_x = player_x
+        pstate.player_y = player_y
+
+        ::check_next_player::
+      end
+
+      -- Rebuild all_overlays_in_view only when chunk range changed or full scan is required.
+      if viewport_changed or needs_full_scan then
+        n_visible_overlays = 0
+        local all_count = 0
+        for i = 1, n_connected_players do
+          local pstate = player_viewport_states[i]
+          if pstate.was_skipped then goto next_player end
+
+          local surface_chunks = chunk_map_data[pstate.surface_index]
+          local player_x = pstate.player_x
+          local player_y = pstate.player_y
+
+          for cx = pstate.chunk_left, pstate.chunk_right do
+            local col = surface_chunks[cx]
+            if col then
+              for cy = pstate.chunk_top, pstate.chunk_bottom do
+                local chunk = col[cy]
+                -- Skip duplicated chunks in multiple players by checking last visited tick.
+                local visited_tick = chunk and chunk_to_visited_tick[chunk]
+                if chunk and (not visited_tick or visited_tick < current_tick) then
+                  chunk_to_visited_tick[chunk] = current_tick
+                  for j = 1, #chunk do
+                    local overlay = chunk[j]
+                    overlay.viewer_x = player_x -- first-writer wins for overlapping views in this tick
+                    overlay.viewer_y = player_y
+                    all_count = all_count + 1
+                    all_overlays_in_view[all_count] = overlay
+                    if overlay.visible then
+                      n_visible_overlays = n_visible_overlays + 1
+                    end
                   end
                 end
               end
             end
           end
+
+          ::next_player::
         end
 
-        ::next_player::
-      end
+        -- Clear trailing references to prevent memory leaks and GC issues.
+        for i = all_count + 1, n_all_in_view do
+          if all_overlays_in_view[i] == nil then break end
+          all_overlays_in_view[i] = nil
+        end
+        n_all_in_view = all_count
 
-      -- Clear trailing references to prevent memory leaks and GC issues.
-      for i = all_count + 1, n_all_in_view do
-        if all_overlays_in_view[i] == nil then break end
-        all_overlays_in_view[i] = nil
+        -- Reset status cursor so incremental scan starts from the beginning.
+        status_cursor = 0
       end
-      n_all_in_view = all_count
-
-      -- Reset status cursor so incremental scan starts from the beginning.
-      status_cursor = 0
     end
 
     -- ========== Incremental status scan (every tick) ==========
