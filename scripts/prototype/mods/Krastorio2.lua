@@ -51,6 +51,8 @@ return {
 
     PrototypeLabRegistry.register("kr-advanced-lab", {
       animation = "mks-dsl-kr-advanced-lab-overlay" --[[$NAME_PREFIX .. "kr-advanced-lab-overlay"]],
+      companion = "mks-dsl-kr-advanced-lab-companion" --[[$NAME_PREFIX .. "kr-advanced-lab-companion"]],
+      is_companion_under_overlay = true,
     })
     PrototypeLabRegistry.register("kr-singularity-lab", {
       animation = "mks-dsl-kr-singularity-lab-overlay" --[[$NAME_PREFIX .. "kr-singularity-lab-overlay"]],
@@ -61,18 +63,32 @@ return {
     AnimationHelpers.modify_on_animation("kr-advanced-lab", function (modifier)
       local light = modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png")
       modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-light-anim.png") -- If has two light anim, so remove twice
+      if not light then return end
+
+      -- Insert a mask image as static frame
       modifier:insert_mask_layer(
         "__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png",
-        "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]]
+        "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]],
+        { frame_count = 1, repeat_count = light.frame_count }
       )
 
-      if not light then return end
+      -- It has three same anim layers.
+      local anim = modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png")
+      modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png")
+      modifier:remove_layer("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png")
+      if not anim then return end
+
       data:extend({
         AnimationHelpers.convert_to_animation_prototype(light, {
           name = "mks-dsl-kr-advanced-lab-overlay" --[[$NAME_PREFIX .. "kr-advanced-lab-overlay"]],
           filename = "__disco-science-lite__/graphics/laborat/lab_albedo_anim-overlay.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-overlay.png"]],
           blend_mode = "additive",
-          frame_count = 1,
+          draw_as_glow = true,
+          draw_as_light = false,
+        }),
+        AnimationHelpers.convert_to_animation_prototype(anim, {
+          name = "mks-dsl-kr-advanced-lab-companion" --[[$NAME_PREFIX .. "kr-advanced-lab-companion"]],
+          filename = "__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png" --[[$GRAPHICS_DIR .. "laborat/lab_albedo_anim-mask.png"]],
         }),
       })
     end)

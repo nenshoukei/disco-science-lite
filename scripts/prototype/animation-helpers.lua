@@ -167,7 +167,7 @@ function OnAnimationModifier:insert_mask_layer(target_filename, mask_filename, o
   local insertion_index = nil --- @type integer?
   local source_layer = nil    --- @type data.Animation?
 
-  for i = 1, #layers do
+  for i = #layers, 1, -1 do
     local layer = layers[i]
     local layer_key --- @type string?
     if layer.filename then

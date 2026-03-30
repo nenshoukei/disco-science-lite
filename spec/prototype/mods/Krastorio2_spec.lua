@@ -59,12 +59,14 @@ describe("mods/Krastorio2", function ()
       _G.data.raw.lab["kr-advanced-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
-    it("removes both light layers and inserts a mask layer", function ()
+    it("removes light layers and anim layers, and inserts mask layer", function ()
       Mod.on_data_final_fixes()
-      -- 8 original - 2 light-anim layers + 1 mask inserted = 7
-      assert.are.equal(7, #on_animation.layers)
+      -- 8 original - 2 light-anim layers - 3 anim layers + 1 mask inserted = 4
+      assert.are.equal(4, #on_animation.layers)
       assert.are.equal("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim-light.png", on_animation.layers[1].filename)
-      assert.are.equal("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-anim.png", on_animation.layers[2].filename)
+      assert.are.equal("__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png", on_animation.layers[2].filename)
+      assert.are.equal("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-shadow.png", on_animation.layers[3].filename)
+      assert.are.equal("__Krastorio2Assets__/buildings/advanced-lab/advanced-lab-ao.png", on_animation.layers[4].filename)
     end)
 
     it("creates the kr-advanced-lab overlay animation", function ()
@@ -73,6 +75,14 @@ describe("mods/Krastorio2", function ()
       assert.is_not_nil(overlay)
       --- @cast overlay -nil
       assert.are.equal("__disco-science-lite__/graphics/laborat/lab_albedo_anim-overlay.png", overlay.filename)
+    end)
+
+    it("creates the kr-advanced-lab companion animation", function ()
+      Mod.on_data_final_fixes()
+      local companion = _G.data.raw["animation"]["mks-dsl-kr-advanced-lab-companion"]
+      assert.is_not_nil(companion)
+      --- @cast companion -nil
+      assert.are.equal("__disco-science-lite__/graphics/laborat/lab_albedo_anim-mask.png", companion.filename)
     end)
   end)
 

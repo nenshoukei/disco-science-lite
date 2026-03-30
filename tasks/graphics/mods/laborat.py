@@ -11,7 +11,6 @@ from lib import (
     fill_black_background,
     rgb_to_grayscale,
     extract_frame,
-    make_mask_frame,
     open_mod_zip,
     save_image,
 )
@@ -30,28 +29,35 @@ LABORAT_X4_OVERLAY_DST = LABORAT_DST_DIR / "lab_albedo_anim_x4-overlay.png"
 
 
 def generate_laborat_images():
-    def make_images(anim_img: Image.Image, light_img: Image.Image, frame_w: int, frame_h: int, modified_dst: Path, overlay_dst: Path) -> None:
+    def make_images(anim_img: Image.Image, light_img: Image.Image, frame_w: int, frame_h: int, mask_dst: Path, overlay_dst: Path) -> None:
         anim = np.array(fill_black_background(anim_img)).astype(np.float32)
         light = np.array(fill_black_background(light_img).convert("L")).astype(np.float32)
 
-        # Blue tinted pixels => grayscale, other pixels => black
-        r, g, b = anim[..., 0], anim[..., 1], anim[..., 2]
-        blue_mask = b > 60
-        overlay_grid = np.where(blue_mask, rgb_to_grayscale(r, g, b), 0)
+        # Blue tinted pixels => desaturate, other pixels => keep original
+        mask = anim.copy()
+        r, g, b = mask[..., 0], mask[..., 1], mask[..., 2]
+        dome_mask = b > 55
+        grayscale = rgb_to_grayscale(r, g, b)
+        contrast = 1.5
+        gray_c = np.clip((grayscale - 127) * contrast + 128, 0, 255)
+        desaturate = 0.8
+        darken = 0.6
+        r[dome_mask] = (r[dome_mask] * (1 - desaturate) + gray_c[dome_mask] * desaturate) * darken
+        g[dome_mask] = (g[dome_mask] * (1 - desaturate) + gray_c[dome_mask] * desaturate) * darken
+        b[dome_mask] = (b[dome_mask] * (1 - desaturate) + gray_c[dome_mask] * desaturate) * darken
+        save_image(Image.fromarray(mask.clip(0, 255).astype(np.uint8), "RGBA"), mask_dst)
 
-        # Blend light in additive mode
-        overlay_grid = np.clip(overlay_grid + light, 0, 255)
-
-        # Static overlay: minimum brightness across all frames, independent of entity animation.
-        # Overlay animation cannot be synchronized with entity animation (rendering.draw_animation
-        # starts from the current tick offset, not frame 0), so we use a single static frame.
-        frames_stack = np.stack([extract_frame(overlay_grid, i, frame_w, frame_h, LABORAT_COLS) for i in range(LABORAT_FRAMES)], axis=0)
-        static_overlay = frames_stack.min(axis=0).clip(0, 90)  # Clipping makes pixels inside the dome flat
-        save_image(Image.fromarray(static_overlay.astype(np.uint8), "L"), overlay_dst)
-
-        mask = make_mask_frame(anim.astype(np.uint8), overlay_grid > 10)
-        mask[:, :, 0] = mask[:, :, 0] * 0.8  # Darkening
-        save_image(Image.fromarray(mask, "LA"), modified_dst)
+        # Extract dome pixels
+        extracted = np.where(dome_mask, grayscale, 0)
+        # Flatten pixels inside dome
+        extracted = extracted.clip(0, 80) / 80 * 200
+        # Apply fade animation
+        for i in range(LABORAT_FRAMES):
+            frame = extract_frame(extracted, i, frame_w, frame_h, LABORAT_COLS)
+            frame[:, :] = frame[:, :] * (0.75 - 0.25 * np.cos(2 * np.pi * i / LABORAT_FRAMES))
+        # Additive blend light image
+        extracted = np.clip(extracted + light, 0, 255)
+        save_image(Image.fromarray(extracted.astype(np.uint8), "L"), overlay_dst)
 
     with open_mod_zip(LABORAT_SRC) as open_file:
         with open_file("graphics/lab_albedo_anim.png") as f:
