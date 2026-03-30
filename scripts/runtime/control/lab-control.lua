@@ -133,12 +133,38 @@ end
 function LabControl.on_load()
   renderer = create_renderer()
 
-  -- on_load cannot modify game state, so defer rendering and registry binding to the first tick.
-  -- bind_registries flushes pending remote calls (e.g. setLabScale), which write to storage.
+  -- on_load cannot modify game state or access game API, so:
+  -- 1. Rendering is deferred to the first tick (rendering modifies game state).
+  -- 2. setup_event_handlers() cannot be called here because get_tick_function() needs game access.
+  --
+  -- However, Factorio requires that on_load registers the EXACT same set of events as the server.
+  -- Register all events with noop handlers here; rebuild_overlays() on the first tick installs real ones.
   script.on_event(defines.events.on_tick, function ()
-    script.on_event(defines.events.on_tick, nil)
-    rebuild_overlays()
+    rebuild_overlays() -- overwrites on_tick handler
   end)
+
+  local noop = function () end
+  script.on_nth_tick(180, noop)
+  script.on_event({
+    defines.events.on_research_started,
+    defines.events.on_research_finished,
+    defines.events.on_research_cancelled,
+    defines.events.on_player_created,
+    defines.events.on_singleplayer_init,
+    defines.events.on_player_joined_game,
+    defines.events.on_player_left_game,
+    defines.events.on_player_display_resolution_changed,
+    defines.events.on_player_changed_force,
+    defines.events.on_multiplayer_init,
+    defines.events.on_force_created,
+    defines.events.on_forces_merged,
+    defines.events.on_script_trigger_effect,
+    defines.events.on_object_destroyed,
+    defines.events.on_surface_cleared,
+    defines.events.on_surface_deleted,
+    defines.events.script_raised_teleported,
+    defines.events.on_runtime_mod_setting_changed,
+  }, noop)
 end
 
 function LabControl.on_configuration_changed()
