@@ -516,8 +516,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_update_budget = Settings.color_update_budget
   local color_update_max_per_call = Settings.color_update_max_per_call
   local color_update_interval = 1
-  local next_color_update_tick = 0
-  local color_update_offset = 1
   local color_update_stride = 1
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
   -- This ensures animation is continuous across load/configuration_changed transitions.
@@ -747,8 +745,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     if in_chart_mode or n_visible_overlays == 0 or not has_any_research then return end
 
     --[[SYNC:color-update-1]]
-    if current_tick < next_color_update_tick then return end
-    next_color_update_tick = current_tick + color_update_interval
+    if current_tick % color_update_interval ~= 0 then return end
 
     local elapsed_tick = current_tick - color_pattern_saved_tick
     if elapsed_tick >= color_pattern_duration then
@@ -764,7 +761,6 @@ function LabOverlayRenderer:get_tick_function(anim_state)
         color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
         phase_speed = random_phase_speed()
       end
-      color_update_offset = 1
 
       -- Persist canonical epoch-start state so the next tick function (after
       -- reload/configuration change) resumes deterministically.
@@ -776,12 +772,8 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       elapsed_tick = current_tick - color_pattern_saved_tick
     end
 
-    -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
-    -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
-    local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
-
-    color_update_offset = color_update_offset + 1
-    if color_update_offset > color_update_stride then color_update_offset = 1 end
+    local phase = phase_base + phase_speed * elapsed_tick
+    local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 
     -- Update colors of visible overlays using stride iteration over all overlays in view.
     local cached_force_index = 0
@@ -875,8 +867,6 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   local color_update_budget = Settings.color_update_budget
   local color_update_max_per_call = Settings.color_update_max_per_call
   local color_update_interval = 1
-  local next_color_update_tick = 0
-  local color_update_offset = 1
   local color_update_stride = 1
   -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
   -- This ensures animation is continuous across load/configuration_changed transitions.
@@ -1161,8 +1151,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     if n_visible_overlays == 0 or not has_any_research then return end
 
     --[[SYNC:color-update-1]]
-    if current_tick < next_color_update_tick then return end
-    next_color_update_tick = current_tick + color_update_interval
+    if current_tick % color_update_interval ~= 0 then return end
 
     local elapsed_tick = current_tick - color_pattern_saved_tick
     if elapsed_tick >= color_pattern_duration then
@@ -1178,7 +1167,6 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
         phase_speed = random_phase_speed()
       end
-      color_update_offset = 1
 
       -- Persist canonical epoch-start state so the next tick function (after
       -- reload/configuration change) resumes deterministically.
@@ -1190,12 +1178,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       elapsed_tick = current_tick - color_pattern_saved_tick
     end
 
-    -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
-    -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
-    local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
-
-    color_update_offset = color_update_offset + 1
-    if color_update_offset > color_update_stride then color_update_offset = 1 end
+    local phase = phase_base + phase_speed * elapsed_tick
+    local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 
     -- Update colors of visible overlays using stride iteration over all overlays in view.
     local cached_force_index = 0
