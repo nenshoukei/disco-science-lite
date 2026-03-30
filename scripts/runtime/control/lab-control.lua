@@ -41,16 +41,17 @@ local function setup_event_handlers()
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
-    defines.events.on_player_joined_game,
-    defines.events.on_player_left_game,
   }, request_state_update)
 
   script.on_event({
     defines.events.on_player_created,
     defines.events.on_singleplayer_init,
+    defines.events.on_player_joined_game,
+    defines.events.on_player_left_game,
     defines.events.on_player_display_resolution_changed,
     defines.events.on_player_changed_force,
     defines.events.on_multiplayer_init,
+    defines.events.on_force_created,
     defines.events.on_forces_merged,
   }, setup_event_handlers)
 

@@ -470,6 +470,12 @@ function LabOverlayRenderer:get_tick_function(anim_state)
 
   --[[SYNC:upvalues]]
 
+  --- Force index to force table
+  local forces = {} --- @type table<number, LuaForce>
+  for _, force in pairs(game.forces) do
+    forces[force.index] = force
+  end
+
   -- Capture chunk_map fields (mutated in-place by ChunkMap)
   local chunk_map = self.chunk_map
   local chunk_map_data = chunk_map.data
@@ -538,8 +544,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
       --[[SYNC:update-force-research-state]]
       -- Update current_research and colors per force.
       has_any_research = false
-      for _, force in pairs(game.forces) do
-        local force_index = force.index
+      for force_index, force in pairs(forces) do
         local state = force_states[force_index]
         if not state then
           state = ({
@@ -793,12 +798,20 @@ end
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
 function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
-  if not game.connected_players[1] then
+  local connected_players = game.connected_players
+  if not connected_players[1] then
     -- No connected players
     return noop, noop, noop
   end
+  local n_connected_players = #connected_players
 
   --[[SYNC:upvalues]]
+
+  --- Force index to force table
+  local forces = {} --- @type table<number, LuaForce>
+  for _, force in pairs(game.forces) do
+    forces[force.index] = force
+  end
 
   -- Capture chunk_map fields (mutated in-place by ChunkMap)
   local chunk_map = self.chunk_map
@@ -838,10 +851,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
   local surface_bounds = chunk_map.surface_bounds
   local surface_bounds_dirty = chunk_map.surface_bounds_dirty
-  chunk_map:set_furthest_game_view_for_players(game.connected_players)
-
-  --- Number of connected players. (will be updated at first tick)
-  local n_connected = 1
+  chunk_map:set_furthest_game_view_for_players(connected_players)
 
   --- @type table<LabOverlay[], number> chunk to last visited tick
   local chunk_to_visited_tick = {}
@@ -856,14 +866,10 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     if current_tick >= next_state_update_tick or needs_full_scan then
       next_state_update_tick = current_tick + 30 --[[$STATE_UPDATE_INTERVAL]]
 
-      local connected_players = game.connected_players
-      if not connected_players[1] then return end -- all players disconnected
-
       --[[SYNC:update-force-research-state]]
       -- Update current_research and colors per force.
       has_any_research = false
-      for _, force in pairs(game.forces) do
-        local force_index = force.index
+      for force_index, force in pairs(forces) do
         local state = force_states[force_index]
         if not state then
           state = ({
@@ -902,12 +908,10 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
       chunk_map:set_furthest_game_view_for_players(connected_players)
 
       -- Rebuild all_overlays_in_view from all connected players' viewport.
-      n_connected = 0
       n_visible_overlays = 0
       local all_count = 0
-      for i = 1, #connected_players do
+      for i = 1, n_connected_players do
         local player = connected_players[i]
-        n_connected = n_connected + 1
         if player.render_mode == RENDER_MODE_CHART then goto next_player end
 
         local surface_index = player.surface_index
@@ -997,7 +1001,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     if n_all_in_view == 0 then
       needs_full_scan = false
     elseif has_any_research or needs_full_scan then
-      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected))
+      local budget = needs_full_scan and n_all_in_view or ceil(n_all_in_view / (30 --[[$STATE_UPDATE_INTERVAL]] * n_connected_players))
       if budget < 1 then budget = 1 end
       needs_full_scan = false
       for _ = 1, budget do
@@ -1032,8 +1036,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
 
     if n_visible_overlays ~= prev_n_visible_overlays then
       -- Recalculate stride and interval using effective budgets scaled by n_connected.
-      local effective_budget = color_update_budget / n_connected
-      local effective_max_per_call = color_update_max_per_call / n_connected
+      local effective_budget = color_update_budget / n_connected_players
+      local effective_max_per_call = color_update_max_per_call / n_connected_players
       color_update_stride = (n_visible_overlays > effective_max_per_call) and ceil(n_visible_overlays / effective_max_per_call) or 1
       if color_update_stride > 60 --[[$MAX_COLOR_UPDATE_STRIDE]] then color_update_stride = 60 --[[$MAX_COLOR_UPDATE_STRIDE]] end
       color_update_interval = max(1, ceil(n_visible_overlays / (effective_budget * color_update_stride)))
@@ -1104,7 +1108,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   --[[END_SYNC]]
 
   local function update_zoom_reach()
-    chunk_map:set_furthest_game_view_for_players(game.connected_players)
+    chunk_map:set_furthest_game_view_for_players(connected_players)
   end
 
   return tick_function, request_state_update, update_zoom_reach
