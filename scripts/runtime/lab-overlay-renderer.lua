@@ -528,6 +528,9 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_function = ColorFunctions.functions[color_function_index]
   local color = { 0, 0, 0 }
 
+  local surface_bounds = chunk_map.surface_bounds
+  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+
   --[[END_SYNC]]
 
   local player_x = 0
@@ -535,8 +538,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local viewport_width = player.display_resolution.width
   local viewport_height = player.display_resolution.height
   local in_chart_mode = false
-  local surface_bounds = chunk_map.surface_bounds
-  local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+
   -- Pre-calculate max viewport reach for surface bounds early-exit check.
   chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
 
@@ -885,10 +887,11 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   local color_function = ColorFunctions.functions[color_function_index]
   local color = { 0, 0, 0 }
 
-  --[[END_SYNC]]
-
   local surface_bounds = chunk_map.surface_bounds
   local surface_bounds_dirty = chunk_map.surface_bounds_dirty
+
+  --[[END_SYNC]]
+
   chunk_map:set_furthest_game_view_for_players(connected_players)
 
   --- @type table<LabOverlay[], number> chunk to last visited tick
@@ -952,9 +955,8 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
         local player = connected_players[i]
         if player.render_mode == RENDER_MODE_CHART then goto next_player end
 
-        local surface_index = player.surface_index
-
         -- Update stale surface bounds if labs were added or removed since last check.
+        local surface_index = player.surface_index
         if surface_bounds_dirty[surface_index] then
           chunk_map:update_surface_bounds(surface_index)
         end
