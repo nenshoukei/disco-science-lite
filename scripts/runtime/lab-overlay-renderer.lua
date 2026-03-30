@@ -749,23 +749,34 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     next_color_update_tick = current_tick + color_update_interval
 
     local elapsed_tick = current_tick - color_pattern_saved_tick
+    if elapsed_tick >= color_pattern_duration then
+      -- Advance by exact epoch boundaries so persisted state is independent from
+      -- color update cadence (important for multiplayer join/catch-up).
+      local elapsed_epochs = elapsed_tick / color_pattern_duration
+      elapsed_epochs = elapsed_epochs - elapsed_epochs % 1 -- floor
+      local advanced_ticks = elapsed_epochs * color_pattern_duration
+
+      phase_base = phase_base + phase_speed * advanced_ticks
+      color_pattern_saved_tick = color_pattern_saved_tick + advanced_ticks
+      for _ = 1, elapsed_epochs do
+        color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
+        phase_speed = random_phase_speed()
+      end
+      color_update_offset = 1
+
+      -- Persist canonical epoch-start state so the next tick function (after
+      -- reload/configuration change) resumes deterministically.
+      anim_state.phase_base = phase_base
+      anim_state.phase_speed = phase_speed
+      anim_state.color_function_index = color_function_index
+      anim_state.saved_tick = color_pattern_saved_tick
+
+      elapsed_tick = current_tick - color_pattern_saved_tick
+    end
+
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
     local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
-
-    if elapsed_tick >= color_pattern_duration then
-      color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-      phase_speed = random_phase_speed()
-      phase_base = phase
-      color_pattern_saved_tick = current_tick
-      color_update_offset = 0
-
-      -- Persist so that the next tick function (after reload or settings change) can resume mid-epoch.
-      anim_state.phase_base = phase
-      anim_state.phase_speed = phase_speed
-      anim_state.color_function_index = color_function_index
-      anim_state.saved_tick = current_tick
-    end
 
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end
@@ -1081,23 +1092,34 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     next_color_update_tick = current_tick + color_update_interval
 
     local elapsed_tick = current_tick - color_pattern_saved_tick
+    if elapsed_tick >= color_pattern_duration then
+      -- Advance by exact epoch boundaries so persisted state is independent from
+      -- color update cadence (important for multiplayer join/catch-up).
+      local elapsed_epochs = elapsed_tick / color_pattern_duration
+      elapsed_epochs = elapsed_epochs - elapsed_epochs % 1 -- floor
+      local advanced_ticks = elapsed_epochs * color_pattern_duration
+
+      phase_base = phase_base + phase_speed * advanced_ticks
+      color_pattern_saved_tick = color_pattern_saved_tick + advanced_ticks
+      for _ = 1, elapsed_epochs do
+        color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
+        phase_speed = random_phase_speed()
+      end
+      color_update_offset = 1
+
+      -- Persist canonical epoch-start state so the next tick function (after
+      -- reload/configuration change) resumes deterministically.
+      anim_state.phase_base = phase_base
+      anim_state.phase_speed = phase_speed
+      anim_state.color_function_index = color_function_index
+      anim_state.saved_tick = color_pattern_saved_tick
+
+      elapsed_tick = current_tick - color_pattern_saved_tick
+    end
+
     -- Quantize elapsed_tick to stride boundary so all overlays in the same stride cycle receive the same phase value.
     -- Multiply by color_update_interval because elapsed_tick advances by interval per call, not by 1.
     local phase = phase_base + phase_speed * (elapsed_tick - (color_update_offset - 1) * color_update_interval)
-
-    if elapsed_tick >= color_pattern_duration then
-      color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-      phase_speed = random_phase_speed()
-      phase_base = phase
-      color_pattern_saved_tick = current_tick
-      color_update_offset = 0
-
-      -- Persist so that the next tick function (after reload or settings change) can resume mid-epoch.
-      anim_state.phase_base = phase
-      anim_state.phase_speed = phase_speed
-      anim_state.color_function_index = color_function_index
-      anim_state.saved_tick = current_tick
-    end
 
     color_update_offset = color_update_offset + 1
     if color_update_offset > color_update_stride then color_update_offset = 1 end

@@ -260,7 +260,7 @@ describe("LabOverlayRenderer", function ()
       r.lab_registry:register("lab", { companion = "comp-anim" })
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
-      assert.is_not_nil(ov1) --- @cast ov1 -nil
+      assert.is_not_nil(ov1)           --- @cast ov1 -nil
       local old_companion = ov1.companion
       assert.is_not_nil(old_companion) --- @cast old_companion -nil
 
@@ -895,6 +895,23 @@ describe("LabOverlayRenderer", function ()
         tick(event) -- color: elapsed=3 >= 3 → write back!
         assert.are.equal(0.75, anim_state.phase_base)
         assert.are.equal(_G.game.tick, anim_state.saved_tick)
+      end)
+
+      it("writes back anim_state at epoch boundary even when update is delayed", function ()
+        local r = setup_tick_renderer()
+        Settings.color_pattern_duration = 3
+        local anim_state = make_anim_state(0.0, 0.25, 0)
+        local tick = r:get_tick_function(anim_state)
+        local start_tick = _G.game.tick
+
+        -- Simulate delayed color updates (e.g. catch-up/join timing in multiplayer).
+        for _ = 1, 5 do
+          increment_tick()
+        end
+        tick(event)
+
+        assert.are.equal(0.75, anim_state.phase_base)
+        assert.are.equal(start_tick + 3, anim_state.saved_tick)
       end)
 
       it("new tick function resumes with elapsed ticks after write-back", function ()
