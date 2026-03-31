@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
 Date: ????
-  Changes:
+  Major Features:
+    - Add experimental multiplayer support.
+  Bugfixes:
+    - Fix potential crash on deconstructing a lab.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 2026-03-31
