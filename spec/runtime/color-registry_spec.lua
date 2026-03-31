@@ -802,6 +802,40 @@ describe("ColorRegistry", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("get_flattened_rainbow_colors", function ()
+    it("returns 7 rainbow colors", function ()
+      local r = ColorRegistry.new()
+      local flat, n = r:get_flattened_rainbow_colors()
+      assert.are.equal(11, n)
+      assert.are.equal(33, #flat)
+      -- Red: {1, 0, 0}
+      assert.are.equal(1, flat[1])
+      assert.are.equal(0, flat[2])
+      assert.are.equal(0, flat[3])
+    end)
+
+    it("applies saturation and brightness", function ()
+      local r = ColorRegistry.new()
+      local flat, n = r:get_flattened_rainbow_colors(0.5, 0.5)
+      assert.are.equal(11, n)
+      -- Red {1, 0, 0} -> lum = 0.299
+      -- r = (0.299 + (1.0 - 0.299) * 0.5) * 0.5 = 0.32475
+      assert.near(0.32475, flat[1], 0.00001)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("get_rainbow_colors", function ()
+    it("returns 7 rainbow color tuples", function ()
+      local r = ColorRegistry.new()
+      local colors, n = r:get_rainbow_colors()
+      assert.are.equal(11, n)
+      assert.are.equal(11, #colors)
+      assert.are.same({ 1, 0, 0 }, colors[1])
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("validate_technology_prototypes", function ()
     it("returns nil when all ingredients are registered", function ()
       local r = ColorRegistry.new()

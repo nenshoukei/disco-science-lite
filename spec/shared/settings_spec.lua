@@ -26,6 +26,12 @@ describe("Settings", function ()
       assert.are.equal(false, Settings.is_development)
     end)
 
+    it("reads is_rainbow_mode from global", function ()
+      _G.settings.global[ "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]] ] = { value = true }
+      Settings.reload()
+      assert.are.equal(true, Settings.is_rainbow_mode)
+    end)
+
     it("reads color_saturation from global and scales by 0.01", function ()
       _G.settings.global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ] = { value = 50 }
       Settings.reload()
@@ -83,6 +89,10 @@ describe("Settings", function ()
       before_each(function ()
         _G.settings.global = nil
         Settings.reload()
+      end)
+
+      it("uses default is_rainbow_mode of false", function ()
+        assert.are.equal(false, Settings.is_rainbow_mode)
       end)
 
       it("uses default color_saturation of 1.0", function ()

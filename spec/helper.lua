@@ -146,6 +146,7 @@ local function reset_mocks()
     },
     global = {
       [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]] },
+      [ "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]] ]                     = { value = false },
       [ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ]             = { value = 100 },
       [ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ]             = { value = 100 },
       [ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ]       = { value = "balanced" },
