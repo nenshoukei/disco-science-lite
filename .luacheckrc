@@ -7,7 +7,8 @@ include_files = {
     "*.lua",
     "scripts/**/*.lua",
     "spec/**/*.lua",
-    "tasks/**/*.lua"
+    "tasks/**/*.lua",
+    "migrations/**/*.lua"
 }
 
 std = "lua52c"
