@@ -538,7 +538,7 @@ describe("LabOverlayRenderer", function ()
 
         add_connected_player(force, 1)
         -- First tick triggers state update
-        r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+        r:get_tick_function()(event)
 
         assert.is_not_nil(ov_working) --- @cast ov_working -nil
         assert.is_not_nil(ov_normal)  --- @cast ov_normal -nil
@@ -556,7 +556,7 @@ describe("LabOverlayRenderer", function ()
         assert.is_not_nil(companion) --- @cast companion -nil
 
         add_connected_player(force, 1)
-        r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+        r:get_tick_function()(event)
 
         assert.is_true(ov.visible)
         assert.is_true(companion.visible)
@@ -574,7 +574,7 @@ describe("LabOverlayRenderer", function ()
 
         -- Make visible first
         add_connected_player(force, 1)
-        local tick, request_state_update = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        local tick, request_state_update = r:get_tick_function()
         tick(event)
         assert.is_true(companion.visible)
 
@@ -591,7 +591,7 @@ describe("LabOverlayRenderer", function ()
         local ov = r.chunk_map:get(1)
         assert.is_not_nil(ov) --- @cast ov -nil
 
-        local tick, request_state_update = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        local tick, request_state_update = r:get_tick_function()
         tick(event) -- state update: picks up research, colors overlay
         assert.is_true(ov.visible)
         assert.is_true(ov.animation.valid)
@@ -616,7 +616,7 @@ describe("LabOverlayRenderer", function ()
           local player = _G.game.players[1]
           player.render_mode = defines.render_mode.chart
 
-          r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+          r:get_tick_function()(event)
 
           -- Overlay should not be made visible in chart mode
           assert.is_false(r.chunk_map:get(1).visible)
@@ -625,7 +625,7 @@ describe("LabOverlayRenderer", function ()
         it("excludes labs outside the player's chunk range", function ()
           local r = setup_tick_renderer({ x = 32 })
 
-          r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+          r:get_tick_function()(event)
 
           -- Lab at x=32 is in chunk 1, outside view range [-1, 0]
           assert.is_false(r.chunk_map:get(1).visible)
@@ -634,7 +634,7 @@ describe("LabOverlayRenderer", function ()
         it("includes labs inside the player's chunk range", function ()
           local r = setup_tick_renderer()
 
-          r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+          r:get_tick_function()(event)
 
           -- Lab at x=0 is in chunk 0, inside view range [-1, 0]
           assert.is_true(r.chunk_map:get(1).visible)
@@ -647,7 +647,7 @@ describe("LabOverlayRenderer", function ()
           local player = _G.game.players[1]
           player.zoom = 0.25
 
-          r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+          r:get_tick_function()(event)
 
           assert.is_true(r.chunk_map:get(1).visible)
         end)
@@ -666,7 +666,7 @@ describe("LabOverlayRenderer", function ()
           add_connected_player_at(1, force1, 1, 0, 0)
           add_connected_player_at(2, force2, 1, 0, 0)
 
-          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          local tick = r:get_tick_function()
           tick(event)
 
           local ov1 = r.chunk_map:get(1)
@@ -686,7 +686,7 @@ describe("LabOverlayRenderer", function ()
           p1.zoom_limits.furthest_game_view = { zoom = 0.5 }
           p1.display_resolution = { width = 640, height = 480 }
 
-          local _, _, update_zoom_reach = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          local _, _, update_zoom_reach = r:get_tick_function()
           assert.are.equal(26, r.chunk_map.max_reach_x)
 
           local p2 = add_connected_player_at(2, force, 1, 0, 0)
@@ -713,7 +713,7 @@ describe("LabOverlayRenderer", function ()
             end,
           })
 
-          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          local tick = r:get_tick_function()
           assert.no_error(function ()
             tick(event)
           end)
@@ -730,7 +730,7 @@ describe("LabOverlayRenderer", function ()
           add_connected_player_at(1, force, 1, 0, 0)
           add_connected_player_at(2, force, 1, 100, 0)
 
-          local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+          local tick = r:get_tick_function()
           tick(event)
 
           local ov1 = r.chunk_map:get(1)
@@ -761,7 +761,7 @@ describe("LabOverlayRenderer", function ()
         })
         ov.animation = mock_anim --[[@as LuaRenderObject]]
 
-        r:get_tick_function(LabOverlayRenderer.create_anim_state())(event)
+        r:get_tick_function()(event)
         assert.is_true(written)
       end)
 
@@ -784,7 +784,7 @@ describe("LabOverlayRenderer", function ()
         end
 
         -- With only 3 overlays, current_interval=1, so all should be updated each tick.
-        local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        local tick = r:get_tick_function()
         tick(event) -- first call: state update + color update
         assert.are.equal(3, #colored)
       end)
@@ -808,23 +808,31 @@ describe("LabOverlayRenderer", function ()
       end)
 
       it("switches color function when duration is reached", function ()
+        _G.game.tick = 0
+        event.tick = 0
         local r = setup_tick_renderer()
         Settings.color_pattern_duration = 3
 
-        local tick = r:get_tick_function(LabOverlayRenderer.create_anim_state())
-        increment_tick()
-        -- starts with cf_calls = 1 (from create_anim_state)
-        tick(event) -- state update + color: elapsed=1
-        increment_tick()
-        tick(event) -- color: elapsed=2
-        increment_tick()
-        tick(event) -- color: elapsed=3 >= 3, switch! cf_calls = 2
+        local tick = r:get_tick_function()
+        -- starts with cf_calls = 0
+        tick(event) -- tick=0, epoch=0: calls choose_random(prev_index, rng) once. (epoch=0 has no prev_index)
+        assert.are.equal(1, cf_calls)
+
+        increment_tick() -- tick=1
+        tick(event)      -- color: tick=1, elapsed=1
+        increment_tick() -- tick=2
+        tick(event)      -- color: tick=2, elapsed=2
+        increment_tick() -- tick=3
+        tick(event)      -- tick=3, epoch=1:
+        -- Advances naturally, so it uses current color_function_index as prev_index.
+        -- Does NOT call ColorFunctions.choose_random for prev_index.
+        -- Calls choose_random(prev_index, rng) once for current state.
         assert.are.equal(2, cf_calls)
       end)
     end)
 
     -- -------------------------------------------------------------------
-    describe("anim_state", function ()
+    describe("deterministic animation", function ()
       local original_fns = {}
       local captured_phase
 
@@ -846,101 +854,64 @@ describe("LabOverlayRenderer", function ()
         end
       end)
 
-      --- @return AnimState
-      local function make_anim_state(phase_base, phase_speed, saved_tick_offset)
-        local _, cf_idx = ColorFunctions.choose_random()
-        return ({
-          phase_base = phase_base,
-          phase_speed = phase_speed,
-          color_function_index = cf_idx,
-          saved_tick = _G.game.tick - (saved_tick_offset or 0),
-        }) --[[@as AnimState]]
-      end
-
-      it("restores phase from anim_state.phase", function ()
+      it("reconstructs phase deterministically from tick 0", function ()
         local r = setup_tick_renderer()
-        -- phase_base=2.0, phase_speed=0.25, saved_tick=game.tick (no elapsed)
-        local anim_state = make_anim_state(2.0, 0.25, 0)
+        Settings.color_pattern_duration = 180
+        _G.game.tick = 180 * 10 + 42 -- Epoch 10, offset 42
+        event.tick = _G.game.tick
 
-        r:get_tick_function(anim_state)(event)
+        r:get_tick_function()(event)
 
-        -- phase = 2.0 + 0 * 0.25 (no elapsed) = 2.0
-        assert.are.equal(2.0, captured_phase)
+        local phase1 = captured_phase
+        assert.is_not_nil(phase1)
+
+        -- Re-run with a fresh tick function at the same tick
+        captured_phase = nil
+        r:get_tick_function()(event)
+        assert.are.equal(phase1, captured_phase)
       end)
 
-      it("accounts for elapsed ticks since saved_tick", function ()
+      it("updates state correctly across epoch boundaries", function ()
         local r = setup_tick_renderer()
-        -- phase_base=2.0, phase_speed=0.25, saved_tick=game.tick - 4 (4 elapsed ticks)
-        local anim_state = make_anim_state(2.0, 0.25, 4)
+        Settings.color_pattern_duration = 10
+        _G.game.tick = 0
+        event.tick = _G.game.tick
+        local tick = r:get_tick_function()
 
-        r:get_tick_function(anim_state)(event)
+        tick(event) -- Tick 0: epoch 0 start
+        local phase0 = captured_phase
+        assert.is_not_nil(phase0)
 
-        -- phase = 2.0 + 4 * 0.25 (elapsed) = 3.0
-        assert.are.equal(3.0, captured_phase)
-      end)
-
-      it("writes back phase and saved_tick to anim_state at epoch end", function ()
-        local r = setup_tick_renderer()
-        Settings.color_pattern_duration = 3
-        local anim_state = make_anim_state(0.0, 0.25, 0)
-
-        local tick = r:get_tick_function(anim_state)
-        increment_tick()
-        tick(event) -- state update + color: elapsed=1, phase=0.25 — not yet written back
-        increment_tick()
-        tick(event) -- color: elapsed=2, phase=0.50 — not yet written back
-        assert.are.equal(0.0, anim_state.phase_base)
-
-        increment_tick()
-        tick(event) -- color: elapsed=3 >= 3 → write back!
-        assert.are.equal(0.75, anim_state.phase_base)
-        assert.are.equal(_G.game.tick, anim_state.saved_tick)
-      end)
-
-      it("writes back anim_state at epoch boundary even when update is delayed", function ()
-        local r = setup_tick_renderer()
-        Settings.color_pattern_duration = 3
-        local anim_state = make_anim_state(0.0, 0.25, 0)
-        local tick = r:get_tick_function(anim_state)
-        local start_tick = _G.game.tick
-
-        -- Simulate delayed color updates (e.g. catch-up/join timing in multiplayer).
-        for _ = 1, 5 do
-          increment_tick()
-        end
+        -- Advance to the start of epoch 1 (tick 10)
+        for _ = 1, 10 do increment_tick() end
         tick(event)
+        local phase10 = captured_phase
+        assert.is_not_nil(phase10)
 
-        assert.are.equal(0.75, anim_state.phase_base)
-        assert.are.equal(start_tick + 3, anim_state.saved_tick)
+        -- In the new O(1) design, phase10 is independent of phase0's trajectory.
+        -- We just verify that it changed to a new deterministic value.
+        assert.are_not.equal(phase0, phase10)
       end)
 
-      it("new tick function resumes with elapsed ticks after write-back", function ()
+      it("is independent of when the tick function was created", function ()
         local r = setup_tick_renderer()
-        Settings.color_pattern_duration = 3
-        local anim_state = make_anim_state(0.0, 0.25, 0)
+        Settings.color_pattern_duration = 10
+        _G.game.tick = 25
+        event.tick = _G.game.tick
 
-        -- Run first tick function until epoch end
-        local tick1 = r:get_tick_function(anim_state)
-        increment_tick()
-        tick1(event) -- state update + color: elapsed=1, phase=0.25
-        increment_tick()
-        tick1(event) -- color: elapsed=2, phase=0.5
-        increment_tick()
-        tick1(event) -- color: elapsed=3 >= 3 → write back: phase_base=0.75, saved_tick=game.tick
+        -- Create tick function at tick 25
+        r:get_tick_function()(event)
+        local phase_a = captured_phase
 
-        local written_phase_base = anim_state.phase_base
-        local written_phase_speed = anim_state.phase_speed
+        -- Create tick function at tick 0, run it until 25
+        _G.game.tick = 0
+        event.tick = _G.game.tick
+        local tick = r:get_tick_function()
+        for _ = 1, 25 do increment_tick() end
+        tick(event)
+        local phase_b = captured_phase
 
-        -- Create a new tick function from the written-back anim_state and call once
-        increment_tick() -- elapsed=1
-        increment_tick() -- elapsed=2
-        local tick2 = r:get_tick_function(anim_state)
-        tick2(event)
-
-        -- phase = written_phase_base + written_phase_speed * 2 (elapsed)
-        -- Use same evaluation order as the implementation to avoid floating-point divergence.
-        local expected = written_phase_base + 2 * written_phase_speed
-        assert.are.equal(expected, captured_phase)
+        assert.are.equal(phase_a, phase_b)
       end)
     end)
 
@@ -951,7 +922,7 @@ describe("LabOverlayRenderer", function ()
         local ov = r.chunk_map:get(1)
         assert.is_not_nil(ov) --- @cast ov -nil
 
-        local tick, request_state_update = r:get_tick_function(LabOverlayRenderer.create_anim_state())
+        local tick, request_state_update = r:get_tick_function()
         tick(event) -- initial state update, overlay becomes visible
         assert.is_true(ov.visible)
 

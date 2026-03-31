@@ -8,7 +8,6 @@ LabOverlayRenderer.__index = LabOverlayRenderer
 
 local random = math.random
 local max = math.max
-local min = math.min
 local ceil = math.ceil
 local rendering_clear = rendering.clear
 local rendering_get_all_objects = rendering.get_all_objects
@@ -424,23 +423,13 @@ function LabOverlayRenderer:hide_all_overlays()
 end
 
 --- Returns a random phase_speed value in { [-3.0, -0.5) or [0.5, 3.0) } / 40.
+--- @param generator LuaRandomGenerator? Optional random generator.
 --- @return number
-local function random_phase_speed()
-  return (((random() * 5 + 3.5) % 6) - 3) * 0.025
+local function random_phase_speed(generator)
+  local r = generator and generator() or random()
+  return (((r * 5 + 3.5) % 6) - 3) * 0.025
 end
 
---- Create an initial animation state based on the current game tick.
----
---- @return AnimState
-function LabOverlayRenderer.create_anim_state()
-  local _, color_function_index = ColorFunctions.choose_random()
-  return ({
-    phase_base = 0,
-    phase_speed = random_phase_speed(),
-    color_function_index = color_function_index,
-    saved_tick = game.tick,
-  }) --[[@as AnimState]]
-end
 
 --- No-op function
 local function noop() end
@@ -463,11 +452,10 @@ local function noop() end
 --- Note: `[[SYNC:name]] .. [[END_SYNC]]` sections must be in sync between singleplayer and multiplayer (_get_mp_tick_function).
 ---       `make check-sync` checks these sections with the same name has the same contents.
 ---
---- @param anim_state AnimState
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
-function LabOverlayRenderer:get_tick_function(anim_state)
+function LabOverlayRenderer:get_tick_function()
   -- Because a tick function is critical for UPS (Updates Per Second), we should optimize it very tightly.
   --
   -- For optimization, as much as possible we should:
@@ -477,7 +465,7 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   -- * Avoid access to native objects provided by Factorio. C bridge call is expensive.
 
   if game.is_multiplayer() then
-    return self:_get_multiplayer_tick_function(anim_state)
+    return self:_get_multiplayer_tick_function()
   end
 
   local player = game.connected_players[1]
@@ -517,13 +505,15 @@ function LabOverlayRenderer:get_tick_function(anim_state)
   local color_update_max_per_call = Settings.color_update_max_per_call
   local color_update_interval = 1
   local color_update_stride = 1
-  -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
-  -- This ensures animation is continuous across load/configuration_changed transitions.
-  local color_pattern_saved_tick = min(anim_state.saved_tick, game.tick)
-  local phase_base = anim_state.phase_base
-  local phase_speed = anim_state.phase_speed
-  local color_function_index = anim_state.color_function_index
-  local color_function = ColorFunctions.functions[color_function_index]
+
+  -- Deterministically derived from game.tick and a constant seed.
+  -- Re-calculated lazily inside tick_function when first called or at epoch boundaries.
+  local rng = game.create_random_generator(0)
+  local color_pattern_saved_tick = 0
+  local phase_base = 0
+  local phase_speed = 0
+  local color_function_index = nil --- @type integer|nil
+  local color_function = nil       --- @type ColorFunction|nil
   local color = { 0, 0, 0 }
 
   local surface_bounds = chunk_map.surface_bounds
@@ -747,31 +737,28 @@ function LabOverlayRenderer:get_tick_function(anim_state)
     --[[SYNC:color-update-1]]
     if current_tick % color_update_interval ~= 0 then return end
 
-    local elapsed_tick = current_tick - color_pattern_saved_tick
-    if elapsed_tick >= color_pattern_duration then
-      -- Advance by exact epoch boundaries so persisted state is independent from
-      -- color update cadence (important for multiplayer join/catch-up).
-      local elapsed_epochs = elapsed_tick / color_pattern_duration
-      elapsed_epochs = elapsed_epochs - elapsed_epochs % 1 -- floor
-      local advanced_ticks = elapsed_epochs * color_pattern_duration
+    if not color_function or (current_tick - color_pattern_saved_tick) >= color_pattern_duration then
+      local epoch = current_tick / color_pattern_duration
+      epoch = epoch - epoch % 1 -- floor
 
-      phase_base = phase_base + phase_speed * advanced_ticks
-      color_pattern_saved_tick = color_pattern_saved_tick + advanced_ticks
-      for _ = 1, elapsed_epochs do
-        color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-        phase_speed = random_phase_speed()
+      -- Reconstruct previous from epoch-1 only during initial call after load.
+      if not color_function_index and epoch > 0 then
+        rng.re_seed((epoch - 1) * 10000 + 12345)
+        rng()                   -- skip phase_base
+        random_phase_speed(rng) -- skip phase_speed
+        color_function, color_function_index = ColorFunctions.choose_random(nil, rng)
       end
 
-      -- Persist canonical epoch-start state so the next tick function (after
-      -- reload/configuration change) resumes deterministically.
-      anim_state.phase_base = phase_base
-      anim_state.phase_speed = phase_speed
-      anim_state.color_function_index = color_function_index
-      anim_state.saved_tick = color_pattern_saved_tick
-
-      elapsed_tick = current_tick - color_pattern_saved_tick
+      -- Deterministically derive current epoch state (O(1))
+      rng.re_seed(epoch * 10000 + 12345)
+      phase_base = rng() * 1000
+      phase_speed = random_phase_speed(rng)
+      color_function, color_function_index = ColorFunctions.choose_random(color_function_index, rng)
+      color_pattern_saved_tick = epoch * color_pattern_duration
     end
+    --- @cast color_function -nil
 
+    local elapsed_tick = current_tick - color_pattern_saved_tick
     local phase = phase_base + phase_speed * elapsed_tick
     local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 
@@ -825,11 +812,10 @@ end
 
 --- Multiplayer tick function. Handles multiple connected players across multiple surfaces.
 ---
---- @param anim_state AnimState
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
-function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
+function LabOverlayRenderer:_get_multiplayer_tick_function()
   local connected_players = game.connected_players
   if not connected_players[1] then
     -- No connected players
@@ -868,13 +854,15 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
   local color_update_max_per_call = Settings.color_update_max_per_call
   local color_update_interval = 1
   local color_update_stride = 1
-  -- Resume from stored state, accounting for ticks elapsed since it was last persisted.
-  -- This ensures animation is continuous across load/configuration_changed transitions.
-  local color_pattern_saved_tick = min(anim_state.saved_tick, game.tick)
-  local phase_base = anim_state.phase_base
-  local phase_speed = anim_state.phase_speed
-  local color_function_index = anim_state.color_function_index
-  local color_function = ColorFunctions.functions[color_function_index]
+
+  -- Deterministically derived from game.tick and a constant seed.
+  -- Re-calculated lazily inside tick_function when first called or at epoch boundaries.
+  local rng = game.create_random_generator(0)
+  local color_pattern_saved_tick = 0
+  local phase_base = 0
+  local phase_speed = 0
+  local color_function_index = nil --- @type integer|nil
+  local color_function = nil       --- @type ColorFunction|nil
   local color = { 0, 0, 0 }
 
   local surface_bounds = chunk_map.surface_bounds
@@ -1153,31 +1141,28 @@ function LabOverlayRenderer:_get_multiplayer_tick_function(anim_state)
     --[[SYNC:color-update-1]]
     if current_tick % color_update_interval ~= 0 then return end
 
-    local elapsed_tick = current_tick - color_pattern_saved_tick
-    if elapsed_tick >= color_pattern_duration then
-      -- Advance by exact epoch boundaries so persisted state is independent from
-      -- color update cadence (important for multiplayer join/catch-up).
-      local elapsed_epochs = elapsed_tick / color_pattern_duration
-      elapsed_epochs = elapsed_epochs - elapsed_epochs % 1 -- floor
-      local advanced_ticks = elapsed_epochs * color_pattern_duration
+    if not color_function or (current_tick - color_pattern_saved_tick) >= color_pattern_duration then
+      local epoch = current_tick / color_pattern_duration
+      epoch = epoch - epoch % 1 -- floor
 
-      phase_base = phase_base + phase_speed * advanced_ticks
-      color_pattern_saved_tick = color_pattern_saved_tick + advanced_ticks
-      for _ = 1, elapsed_epochs do
-        color_function, color_function_index = ColorFunctions.choose_random(color_function_index)
-        phase_speed = random_phase_speed()
+      -- Reconstruct previous from epoch-1 only during initial call after load.
+      if not color_function_index and epoch > 0 then
+        rng.re_seed((epoch - 1) * 10000 + 12345)
+        rng()                   -- skip phase_base
+        random_phase_speed(rng) -- skip phase_speed
+        color_function, color_function_index = ColorFunctions.choose_random(nil, rng)
       end
 
-      -- Persist canonical epoch-start state so the next tick function (after
-      -- reload/configuration change) resumes deterministically.
-      anim_state.phase_base = phase_base
-      anim_state.phase_speed = phase_speed
-      anim_state.color_function_index = color_function_index
-      anim_state.saved_tick = color_pattern_saved_tick
-
-      elapsed_tick = current_tick - color_pattern_saved_tick
+      -- Deterministically derive current epoch state (O(1))
+      rng.re_seed(epoch * 10000 + 12345)
+      phase_base = rng() * 1000
+      phase_speed = random_phase_speed(rng)
+      color_function, color_function_index = ColorFunctions.choose_random(color_function_index, rng)
+      color_pattern_saved_tick = epoch * color_pattern_duration
     end
+    --- @cast color_function -nil
 
+    local elapsed_tick = current_tick - color_pattern_saved_tick
     local phase = phase_base + phase_speed * elapsed_tick
     local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 

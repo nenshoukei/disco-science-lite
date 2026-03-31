@@ -29,11 +29,7 @@ local function create_renderer()
 end
 
 local function setup_event_handlers()
-  local ds_storage = storage --[[@as DiscoScienceStorage]]
-  if not ds_storage.anim_state then
-    ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
-  end
-  local tick_function, request_state_update, update_zoom_reach = renderer:get_tick_function(ds_storage.anim_state)
+  local tick_function, request_state_update, update_zoom_reach = renderer:get_tick_function()
   script.on_event(defines.events.on_tick, tick_function)
   script.on_nth_tick(180, update_zoom_reach)
 
@@ -131,7 +127,6 @@ function LabControl.on_init()
   local ds_storage = storage --[[@as DiscoScienceStorage]]
   ds_storage.color_overrides = {}
   ds_storage.lab_scale_overrides = {}
-  ds_storage.anim_state = LabOverlayRenderer.create_anim_state()
 
   renderer = create_renderer()
   rebuild_overlays()

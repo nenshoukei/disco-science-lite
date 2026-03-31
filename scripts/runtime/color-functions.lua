@@ -244,17 +244,26 @@ local n_functions = #functions
 --- If `prev_index` is given, that index will not be chosen.
 ---
 --- @param prev_index integer? Previous color function index. `nil` for first time.
+--- @param rng LuaRandomGenerator? Optional random generator for deterministic choice.
 --- @return ColorFunction # Chosen color function.
 --- @return integer # Index of chosen color function.
-function ColorFunctions.choose_random(prev_index)
+function ColorFunctions.choose_random(prev_index, rng)
   local new_index
   if prev_index then
-    new_index = random(1, n_functions - 1)
+    if rng then
+      new_index = rng(1, n_functions - 1)
+    else
+      new_index = random(1, n_functions - 1)
+    end
     if new_index >= prev_index then
       new_index = new_index + 1
     end
   else
-    new_index = random(1, n_functions)
+    if rng then
+      new_index = rng(1, n_functions)
+    else
+      new_index = random(1, n_functions)
+    end
   end
   return functions[new_index], new_index
 end

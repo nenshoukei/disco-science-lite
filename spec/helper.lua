@@ -96,6 +96,27 @@ local function reset_mocks()
     surfaces = {},
     get_player = function (index) return _G.game.players[index] end,
     is_multiplayer = function () return false end,
+    create_random_generator = function (seed)
+      local state = seed or 0
+      local rng = {
+        re_seed = function (new_seed)
+          state = new_seed
+        end,
+      }
+      setmetatable(rng, {
+        __call = function (_, min, max)
+          -- Simple LCG for testing
+          state = (state * 1103515245 + 12345) % 2147483648
+          if not min then return state / 2147483648 end
+          if not max then
+            max = min
+            min = 1
+          end
+          return (state % (max - min + 1)) + min
+        end,
+      })
+      return rng
+    end,
   }
 
   --- @diagnostic disable-next-line: missing-fields
