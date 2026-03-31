@@ -37,7 +37,10 @@ local function setup_event_handlers()
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
-  }, request_state_update)
+  }, function ()
+    renderer:hide_all_overlays()
+    request_state_update()
+  end)
 
   script.on_event({
     defines.events.on_player_created,
