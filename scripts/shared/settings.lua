@@ -4,6 +4,7 @@
 --- @field is_fallback_enabled         boolean  Whether the fallback overlay is enabled.
 --- @field is_lab_blinking_disabled    boolean  Whether the lab blinking is disabled.
 --- @field is_development              boolean  Whether Development mode is enabled.
+--- @field is_rainbow_mode             boolean  Whether Rainbow mode is enabled.
 --- @field color_saturation            number   Color saturation. [0, 1]
 --- @field color_brightness            number   Color brightness. [0, 1]
 --- @field color_pattern_duration      integer  Color function duration in ticks.
@@ -36,6 +37,9 @@ function Settings.reload()
   Settings.is_lab_blinking_disabled = startup[ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ].value --[[@as boolean]]
   Settings.is_development = startup[ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ].value --[[@as boolean]]
 
+  Settings.is_rainbow_mode = global and
+    global[ "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]] ].value --[[@as boolean]]
+    or false
   Settings.color_saturation = global and
     (global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ].value * 0.01)
     or 1.0

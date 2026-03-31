@@ -22,13 +22,20 @@ data:extend({
     order = "rg-a[visual]-b",
   },
   {
+    type = "bool-setting",
+    name = "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]],
+    setting_type = "runtime-global",
+    default_value = false,
+    order = "rg-a[visual]-c",
+  },
+  {
     type = "int-setting",
     name = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]],
     setting_type = "runtime-global",
     default_value = 100,
     minimum_value = 1,
     maximum_value = 100,
-    order = "rg-a[visual]-c",
+    order = "rg-a[visual]-d",
   },
   {
     type = "int-setting",
@@ -37,7 +44,7 @@ data:extend({
     default_value = 100,
     minimum_value = 1,
     maximum_value = 100,
-    order = "rg-a[visual]-d",
+    order = "rg-a[visual]-e",
   },
   {
     type = "string-setting",

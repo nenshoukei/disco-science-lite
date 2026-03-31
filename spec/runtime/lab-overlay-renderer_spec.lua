@@ -604,6 +604,34 @@ describe("LabOverlayRenderer", function ()
         assert.is_false(ov.visible)
       end)
 
+      it("uses rainbow colors when Settings.is_rainbow_mode is true", function ()
+        local r = setup_tick_renderer()
+        r.color_registry:set_ingredient_color("automation-science-pack", { 1, 1, 1 }) -- White
+        Settings.is_rainbow_mode = true
+        local tick = r:get_tick_function()
+        tick(event) -- First tick: state update and status scan
+        -- Verify that colors are NOT the science pack color.
+        local anim = r.chunk_map:get(1).animation
+        assert.is_not.same({ 1, 1, 1 }, anim.color)
+      end)
+
+      it("handles switching rainbow mode on/off", function ()
+        local r = setup_tick_renderer()
+        r.color_registry:set_ingredient_color("automation-science-pack", { 1, 1, 1 }) -- White
+        Settings.is_rainbow_mode = false
+        local tick1 = r:get_tick_function()
+        tick1(event)
+        local anim = r.chunk_map:get(1).animation
+        assert.are.same({ 1, 1, 1 }, anim.color)
+
+        Settings.is_rainbow_mode = true
+        local tick2 = r:get_tick_function()
+        event.tick = event.tick + 30 -- force state update
+        tick2(event)
+        -- Should now be something from the rainbow, not White.
+        assert.is_not.same({ 1, 1, 1 }, anim.color)
+      end)
+
       -- -------------------------------------------------------------------
       describe("player view filtering", function ()
         -- At zoom=1, 640x480, player at (0,0):

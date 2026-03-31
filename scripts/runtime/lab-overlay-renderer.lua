@@ -500,6 +500,7 @@ function LabOverlayRenderer:get_tick_function()
   local has_any_research = false
 
   -- Animation state
+  local is_rainbow_mode = Settings.is_rainbow_mode
   local color_pattern_duration = Settings.color_pattern_duration
   local color_update_budget = Settings.color_update_budget
   local color_update_max_per_call = Settings.color_update_max_per_call
@@ -568,8 +569,12 @@ function LabOverlayRenderer:get_tick_function()
           state.current_research = new_current_research
           needs_full_scan = true
           if new_current_research then
-            state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, Settings.color_saturation,
-              Settings.color_brightness)
+            if is_rainbow_mode then
+              state.colors, state.n_colors = color_registry:get_flattened_rainbow_colors(Settings.color_saturation, Settings.color_brightness)
+            else
+              state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, Settings.color_saturation,
+                Settings.color_brightness)
+            end
           else
             state.colors = nil
             state.n_colors = 0
@@ -849,6 +854,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
   local has_any_research = false
 
   -- Animation state
+  local is_rainbow_mode = Settings.is_rainbow_mode
   local color_pattern_duration = Settings.color_pattern_duration
   local color_update_budget = Settings.color_update_budget
   local color_update_max_per_call = Settings.color_update_max_per_call
@@ -928,8 +934,12 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
           state.current_research = new_current_research
           needs_full_scan = true
           if new_current_research then
-            state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, Settings.color_saturation,
-              Settings.color_brightness)
+            if is_rainbow_mode then
+              state.colors, state.n_colors = color_registry:get_flattened_rainbow_colors(Settings.color_saturation, Settings.color_brightness)
+            else
+              state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, Settings.color_saturation,
+                Settings.color_brightness)
+            end
           else
             state.colors = nil
             state.n_colors = 0

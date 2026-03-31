@@ -32,6 +32,7 @@ local consts = {
   FALLBACK_OVERLAY_ENABLED_NAME = NAME_PREFIX .. "fallback-overlay-enabled",
   LAB_BLINKING_DISABLED_NAME = NAME_PREFIX .. "lab-blinking-disabled",
   COLOR_PATTERN_DURATION_NAME = NAME_PREFIX .. "color-pattern-duration",
+  RAINBOW_MODE_NAME = NAME_PREFIX .. "rainbow-mode",
   COLOR_SATURATION_NAME = NAME_PREFIX .. "color-saturation",
   COLOR_BRIGHTNESS_NAME = NAME_PREFIX .. "color-brightness",
   COLOR_UPDATE_PRESET_NAME = NAME_PREFIX .. "color-update-preset",
