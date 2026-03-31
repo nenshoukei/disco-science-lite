@@ -94,6 +94,28 @@ function ChunkMap.zoom_spec_to_zoom(zoom_spec, width, height)
   return zoom_from_distance > zoom_from_max and zoom_from_distance or zoom_from_max
 end
 
+--- Apply new zoom/reach values and mark all surface bounds dirty if any value changed.
+---
+--- @param new_zoom number
+--- @param new_reach_x number
+--- @param new_reach_y number
+function ChunkMap:_set_reach(new_zoom, new_reach_x, new_reach_y)
+  if
+    new_zoom == self.furthest_zoom and
+    new_reach_x == self.max_reach_x and
+    new_reach_y == self.max_reach_y
+  then
+    return
+  end
+
+  self.furthest_zoom = new_zoom
+  self.max_reach_x = new_reach_x
+  self.max_reach_y = new_reach_y
+  for surface_index in pairs(self.data) do
+    self.surface_bounds_dirty[surface_index] = true
+  end
+end
+
 --- Update the furthest zoom from a ZoomSpecification, recomputing max_reach and marking
 --- all surfaces dirty if the zoom changed.
 ---
@@ -102,13 +124,44 @@ end
 --- @param height number Display height in pixels.
 function ChunkMap:set_furthest_game_view(zoom_spec, width, height)
   local new_zoom = ChunkMap.zoom_spec_to_zoom(zoom_spec, width, height)
-  if new_zoom == self.furthest_zoom then return end
-  self.furthest_zoom = new_zoom
-  self.max_reach_x = width  / (new_zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
-  self.max_reach_y = height / (new_zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
-  for surface_index in pairs(self.data) do
-    self.surface_bounds_dirty[surface_index] = true
+  local new_reach_x = width / (new_zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
+  local new_reach_y = height / (new_zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
+  self:_set_reach(new_zoom, new_reach_x, new_reach_y)
+end
+
+--- Update furthest zoom / max_reach from all connected players.
+---
+--- This uses conservative aggregate values:
+--- - `furthest_zoom`: minimum zoom rate among players.
+--- - `max_reach_x/y`: maximum per-axis viewport reach among players.
+---
+--- @param players LuaPlayer[]
+function ChunkMap:set_furthest_game_view_for_players(players)
+  local has_player = false
+  local min_zoom = math.huge
+  local max_reach_x = 0
+  local max_reach_y = 0
+
+  for _, player in pairs(players) do
+    local resolution = player.display_resolution
+    local zoom_limits = player.zoom_limits
+    local zoom_spec = zoom_limits and zoom_limits.furthest_game_view
+    if resolution and zoom_spec then
+      local width = resolution.width
+      local height = resolution.height
+      local zoom = ChunkMap.zoom_spec_to_zoom(zoom_spec, width, height)
+      if zoom < min_zoom then min_zoom = zoom end
+
+      local reach_x = width / (zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
+      local reach_y = height / (zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
+      if reach_x > max_reach_x then max_reach_x = reach_x end
+      if reach_y > max_reach_y then max_reach_y = reach_y end
+      has_player = true
+    end
   end
+
+  if not has_player then return end
+  self:_set_reach(min_zoom, max_reach_x, max_reach_y)
 end
 
 --- Insert an entity into the map.

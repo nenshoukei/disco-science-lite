@@ -24,7 +24,10 @@ mod-description:
 mods:
 	@tasks/update-all-mods.sh
 
-check: consts mods mod-description lint test
+check-sync:
+	@uv run tasks/check-sync.py
+
+check: consts mods mod-description lint test check-sync
 
 typecheck:
 	@tsc -p tasks/typecheck/tsconfig.json

@@ -57,6 +57,7 @@ _G.defines = setmetatable({
     on_player_changed_surface = 204,
     on_player_changed_force = 205,
     on_player_display_resolution_changed = 206,
+    on_player_joined_game = 211,
     on_player_left_game = 207,
     on_player_kicked = 208,
     on_singleplayer_init = 209,
@@ -70,6 +71,8 @@ _G.defines = setmetatable({
     on_object_destroyed = 501,
     script_raised_teleported = 502,
     on_runtime_mod_setting_changed = 503,
+    on_force_created = 600,
+    on_forces_merged = 601,
   }, missing_mock_check),
 }, missing_mock_check)
 
@@ -93,6 +96,27 @@ local function reset_mocks()
     surfaces = {},
     get_player = function (index) return _G.game.players[index] end,
     is_multiplayer = function () return false end,
+    create_random_generator = function (seed)
+      local state = seed or 0
+      local rng = {
+        re_seed = function (new_seed)
+          state = new_seed
+        end,
+      }
+      setmetatable(rng, {
+        __call = function (_, min, max)
+          -- Simple LCG for testing
+          state = (state * 1103515245 + 12345) % 2147483648
+          if not min then return state / 2147483648 end
+          if not max then
+            max = min
+            min = 1
+          end
+          return (state % (max - min + 1)) + min
+        end,
+      })
+      return rng
+    end,
   }
 
   --- @diagnostic disable-next-line: missing-fields
