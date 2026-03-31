@@ -29,9 +29,10 @@ local function create_renderer()
 end
 
 local function setup_event_handlers()
-  local tick_function, request_state_update, update_zoom_reach = renderer:get_tick_function()
+  local tick_function, request_state_update, update_zoom_reach, update_player_position = renderer:get_tick_function()
   script.on_event(defines.events.on_tick, tick_function)
   script.on_nth_tick(180, update_zoom_reach)
+  script.on_event(defines.events.on_player_changed_position, update_player_position)
 
   script.on_event({
     defines.events.on_research_started,
@@ -166,6 +167,7 @@ function LabControl.on_load()
     defines.events.on_player_left_game,
     defines.events.on_player_display_resolution_changed,
     defines.events.on_player_changed_force,
+    defines.events.on_player_changed_position,
     defines.events.on_multiplayer_init,
     defines.events.on_force_created,
     defines.events.on_forces_merged,

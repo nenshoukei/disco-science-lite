@@ -26,8 +26,7 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field unit_number   number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
 --- @field force_index   number           Force index of the lab entity.
 --- @field surface_index number           Surface index of the lab entity.
---- @field viewer_x      number           Reference player X used by spatial color functions in multiplayer.
---- @field viewer_y      number           Reference player Y used by spatial color functions in multiplayer.
+--- @field viewer_index  integer          Player index of the viewer for spatial color functions in multiplayer.
 
 --- @class (exact) ForceResearchState
 --- @field current_research LuaTechnology|nil Current researching technology in force.
@@ -194,8 +193,7 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
     companion     = companion_object,
     x             = lab_x,
     y             = lab_y,
-    viewer_x      = lab_x,
-    viewer_y      = lab_y,
+    viewer_index  = 0,
     visible       = false, -- start as hidden; tick scan will synchronize this with entity.status
     unit_number   = lab_unit_number,
     force_index   = lab.force_index,
@@ -455,6 +453,7 @@ local function noop() end
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
+--- @return fun(event: EventData.on_player_changed_position) update_player_position
 function LabOverlayRenderer:get_tick_function()
   -- Because a tick function is critical for UPS (Updates Per Second), we should optimize it very tightly.
   --
@@ -471,7 +470,7 @@ function LabOverlayRenderer:get_tick_function()
   local player = game.connected_players[1]
   if not player then
     -- Return empty functions when player is not created yet (e.g. before on_player_created fires)
-    return noop, noop, noop
+    return noop, noop, noop, noop
   end
 
   --[[SYNC:upvalues]]
@@ -771,6 +770,8 @@ function LabOverlayRenderer:get_tick_function()
     local cached_force_index = 0
     local cached_colors = nil --- @type number[]|nil
     local cached_n_colors = 0
+    --[[END_SYNC]]
+    --[[SYNC:color-update-2]]
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
@@ -791,7 +792,7 @@ function LabOverlayRenderer:get_tick_function()
           if animation.valid then
             --[[END_SYNC]]
             color_function(color, phase, cached_colors, cached_n_colors, player_x, player_y, overlay.x, overlay.y)
-            --[[SYNC:color-update-2]]
+            --[[SYNC:color-update-3]]
             animation.color = color
           end
         end
@@ -812,7 +813,14 @@ function LabOverlayRenderer:get_tick_function()
     chunk_map:set_furthest_game_view(player.zoom_limits.furthest_game_view, viewport_width, viewport_height)
   end
 
-  return tick_function, request_state_update, update_zoom_reach
+  --- Update player position immediately for real-time color function accuracy.
+  local function update_player_position()
+    local position = player.position
+    player_x = position.x or position[1]
+    player_y = position.y or position[2]
+  end
+
+  return tick_function, request_state_update, update_zoom_reach, update_player_position
 end
 
 --- Multiplayer tick function. Handles multiple connected players across multiple surfaces.
@@ -820,11 +828,12 @@ end
 --- @return fun(event: EventData.on_tick) tick_function
 --- @return fun() request_state_update
 --- @return fun() update_zoom_reach
+--- @return fun(event: EventData.on_player_changed_position) update_player_position
 function LabOverlayRenderer:_get_multiplayer_tick_function()
   local connected_players = game.connected_players
   if not connected_players[1] then
     -- No connected players
-    return noop, noop, noop
+    return noop, noop, noop, noop
   end
   local n_connected_players = #connected_players
 
@@ -878,6 +887,14 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
 
   chunk_map:set_furthest_game_view_for_players(connected_players)
 
+  -- Per-player position for spatial color functions, updated by update_player_position and the viewport loop.
+  local player_positions = {} --- @type table<integer, MapPositionTuple>
+  for i = 1, n_connected_players do
+    local p = connected_players[i]
+    local pos = p.position
+    player_positions[p.index] = { pos.x or pos[1], pos.y or pos[2] }
+  end
+
   --- Per-player viewport state for chunk range change detection.
   --- @class (exact) PlayerViewportState
   --- @field chunk_left    number
@@ -886,8 +903,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
   --- @field chunk_bottom  number
   --- @field surface_index number
   --- @field was_skipped   boolean  true if player was in chart mode or outside surface bounds
-  --- @field player_x      number   viewer X stored for overlay.viewer_x assignment
-  --- @field player_y      number   viewer Y stored for overlay.viewer_y assignment
+  --- @field player_index  integer  player.index for overlay.viewer_index assignment
   local player_viewport_states = {} --- @type PlayerViewportState[]
   for i = 1, n_connected_players do
     player_viewport_states[i] = {
@@ -897,8 +913,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
       chunk_bottom = 0,
       surface_index = 0,
       was_skipped = true,
-      player_x = 0,
-      player_y = 0,
+      player_index = connected_players[i].index,
     }
   end
 
@@ -990,6 +1005,13 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
         local position = player.position
         local player_x = position.x or position[1]
         local player_y = position.y or position[2]
+        local stored_pos = player_positions[player.index]
+        if stored_pos then
+          stored_pos[1] = player_x
+          stored_pos[2] = player_y
+        else
+          player_positions[player.index] = { player_x, player_y } --[[@as MapPositionTuple]]
+        end
 
         -- Skip: if player is definitely outside all labs on this surface.
         local bounds = surface_bounds[surface_index]
@@ -1037,9 +1059,6 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
           pstate.chunk_bottom = chunk_bottom
           pstate.surface_index = surface_index
         end
-        pstate.player_x = player_x
-        pstate.player_y = player_y
-
         ::check_next_player::
       end
 
@@ -1052,8 +1071,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
           if pstate.was_skipped then goto next_player end
 
           local surface_chunks = chunk_map_data[pstate.surface_index]
-          local player_x = pstate.player_x
-          local player_y = pstate.player_y
+          local player_index = pstate.player_index
 
           for cx = pstate.chunk_left, pstate.chunk_right do
             local col = surface_chunks[cx]
@@ -1066,8 +1084,7 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
                   chunk_to_visited_tick[chunk] = current_tick
                   for j = 1, #chunk do
                     local overlay = chunk[j]
-                    overlay.viewer_x = player_x -- first-writer wins for overlapping views in this tick
-                    overlay.viewer_y = player_y
+                    overlay.viewer_index = player_index -- first-writer wins for overlapping views in this tick
                     all_count = all_count + 1
                     all_overlays_in_view[all_count] = overlay
                     if overlay.visible then
@@ -1180,6 +1197,11 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
     local cached_force_index = 0
     local cached_colors = nil --- @type number[]|nil
     local cached_n_colors = 0
+    --[[END_SYNC]]
+    local cached_viewer_index = 0
+    local cached_viewer_x = 0
+    local cached_viewer_y = 0
+    --[[SYNC:color-update-2]]
     for i = color_update_offset, n_all_in_view, color_update_stride do
       local overlay = all_overlays_in_view[i]
       if overlay.visible then
@@ -1199,8 +1221,17 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
           local animation = overlay.animation
           if animation.valid then
             --[[END_SYNC]]
-            color_function(color, phase, cached_colors, cached_n_colors, overlay.viewer_x, overlay.viewer_y, overlay.x, overlay.y)
-            --[[SYNC:color-update-2]]
+            local viwer_index = overlay.viewer_index
+            if cached_viewer_index ~= viwer_index then
+              cached_viewer_index = viwer_index
+              local viewer_pos = player_positions[viwer_index]
+              if viewer_pos then
+                cached_viewer_x = viewer_pos[1]
+                cached_viewer_y = viewer_pos[2]
+              end
+            end
+            color_function(color, phase, cached_colors, cached_n_colors, cached_viewer_x, cached_viewer_y, overlay.x, overlay.y)
+            --[[SYNC:color-update-3]]
             animation.color = color
           end
         end
@@ -1219,7 +1250,23 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
     chunk_map:set_furthest_game_view_for_players(connected_players)
   end
 
-  return tick_function, request_state_update, update_zoom_reach
+  --- Update the moved player's position in player_positions for immediate color function accuracy.
+  --- @param event EventData.on_player_changed_position
+  local function update_player_position(event)
+    local player_index = event.player_index
+    local pos = game.players[player_index].position
+    local px = pos.x or pos[1]
+    local py = pos.y or pos[2]
+    local stored = player_positions[player_index]
+    if stored then
+      stored[1] = px
+      stored[2] = py
+    else
+      player_positions[player_index] = { px, py }
+    end
+  end
+
+  return tick_function, request_state_update, update_zoom_reach, update_player_position
 end
 
 return LabOverlayRenderer

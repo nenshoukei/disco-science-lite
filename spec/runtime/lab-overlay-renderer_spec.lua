@@ -747,7 +747,7 @@ describe("LabOverlayRenderer", function ()
           end)
         end)
 
-        it("stores viewer coordinates per overlay from the first player who sees it", function ()
+        it("stores viewer_index per overlay from the first player who sees it", function ()
           local r = make_renderer()
           local force = make_force(1)
 
@@ -765,10 +765,8 @@ describe("LabOverlayRenderer", function ()
           local ov2 = r.chunk_map:get(2)
           assert.is_not_nil(ov1) --- @cast ov1 -nil
           assert.is_not_nil(ov2) --- @cast ov2 -nil
-          assert.are.equal(0, ov1.viewer_x)
-          assert.are.equal(0, ov1.viewer_y)
-          assert.are.equal(100, ov2.viewer_x)
-          assert.are.equal(0, ov2.viewer_y)
+          assert.are.equal(1, ov1.viewer_index) -- player 1 at (0,0) sees ov1 at (0,0)
+          assert.are.equal(2, ov2.viewer_index) -- player 2 at (100,0) sees ov2 at (100,0)
         end)
       end)
     end)
