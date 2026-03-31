@@ -14,6 +14,8 @@ This mod is not officially affiliated with the original mod author. Please **DO 
 
 Your science labs glow with the color of the science packs they're consuming, shifting and pulsing dynamically, disco-style. One glance at your factory floor tells you exactly what's being researched.
 
+Demo Video: https://www.youtube.com/watch?v=gYLMDnKurTc
+
 ## Features
 
 - **Performance**: Heavily optimized to keep UPS (Updates Per Second) impact minimal, even with large numbers of labs in mega-bases. Additional performance tuning options are available in mod settings. ([Technical details](https://github.com/nenshoukei/disco-science-lite/blob/main/docs/ups-optimization.md))
