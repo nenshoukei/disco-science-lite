@@ -26,6 +26,7 @@ return {
   require("scripts.prototype.mods.Paracelsin"),
   require("scripts.prototype.mods.pelagos"),
   require("scripts.prototype.mods.planet-muluna"),
+  require("scripts.prototype.mods.planet-rabbasca"),
   require("scripts.prototype.mods.planetaris-arig"),
   require("scripts.prototype.mods.planetaris-hyarion"),
   require("scripts.prototype.mods.planetaris-tellus"),

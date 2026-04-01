@@ -8,6 +8,7 @@ Date: ????
     - Add support for "Planetaris: Arig" mod by Syen.
     - Add support for "Planetaris: Hyarion" mod by Syen.
     - Add support for "Planetaris: Tellus" mod by Syen.
+    - Add support for "Rabbasca, the forgotten Moon" mod by PizzaPlanner.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
 ---------------------------------------------------------------------------------------------------

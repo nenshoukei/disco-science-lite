@@ -74,6 +74,7 @@ Supported Space-Age Planet Mods:
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
+- [🌐 Rabbasca, the forgotten Moon](https://mods.factorio.com/mod/planet-rabbasca) by PizzaPlanner
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
@@ -109,8 +110,8 @@ The source code is released under the [MIT License](https://github.com/nenshouke
 
 Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-| Files                                                                | Source                                                        | Author                                                      | License                     |
-| -------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| Files                                                                                                                           | Source                                                        | Author                                                      | License                     |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
 | [graphics/factorio/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/factorio/)                             | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
 | [graphics/laborat/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/laborat/)                               | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
 | [graphics/Krastorio2/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/Krastorio2/)                         | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |
@@ -192,6 +193,7 @@ Space-Age 惑星追加 Mod:
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
+- [🌐 Rabbasca, the forgotten Moon](https://mods.factorio.com/mod/planet-rabbasca) by PizzaPlanner
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
