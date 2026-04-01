@@ -39,6 +39,7 @@ These mods are supported out of the box.
 - [5Dim's mod - New Automatization](https://mods.factorio.com/mod/5dim_automation) by McGuten
 - [AAI Industry](https://mods.factorio.com/mod/aai-industry) by Earendel
 - [Age of Production](https://mods.factorio.com/mod/Age-of-Production) by AndreusAxolotl
+- [Aquilo Overhaul: Circular Collider Lab](https://mods.factorio.com/mod/CircularColliderLab) by Cubickman
 - [Big Lab](https://mods.factorio.com/mod/BigLabFork) by DellAquila and \_CodeGreen
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout
 - [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
@@ -160,6 +161,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [5Dim's mod - New Automatization](https://mods.factorio.com/mod/5dim_automation) by McGuten
 - [AAI Industry](https://mods.factorio.com/mod/aai-industry) by Earendel
 - [Age of Production](https://mods.factorio.com/mod/Age-of-Production) by AndreusAxolotl
+- [Aquilo Overhaul: Circular Collider Lab](https://mods.factorio.com/mod/CircularColliderLab) by Cubickman
 - [Big Lab](https://mods.factorio.com/mod/BigLabFork) by DellAquila and \_CodeGreen
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout
 - [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero

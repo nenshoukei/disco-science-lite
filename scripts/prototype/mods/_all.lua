@@ -8,6 +8,7 @@ return {
   require("scripts.prototype.mods.bobsmods"),
   require("scripts.prototype.mods.castra"),
   require("scripts.prototype.mods.Cerys-Moon-of-Fulgora"),
+  require("scripts.prototype.mods.CircularColliderLab"),
   require("scripts.prototype.mods.corrundum"),
   require("scripts.prototype.mods.dea-dia-system"),
   require("scripts.prototype.mods.exotic-space-industries"),
