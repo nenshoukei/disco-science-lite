@@ -1,4 +1,4 @@
---- Janus by Xavier Silva
+--- Janus by RochX
 --- https://mods.factorio.com/mod/janus
 
 if not mods["janus"] then return {} end
