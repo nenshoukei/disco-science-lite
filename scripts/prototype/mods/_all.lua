@@ -14,6 +14,7 @@ return {
   require("scripts.prototype.mods.Factorio-Tiberium"),
   require("scripts.prototype.mods.fusion-lab"),
   require("scripts.prototype.mods.Igrys"),
+  require("scripts.prototype.mods.IridescentIndustry"),
   require("scripts.prototype.mods.janus"),
   require("scripts.prototype.mods.Krastorio2"),
   require("scripts.prototype.mods.LabOMatic"),
