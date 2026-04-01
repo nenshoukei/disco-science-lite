@@ -46,6 +46,16 @@ def generate_hurricane_fusion_reactor_images():
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), HURRICANE_DST_DIR / "fusion-reactor-hr-overlay.png")
 
 
+def generate_hurricane_research_center_images():
+    emission_img1 = Image.open(HURRICANE_SRC_DIR / "research-center-emission1.png").convert("L")
+    emission_img2 = Image.open(HURRICANE_SRC_DIR / "research-center-emission2.png").convert("L")
+
+    # Overlay: grayscale + additive blend
+    overlay = np.array(emission_img1).astype(np.float32) + np.array(emission_img2).astype(np.float32)
+    overlay = np.clip(overlay, 0, 255)
+    save_image(Image.fromarray(overlay.astype(np.uint8), "L"), HURRICANE_DST_DIR / "research-center-overlay.png")
+
+
 def generate_hurricane_photometric_lab_images():
     emission_frames: list[np.ndarray] = []
     for emission_src, overlay_dst, frame_count in [

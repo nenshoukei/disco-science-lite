@@ -11,6 +11,7 @@ Date: ????
     - Add support for "Rabbasca, the forgotten Moon" mod by PizzaPlanner.
     - Add support for "Planet Omnia" mod by Wwombatt.
     - Add support for "Iridescent Industry" mod by S6X.
+    - Add support for "Aquilo Overhaul: Circular Collider Lab" mod by Cubickman.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
 ---------------------------------------------------------------------------------------------------
