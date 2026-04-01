@@ -71,6 +71,7 @@ Supported Space-Age Planet Mods:
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
@@ -186,6 +187,7 @@ Space-Age 惑星追加 Mod:
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
