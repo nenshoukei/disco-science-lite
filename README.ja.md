@@ -62,6 +62,7 @@ Space-Age 惑星追加 Mod:
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
+- [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
