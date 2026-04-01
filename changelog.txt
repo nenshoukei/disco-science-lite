@@ -6,6 +6,7 @@ Date: ????
     - Add support for "Planet Pelagos" mod by Talandar99.
     - Add support for "Janus" mod by Xavier Silva.
     - Add support for "Planetaris: Arig" mod by Syen.
+    - Add support for "Planetaris: Hyarion" mod by Syen.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
 ---------------------------------------------------------------------------------------------------
