@@ -100,6 +100,7 @@ local function reset_mocks()
       local state = seed or 0
       local rng = {
         re_seed = function (new_seed)
+          if new_seed > 4294967295 then error("Seed value is tool big") end
           state = new_seed
         end,
       }

@@ -751,14 +751,14 @@ function LabOverlayRenderer:get_tick_function()
 
       -- Reconstruct previous from epoch-1 only during initial call after load.
       if not color_function_index and epoch > 0 then
-        rng.re_seed((epoch - 1) * 10000 + 12345)
+        rng.re_seed((epoch - 1) % 10000 * 10000 + 12345)
         rng()                   -- skip phase_base
         random_phase_speed(rng) -- skip phase_speed
         color_function, color_function_index = ColorFunctions.choose_random(nil, rng)
       end
 
       -- Deterministically derive current epoch state (O(1))
-      rng.re_seed(epoch * 10000 + 12345)
+      rng.re_seed(epoch % 10000 * 10000 + 12345)
       phase_base = rng() * 1000
       phase_speed = random_phase_speed(rng)
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index, rng)
@@ -1178,14 +1178,14 @@ function LabOverlayRenderer:_get_multiplayer_tick_function()
 
       -- Reconstruct previous from epoch-1 only during initial call after load.
       if not color_function_index and epoch > 0 then
-        rng.re_seed((epoch - 1) * 10000 + 12345)
+        rng.re_seed((epoch - 1) % 10000 * 10000 + 12345)
         rng()                   -- skip phase_base
         random_phase_speed(rng) -- skip phase_speed
         color_function, color_function_index = ColorFunctions.choose_random(nil, rng)
       end
 
       -- Deterministically derive current epoch state (O(1))
-      rng.re_seed(epoch * 10000 + 12345)
+      rng.re_seed(epoch % 10000 * 10000 + 12345)
       phase_base = rng() * 1000
       phase_speed = random_phase_speed(rng)
       color_function, color_function_index = ColorFunctions.choose_random(color_function_index, rng)
