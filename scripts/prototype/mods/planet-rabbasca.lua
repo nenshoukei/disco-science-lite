@@ -4,9 +4,12 @@
 if not mods["planet-rabbasca"] then return {} end
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 return {
   on_data = function ()
     PrototypeColorRegistry.set("athletic-science-pack", { 0.24, 0.76, 0.35 })
+
+    PrototypeLabRegistry.add_prefix("harene-infused-")
   end,
 }
