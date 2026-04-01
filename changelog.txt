@@ -3,7 +3,8 @@ Version: 0.4.1
 Date: ????
   Features:
     - Add support for "Fusion Machines" mod by Talandar99.
-  Changes:
+  Bugfixes:
+    - Fix "Given seed value is too big" error for long-term games.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
 Date: 2026-04-01
