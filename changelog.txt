@@ -14,6 +14,8 @@ Date: ????
     - Add support for "Aquilo Overhaul: Circular Collider Lab" mod by Cubickman.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
+  Bugfixes:
+    - Fix crash when deconstructing a lab at the same time current research changes or a player leaves the game.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: 2026-03-31
