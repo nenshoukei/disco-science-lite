@@ -412,9 +412,13 @@ function LabOverlayRenderer:hide_all_overlays()
     local overlay = entry.overlay
     if overlay.visible then
       overlay.visible = false
-      overlay.animation.visible = false
-      if overlay.companion then
-        overlay.companion.visible = false
+      local animation = overlay.animation
+      if animation.valid then
+        animation.visible = false
+      end
+      local companion = overlay.companion
+      if companion and companion.valid then
+        companion.visible = false
       end
     end
   end
