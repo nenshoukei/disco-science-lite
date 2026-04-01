@@ -67,6 +67,7 @@ Supported Space-Age Planet Mods:
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+- [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
@@ -189,6 +190,7 @@ Space-Age 惑星追加 Mod:
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
+- [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
