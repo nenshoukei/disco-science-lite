@@ -46,6 +46,7 @@ These mods are supported out of the box.
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
 - [Factorio and Conquer: Tiberian Dawn](https://mods.factorio.com/mod/Factorio-Tiberium) by James-Fire
 - [Factorio HD Age](https://mods.factorio.com/mod/factorio_hd_age_modpack) by Ingo_Igel
+- [Fusion Machines](https://mods.factorio.com/mod/fusion_machines) by Talandar99
 - [Iridescent Industry](https://mods.factorio.com/mod/IridescentIndustry) by S6X
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
@@ -169,6 +170,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
 - [Factorio and Conquer: Tiberian Dawn](https://mods.factorio.com/mod/Factorio-Tiberium) by James-Fire
 - [Factorio HD Age](https://mods.factorio.com/mod/factorio_hd_age_modpack) by Ingo_Igel
+- [Fusion Machines](https://mods.factorio.com/mod/fusion_machines) by Talandar99
 - [Iridescent Industry](https://mods.factorio.com/mod/IridescentIndustry) by S6X
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
