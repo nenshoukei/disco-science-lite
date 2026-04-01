@@ -26,6 +26,7 @@ return {
   require("scripts.prototype.mods.omnia"),
   require("scripts.prototype.mods.omnimatter"),
   require("scripts.prototype.mods.one-more-tier"),
+  require("scripts.prototype.mods.panglia_planet"),
   require("scripts.prototype.mods.Paracelsin"),
   require("scripts.prototype.mods.pelagos"),
   require("scripts.prototype.mods.planet-muluna"),
