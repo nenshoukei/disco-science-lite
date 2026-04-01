@@ -67,6 +67,7 @@ Supported Space-Age Planet Mods:
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
@@ -110,8 +111,8 @@ The source code is released under the [MIT License](https://github.com/nenshouke
 
 Some image assets are derived from third-party works and are **NOT** covered by the MIT License:
 
-| Files                                                                                                                           | Source                                                        | Author                                                      | License                     |
-| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| Files                                                                | Source                                                        | Author                                                      | License                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
 | [graphics/factorio/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/factorio/)                             | Factorio                                                      | Wube Software Ltd.                                          | © Wube Software Ltd. (EULA) |
 | [graphics/laborat/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/laborat/)                               | [BiusArt Lab graphics](https://mods.factorio.com/mod/laborat) | [BiusArt](https://mods.factorio.com/user/BiusArt)           | GNU LGPL v3.0               |
 | [graphics/Krastorio2/](https://github.com/nenshoukei/disco-science-lite/tree/main/graphics/Krastorio2/)                         | [Krastorio 2](https://mods.factorio.com/mod/Krastorio2)       | [raiguard](https://mods.factorio.com/user/raiguard)         | GNU LGPL v3.0               |
@@ -186,6 +187,7 @@ Space-Age 惑星追加 Mod:
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop

@@ -21,6 +21,7 @@ return {
   require("scripts.prototype.mods.maraxis"),
   require("scripts.prototype.mods.metal-and-stars"),
   require("scripts.prototype.mods.Moshine"),
+  require("scripts.prototype.mods.omnia"),
   require("scripts.prototype.mods.omnimatter"),
   require("scripts.prototype.mods.one-more-tier"),
   require("scripts.prototype.mods.Paracelsin"),

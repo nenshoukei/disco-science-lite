@@ -61,6 +61,7 @@ Space-Age 惑星追加 Mod:
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
