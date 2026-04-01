@@ -65,6 +65,7 @@ Supported Space-Age Planet Mods:
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
+- [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky

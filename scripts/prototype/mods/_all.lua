@@ -23,6 +23,7 @@ return {
   require("scripts.prototype.mods.omnimatter"),
   require("scripts.prototype.mods.one-more-tier"),
   require("scripts.prototype.mods.Paracelsin"),
+  require("scripts.prototype.mods.pelagos"),
   require("scripts.prototype.mods.planet-muluna"),
   require("scripts.prototype.mods.pyanodon"),
   require("scripts.prototype.mods.quality_glassware"),

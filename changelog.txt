@@ -3,6 +3,7 @@ Version: 0.3.2
 Date: ????
   Features:
     - Add support for "Planet Vesta" mod by CPU_BlackHeart.
+    - Add support for "Planet Pelagos" mod by Talandar99.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
 ---------------------------------------------------------------------------------------------------
