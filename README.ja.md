@@ -54,6 +54,7 @@ Space-Age 惑星追加 Mod:
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
+- [Janus](https://mods.factorio.com/mod/janus) by Xavier Silva
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
