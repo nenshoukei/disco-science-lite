@@ -19,6 +19,25 @@
     {
       "type": "factoriomod",
       "request": "launch",
+      "name": "Factorio Mod Debug (Clean Mod List)",
+      "disableExtraMods": true,
+      "adjustMods": {
+        "elevated-rails": true,
+        "quality": true,
+        "space-age": true,
+        "disco-science-lite": true
+      },
+      "adjustModSettings": [
+        {
+          "name": "mks-dsl-is-development",
+          "scope": "startup",
+          "value": true
+        }
+      ]
+    },
+    {
+      "type": "factoriomod",
+      "request": "launch",
       "name": "Factorio Mod Debug (Settings & Data)",
       "hookSettings": true,
       "hookData": true,
