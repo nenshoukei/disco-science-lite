@@ -763,8 +763,8 @@ describe("LabOverlayRenderer", function ()
 
           local ov1 = r.chunk_map:get(1)
           local ov2 = r.chunk_map:get(2)
-          assert.is_not_nil(ov1) --- @cast ov1 -nil
-          assert.is_not_nil(ov2) --- @cast ov2 -nil
+          assert.is_not_nil(ov1)                --- @cast ov1 -nil
+          assert.is_not_nil(ov2)                --- @cast ov2 -nil
           assert.are.equal(1, ov1.viewer_index) -- player 1 at (0,0) sees ov1 at (0,0)
           assert.are.equal(2, ov2.viewer_index) -- player 2 at (100,0) sees ov2 at (100,0)
         end)
@@ -938,6 +938,16 @@ describe("LabOverlayRenderer", function ()
         local phase_b = captured_phase
 
         assert.are.equal(phase_a, phase_b)
+      end)
+
+      it("does not throw error for big tick count", function ()
+        _G.game.tick = 50000000000
+        event.tick = _G.game.tick
+
+        local r = setup_tick_renderer()
+        assert.no_error(function ()
+          r:get_tick_function()(event)
+        end)
       end)
     end)
 
