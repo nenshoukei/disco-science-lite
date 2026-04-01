@@ -39,6 +39,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
 - [Factorio and Conquer: Tiberian Dawn](https://mods.factorio.com/mod/Factorio-Tiberium) by James-Fire
 - [Factorio HD Age](https://mods.factorio.com/mod/factorio_hd_age_modpack) by Ingo_Igel
+- [Iridescent Industry](https://mods.factorio.com/mod/IridescentIndustry) by S6X
 - [Krastorio 2](https://mods.factorio.com/mod/Krastorio2) by raiguard
 - [Krastorio 2 Spaced Out](https://mods.factorio.com/mod/Krastorio2-spaced-out) by Polka_37
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
@@ -54,14 +55,22 @@ Space-Age 惑星追加 Mod:
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
+- [Janus](https://mods.factorio.com/mod/janus) by RochX
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
+- [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
+- [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
+- [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
+- [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
+- [🌐 Rabbasca, the forgotten Moon](https://mods.factorio.com/mod/planet-rabbasca) by PizzaPlanner
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J

@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.2
 Date: ????
+  Features:
+    - Add support for "Planet Vesta" mod by CPU_BlackHeart.
+    - Add support for "Planet Pelagos" mod by Talandar99.
+    - Add support for "Janus" mod by RochX.
+    - Add support for "Planetaris: Arig" mod by Syen.
+    - Add support for "Planetaris: Hyarion" mod by Syen.
+    - Add support for "Planetaris: Tellus" mod by Syen.
+    - Add support for "Rabbasca, the forgotten Moon" mod by PizzaPlanner.
+    - Add support for "Planet Omnia" mod by Wwombatt.
+    - Add support for "Iridescent Industry" mod by S6X.
   Minor Features:
     - Smoother player position tracking for color animations that follow the player.
 ---------------------------------------------------------------------------------------------------

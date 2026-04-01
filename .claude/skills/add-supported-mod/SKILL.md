@@ -15,11 +15,18 @@ Ask the user for the following (if not already provided via $ARGUMENTS):
 - **Mod ID**: The ID used in the mod URL (e.g. `Cerys-Moon-of-Fulgora` from `https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora`)
 - **Author name**: The mod author's display name (e.g. `thesixthroc`)
 - **Planet mod?**: Whether this is a Space-Age planet-adding mod (Yes/No)
-- **Source URL for `on_animation`**: A URL to the source code where the lab's `on_animation` is defined (e.g. a GitHub permalink). May be omitted if no public code repository exists.
+- **New Science Packs**: The new science packs the mod adds. For each science pack:
+    - **Science Pack Name**: Name of the science pack prototype. (e.g. `automation-science-pack`)
+    - **Color**: Color of the science pack. (e.g. `{ 0.91, 0.16, 0.20 }` or `float4(0.911, 0.164, 0.220, 1.000)` which should be converted into Lua format)
+- **New Custom Labs**: The new custom labs the mod adds. For each custom lab:
+    - **Custom Lab Name**: Name of the custom lab prototype. (e.g. `cerys-lab`)
+    - **Source URL for `on_animation`**: A URL to the source code where the lab's `on_animation` is defined (e.g. a GitHub permalink). May be omitted if no public code repository exists.
 
 If the user provides a Factorio Mod Portal URL like `https://mods.factorio.com/mod/secretas?from=downloaded`, extract the Mod ID as `secretas` (the path segment after `/mod/`, excluding query strings).
 
 ## Step 2: Create Lua File
+
+In a template, comments with `--#` prefix are instructions for you (code agent). These comments should be stripped in the resulting file. If a stripped line only contains whitespaces, then remove the line.
 
 Create `scripts/prototype/mods/<Mod ID>.lua` using this template:
 
@@ -29,18 +36,39 @@ Create `scripts/prototype/mods/<Mod ID>.lua` using this template:
 
 if not mods["<Mod ID>"] then return {} end
 
-local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
-local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
-local AnimationHelpers = require("scripts.prototype.animation-helpers")
+local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")  --# This line should be removed when `New Science Packs` is none.
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")      --# This line should be removed when `New Custom Labs` is none.
+local AnimationHelpers = require("scripts.prototype.animation-helpers")               --# This line should be removed when `New Custom Labs` is none.
 
 return {
   on_data = function ()
+    --# Each component of color should be formatted as "%.2f". (e.g. `{ 1.00, 0.50, 0.01 }`)
+    --# If only one `New Science Packs`:
+    PrototypeColorRegistry.set("<Science Pack Name>", { <Color R>, <Color G>, <Color B> })
+    --# Else If multiple `New Science Packs`:
+    PrototypeColorRegistry.set_by_table({
+        --# Foreach science pack:
+        ["<Science Pack Name>"] = { <Color R>, <Color G>, <Color B> },
+        --# End Foreach
+    })
+    --# End If
 
+    --# If any `New Custom Labs`:
+    --# Foreach custom lab:
+    PrototypeLabRegistry.register("<Lab Name>")
+    --# End Foreach
+    --# End If
   end,
 
+  --# If any `New Custom Labs`:
   on_data_final_fixes = function ()
-
+    --# Foreach new custom lab:
+    AnimationHelpers.modify_on_animation("<Lab Name>", function (modifier)
+      -- TODO: Write modifications
+    end)
+    --# End Foreach
   end,
+  --# End If
 }
 ```
 
@@ -62,8 +90,12 @@ Use the actual lab entity name (the key in `data.raw.lab`) from the source code 
 
 ```lua
 local Helper = require("spec.helper")
+--# If any `New Science Packs`:
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
+--# End If
+--# If any `New Custom Labs`:
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+--# End If
 
 _G.mods["<Mod ID>"] = "1.0.0"
 local Mod = require("scripts.prototype.mods.<Mod ID>")
@@ -71,36 +103,57 @@ local Mod = require("scripts.prototype.mods.<Mod ID>")
 describe("mods/<Mod ID>", function ()
   before_each(function ()
     Helper.reset_mocks()
+    --# If any `New Science Packs`:
     PrototypeColorRegistry.reset()
+    --# End If
+    --# If any `New Custom Labs`:
     PrototypeLabRegistry.reset()
+    --# End If
     _G.mods["<Mod ID>"] = "1.0.0"
   end)
 
   -- -------------------------------------------------------------------
   describe("on_data", function ()
+    --# If any `New Science Packs`:
     it("registers colors", function ()
       Mod.on_data()
-      assert.is_not_nil(PrototypeColorRegistry.registered_colors[""])
+      --# Foreach new science pack:
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["<Science Pack Name>"])
+      --# End Foreach
     end)
+    --# End If
 
+    --# If any `New Custom Labs`:
     it("registers labs", function ()
       Mod.on_data()
-      assert.is_not_nil(PrototypeLabRegistry.registered_labs[""])
+      --# Foreach new custom lab:
+      assert.is_not_nil(PrototypeLabRegistry.registered_labs["<Lab Name>"])
+      --# End Foreach
     end)
+    --# End If
   end)
 
+  --# If any `New Custom Labs`:
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
+    --# If only one `New Custom Labs`:
     local on_animation --- @type data.Animation
+    --# Else If multiple `New Custom Labs`:
+    --# Foreach `New Custom Labs`:
+    local on_animation_<Lab Name> --- @type data.Animation
+    --# End Foreach
+    --# End If
 
     before_each(function ()
-      -- Source: <URL>  (or "-- No public code repositories")
+      --# Foreach defined on_animation variable
+      -- Source: <URL> --# or "-- No public code repositories"
       on_animation = {
         layers = {
-          -- extracted from source, or TODO
+          --# extracted from source, or TODO
         },
       }
-      _G.data.raw.lab["<lab-name>"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
+      --# End Foreach
+      _G.data.raw.lab["<Lab Name>"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
     it("applies lab modifications", function ()
@@ -108,12 +161,15 @@ describe("mods/<Mod ID>", function ()
       -- TODO: Write assertions
     end)
 
-    it("creates the <lab-name> overlay animation", function ()
+    --# Foreach new custom lab:
+    it("creates the <Lab Name> overlay animation", function ()
       Mod.on_data_final_fixes()
-      local overlay = _G.data.raw["animation"]["mks-dsl-<lab-name>-overlay"]
+      local overlay = _G.data.raw["animation"]["mks-dsl-<Lab Name>-overlay"]
       assert.is_not_nil(overlay) --- @cast overlay -nil
     end)
+    --# End Foreach
   end)
+  --# End If
 end)
 ```
 
@@ -133,8 +189,12 @@ Add the following line to the `## Supported Mods` section of `README.md`, ad to 
 
 **Insertion rules:**
 
-- If **not** a planet mod: Insert into the fist list in the section, in alphabetical order by mod name (case-insensitive, ignore leading symbols like 🌐).
-- If **a planet mod**: Insert into the list after `Supported Space-Age Planet Mods:`, in alphabetical order by mod name (case-insensitive, ignore leading symbols).
+- If **not** a planet mod: Insert into the fist list in the section, in alphabetical order by mod name.
+- If **a planet mod**: Insert into the list after `Supported Space-Age Planet Mods:`, in alphabetical order by mod name.
+- Alphabetical order rules:
+    - Case-insensitive
+    - Ignore leading symbols like 🌐
+    - Do NOT ignore prefixes like "Planet"
 
 ## Step 5: Run make check
 
@@ -145,6 +205,16 @@ make mods mod-description
 ```
 
 Run from the project root directory: `/Users/kotas/Library/Application Support/factorio/mods/disco-science-lite`
+
+## Step 6: Update changelog.txt
+
+In `changelog.txt`, if the `Features:` section does not exist in the top entry, add it.
+
+Add the following line to the `Features:` section in the top entry, at last position.
+
+```
+    - Add support for "<Mod name>" mod by <Author name>.
+```
 
 ## Notes
 
