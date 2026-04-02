@@ -76,6 +76,7 @@ local function make_player(force, surface_index, px, py)
   return ({
     render_mode = defines.render_mode.game,
     force = force,
+    force_index = force.index,
     surface_index = surface_index,
     position = { x = px or 0, y = py or 0 },
     zoom = 1,
@@ -574,13 +575,13 @@ describe("LabOverlayRenderer", function ()
 
         -- Make visible first
         add_connected_player(force, 1)
-        local tick, request_state_update = r:get_tick_function()
+        local tick, request_viewport_update = r:get_tick_function()
         tick(event)
         assert.is_true(companion.visible)
 
         -- Now make it hidden (lab stops working)
         lab.status = defines.entity_status.normal
-        request_state_update()
+        request_viewport_update()
         increment_tick()
         tick(event)
         assert.is_false(companion.visible)
@@ -591,14 +592,14 @@ describe("LabOverlayRenderer", function ()
         local ov = r.chunk_map:get(1)
         assert.is_not_nil(ov) --- @cast ov -nil
 
-        local tick, request_state_update = r:get_tick_function()
+        local tick, request_viewport_update = r:get_tick_function()
         tick(event) -- state update: picks up research, colors overlay
         assert.is_true(ov.visible)
         assert.is_true(ov.animation.valid)
 
         -- Cancel research
         force.current_research = nil
-        request_state_update()
+        request_viewport_update()
         increment_tick()
         tick(event)
         assert.is_false(ov.visible)
@@ -952,19 +953,19 @@ describe("LabOverlayRenderer", function ()
     end)
 
     -- -------------------------------------------------------------------
-    describe("request_state_update", function ()
+    describe("request_viewport_update", function ()
       it("forces state update on next tick call", function ()
         local r, force = setup_tick_renderer()
         local ov = r.chunk_map:get(1)
         assert.is_not_nil(ov) --- @cast ov -nil
 
-        local tick, request_state_update = r:get_tick_function()
+        local tick, request_viewport_update = r:get_tick_function()
         tick(event) -- initial state update, overlay becomes visible
         assert.is_true(ov.visible)
 
         -- Cancel research and request state update
         force.current_research = nil
-        request_state_update()
+        request_viewport_update()
         increment_tick()
         tick(event)
 
