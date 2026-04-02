@@ -29,7 +29,7 @@ local function create_renderer()
 end
 
 local function setup_event_handlers()
-  local tick_function, request_state_update, update_zoom_reach, update_player_position = renderer:get_tick_function()
+  local tick_function, request_viewport_update, update_zoom_reach, update_player_position = renderer:get_tick_function()
   script.on_event(defines.events.on_tick, tick_function)
   script.on_nth_tick(180, update_zoom_reach)
   script.on_event(defines.events.on_player_changed_position, update_player_position)
@@ -40,7 +40,7 @@ local function setup_event_handlers()
     defines.events.on_research_cancelled,
   }, function ()
     renderer:hide_all_overlays()
-    request_state_update()
+    request_viewport_update()
   end)
 
   script.on_event({
@@ -74,10 +74,10 @@ local function setup_event_handlers()
   script.on_event(defines.events.on_object_destroyed, function (event)
     if event.type == TARGET_TYPE_ENTITY then
       renderer:remove_overlay_from_lab(event.useful_id)
-      request_state_update()
+      request_viewport_update()
     elseif event.type == TARGET_TYPE_RENDER_OBJECT then
       renderer:on_render_object_destroyed(event.useful_id)
-      request_state_update()
+      request_viewport_update()
     end
   end)
 
@@ -87,12 +87,12 @@ local function setup_event_handlers()
   }, function (event)
     --- @cast event EventData.on_surface_cleared|EventData.on_surface_deleted
     renderer:remove_overlays_on_surface(event.surface_index)
-    request_state_update()
+    request_viewport_update()
   end)
 
   script.on_event(defines.events.script_raised_teleported, function (event)
     renderer:update_lab_position(event.entity)
-    request_state_update()
+    request_viewport_update()
   end)
 
   script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
