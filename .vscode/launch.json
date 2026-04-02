@@ -38,6 +38,41 @@
     {
       "type": "factoriomod",
       "request": "launch",
+      "name": "Factorio Mod Debug (Showcase for gallery)",
+      "disableExtraMods": true,
+      "adjustMods": {
+        "elevated-rails": true,
+        "quality": true,
+        "space-age": true,
+        "Age-of-Production": true,
+        "Age-of-Production-Graphics": true,
+        "bioprocessing-tab": true,
+        "CircularColliderLab": true,
+        "Cold_biters": true,
+        "corrundum": true,
+        "dea-dia-system": true,
+        "disco-science-lite": true,
+        "est-tiny-storage-tank": true,
+        "fusion-lab": true,
+        "LabOMatic": true,
+        "lex-aircraft": true,
+        "PlanetsLib": true,
+        "quality_glassware": true,
+        "Robocharger-Updated": true,
+        "SpidertronEnhancements": true,
+        "SpidertronPatrols": true
+      },
+      "adjustModSettings": [
+        {
+          "name": "mks-dsl-is-development",
+          "scope": "startup",
+          "value": true
+        }
+      ]
+    },
+    {
+      "type": "factoriomod",
+      "request": "launch",
       "name": "Factorio Mod Debug (Settings & Data)",
       "hookSettings": true,
       "hookData": true,
