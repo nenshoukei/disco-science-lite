@@ -3,6 +3,7 @@ Version: 0.4.2
 Date: ????
   Features:
     - Add support for "Shattered Planet" mod by CPU_BlackHeart.
+    - Add support for "Planet Foliax" mod by Crethor.
   Changes:
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.1

@@ -13,6 +13,7 @@ return {
   require("scripts.prototype.mods.dea-dia-system"),
   require("scripts.prototype.mods.exotic-space-industries"),
   require("scripts.prototype.mods.Factorio-Tiberium"),
+  require("scripts.prototype.mods.foliax"),
   require("scripts.prototype.mods.fusion_machines"),
   require("scripts.prototype.mods.fusion-lab"),
   require("scripts.prototype.mods.Igrys"),
