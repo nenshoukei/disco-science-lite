@@ -884,7 +884,7 @@ function LabOverlayRenderer:get_tick_function()
     local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 
     if is_multiplayer then
-      local cached_force_index, cached_colors, cached_n_colors, cached_scale = 0, nil, 0, 1
+      local cached_force_index, cached_colors, cached_n_colors, cached_scale = 0, nil, 0, 0.125
       local cached_viewer_index, cached_px, cached_py = 0, 0, 0
       for i = color_update_offset, n_all_in_view, color_update_stride do
         local overlay = all_overlays_in_view[i]
@@ -896,11 +896,11 @@ function LabOverlayRenderer:get_tick_function()
             if f_state then
               cached_colors = f_state.colors
               cached_n_colors = f_state.n_colors
-              cached_scale = 1 + cached_n_colors / n_visible_overlays
+              cached_scale = (1 + cached_n_colors / n_visible_overlays) * 0.125
             else
               cached_colors = nil
               cached_n_colors = 0
-              cached_scale = 1
+              cached_scale = 0.125
             end
           end
           if cached_colors then
@@ -923,7 +923,7 @@ function LabOverlayRenderer:get_tick_function()
     else
       local cached_colors, cached_n_colors = sp_fstate.colors, sp_fstate.n_colors
       if cached_colors then
-        local scale = 1 + cached_n_colors / n_visible_overlays
+        local scale = (1 + cached_n_colors / n_visible_overlays) * 0.125
         for i = color_update_offset, n_all_in_view, color_update_stride do
           local overlay = all_overlays_in_view[i]
           if overlay.visible then
