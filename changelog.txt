@@ -6,6 +6,7 @@ Date: ????
     - Add support for "Shattered Planet" mod by CPU_BlackHeart.
     - Add support for "Planet Foliax" mod by Crethor.
     - Add support for "Nexus Extended Promethium Endgame" mod by Karu_Kiruna.
+    - Add support for "Science Pack Galore (Forked)" mod by Semenar and nihilistzsche.
   Changes:
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.1

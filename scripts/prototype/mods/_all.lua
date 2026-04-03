@@ -41,6 +41,7 @@ return {
   require("scripts.prototype.mods.pyanodon"),
   require("scripts.prototype.mods.quality_glassware"),
   require("scripts.prototype.mods.rubia"),
+  require("scripts.prototype.mods.SciencePackGalore"),
   require("scripts.prototype.mods.secretas"),
   require("scripts.prototype.mods.skewer_planet_vesta"),
   require("scripts.prototype.mods.skewer_shattered_planet"),

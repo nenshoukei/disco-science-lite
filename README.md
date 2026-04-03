@@ -53,6 +53,7 @@ These mods are supported out of the box.
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
+- [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
 
 Supported Space-Age Planet Mods:

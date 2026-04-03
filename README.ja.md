@@ -49,6 +49,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
+- [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel（ただし宇宙科学研究所は対象外）
 
 Space-Age 惑星追加 Mod:
