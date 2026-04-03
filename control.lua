@@ -7,6 +7,7 @@ event_handler.add_libraries({
 
 if Settings.is_development then
   require("scripts.runtime.command.ds-bench")
+  require("scripts.runtime.command.ds-bench-color")
   require("scripts.runtime.command.ds-force-render")
   require("scripts.runtime.command.ds-set-tech")
   require("scripts.runtime.command.ds-showcase")
