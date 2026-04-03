@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.2
-Date: ????
+Date: 2026-04-03
   Features:
     - More dynamic color animations for small number of labs.
     - Add support for "Shattered Planet" mod by CPU_BlackHeart.
