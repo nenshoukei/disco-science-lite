@@ -2,6 +2,7 @@
 Version: 0.4.2
 Date: ????
   Features:
+    - More dynamic color animations for small number of labs.
     - Add support for "Shattered Planet" mod by CPU_BlackHeart.
     - Add support for "Planet Foliax" mod by Crethor.
     - Add support for "Nexus Extended Promethium Endgame" mod by Karu_Kiruna.

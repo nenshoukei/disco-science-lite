@@ -19,10 +19,12 @@ local random = math.random
 --- - `phase`    - Continuously drifting value that shifts the color cycle position over time.
 --- - `colors`   - A flattened array of colors for picking from in format: `{ r, g, b, r, g, b, ... }`
 --- - `n_colors` - Number of colors. `#colors / 3`.
+--- - `scale`    - Spatial variation scale. Precomputed as `1 + n_colors / n_visible_labs` by the caller.
+---               Amplifies color variation when labs are few; converges to 1 (original behavior) as labs increase.
 --- - `px`, `py` - Coordinates of the player. (`LuaPlayer::position`)
 --- - `lx`, `ly` - Coordinates of the lab entity. (`LuaEntity::position`)
 ---
---- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], n_colors: integer, px: number, py: number, lx: number, ly: number)
+--- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], n_colors: integer, scale: number, px: number, py: number, lx: number, ly: number)
 
 -- Constants for pre-processing. These will be embedded as numeric literals.
 -- Inversed for folding constant divisions into multiplications. (much faster in Lua 5.2)
@@ -47,7 +49,7 @@ local COLOR_FUNCTION_TEMPLATE = [[
   local atan2 = math.atan2
 
   --- @type ColorFunction
-  return function (output, phase, colors, n_colors, px, py, lx, ly)
+  return function (output, phase, colors, n_colors, scale, px, py, lx, ly)
     local t
     %s
 
@@ -111,7 +113,7 @@ local functions = {
   compile_function("Radial", [[
     local dx = lx - px
     local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) / 8 + phase
+    t = sqrt(dx * dx + dy * dy) * scale / 8 + phase
   ]], 2),
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
@@ -122,19 +124,19 @@ local functions = {
   -- [3] Horizontal: color cycles based on horizontal separation only.
   compile_function("Horizontal", [[
     local d = lx - px
-    t = (d < 0 and -d or d) / 10 + phase
+    t = (d < 0 and -d or d) * scale / 10 + phase
   ]], 2),
 
   -- [4] Vertical: color cycles based on vertical separation only.
   compile_function("Vertical", [[
     local d = ly - py
-    t = (d < 0 and -d or d) / 10 + phase
+    t = (d < 0 and -d or d) * scale / 10 + phase
   ]], 2),
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
   compile_function("Diagonal", [[
     local d = lx - px + ly - py
-    t = (d < 0 and -d or d) / 10 + phase
+    t = (d < 0 and -d or d) * scale / 10 + phase
   ]], 2),
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x9 units) relative to the player.
@@ -158,14 +160,14 @@ local functions = {
     local a = s > 0 and ay / s * 0.25 or 0
     if dx < 0 then a = 0.5 - a end
     if dy < 0 then a = 1 - a end
-    t = sqrt(dx * dx + dy * dy) / 8 - a * n_colors + phase
+    t = sqrt(dx * dx + dy * dy) * scale / 8 - a * n_colors + phase
   ]], 2),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
   compile_function("Diamond", [[
     local dx = lx - px
     local dy = ly - py
-    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) / 8 + phase
+    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * scale / 8 + phase
   ]], 2),
 
   -- [9] Kaleidoscope: 4-fold mirror symmetry (fold both axes) combined with radial distance bands.
@@ -175,7 +177,7 @@ local functions = {
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
     local dist = dx + dy
-    t = dist / 8 + (dy * n_colors) / (dist + 1e-9) + phase
+    t = dist  * scale / 8 + (dy * n_colors) / (dist + 1e-9) + phase
   ]], 3),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
@@ -184,7 +186,7 @@ local functions = {
     local dy = ly - py
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = (dx > dy and dx or dy) / 8 + phase
+    t = (dx > dy and dx or dy) * scale / 8 + phase
   ]], 2),
 
   -- [11] Lattice: repeating tiled pattern of circular rings across the map.
@@ -193,7 +195,7 @@ local functions = {
     local dy = (ly + 16) % 32 - 16
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = sqrt(dx * dx + dy * dy) / 8 - phase
+    t = sqrt(dx * dx + dy * dy) * scale / 8 - phase
   ]], 2),
 
   -- [12] Pulse: all labs change color in unison regardless of position.
@@ -216,14 +218,14 @@ local functions = {
     local dy = ly - py
     dx = dx < 0 and -dx or dx
     dy = dy < 0 and -dy or dy
-    t = (dx < dy and dx or dy) / 8 + phase
+    t = (dx < dy and dx or dy) * scale / 8 + phase
   ]], 2),
 
   -- [15] Hyperbolic: four curved quadrants with hyperbolic contour lines.
   compile_function("Hyperbolic", [[
     local dx = lx - px
     local dy = ly - py
-    t = dx * dy / 64 + phase
+    t = dx * dy  * scale / 64 + phase
   ]], 2),
 
   -- [16] Pinwheel: windmill pattern, rotational symmetry where each quadrant offsets the color by a quarter cycle.
@@ -233,7 +235,7 @@ local functions = {
     local q = 0
     if dx < 0 then q = q + 1; dx = -dx end
     if dy < 0 then q = q + 2; dy = -dy end
-    t = (dx + dy) / 8 + q * n_colors * 0.25 + phase
+    t = (dx + dy) * scale / 8 + q * n_colors * 0.25 + phase
   ]], 2),
 }
 ColorFunctions.functions = functions
