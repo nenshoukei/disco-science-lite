@@ -31,12 +31,12 @@ local lx, ly = 15.2, 25.8
 local function benchmark(name, func)
   -- Warm up
   for _ = 1, 1000 do
-    func(output, phase, colors, n_colors, px, py, lx, ly)
+    func(output, phase, colors, n_colors, 1.0, px, py, lx, ly)
   end
 
   local start_time = os.clock()
   for _ = 1, ITERATIONS do
-    func(output, phase, colors, n_colors, px, py, lx, ly)
+    func(output, phase, colors, n_colors, 1.0, px, py, lx, ly)
   end
   local end_time = os.clock()
 

@@ -78,17 +78,15 @@ commands.add_command(
   end
 )
 
-local MEGA_WIDTH = 320 --[[$CHUNK_SIZE * 10]]
-local MEGA_HEIGHT = 320 --[[$CHUNK_SIZE * 10]]
-
 commands.add_command(
   "ds-showcase2",
-  "Set up showcase of vanilla labs in mega-base. Usage: /ds-showcase2 [gap:integer=0]",
+  "Set up showcase of vanilla labs in mega-base. Usage: /ds-showcase2 [tile_size:integer=320]",
   function (event)
     local player = game.get_player(event.player_index)
     if not player then return end
 
-    local gap = event.parameter and event.parameter ~= "" and tonumber(event.parameter) or 0
+    local tile_size = event.parameter and event.parameter ~= "" and tonumber(event.parameter) or 320
+    if tile_size < 1 then return end
 
     local surface = player.surface
     CommandHelpers.setup_test_surface(surface)
@@ -101,8 +99,8 @@ commands.add_command(
     local y = 0
     local width = math.max(proto.tile_width, 1)
     local height = math.max(proto.tile_height, 1)
-    while y < MEGA_HEIGHT do
-      while x < MEGA_WIDTH do
+    while y < tile_size do
+      while x < tile_size do
         local lab = surface.create_entity({
           name = proto.name,
           position = { x = x + width / 2, y = y + height / 2 },
@@ -110,10 +108,10 @@ commands.add_command(
         })
         assert(lab, "Failed to create lab entity: " .. proto.name)
         CommandHelpers.fill_lab_entity_with_ingredients(lab)
-        x = x + width + gap
+        x = x + width
       end
       x = 0
-      y = y + height + gap
+      y = y + height
     end
   end
 )
