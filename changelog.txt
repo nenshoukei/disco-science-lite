@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Add support for "Shattered Planet" mod by CPU_BlackHeart.
     - Add support for "Planet Foliax" mod by Crethor.
+    - Add support for "Nexus Extended Promethium Endgame" mod by Karu_Kiruna.
   Changes:
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.1

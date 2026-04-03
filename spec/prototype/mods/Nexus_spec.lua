@@ -1,0 +1,40 @@
+local Helper = require("spec.helper")
+local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
+local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
+
+_G.mods["Nexus"] = "1.0.0"
+local Mod = require("scripts.prototype.mods.Nexus")
+
+describe("mods/Nexus", function ()
+  before_each(function ()
+    Helper.reset_mocks()
+    PrototypeColorRegistry.reset()
+    PrototypeLabRegistry.reset()
+    _G.mods["Nexus"] = "1.0.0"
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("on_data", function ()
+    it("registers colors", function ()
+      Mod.on_data()
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["promethium-882-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["antimatter-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-automation-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-logistic-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-military-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-chemical-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-production-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-utility-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-space-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-metallurgic-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-agricultural-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-electromagnetic-science-pack"])
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["omega-cryogenic-science-pack"])
+    end)
+
+    it("excludes omega-lab", function ()
+      Mod.on_data()
+      assert.is_true(PrototypeLabRegistry.excluded_labs["omega-lab"])
+    end)
+  end)
+end)
