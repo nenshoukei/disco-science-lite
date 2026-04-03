@@ -68,6 +68,7 @@ Supported Space-Age Planet Mods:
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
+- [Planet Foliax](https://mods.factorio.com/mod/foliax) by Crethor
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
