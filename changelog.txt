@@ -2,6 +2,8 @@
 Version: 0.4.3
 Date: ????
   Changes:
+  Optimizations:
+    - Fix position tracking to use `game.get_player()` instead of `game.players`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.2
 Date: 2026-04-03

@@ -952,7 +952,7 @@ function LabOverlayRenderer:get_tick_function()
     --- @param event EventData.on_player_changed_position
     update_player_position = function (event)
       local p_index = event.player_index
-      local player = game.players[p_index]
+      local player = game.get_player(p_index)
       if not player then return end
 
       local stored = mp_player_index_to_position[p_index]
