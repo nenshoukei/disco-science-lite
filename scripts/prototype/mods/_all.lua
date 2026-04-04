@@ -16,6 +16,7 @@ return {
   require("scripts.prototype.mods.foliax"),
   require("scripts.prototype.mods.fusion_machines"),
   require("scripts.prototype.mods.fusion-lab"),
+  require("scripts.prototype.mods.gleba-lab"),
   require("scripts.prototype.mods.Igrys"),
   require("scripts.prototype.mods.IridescentIndustry"),
   require("scripts.prototype.mods.janus"),

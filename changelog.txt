@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.3
 Date: ????
-  Changes:
+  Features:
+    - Add support for "Gleba Lab" mod by LordMiguel.
   Optimizations:
     - Fix position tracking to use `game.get_player()` instead of `game.players`.
 ---------------------------------------------------------------------------------------------------
