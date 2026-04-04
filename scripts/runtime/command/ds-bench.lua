@@ -1,22 +1,34 @@
+--- Benchmark for basic Lua operations
+--- /c version: https://gist.github.com/nenshoukei/007fcd17c5384ead5485f68b94dca1a7
+
 --- @diagnostic disable: unused-local, empty-block
 
-local ROUNDS = 5
+local ROUNDS = 3
+local WARMUP = 2
 local OUT_FILE = "lua-benchmark.md" -- in `script-output/`
 
 commands.add_command(
   "ds-bench",
-  "Run Lua operation benchmark. Usage: /ds-bench [category]",
+  "Run benchmark for basic Lua operations. Usage: /ds-bench",
   function (event)
     local player_index = event.player_index
     if not player_index then return end
-    local category_filter = event.parameter
+
+    if script.active_mods["debugadapter"] then
+      game.print("Error: The benchmark should not be run with the FMTK debugger enabled.")
+      return
+    end
 
     local pi = math.pi
     local inv_pi = 1 / pi
     local negative = -12345
     local n, m = 123, 456
-    local h_table = {}; for i = 1, 100 do h_table["i" .. i] = i end
-    local a_table = {}; for i = 1, 100 do a_table[i] = i end
+    local N_ITEM = 100
+    local h_table = {}; for i = 1, N_ITEM do h_table["testkey" .. i] = i end
+    local h_keys = {}; for i = 1, N_ITEM do h_keys[i] = "testkey" .. i end
+    local a_table = {}; for i = 1, N_ITEM do a_table[i] = i end
+    local a_keys = {}; for i = 1, N_ITEM do a_keys[i] = i end
+    local rng = game.create_random_generator()
     local upvalue = 1
     local test_table = {}
     local test_counter = 0
@@ -103,22 +115,52 @@ commands.add_command(
           end,
         },
       },
-      ["table"] = {
+      ["table:const"] = {
         N = 5000000,
         tests = {
           ["Hash-key Access"] = function ()
-            local _ = h_table["i1"] + h_table["i50"] + h_table["i100"]
+            local _ = h_table["testkey1"] + h_table["testkey50"] + h_table["testkey100"]
           end,
           ["Array-index Access"] = function ()
             local _ = a_table[1] + a_table[50] + a_table[100]
           end,
         },
       },
-      ["loop"] = {
+      ["table:random"] = {
+        N = 1000000,
+        setup_round = function ()
+          rng.re_seed(123456)
+        end,
+        tests = {
+          ["Hash-key Access"] = function ()
+            local k = h_keys[rng(N_ITEM)]
+            local _ = h_table[k]
+          end,
+          ["Array-index Access"] = function ()
+            local k = a_keys[rng(N_ITEM)]
+            local _ = a_table[k]
+          end,
+        },
+      },
+      ["loop:h_table"] = {
         N = 100000,
         tests = {
           ["pairs() for-loop"] = function ()
             local tbl = h_table
+            for _k, _v in pairs(tbl) do end
+          end,
+          ["next() while-loop"] = function ()
+            local tbl = h_table
+            local _k, _v = next(tbl, nil)
+            while _k do _k, _v = next(tbl, _k) end
+          end,
+        },
+      },
+      ["loop:a_table"] = {
+        N = 100000,
+        tests = {
+          ["pairs() for-loop"] = function ()
+            local tbl = a_table
             for _k, _v in pairs(tbl) do end
           end,
           ["ipairs() for-loop"] = function ()
@@ -126,7 +168,7 @@ commands.add_command(
             for _k, _v in ipairs(tbl) do end
           end,
           ["next() while-loop"] = function ()
-            local tbl = h_table
+            local tbl = a_table
             local _k, _v = next(tbl, nil)
             while _k do _k, _v = next(tbl, _k) end
           end,
@@ -166,41 +208,64 @@ commands.add_command(
     --- @param new boolean?
     local function write_log(str, new)
       helpers.write_file(OUT_FILE, { "", str, "\n" }, not new, player_index)
+      game.print(str)
       log(str)
     end
+
+    local COLUMN_WIDTH = { 12, 20 }
+    for i = 1, ROUNDS + 1 do COLUMN_WIDTH[i + 2] = 22 end
+
+    --- @param values LocalisedString[]
+    local function write_table_row(values)
+      local s = { "", "| " } --- @type LocalisedString
+      for col, value in ipairs(values) do
+        if type(value) == "string" then
+          s[#s + 1] = string.format("%-" .. COLUMN_WIDTH[col] .. "s", value)
+        else
+          s[#s + 1] = value
+        end
+        s[#s + 1] = " | "
+      end
+      s[#s] = " |"
+      write_log(s)
+    end
+
     write_log("### Benchmark results", true)
-    write_log(string.format("| %-16s | %-30s | %-22s |", "Category", "Name", "Duration"))
-    write_log(string.format("| %s | %s | %s |", string.rep("-", 16), string.rep("-", 30), string.rep("-", 22)))
+
+    local header = { "Category", "Name", "Average" }
+    for i = 1, ROUNDS do header[i + 3] = "Round " .. i end
+    write_table_row(header)
+
+    local sep = {}
+    for i, w in ipairs(COLUMN_WIDTH) do sep[i] = string.rep("-", w) end
+    write_table_row(sep)
 
     for category, ts in pairs(test_suites) do
-      if not category_filter or category == category_filter then
-        local N = ts.N
-        local setup_each = ts.setup_each
+      local N = ts.N
+      local setup_each = ts.setup_each
 
-        for name, func in pairs(ts.tests) do
-          if ts.setup_suite then ts.setup_suite() end
+      for name, func in pairs(ts.tests) do
+        if ts.setup_suite then ts.setup_suite() end
 
-          -- Warm up
+        local average = game.create_profiler(true)
+        local row = { category, name, average }
+        for i = 1, WARMUP + ROUNDS do
           if ts.setup_round then ts.setup_round() end
+
+          local profiler = game.create_profiler()
           for _ = 1, N do
             if setup_each then setup_each() end
             func()
           end
+          profiler.stop()
 
-          local profiler = game.create_profiler(true)
-          for _ = 1, ROUNDS do
-            if ts.setup_round then ts.setup_round() end
-            profiler.restart()
-            for _ = 1, N do
-              if setup_each then setup_each() end
-              func()
-            end
-            profiler.stop()
+          if i > WARMUP then
+            average.add(profiler)
+            row[#row + 1] = profiler
           end
-          profiler.divide(ROUNDS)
-
-          write_log({ "", string.format("| %-16s | %-30s | ", category, name), profiler, " |" })
         end
+        average.divide(ROUNDS)
+        write_table_row(row)
       end
     end
 
