@@ -50,7 +50,7 @@ Notes:
 
 ## Results
 
-The `Average Duration` column is the Factorio profiler output: average time per round (covering N operations).
+The `Duration` column is the Factorio profiler output: average time per round (covering N operations).
 
 ### Mac
 
