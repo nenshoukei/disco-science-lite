@@ -25,6 +25,7 @@ return {
   require("scripts.prototype.mods.linox"),
   require("scripts.prototype.mods.maraxis"),
   require("scripts.prototype.mods.metal-and-stars"),
+  require("scripts.prototype.mods.micro-machines"),
   require("scripts.prototype.mods.mini-machines"),
   require("scripts.prototype.mods.Moshine"),
   require("scripts.prototype.mods.Nexus"),
