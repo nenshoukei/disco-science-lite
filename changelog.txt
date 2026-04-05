@@ -10,6 +10,8 @@ Date: ????
     - Add support for "Void Processing" mod by RustyNova016.
   Bugfixes:
     - Fix Quality Glassware mod support to respect the "Flask overrides" setting.
+  Graphics:
+    - Adjust color animations for Big Lab mod.
   Optimizations:
     - Fix position tracking to use `game.get_player()` instead of `game.players`.
 ---------------------------------------------------------------------------------------------------
