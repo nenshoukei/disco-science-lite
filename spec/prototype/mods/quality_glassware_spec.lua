@@ -55,7 +55,7 @@ describe("mods/quality_glassware", function ()
       assert.are.same({ 0.75, 0.75, 0.75 }, PrototypeColorRegistry.registered_colors["my-pack"])
     end)
 
-    it("does not overwrite already registered tool", function ()
+    it("overwrites already registered tool", function ()
       local existing_color = { 0.5, 0.5, 0.5 }
       PrototypeColorRegistry.set("already-registered", existing_color)
 
@@ -67,7 +67,7 @@ describe("mods/quality_glassware", function ()
 
       Mod.on_data_final_fixes()
 
-      assert.are.same(existing_color, PrototypeColorRegistry.registered_colors["already-registered"])
+      assert.are.same({ 1.00, 0.29, 0.29 }, PrototypeColorRegistry.registered_colors["already-registered"])
     end)
 
     it("skips tools with non-Quality-Glassware icon", function ()

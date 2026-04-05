@@ -74,15 +74,11 @@ end
 
 return {
   on_data_final_fixes = function ()
-    local registered_colors = PrototypeColorRegistry.registered_colors
-
-    -- Register all unregistered science-packs using Quality Glassware
+    -- Register all science-packs using Quality Glassware
     for _, tool in pairs(data.raw["tool"]) do
-      if not registered_colors[tool.name] then
-        local color = tool_to_color(tool)
-        if color then
-          PrototypeColorRegistry.set(tool.name, color)
-        end
+      local color = tool_to_color(tool)
+      if color then
+        PrototypeColorRegistry.set(tool.name, color)
       end
     end
   end,
