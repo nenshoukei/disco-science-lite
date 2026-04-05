@@ -13,7 +13,7 @@ return {
     })
     PrototypeLabRegistry.register("mini-biolab-1", {
       animation = "mks-dsl-biolab-overlay" --[[$NAME_PREFIX .. "biolab-overlay"]],
-      scale = 2 / 3,
+      scale = 3 / 5,
     })
     PrototypeLabRegistry.register("mini-alien-lab-1", {
       scale = 2 / 3,
