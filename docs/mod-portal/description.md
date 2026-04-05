@@ -53,6 +53,7 @@ These mods are supported out of the box.
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
 - [Micro Machines Mod](https://mods.factorio.com/mod/micro-machines) by Kryzeth
 - [Mini Machines Mod](https://mods.factorio.com/mod/mini-machines) by Kryzeth
+- [Nuclear Science](https://mods.factorio.com/mod/atan-nuclear-science) by atanvarno
 - [Omnimatter](https://mods.factorio.com/user/OmnissiahZelos) mods by OmnissiahZelos
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
@@ -183,6 +184,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Lab-O-Matic](https://mods.factorio.com/mod/LabOMatic) by Stargateur
 - [Micro Machines Mod](https://mods.factorio.com/mod/micro-machines) by Kryzeth
 - [Mini Machines Mod](https://mods.factorio.com/mod/mini-machines) by Kryzeth
+- [Nuclear Science](https://mods.factorio.com/mod/atan-nuclear-science) by atanvarno
 - [Omnimatter](https://mods.factorio.com/user/OmnissiahZelos) mods by OmnissiahZelos
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon

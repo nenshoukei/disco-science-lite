@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Add support for "Micro Machines Mod" mod by Kryzeth.
     - Add support for "Mini Machines Mod" mod by Kryzeth.
+    - Add support for "Nuclear Science" mod by atanvarno.
   Optimizations:
     - Fix position tracking to use `game.get_player()` instead of `game.players`.
 ---------------------------------------------------------------------------------------------------
