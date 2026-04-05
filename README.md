@@ -89,6 +89,7 @@ Supported Space-Age Planet Mods:
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
 - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
+- [Void Processing](https://mods.factorio.com/mod/VoidProcessing) by RustyNova016
 
 In addition to the mods listed above, mods that support the original Disco Science mod may still work, unless it specifically checks for the original mod by name and doesn't recognize Disco Science Lite as a compatible mod.
 
