@@ -5,6 +5,8 @@ Date: ????
     - Add support for "Micro Machines Mod" mod by Kryzeth.
     - Add support for "Mini Machines Mod" mod by Kryzeth.
     - Add support for "Nuclear Science" mod by atanvarno.
+    - Add support for "Schall Alien Loot" mod by Schallfalke.
+    - Add support for "Schall Machine Scaling" mod by Schallfalke.
     - Add support for "Void Processing" mod by RustyNova016.
   Bugfixes:
     - Fix Quality Glassware mod support to respect the "Flask overrides" setting.

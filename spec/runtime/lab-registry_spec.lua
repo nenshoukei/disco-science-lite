@@ -16,7 +16,7 @@ local function set_prototype_data(registrations, excluded, lab_prefixes, lab_suf
         registered_color_suffixes = {},
         registered_lab_prefixes = lab_prefixes or {},
         registered_lab_suffixes = lab_suffixes or {},
-      }
+      },
     }) --[[@as LuaModData]]
   else
     _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ] = nil
@@ -279,6 +279,17 @@ describe("LabRegistry", function ()
       assert.is_true(r:is_excluded("my-lab"))
       r:set_scale("my-lab", 2)
       assert.is_false(r:is_excluded("my-lab"))
+    end)
+
+    it("does nothing when lab.ignores_scale_overrides is true", function ()
+      local scale_overrides = {}
+      local r = LabRegistry.new(scale_overrides)
+      r:register("my-lab", { scale = 1, ignores_scale_overrides = true })
+      r:set_scale("my-lab", 2)
+      local registration = r:get_registration("my-lab")
+      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.are.equal(1, registration.scale)
+      assert.is_nil(scale_overrides["my-lab"])
     end)
   end)
 
