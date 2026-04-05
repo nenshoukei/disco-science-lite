@@ -11,6 +11,7 @@ _G.consts = {}
 --- @field companion string? Name of AnimationPrototype to be used as a companion, which is rendered over the overlay but not colorized.
 --- @field is_companion_under_overlay boolean? If `true`, the companion will be rendered under the overlay.
 --- @field scale number? Scale of the overlay.
+--- @field ignores_scale_overrides boolean? If `true`, ignores scale overrides by the remote interface `setLabScale`.
 
 --- Prototype-stage data passed to the runtime stage via mod-data.
 ---

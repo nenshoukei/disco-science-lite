@@ -58,6 +58,8 @@ These mods are supported out of the box.
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
+- [Schall Alien Loot](https://mods.factorio.com/mod/SchallAlienLoot) by Schallfalke
+- [Schall Machine Scaling](https://mods.factorio.com/mod/SchallMachineScaling) by Schallfalke
 - [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
 
@@ -190,6 +192,8 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [One More Tier](https://mods.factorio.com/mod/one-more-tier) by Jakzie
 - [Pyanodons](https://mods.factorio.com/user/pyanodon) by pyanodon
 - [Quality Glassware](https://mods.factorio.com/mod/quality_glassware) by Hornwitser
+- [Schall Alien Loot](https://mods.factorio.com/mod/SchallAlienLoot) by Schallfalke
+- [Schall Machine Scaling](https://mods.factorio.com/mod/SchallMachineScaling) by Schallfalke
 - [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel（ただし宇宙科学研究所は対象外）
 

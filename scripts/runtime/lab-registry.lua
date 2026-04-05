@@ -52,10 +52,11 @@ end
 --- @param lab_name string LabPrototype name.
 --- @param scale integer Scale of the lab. (Default scale is `1`)
 function LabRegistry:set_scale(lab_name, scale)
-  self.scale_overrides[lab_name] = scale
-  self.excluded_labs[lab_name] = nil
   local registration = self.registered_labs[lab_name]
   if registration then
+    if registration.ignores_scale_overrides then
+      return
+    end
     registration.scale = scale
   else
     -- Automatically creates a LabRegistration with the default values (nil).
@@ -63,6 +64,8 @@ function LabRegistry:set_scale(lab_name, scale)
       scale = scale,
     }
   end
+  self.scale_overrides[lab_name] = scale
+  self.excluded_labs[lab_name] = nil
 end
 
 --- Get the LabRegistration for the given lab name.
