@@ -35,10 +35,10 @@ describe("mods/lignumis", function ()
       -- Source: https://git.cacklingfiend.info/cacklingfiend/lignumis/src/branch/master/lignumis/prototypes/content/wood-lab.lua#L21
       on_animation = {
         layers = {
-          { filename = "__lignumis-assets__/entity/wood-lab/wood-lab.png",       width = 194, height = 174, frame_count = 33, line_length = 11 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png",       width = 242, height = 162, line_length = 1,  repeat_count = 33 },
-          { filename = "__lignumis-assets__/entity/wood-lab/wood-lab-light.png", width = 216, height = 194, frame_count = 33, line_length = 11,  blend_mode = "additive", draw_as_light = true },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",            width = 242, height = 136, line_length = 1,  repeat_count = 33, draw_as_shadow = true },
+          { filename = "__lignumis-assets__/graphics/entity/wood-lab/wood-lab.png",       width = 194, height = 174, frame_count = 33, line_length = 11 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png",                width = 242, height = 162, line_length = 1,  repeat_count = 33 },
+          { filename = "__lignumis-assets__/graphics/entity/wood-lab/wood-lab-light.png", width = 216, height = 194, frame_count = 33, line_length = 11,  blend_mode = "additive", draw_as_light = true },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                     width = 242, height = 136, line_length = 1,  repeat_count = 33, draw_as_shadow = true },
         },
       }
       _G.data.raw.lab["wood-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
@@ -49,7 +49,7 @@ describe("mods/lignumis", function ()
 
       -- light layer removed: 4 original - 1 removed = 3
       assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__lignumis-assets__/entity/wood-lab/wood-lab.png", on_animation.layers[1].filename)
+      assert.are.equal("__lignumis-assets__/graphics/entity/wood-lab/wood-lab.png", on_animation.layers[1].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
 
@@ -60,7 +60,7 @@ describe("mods/lignumis", function ()
     it("does not error when light layer is missing", function ()
       _G.data.raw.lab["wood-lab"].on_animation = {
         layers = {
-          { filename = "__lignumis-assets__/entity/wood-lab/wood-lab.png", frame_count = 33 },
+          { filename = "__lignumis-assets__/graphics/entity/wood-lab/wood-lab.png", frame_count = 33 },
         },
       }
 
