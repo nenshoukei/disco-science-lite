@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "SchallAlienLoot",
+      "files": [
+        {
+          "file": "graphics/icons/alien-science-pack.png",
+          "size": 7669,
+          "crc": 1700885723
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+name: Check Supported Mod Updates
+
+on:
+  schedule:
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Re-check all mods"
+        type: boolean
+        default: false
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+
+      - name: Run check-updates
+        env:
+          FACTORIO_SERVICE_USERNAME: ${{ secrets.FACTORIO_SERVICE_USERNAME }}
+          FACTORIO_SERVICE_TOKEN: ${{ secrets.FACTORIO_SERVICE_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.full }}" = "true" ]; then
+            ARGS="--full"
+          fi
+          uv run tasks/check-updates/check-updates.py $ARGS
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet scripts/prototype/mods/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR if changed
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date +%Y%m%d)
+          BRANCH="check-updates/${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
+          git add scripts/prototype/mods/
+          git commit -m "chore: update mod checksums with latest versions"
+          git push origin "${BRANCH}"
+          gh pr create \
+            --title "chore: update mod checksums ($(date +%Y-%m-%d))" \
+            --body "Automated update: file checksums changed in one or more supported mods. Check the diff for details." \
+            --base main \
+            --head "${BRANCH}"

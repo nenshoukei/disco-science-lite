@@ -19,7 +19,7 @@ return {
 
   on_data_final_fixes = function ()
     AnimationHelpers.modify_on_animation("wood-lab", function (modifier)
-      modifier:remove_layer("__lignumis-assets__/entity/wood-lab/wood-lab-light.png")
+      modifier:remove_layer("__lignumis-assets__/graphics/entity/wood-lab/wood-lab-light.png")
       modifier:freeze_animation()
     end)
   end,

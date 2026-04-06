@@ -35,6 +35,17 @@ return {
       ["se-deep-space-science-pack-4"] = { 0.28, 0.00, 0.84 },
     })
 
+    if mods["Krastorio2"] then
+      PrototypeColorRegistry.set_by_table({
+        ["kr-matter-research-data"]     = { 1.00, 0.20, 0.60 },
+        ["kr-matter-tech-card"]         = { 1.00, 0.20, 0.60 },
+        ["se-kr-matter-science-pack-2"] = { 1.00, 0.20, 0.60 },
+        ["kr-advanced-tech-card"]       = { 0.52, 0.13, 0.82 },
+        ["kr-singularity-tech-card"]    = { 0.52, 0.13, 0.82 },
+        ["kr-optimization-tech-card"]   = { 1.00, 0.50, 0.00 },
+      })
+    end
+
     -- We cannot colorize the space science lab because it needs a grayscale mask, but
     -- it is not allowed to make any deriviations by the mod's license.
     PrototypeLabRegistry.exclude("se-space-science-lab")

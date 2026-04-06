@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "maraxsis",
+      "files": [
+        {
+          "file": "graphics/icons/hydraulic-science-pack.png",
+          "size": 2618,
+          "crc": 3540299636
+        }
+      ]
+    }
+  ]
+}

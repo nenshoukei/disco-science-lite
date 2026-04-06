@@ -1,0 +1,118 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "bobtech",
+      "files": [
+        {
+          "file": "graphics/icons/logistic-science-pack.png",
+          "size": 9342,
+          "crc": 892656498
+        },
+        {
+          "file": "graphics/icons/science-pack-gold.png",
+          "size": 9547,
+          "crc": 1279709136
+        },
+        {
+          "file": "graphics/icons/alien-science-pack.png",
+          "size": 9510,
+          "crc": 1929633780
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-blue.png",
+          "size": 9522,
+          "crc": 1386392607
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-orange.png",
+          "size": 9538,
+          "crc": 1161904859
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-purple.png",
+          "size": 9529,
+          "crc": 2312636166
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-yellow.png",
+          "size": 9530,
+          "crc": 3782386932
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-green.png",
+          "size": 9549,
+          "crc": 763398669
+        },
+        {
+          "file": "graphics/icons/alien-science-pack-red.png",
+          "size": 9529,
+          "crc": 1923032140
+        },
+        {
+          "file": "prototypes/entity/entity.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 1420,
+              "crc": 853989401
+            },
+            {
+              "line_from": "      on_animation = {",
+              "line_to": "      },",
+              "size": 1137,
+              "crc": 1727418375
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/lab/lab2.png",
+          "size": 1654432,
+          "crc": 3039475834
+        },
+        {
+          "file": "graphics/entity/lab/lab-integration.png",
+          "size": 39620,
+          "crc": 4211231626
+        },
+        {
+          "file": "graphics/entity/lab/lab2-light.png",
+          "size": 1574647,
+          "crc": 198046950
+        },
+        {
+          "file": "graphics/entity/lab/lab-shadow.png",
+          "size": 7550,
+          "crc": 52879805
+        },
+        {
+          "file": "graphics/entity/lab/lab-red.png",
+          "size": 1418142,
+          "crc": 1372779813
+        },
+        {
+          "file": "prototypes/entity/entity-alien.lua",
+          "ranges": [
+            {
+              "line_from": "      on_animation = {",
+              "line_to": "      },",
+              "size": 1528,
+              "crc": 4107153509
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/lab/lab-alien.png",
+          "size": 1624338,
+          "crc": 2217469632
+        },
+        {
+          "file": "graphics/entity/lab/lab-alien-light.png",
+          "size": 1458050,
+          "crc": 204548124
+        }
+      ]
+    }
+  ]
+}

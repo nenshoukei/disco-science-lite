@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "rabbasca-assets",
+      "files": [
+        {
+          "file": "graphics/recolor/icons/athletic-science-pack.png",
+          "size": 9619,
+          "crc": 2325245973
+        }
+      ]
+    }
+  ]
+}

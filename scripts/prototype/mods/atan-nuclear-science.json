@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "atan-nuclear-science",
+      "files": [
+        {
+          "file": "graphics/icons/nuclear-science-pack.png",
+          "size": 8693,
+          "crc": 1082354427
+        }
+      ]
+    }
+  ]
+}

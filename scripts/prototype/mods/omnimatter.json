@@ -1,0 +1,41 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "omnilib",
+      "files": [
+        {
+          "file": "graphics/icons/science-pack/production-science-pack.png",
+          "size": 4979,
+          "crc": 3713450097
+        }
+      ]
+    },
+    {
+      "name": "omnimatter_energy",
+      "files": [
+        {
+          "file": "graphics/icons/energy-science-pack.png",
+          "size": 6200,
+          "crc": 1822248111
+        },
+        {
+          "file": "prototypes/entities/burner.lua",
+          "ranges": [
+            {
+              "line_from": "    setOnAnimation({",
+              "line_to": "    }):",
+              "size": 1544,
+              "crc": 1811348133
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/omnitor-lab/omnitor-lab.png",
+          "size": 1601022,
+          "crc": 1084586567
+        }
+      ]
+    }
+  ]
+}

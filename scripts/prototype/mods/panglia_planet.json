@@ -1,0 +1,20 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "panglia_planet",
+      "files": [
+        {
+          "file": "graphics/icons/datacell-dna-raw.png",
+          "size": 7049,
+          "crc": 897354407
+        },
+        {
+          "file": "graphics/icons/datacell-dna-sequenced.png",
+          "size": 7812,
+          "crc": 777663018
+        }
+      ]
+    }
+  ]
+}

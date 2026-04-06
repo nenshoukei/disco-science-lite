@@ -42,7 +42,7 @@ describe("mods/bobsmods", function ()
       -- Source: https://github.com/modded-factorio/bobsmods/blob/main/bobtech/prototypes/entity/entity.lua#L180
       on_animation_burner = {
         layers = {
-          { filename = "__bobtech__/graphics/entity/lab/burner-lab.png",      frame_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-red.png",         frame_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
         },

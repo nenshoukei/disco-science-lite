@@ -1,0 +1,46 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "fusion-lab",
+      "files": [
+        {
+          "file": "data.lua",
+          "ranges": [
+            {
+              "line_from": "\t\ton_animation =",
+              "line_to": "\t\t},",
+              "size": 672,
+              "crc": 201096193
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/fusion-lab/photometric-lab-hr-animation-1.png",
+          "size": 2503874,
+          "crc": 159846953
+        },
+        {
+          "file": "graphics/entity/fusion-lab/photometric-lab-hr-animation-2.png",
+          "size": 632174,
+          "crc": 1006653571
+        },
+        {
+          "file": "graphics/entity/fusion-lab/photometric-lab-hr-emission-1.png",
+          "size": 1203251,
+          "crc": 1057880857
+        },
+        {
+          "file": "graphics/entity/fusion-lab/photometric-lab-hr-emission-2.png",
+          "size": 284236,
+          "crc": 152912744
+        },
+        {
+          "file": "graphics/entity/fusion-lab/photometric-lab-hr-shadow.png",
+          "size": 26448,
+          "crc": 2947292635
+        }
+      ]
+    }
+  ]
+}

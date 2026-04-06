@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mod Update Check List",
+  "description": "List of Factorio mods to monitor for file changes. Used by check-updates.py.",
+  "type": "object",
+  "required": ["mods"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "mods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "files"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The mod name on the Factorio mod portal."
+          },
+          "files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["file"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "description": "Path to the file inside the mod zip (relative to the mod root)."
+                    },
+                    "size": {
+                      "type": "integer",
+                      "description": "Expected size in bytes of the file."
+                    },
+                    "crc": {
+                      "type": "integer",
+                      "description": "Expected CRC-32 checksum of the file."
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["file"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "description": "Path to the file inside the mod zip (relative to the mod root)."
+                    },
+                    "ranges": {
+                      "type": "array",
+                      "description": "Multiple line ranges to monitor within this file.",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "required": ["line_from", "line_to"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "line_from": {
+                            "type": ["string", "integer"],
+                            "description": "Start of the range. Integer = 1-based line number. String = exact line content to match."
+                          },
+                          "line_to": {
+                            "type": ["string", "integer"],
+                            "description": "End of the range (inclusive). Integer = 1-based line number. String = exact line content to match."
+                          },
+                          "size": {
+                            "type": "integer",
+                            "description": "Expected size in bytes of the extracted range."
+                          },
+                          "crc": {
+                            "type": "integer",
+                            "description": "Expected CRC-32 checksum of the extracted range."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "castra",
+      "files": [
+        {
+          "file": "graphics/icons/battlefield-science-pack.png",
+          "size": 9370,
+          "crc": 966960433
+        }
+      ]
+    }
+  ]
+}

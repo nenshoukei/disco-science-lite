@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "skewer_planet_vesta_assets",
+      "files": [
+        {
+          "file": "graphics/icons/gas-manipulation-science-pack.png",
+          "size": 6135,
+          "crc": 3909733781
+        }
+      ]
+    }
+  ]
+}

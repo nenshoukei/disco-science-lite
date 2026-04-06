@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Igrys",
+      "files": [
+        {
+          "file": "Assets/Items/mineral-science-pack.png",
+          "size": 6076,
+          "crc": 570971213
+        }
+      ]
+    }
+  ]
+}

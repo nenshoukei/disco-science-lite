@@ -1,0 +1,57 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "corrundum",
+      "files": [
+        {
+          "file": "graphics/icons/electrochemical-science-pack.png",
+          "size": 16822,
+          "crc": 97860248
+        },
+        {
+          "file": "prototypes/entities.lua",
+          "ranges": [
+            {
+              "line_from": "      on_animation = ",
+              "line_to": "      },",
+              "size": 1792,
+              "crc": 840329103
+            },
+            {
+              "line_from": "      on_animation = ",
+              "line_to": "      },",
+              "size": 3152,
+              "crc": 3919619247
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/chem-lab-on-mask.png",
+          "size": 121597,
+          "crc": 1568998646
+        },
+        {
+          "file": "graphics/entity/chemical-plant-smoke-inner-blue.png",
+          "size": 201314,
+          "crc": 3801042920
+        },
+        {
+          "file": "graphics/entity/chemical-plant-smoke-outer-blue.png",
+          "size": 988969,
+          "crc": 214469527
+        },
+        {
+          "file": "graphics/entity/lab-3-x-frame.png",
+          "size": 4714637,
+          "crc": 3529092793
+        },
+        {
+          "file": "graphics/entity/lab-light-three-times-frames-no-change.png",
+          "size": 4048760,
+          "crc": 3286935215
+        }
+      ]
+    }
+  ]
+}

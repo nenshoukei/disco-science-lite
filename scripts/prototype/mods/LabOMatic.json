@@ -1,0 +1,61 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "LabOMatic",
+      "files": [
+        {
+          "file": "data.lua",
+          "ranges": [
+            {
+              "line_from": "labomatic.on_animation =",
+              "line_to": "}",
+              "size": 1234,
+              "crc": 2227403532
+            }
+          ]
+        },
+        {
+          "file": "graphics/lab_albedo_anim.png",
+          "size": 195019,
+          "crc": 3975670647
+        },
+        {
+          "file": "graphics/lab_albedo_anim_x4.png",
+          "size": 3695769,
+          "crc": 924676190
+        },
+        {
+          "file": "graphics/lab_light_anim.png",
+          "size": 309440,
+          "crc": 2037152398
+        },
+        {
+          "file": "graphics/lab_light_anim_x4.png",
+          "size": 2397546,
+          "crc": 2011593106
+        },
+        {
+          "file": "graphics/lab_shadow.png",
+          "size": 1869,
+          "crc": 2900810387
+        },
+        {
+          "file": "graphics/lab_shadow_x4.png",
+          "size": 5674,
+          "crc": 540079881
+        },
+        {
+          "file": "graphics/lab_albedo_ao.png",
+          "size": 8965,
+          "crc": 688095337
+        },
+        {
+          "file": "graphics/lab_albedo_ao_x4.png",
+          "size": 30155,
+          "crc": 2412738186
+        }
+      ]
+    }
+  ]
+}

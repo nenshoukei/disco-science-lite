@@ -1,0 +1,96 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "pyalienlifegraphics",
+      "files": [
+        {
+          "file": "graphics/icons/py-science-pack-1.png",
+          "size": 2928,
+          "crc": 3953662141
+        },
+        {
+          "file": "graphics/icons/py-science-pack-2.png",
+          "size": 2448,
+          "crc": 2734695522
+        },
+        {
+          "file": "graphics/icons/py-science-pack-3.png",
+          "size": 3153,
+          "crc": 4109270506
+        }
+      ]
+    },
+    {
+      "name": "pyfusionenergygraphics",
+      "files": [
+        {
+          "file": "graphics/icons/production-science-pack.png",
+          "size": 2174,
+          "crc": 3896314157
+        }
+      ]
+    },
+    {
+      "name": "pycoalprocessing",
+      "files": [
+        {
+          "file": "prototypes/buildings/lab.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation =",
+              "line_to": "    },",
+              "size": 2140,
+              "crc": 2374092381
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pycoalprocessinggraphics",
+      "files": [
+        {
+          "file": "graphics/icons/py-science-pack-1.png",
+          "size": 1667,
+          "crc": 3462653103
+        },
+        {
+          "file": "graphics/entity/lab-mk01/beam.png",
+          "size": 62354,
+          "crc": 1833415302
+        },
+        {
+          "file": "graphics/entity/lab-mk01/beam-bw.png",
+          "size": 60689,
+          "crc": 207350409
+        },
+        {
+          "file": "graphics/entity/lab-mk01/l.png",
+          "size": 2805,
+          "crc": 24803607
+        },
+        {
+          "file": "graphics/entity/lab-mk01/l-bw.png",
+          "size": 2258,
+          "crc": 3546800907
+        },
+        {
+          "file": "graphics/entity/lab-mk01/raw.png",
+          "size": 398621,
+          "crc": 4155543796
+        },
+        {
+          "file": "graphics/entity/lab-mk01/raw-bw.png",
+          "size": 400457,
+          "crc": 2925291661
+        },
+        {
+          "file": "graphics/entity/lab-mk01/sh.png",
+          "size": 1392,
+          "crc": 1315107650
+        }
+      ]
+    }
+  ]
+}

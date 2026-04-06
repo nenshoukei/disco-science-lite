@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "pelagos",
+      "files": [
+        {
+          "file": "graphics/pelagos-science-pack.png",
+          "size": 8373,
+          "crc": 3328009212
+        }
+      ]
+    }
+  ]
+}

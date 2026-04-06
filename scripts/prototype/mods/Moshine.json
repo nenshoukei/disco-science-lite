@@ -1,0 +1,71 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Moshine",
+      "files": [
+        {
+          "file": "graphics/icons/datacell-empty.png",
+          "size": 6789,
+          "crc": 1278871379
+        },
+        {
+          "file": "graphics/icons/datacell-raw-data.png",
+          "size": 7432,
+          "crc": 3083306494
+        },
+        {
+          "file": "graphics/icons/datacell-ai-model-data.png",
+          "size": 7806,
+          "crc": 3517071510
+        },
+        {
+          "file": "graphics/icons/datacell-equation.png",
+          "size": 7478,
+          "crc": 121423405
+        },
+        {
+          "file": "graphics/icons/datacell-solved-equation.png",
+          "size": 7659,
+          "crc": 3383562713
+        },
+        {
+          "file": "prototypes/entity/supercomputer.lua",
+          "ranges": [
+            {
+              "line_from": "local planetary_teleporter_on_animation = {",
+              "line_to": "}",
+              "size": 1571,
+              "crc": 713861767
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/supercomputer/supercomputer_anim.png",
+          "size": 617132,
+          "crc": 2583148583
+        },
+        {
+          "file": "graphics/entity/supercomputer/supercomputer_glow.png",
+          "size": 16964,
+          "crc": 2300661721
+        },
+        {
+          "file": "graphics/entity/supercomputer/supercomputer_light.png",
+          "size": 35442,
+          "crc": 4057791058
+        },
+        {
+          "file": "graphics/entity/supercomputer/teleporter-base.png",
+          "size": 321554,
+          "crc": 986404813
+        },
+        {
+          "file": "graphics/entity/supercomputer/teleporter-shadow.png",
+          "size": 5418,
+          "crc": 2796739810
+        }
+      ]
+    }
+  ]
+}

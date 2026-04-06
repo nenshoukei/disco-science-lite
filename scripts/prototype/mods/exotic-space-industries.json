@@ -1,0 +1,167 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "exotic-space-industries",
+      "files": [
+        {
+          "file": "prototypes/dark_age/lab.lua",
+          "ranges": [
+            {
+              "line_from": "lab.on_animation = {",
+              "line_to": "}",
+              "size": 1297,
+              "crc": 593254016
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "exotic-space-industries-graphics-1",
+      "files": [
+        {
+          "file": "graphics/items/dark-age-tech.png",
+          "size": 8466,
+          "crc": 2667748060
+        },
+        {
+          "file": "graphics/items/steam-age-tech.png",
+          "size": 8935,
+          "crc": 475277117
+        },
+        {
+          "file": "graphics/items/electric-age-tech.png",
+          "size": 22439,
+          "crc": 3591894847
+        },
+        {
+          "file": "graphics/items/computer-age-tech.png",
+          "size": 9459,
+          "crc": 3881772443
+        },
+        {
+          "file": "graphics/items/advanced-computer-age-tech.png",
+          "size": 23845,
+          "crc": 3306638956
+        },
+        {
+          "file": "graphics/items/alien-computer-age-tech.png",
+          "size": 24022,
+          "crc": 2254354399
+        },
+        {
+          "file": "graphics/items/quantum-age-tech.png",
+          "size": 8330,
+          "crc": 714220898
+        },
+        {
+          "file": "graphics/items/fusion-quantum-age-tech.png",
+          "size": 22132,
+          "crc": 1748592497
+        },
+        {
+          "file": "graphics/items/exotic-age-tech.png",
+          "size": 9129,
+          "crc": 1601790325
+        },
+        {
+          "file": "graphics/items/black-hole-exotic-age-tech.png",
+          "size": 24028,
+          "crc": 420218424
+        },
+        {
+          "file": "graphics/items/space-data.png",
+          "size": 29504,
+          "crc": 3662058291
+        },
+        {
+          "file": "graphics/entities/dark-age-lab_animation.png",
+          "size": 1105742,
+          "crc": 1503674880
+        }
+      ]
+    },
+    {
+      "name": "exotic-space-industries-remembrance",
+      "files": [
+        {
+          "file": "prototypes/dark-age/lab.lua",
+          "ranges": [
+            {
+              "line_from": "lab.on_animation = {",
+              "line_to": "}",
+              "size": 1346,
+              "crc": 3022904515
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "exotic-space-industries-remembrance-graphics-1",
+      "files": [
+        {
+          "file": "graphics/items/dark-age-tech.png",
+          "size": 8466,
+          "crc": 2667748060
+        },
+        {
+          "file": "graphics/items/steam-age-tech.png",
+          "size": 8935,
+          "crc": 475277117
+        },
+        {
+          "file": "graphics/items/electric-age-tech.png",
+          "size": 22439,
+          "crc": 3591894847
+        },
+        {
+          "file": "graphics/items/computer-age-tech.png",
+          "size": 9459,
+          "crc": 3881772443
+        },
+        {
+          "file": "graphics/items/advanced-computer-age-tech.png",
+          "size": 23845,
+          "crc": 3306638956
+        },
+        {
+          "file": "graphics/items/alien-computer-age-tech.png",
+          "size": 24022,
+          "crc": 2254354399
+        },
+        {
+          "file": "graphics/items/quantum-age-tech.png",
+          "size": 8330,
+          "crc": 714220898
+        },
+        {
+          "file": "graphics/items/fusion-quantum-age-tech.png",
+          "size": 22132,
+          "crc": 1748592497
+        },
+        {
+          "file": "graphics/items/exotic-age-tech.png",
+          "size": 9129,
+          "crc": 1601790325
+        },
+        {
+          "file": "graphics/items/black-hole-exotic-age-tech.png",
+          "size": 24028,
+          "crc": 420218424
+        },
+        {
+          "file": "graphics/items/space-data.png",
+          "size": 29504,
+          "crc": 3662058291
+        },
+        {
+          "file": "graphics/entities/dark-age-lab_animation.png",
+          "size": 1105742,
+          "crc": 1503674880
+        }
+      ]
+    }
+  ]
+}

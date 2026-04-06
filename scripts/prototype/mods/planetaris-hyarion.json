@@ -1,0 +1,20 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "planetaris-hyarion",
+      "files": [
+        {
+          "file": "graphics/icons/polishing-science-pack.png",
+          "size": 3148,
+          "crc": 26389946
+        },
+        {
+          "file": "graphics/icons/refraction-science-pack.png",
+          "size": 8729,
+          "crc": 3788979863
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Paracelsin-Graphics",
+      "files": [
+        {
+          "file": "graphics/icons/galvanization-science-pack.png",
+          "size": 2646,
+          "crc": 1991015322
+        }
+      ]
+    }
+  ]
+}

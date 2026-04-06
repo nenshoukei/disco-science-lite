@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "planetaris-arig",
+      "files": [
+        {
+          "file": "graphics/icons/compression-science-pack.png",
+          "size": 4468,
+          "crc": 730093334
+        }
+      ]
+    }
+  ]
+}

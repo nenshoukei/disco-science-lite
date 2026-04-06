@@ -1,0 +1,75 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Nexus-Graphics",
+      "files": [
+        {
+          "file": "graphics/items/promethium-882-science-pack.png",
+          "size": 10095,
+          "crc": 1774919142
+        },
+        {
+          "file": "graphics/items/antimatter-science-pack.png",
+          "size": 8447,
+          "crc": 924307337
+        },
+        {
+          "file": "graphics/items/omega-automation-science-pack.png",
+          "size": 8258,
+          "crc": 2503200679
+        },
+        {
+          "file": "graphics/items/omega-logistic-science-pack.png",
+          "size": 8600,
+          "crc": 4160078672
+        },
+        {
+          "file": "graphics/items/omega-military-science-pack.png",
+          "size": 8572,
+          "crc": 3162591263
+        },
+        {
+          "file": "graphics/items/omega-chemical-science-pack.png",
+          "size": 8628,
+          "crc": 2026145648
+        },
+        {
+          "file": "graphics/items/omega-production-science-pack.png",
+          "size": 8649,
+          "crc": 553902197
+        },
+        {
+          "file": "graphics/items/omega-utility-science-pack.png",
+          "size": 8586,
+          "crc": 1792580329
+        },
+        {
+          "file": "graphics/items/omega-space-science-pack.png",
+          "size": 6858,
+          "crc": 3643519711
+        },
+        {
+          "file": "graphics/items/omega-metallurgic-science-pack.png",
+          "size": 8296,
+          "crc": 3459266743
+        },
+        {
+          "file": "graphics/items/omega-agricultural-science-pack.png",
+          "size": 8442,
+          "crc": 4061202403
+        },
+        {
+          "file": "graphics/items/omega-electromagnetic-science-pack.png",
+          "size": 8691,
+          "crc": 262005688
+        },
+        {
+          "file": "graphics/items/omega-cryogenic-science-pack.png",
+          "size": 8552,
+          "crc": 3626742750
+        }
+      ]
+    }
+  ]
+}

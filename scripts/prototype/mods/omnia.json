@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "omnia",
+      "files": [
+        {
+          "file": "graphics/icons/omnia-science-1.png",
+          "size": 40594,
+          "crc": 4205915909
+        }
+      ]
+    }
+  ]
+}

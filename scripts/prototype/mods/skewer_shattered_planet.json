@@ -1,0 +1,70 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "skewer_shattered_planet_assets",
+      "files": [
+        {
+          "file": "graphics/icons/heu_science_pack.png",
+          "size": 7359,
+          "crc": 1185358161
+        },
+        {
+          "file": "graphics/icons/hep_science_pack.png",
+          "size": 7145,
+          "crc": 4240890396
+        },
+        {
+          "file": "graphics/icons/hea_science_pack.png",
+          "size": 7476,
+          "crc": 1165737829
+        },
+        {
+          "file": "graphics/icons/hec_science_pack.png",
+          "size": 6942,
+          "crc": 45671601
+        },
+        {
+          "file": "graphics/icons/hef_science_pack.png",
+          "size": 7110,
+          "crc": 1252201835
+        },
+        {
+          "file": "graphics/icons/anti_matter_cell.png",
+          "size": 7926,
+          "crc": 2475730604
+        }
+      ]
+    },
+    {
+      "name": "skewer_shattered_planet",
+      "files": [
+        {
+          "file": "prototypes/buildings.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation =",
+              "line_to": "    },",
+              "size": 1144,
+              "crc": 3995012985
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "space-exploration-graphics-4",
+      "files": [
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png"
+        },
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory.png"
+        },
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-tint.png"
+        }
+      ]
+    }
+  ]
+}
