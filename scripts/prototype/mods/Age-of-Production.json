@@ -1,0 +1,41 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Age-of-Production",
+      "files": [
+        {
+          "file": "prototypes/entities.lua",
+          "ranges": [
+            {
+              "line_from": "        on_animation =",
+              "line_to": "        },",
+              "size": 1659,
+              "crc": 2847356610
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Age-of-Production-Graphics",
+      "files": [
+        {
+          "file": "graphics/entity/quantum-computer/quantum-computer-hr-animation-1.png",
+          "size": 3478006,
+          "crc": 2126911002
+        },
+        {
+          "file": "graphics/entity/quantum-computer/quantum-computer-hr-emission-1.png",
+          "size": 2575793,
+          "crc": 2053234607
+        },
+        {
+          "file": "graphics/entity/quantum-computer/quantum-computer-hr-shadow.png",
+          "size": 30475,
+          "crc": 2929535700
+        }
+      ]
+    }
+  ]
+}

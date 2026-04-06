@@ -1,0 +1,46 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "planet-muluna",
+      "files": [
+        {
+          "file": "prototypes/entity/cryolab.lua",
+          "ranges": [
+            {
+              "line_from": "cryolab.on_animation = {",
+              "line_to": "  }",
+              "size": 1186,
+              "crc": 1674777438
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "muluna-graphics",
+      "files": [
+        {
+          "file": "graphics/icons/space-science-pack.png",
+          "size": 14636,
+          "crc": 3192693850
+        },
+        {
+          "file": "graphics/photometric-lab/photometric-lab-hr-animation-1.png",
+          "size": 2634413,
+          "crc": 1043280610
+        },
+        {
+          "file": "graphics/photometric-lab/photometric-lab-hr-emission-1.png",
+          "size": 1203251,
+          "crc": 1057880857
+        },
+        {
+          "file": "graphics/photometric-lab/photometric-lab-hr-shadow.png",
+          "size": 18154,
+          "crc": 3477868657
+        }
+      ]
+    }
+  ]
+}

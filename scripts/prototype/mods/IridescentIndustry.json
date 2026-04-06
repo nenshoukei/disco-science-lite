@@ -1,0 +1,20 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "IridescentIndustry",
+      "files": [
+        {
+          "file": "graphics/icons/iridescent-science-pack.png",
+          "size": 6935,
+          "crc": 490122313
+        },
+        {
+          "file": "graphics/icons/polychromatic-science-pack.png",
+          "size": 6966,
+          "crc": 3616100557
+        }
+      ]
+    }
+  ]
+}

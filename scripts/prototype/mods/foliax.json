@@ -1,0 +1,72 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "foliax",
+      "files": [
+        {
+          "file": "prototypes/entity.lua",
+          "ranges": [
+            {
+              "line_from": "burner_biolab.on_animation = {",
+              "line_to": "    }",
+              "size": 1613,
+              "crc": 2920775775
+            },
+            {
+              "line_from": "burner_biolab_mk2.on_animation = {",
+              "line_to": "    }",
+              "size": 1618,
+              "crc": 410791001
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cr-commons",
+      "files": [
+        {
+          "file": "graphics/icons/research-transportation.png",
+          "size": 6476,
+          "crc": 4148431975
+        },
+        {
+          "file": "graphics/icons/research-machine.png",
+          "size": 6444,
+          "crc": 3401982237
+        },
+        {
+          "file": "graphics/icons/research-biology.png",
+          "size": 6403,
+          "crc": 1194471649
+        },
+        {
+          "file": "graphics/icons/research-power.png",
+          "size": 6431,
+          "crc": 3756634821
+        },
+        {
+          "file": "graphics/icons/research-optimization.png",
+          "size": 6488,
+          "crc": 2590339073
+        },
+        {
+          "file": "graphics/icons/research-violence.png",
+          "size": 5579,
+          "crc": 2922989713
+        },
+        {
+          "file": "graphics/entity/biolab/biolab-color-mask.png",
+          "size": 2144470,
+          "crc": 388300597
+        },
+        {
+          "file": "graphics/entity/biolab/biolab-light-mask.png",
+          "size": 911869,
+          "crc": 1593974927
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "slp-dyson-sphere-reworked",
+      "files": [
+        {
+          "file": "graphics/icons/sun-science-pack.png",
+          "size": 10558,
+          "crc": 1802279655
+        }
+      ]
+    }
+  ]
+}

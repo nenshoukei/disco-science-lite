@@ -1,0 +1,61 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "metal-and-stars",
+      "files": [
+        {
+          "file": "prototypes/entity/particle-accelerator.lua",
+          "ranges": [
+            {
+              "line_from": "  on_animation = {",
+              "line_to": "  },",
+              "size": 1412,
+              "crc": 3346510650
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "metal-and-stars-graphics",
+      "files": [
+        {
+          "file": "graphics/icons/quantum-science-pack.png",
+          "size": 5447,
+          "crc": 2910233845
+        },
+        {
+          "file": "graphics/icons/anomaly-science-pack.png",
+          "size": 9151,
+          "crc": 229200516
+        },
+        {
+          "file": "graphics/icons/nanite-science-pack.png",
+          "size": 8882,
+          "crc": 1475295229
+        },
+        {
+          "file": "graphics/icons/ring-science-pack.png",
+          "size": 20475,
+          "crc": 2387627402
+        },
+        {
+          "file": "graphics/entity/particle-accelerator/particle-accelerator-hr-animation.png",
+          "size": 15740671,
+          "crc": 2137277167
+        },
+        {
+          "file": "graphics/entity/particle-accelerator/particle-accelerator-hr-animation-emission.png",
+          "size": 6102351,
+          "crc": 4211178779
+        },
+        {
+          "file": "graphics/entity/particle-accelerator/particle-accelerator-hr-shadow.png",
+          "size": 51741,
+          "crc": 4080652615
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "fusion_machines",
+      "files": [
+        {
+          "file": "fusion-lab.lua",
+          "ranges": [
+            {
+              "line_from": "\t\ton_animation = {",
+              "line_to": "\t\t},",
+              "size": 1733,
+              "crc": 228412241
+            }
+          ]
+        },
+        {
+          "file": "graphics/fusion_lab/fusion-lab-hr-animation-1.png",
+          "size": 2662492,
+          "crc": 732599626
+        },
+        {
+          "file": "graphics/fusion_lab/fusion-lab-hr-animation-2.png",
+          "size": 631537,
+          "crc": 3858126228
+        },
+        {
+          "file": "graphics/fusion_lab/fusion-lab-hr-emission-1.png",
+          "size": 1082185,
+          "crc": 1962876879
+        },
+        {
+          "file": "graphics/fusion_lab/fusion-lab-hr-emission-2.png",
+          "size": 257189,
+          "crc": 3932033404
+        },
+        {
+          "file": "graphics/fusion_lab/fusion-lab-hr-shadow.png",
+          "size": 14384,
+          "crc": 631024894
+        }
+      ]
+    }
+  ]
+}

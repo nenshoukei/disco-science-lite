@@ -1,0 +1,31 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "aai-industry",
+      "files": [
+        {
+          "file": "prototypes/phase-1/entity/entity-burner-lab.lua",
+          "ranges": [
+            {
+              "line_from": "burner_lab.on_animation =",
+              "line_to": "}",
+              "size": 1195,
+              "crc": 1979850499
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/burner-lab/burner-lab.png",
+          "size": 394294,
+          "crc": 279678710
+        },
+        {
+          "file": "graphics/entity/burner-lab/burner-lab-light.png",
+          "size": 538334,
+          "crc": 762023061
+        }
+      ]
+    }
+  ]
+}

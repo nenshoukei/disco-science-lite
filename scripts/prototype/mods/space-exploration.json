@@ -1,0 +1,140 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "space-exploration-graphics",
+      "files": [
+        {
+          "file": "graphics/compatability/icons/matter-analysis.png",
+          "size": 2649,
+          "crc": 2678518103
+        },
+        {
+          "file": "graphics/icons/beaker/orange.png",
+          "size": 4629,
+          "crc": 4050285849
+        },
+        {
+          "file": "graphics/icons/catalogue/astronomic-1.png",
+          "size": 4234,
+          "crc": 3638169290
+        },
+        {
+          "file": "graphics/icons/catalogue/astronomic-2.png",
+          "size": 4293,
+          "crc": 1742492638
+        },
+        {
+          "file": "graphics/icons/catalogue/astronomic-3.png",
+          "size": 4301,
+          "crc": 3518925289
+        },
+        {
+          "file": "graphics/icons/catalogue/astronomic-4.png",
+          "size": 4334,
+          "crc": 3349760445
+        },
+        {
+          "file": "graphics/icons/catalogue/biological-1.png",
+          "size": 4381,
+          "crc": 1025567067
+        },
+        {
+          "file": "graphics/icons/catalogue/biological-2.png",
+          "size": 4314,
+          "crc": 3015851978
+        },
+        {
+          "file": "graphics/icons/catalogue/biological-3.png",
+          "size": 4332,
+          "crc": 1383723817
+        },
+        {
+          "file": "graphics/icons/catalogue/biological-4.png",
+          "size": 4338,
+          "crc": 2111518830
+        },
+        {
+          "file": "graphics/icons/catalogue/energy-1.png",
+          "size": 4222,
+          "crc": 4045530139
+        },
+        {
+          "file": "graphics/icons/catalogue/energy-2.png",
+          "size": 4276,
+          "crc": 3885468298
+        },
+        {
+          "file": "graphics/icons/catalogue/energy-3.png",
+          "size": 4295,
+          "crc": 3571247889
+        },
+        {
+          "file": "graphics/icons/catalogue/energy-4.png",
+          "size": 4478,
+          "crc": 899412651
+        },
+        {
+          "file": "graphics/icons/catalogue/material-1.png",
+          "size": 4263,
+          "crc": 491542438
+        },
+        {
+          "file": "graphics/icons/catalogue/material-2.png",
+          "size": 4326,
+          "crc": 3229815111
+        },
+        {
+          "file": "graphics/icons/catalogue/material-3.png",
+          "size": 4309,
+          "crc": 4107530034
+        },
+        {
+          "file": "graphics/icons/catalogue/material-4.png",
+          "size": 4354,
+          "crc": 271282342
+        },
+        {
+          "file": "graphics/icons/catalogue/deep-1.png",
+          "size": 4320,
+          "crc": 2369937291
+        },
+        {
+          "file": "graphics/icons/catalogue/deep-2.png",
+          "size": 4349,
+          "crc": 358712203
+        },
+        {
+          "file": "graphics/icons/catalogue/deep-3.png",
+          "size": 4359,
+          "crc": 1326895331
+        },
+        {
+          "file": "graphics/icons/catalogue/deep-4.png",
+          "size": 4359,
+          "crc": 4259264882
+        }
+      ]
+    },
+    {
+      "name": "space-exploration-graphics-4",
+      "files": [
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory.png",
+          "size": 2989898,
+          "crc": 3884412936
+        },
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-tint.png",
+          "size": 2060345,
+          "crc": 4167816259
+        },
+        {
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png",
+          "size": 168849,
+          "crc": 2163339164
+        }
+      ]
+    }
+  ]
+}

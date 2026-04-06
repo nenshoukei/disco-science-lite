@@ -1,0 +1,189 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Krastorio2",
+      "files": [
+        {
+          "file": "prototypes/buildings/advanced-lab.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 2712,
+              "crc": 4271820359
+            }
+          ]
+        },
+        {
+          "file": "prototypes/buildings/singularity-lab.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 1789,
+              "crc": 3884640941
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Krastorio2Assets",
+      "files": [
+        {
+          "file": "icons/items/blank-tech-card-1.png",
+          "size": 6147,
+          "crc": 1635806407
+        },
+        {
+          "file": "icons/cards/biters-research-data.png",
+          "size": 7176,
+          "crc": 680007252
+        },
+        {
+          "file": "icons/cards/matter-research-data.png",
+          "size": 7125,
+          "crc": 2719183291
+        },
+        {
+          "file": "icons/cards/space-research-data.png",
+          "size": 7236,
+          "crc": 516275218
+        },
+        {
+          "file": "icons/cards/basic-tech-card.png",
+          "size": 7259,
+          "crc": 461106903
+        },
+        {
+          "file": "icons/cards/matter-tech-card.png",
+          "size": 6973,
+          "crc": 4109392048
+        },
+        {
+          "file": "icons/cards/advanced-tech-card.png",
+          "size": 7078,
+          "crc": 776953735
+        },
+        {
+          "file": "icons/cards/singularity-tech-card.png",
+          "size": 6722,
+          "crc": 744573985
+        },
+        {
+          "file": "icons/cards/automation-tech-card.png",
+          "size": 7299,
+          "crc": 2765068281
+        },
+        {
+          "file": "icons/cards/logistic-tech-card.png",
+          "size": 7089,
+          "crc": 3526455626
+        },
+        {
+          "file": "icons/cards/military-tech-card.png",
+          "size": 7252,
+          "crc": 3427561405
+        },
+        {
+          "file": "icons/cards/chemical-tech-card.png",
+          "size": 7294,
+          "crc": 2119103733
+        },
+        {
+          "file": "icons/cards/production-tech-card.png",
+          "size": 7059,
+          "crc": 1711600677
+        },
+        {
+          "file": "icons/cards/utility-tech-card.png",
+          "size": 7177,
+          "crc": 2067090610
+        },
+        {
+          "file": "icons/cards/optimization-tech-card.png",
+          "size": 6450,
+          "crc": 3499303344
+        },
+        {
+          "file": "buildings/advanced-lab/advanced-lab-anim.png",
+          "size": 194877,
+          "crc": 2404468805
+        },
+        {
+          "file": "buildings/advanced-lab/advanced-lab-anim-light.png",
+          "size": 171181,
+          "crc": 137961660
+        },
+        {
+          "file": "buildings/advanced-lab/advanced-lab-ao.png",
+          "size": 8965,
+          "crc": 688095337
+        },
+        {
+          "file": "buildings/advanced-lab/advanced-lab-light-anim.png",
+          "size": 171991,
+          "crc": 2022033253
+        },
+        {
+          "file": "buildings/advanced-lab/advanced-lab-shadow.png",
+          "size": 1869,
+          "crc": 2900810387
+        },
+        {
+          "file": "buildings/singularity-lab/singularity-lab-glow.png",
+          "size": 596921,
+          "crc": 3918241692
+        },
+        {
+          "file": "buildings/singularity-lab/singularity-lab-glow-light.png",
+          "size": 508218,
+          "crc": 3719517109
+        },
+        {
+          "file": "buildings/singularity-lab/singularity-lab-light.png",
+          "size": 11595,
+          "crc": 4164521281
+        },
+        {
+          "file": "buildings/singularity-lab/singularity-lab-sh.png",
+          "size": 17470,
+          "crc": 507185201
+        },
+        {
+          "file": "buildings/singularity-lab/singularity-lab-working.png",
+          "size": 3717236,
+          "crc": 3179618702
+        }
+      ]
+    },
+    {
+      "name": "Krastorio2-spaced-out",
+      "files": [
+        {
+          "file": "prototypes/buildings/advanced-lab.lua",
+          "ranges": [
+            {
+              "line_from": "\t\ton_animation = {",
+              "line_to": "\t\t},",
+              "size": 2288,
+              "crc": 2945384534
+            }
+          ]
+        },
+        {
+          "file": "prototypes/buildings/singularity-lab.lua",
+          "ranges": [
+            {
+              "line_from": "\t\ton_animation = {",
+              "line_to": "\t\t},",
+              "size": 1509,
+              "crc": 3410351940
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "janus",
+      "files": [
+        {
+          "file": "graphics/time-science.png",
+          "size": 955144,
+          "crc": 4095734929
+        }
+      ]
+    }
+  ]
+}

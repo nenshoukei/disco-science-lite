@@ -1,0 +1,21 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Factorio-Tiberium",
+      "files": [
+        {
+          "file": "control.lua",
+          "ranges": [
+            {
+              "line_from": "\t-- Define pack color for DiscoScience",
+              "line_to": "\tend",
+              "size": 252,
+              "crc": 1081387050
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "BigLabFork",
+      "files": [
+        {
+          "file": "data.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 1383,
+              "crc": 1393405152
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

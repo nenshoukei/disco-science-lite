@@ -1,0 +1,46 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Cerys-Moon-of-Fulgora",
+      "files": [
+        {
+          "file": "graphics/icons/cerysian-science-pack.png",
+          "size": 2451,
+          "crc": 142386787
+        },
+        {
+          "file": "prototypes/entity/lab.lua",
+          "ranges": [
+            {
+              "line_from": "\ton_animation = {",
+              "line_to": "\t},",
+              "size": 2195,
+              "crc": 2046108275
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/cerys-lab/cerys-lab-back.png",
+          "size": 65625,
+          "crc": 2151864740
+        },
+        {
+          "file": "graphics/entity/cerys-lab/cerys-lab-front.png",
+          "size": 72954,
+          "crc": 2500613226
+        },
+        {
+          "file": "graphics/entity/cerys-lab/cerys-lab-front-shadow.png",
+          "size": 19697,
+          "crc": 612062391
+        },
+        {
+          "file": "graphics/entity/cerys-lab/cerys-lab-shadow.png",
+          "size": 22523,
+          "crc": 170626672
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "tenebris",
+      "files": [
+        {
+          "file": "graphics/icons/bioluminescent-science-pack.png",
+          "size": 8836,
+          "crc": 2515938516
+        }
+      ]
+    }
+  ]
+}

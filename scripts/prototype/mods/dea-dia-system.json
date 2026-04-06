@@ -1,0 +1,36 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "dea-dia-system",
+      "files": [
+        {
+          "file": "prototype/entity/thermodynamic-lab.lua",
+          "ranges": [
+            {
+              "line_from": "lab.on_animation = {",
+              "line_to": "}",
+              "size": 1234,
+              "crc": 319474120
+            }
+          ]
+        },
+        {
+          "file": "graphics/entity/thermodynamics-laboratory/thermodynamics-laboratory.png",
+          "size": 68554,
+          "crc": 302079922
+        },
+        {
+          "file": "graphics/entity/thermodynamics-laboratory/thermodynamics-laboratory-emission.png",
+          "size": 3087010,
+          "crc": 1801850536
+        },
+        {
+          "file": "graphics/entity/thermodynamics-laboratory/thermodynamics-laboratory-shadow.png",
+          "size": 23616,
+          "crc": 495241145
+        }
+      ]
+    }
+  ]
+}

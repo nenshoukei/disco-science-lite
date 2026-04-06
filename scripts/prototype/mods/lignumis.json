@@ -1,0 +1,46 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "lignumis",
+      "files": [
+        {
+          "file": "prototypes/content/wood-lab.lua",
+          "ranges": [
+            {
+              "line_from": "        on_animation = {",
+              "line_to": "        },",
+              "size": 1708,
+              "crc": 699075938
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "lignumis-assets",
+      "files": [
+        {
+          "file": "graphics/icons/steam-science-pack.png",
+          "size": 3707,
+          "crc": 2792395353
+        },
+        {
+          "file": "graphics/icons/wood-science-pack.png",
+          "size": 3564,
+          "crc": 2590136883
+        },
+        {
+          "file": "graphics/entity/wood-lab/wood-lab.png",
+          "size": 336147,
+          "crc": 2099416195
+        },
+        {
+          "file": "graphics/entity/wood-lab/wood-lab-light.png",
+          "size": 384815,
+          "crc": 3428819911
+        }
+      ]
+    }
+  ]
+}

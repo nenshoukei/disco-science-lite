@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "VoidProcessing",
+      "files": [
+        {
+          "file": "graphics/icons/void-science-pack.png",
+          "size": 7586,
+          "crc": 3069469443
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "SciencePackGaloreForked",
+      "files": [
+        {
+          "file": "graphics/icons/science-pack-1.png",
+          "size": 6075,
+          "crc": 3300995286
+        },
+        {
+          "file": "graphics/icons/science-pack-2.png",
+          "size": 6238,
+          "crc": 3042277346
+        },
+        {
+          "file": "graphics/icons/science-pack-3.png",
+          "size": 6238,
+          "crc": 2578293067
+        },
+        {
+          "file": "graphics/icons/science-pack-4.png",
+          "size": 6269,
+          "crc": 1397722459
+        },
+        {
+          "file": "graphics/icons/science-pack-5.png",
+          "size": 6265,
+          "crc": 964113655
+        },
+        {
+          "file": "graphics/icons/science-pack-6.png",
+          "size": 6227,
+          "crc": 1250534575
+        },
+        {
+          "file": "graphics/icons/science-pack-7.png",
+          "size": 6378,
+          "crc": 2906971176
+        },
+        {
+          "file": "graphics/icons/science-pack-8.png",
+          "size": 6311,
+          "crc": 1089906933
+        },
+        {
+          "file": "graphics/icons/science-pack-9.png",
+          "size": 6340,
+          "crc": 188940238
+        },
+        {
+          "file": "graphics/icons/science-pack-10.png",
+          "size": 6273,
+          "crc": 3218680192
+        },
+        {
+          "file": "graphics/icons/science-pack-11.png",
+          "size": 6370,
+          "crc": 3618155243
+        },
+        {
+          "file": "graphics/icons/science-pack-12.png",
+          "size": 6333,
+          "crc": 1714856249
+        },
+        {
+          "file": "graphics/icons/science-pack-13.png",
+          "size": 6311,
+          "crc": 3975931256
+        },
+        {
+          "file": "graphics/icons/science-pack-14.png",
+          "size": 6362,
+          "crc": 89386028
+        },
+        {
+          "file": "graphics/icons/science-pack-15.png",
+          "size": 6329,
+          "crc": 3135692294
+        },
+        {
+          "file": "graphics/icons/science-pack-16.png",
+          "size": 6306,
+          "crc": 2944584256
+        },
+        {
+          "file": "graphics/icons/science-pack-17.png",
+          "size": 6363,
+          "crc": 3694990342
+        },
+        {
+          "file": "graphics/icons/science-pack-18.png",
+          "size": 6272,
+          "crc": 2944586760
+        },
+        {
+          "file": "graphics/icons/science-pack-19.png",
+          "size": 6286,
+          "crc": 1158499186
+        },
+        {
+          "file": "graphics/icons/science-pack-20.png",
+          "size": 6198,
+          "crc": 159841837
+        },
+        {
+          "file": "graphics/icons/science-pack-21.png",
+          "size": 6334,
+          "crc": 2002759853
+        },
+        {
+          "file": "graphics/icons/science-pack-22.png",
+          "size": 6212,
+          "crc": 2739647210
+        },
+        {
+          "file": "graphics/icons/science-pack-23.png",
+          "size": 6215,
+          "crc": 1090680561
+        },
+        {
+          "file": "graphics/icons/science-pack-24.png",
+          "size": 6298,
+          "crc": 2094665264
+        },
+        {
+          "file": "graphics/icons/science-pack-25.png",
+          "size": 6201,
+          "crc": 3543975903
+        },
+        {
+          "file": "graphics/icons/science-pack-26.png",
+          "size": 6140,
+          "crc": 2203485830
+        },
+        {
+          "file": "graphics/icons/science-pack-27.png",
+          "size": 6322,
+          "crc": 840724275
+        },
+        {
+          "file": "graphics/icons/science-pack-28.png",
+          "size": 6114,
+          "crc": 961533964
+        },
+        {
+          "file": "graphics/icons/science-pack-29.png",
+          "size": 6154,
+          "crc": 1611882785
+        },
+        {
+          "file": "graphics/icons/science-pack-30.png",
+          "size": 6218,
+          "crc": 3040692089
+        },
+        {
+          "file": "graphics/icons/science-pack-31.png",
+          "size": 6354,
+          "crc": 56126966
+        },
+        {
+          "file": "graphics/icons/science-pack-32.png",
+          "size": 6229,
+          "crc": 3199721627
+        },
+        {
+          "file": "graphics/icons/science-pack-33.png",
+          "size": 6239,
+          "crc": 3771325198
+        },
+        {
+          "file": "graphics/icons/science-pack-34.png",
+          "size": 6318,
+          "crc": 1015302869
+        },
+        {
+          "file": "graphics/icons/science-pack-35.png",
+          "size": 6221,
+          "crc": 2521447925
+        },
+        {
+          "file": "graphics/icons/science-pack-36.png",
+          "size": 6221,
+          "crc": 1027532624
+        }
+      ]
+    },
+    {
+      "name": "SciencePackGalore",
+      "files": [
+        {
+          "file": "graphics/icons/science-pack-1.png",
+          "size": 6075,
+          "crc": 3300995286
+        },
+        {
+          "file": "graphics/icons/science-pack-2.png",
+          "size": 6238,
+          "crc": 3042277346
+        },
+        {
+          "file": "graphics/icons/science-pack-3.png",
+          "size": 6238,
+          "crc": 2578293067
+        },
+        {
+          "file": "graphics/icons/science-pack-4.png",
+          "size": 6269,
+          "crc": 1397722459
+        },
+        {
+          "file": "graphics/icons/science-pack-5.png",
+          "size": 6265,
+          "crc": 964113655
+        },
+        {
+          "file": "graphics/icons/science-pack-6.png",
+          "size": 6227,
+          "crc": 1250534575
+        },
+        {
+          "file": "graphics/icons/science-pack-7.png",
+          "size": 6378,
+          "crc": 2906971176
+        },
+        {
+          "file": "graphics/icons/science-pack-8.png",
+          "size": 6311,
+          "crc": 1089906933
+        },
+        {
+          "file": "graphics/icons/science-pack-9.png",
+          "size": 6340,
+          "crc": 188940238
+        },
+        {
+          "file": "graphics/icons/science-pack-10.png",
+          "size": 6273,
+          "crc": 3218680192
+        },
+        {
+          "file": "graphics/icons/science-pack-11.png",
+          "size": 6370,
+          "crc": 3618155243
+        },
+        {
+          "file": "graphics/icons/science-pack-12.png",
+          "size": 6333,
+          "crc": 1714856249
+        },
+        {
+          "file": "graphics/icons/science-pack-13.png",
+          "size": 6311,
+          "crc": 3975931256
+        },
+        {
+          "file": "graphics/icons/science-pack-14.png",
+          "size": 6362,
+          "crc": 89386028
+        },
+        {
+          "file": "graphics/icons/science-pack-15.png",
+          "size": 6329,
+          "crc": 3135692294
+        },
+        {
+          "file": "graphics/icons/science-pack-16.png",
+          "size": 6306,
+          "crc": 2944584256
+        },
+        {
+          "file": "graphics/icons/science-pack-17.png",
+          "size": 6363,
+          "crc": 3694990342
+        },
+        {
+          "file": "graphics/icons/science-pack-18.png",
+          "size": 6272,
+          "crc": 2944586760
+        },
+        {
+          "file": "graphics/icons/science-pack-19.png",
+          "size": 6286,
+          "crc": 1158499186
+        },
+        {
+          "file": "graphics/icons/science-pack-20.png",
+          "size": 6198,
+          "crc": 159841837
+        },
+        {
+          "file": "graphics/icons/science-pack-21.png",
+          "size": 6334,
+          "crc": 2002759853
+        },
+        {
+          "file": "graphics/icons/science-pack-22.png",
+          "size": 6212,
+          "crc": 2739647210
+        },
+        {
+          "file": "graphics/icons/science-pack-23.png",
+          "size": 6215,
+          "crc": 1090680561
+        },
+        {
+          "file": "graphics/icons/science-pack-24.png",
+          "size": 6298,
+          "crc": 2094665264
+        },
+        {
+          "file": "graphics/icons/science-pack-25.png",
+          "size": 6201,
+          "crc": 3543975903
+        },
+        {
+          "file": "graphics/icons/science-pack-26.png",
+          "size": 6140,
+          "crc": 2203485830
+        },
+        {
+          "file": "graphics/icons/science-pack-27.png",
+          "size": 6322,
+          "crc": 840724275
+        },
+        {
+          "file": "graphics/icons/science-pack-28.png",
+          "size": 6114,
+          "crc": 961533964
+        },
+        {
+          "file": "graphics/icons/science-pack-29.png",
+          "size": 6154,
+          "crc": 1611882785
+        },
+        {
+          "file": "graphics/icons/science-pack-30.png",
+          "size": 6218,
+          "crc": 3040692089
+        },
+        {
+          "file": "graphics/icons/science-pack-31.png",
+          "size": 6354,
+          "crc": 56126966
+        },
+        {
+          "file": "graphics/icons/science-pack-32.png",
+          "size": 6229,
+          "crc": 3199721627
+        },
+        {
+          "file": "graphics/icons/science-pack-33.png",
+          "size": 6239,
+          "crc": 3771325198
+        },
+        {
+          "file": "graphics/icons/science-pack-34.png",
+          "size": 6318,
+          "crc": 1015302869
+        },
+        {
+          "file": "graphics/icons/science-pack-35.png",
+          "size": 6221,
+          "crc": 2521447925
+        },
+        {
+          "file": "graphics/icons/science-pack-36.png",
+          "size": 6221,
+          "crc": 1027532624
+        }
+      ]
+    }
+  ]
+}

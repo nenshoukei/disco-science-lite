@@ -1,0 +1,30 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "one-more-tier",
+      "files": [
+        {
+          "file": "graphics/entity/lab/lab.png",
+          "size": 1530610,
+          "crc": 4139373754
+        },
+        {
+          "file": "graphics/entity/lab/lab-integration.png",
+          "size": 39611,
+          "crc": 3352659615
+        },
+        {
+          "file": "graphics/entity/lab/lab-light.png",
+          "size": 1232183,
+          "crc": 3320503791
+        },
+        {
+          "file": "graphics/entity/lab/lab-shadow.png",
+          "size": 7550,
+          "crc": 52879805
+        }
+      ]
+    }
+  ]
+}

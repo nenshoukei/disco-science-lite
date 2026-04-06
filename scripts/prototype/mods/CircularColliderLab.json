@@ -1,0 +1,30 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "CircularColliderLab",
+      "files": [
+        {
+          "file": "data.lua",
+          "size": 15177,
+          "crc": 81342763
+        },
+        {
+          "file": "graphics/circular-collider-lab-animation.png",
+          "size": 30981476,
+          "crc": 2658555656
+        },
+        {
+          "file": "graphics/circular-collider-lab-emission.png",
+          "size": 16426011,
+          "crc": 3329668915
+        },
+        {
+          "file": "graphics/circular-collider-lab-shadow.png",
+          "size": 43070,
+          "crc": 2938770824
+        }
+      ]
+    }
+  ]
+}

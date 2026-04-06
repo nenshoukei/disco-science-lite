@@ -1,0 +1,70 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "quality_glassware",
+      "files": [
+        {
+          "file": "graphics/icons/cone_inverted_clear_black.png",
+          "size": 3444,
+          "crc": 2297387703
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_blue.png",
+          "size": 3581,
+          "crc": 178954252
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_cyan.png",
+          "size": 3713,
+          "crc": 2060732742
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_green.png",
+          "size": 3653,
+          "crc": 3112750279
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_lime.png",
+          "size": 3647,
+          "crc": 147778889
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_orange.png",
+          "size": 3647,
+          "crc": 2298021416
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_pink.png",
+          "size": 3655,
+          "crc": 4222650019
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_purple.png",
+          "size": 3730,
+          "crc": 2263399995
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_red.png",
+          "size": 3555,
+          "crc": 3753401497
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_white.png",
+          "size": 3456,
+          "crc": 1506625030
+        },
+        {
+          "file": "graphics/icons/cone_inverted_clear_yellow.png",
+          "size": 3715,
+          "crc": 4033228877
+        },
+        {
+          "file": "graphics/icons/cone_inverted_empty.png",
+          "size": 3682,
+          "crc": 2104018559
+        }
+      ]
+    }
+  ]
+}

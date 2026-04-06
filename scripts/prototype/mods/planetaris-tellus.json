@@ -1,0 +1,20 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "planetaris-tellus",
+      "files": [
+        {
+          "file": "graphics/icons/bioengineering-science-pack.png",
+          "size": 3591,
+          "crc": 4191892538
+        },
+        {
+          "file": "graphics/icons/pathological-science-pack.png",
+          "size": 3616,
+          "crc": 3490634818
+        }
+      ]
+    }
+  ]
+}
