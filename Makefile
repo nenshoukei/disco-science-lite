@@ -12,6 +12,9 @@ lint:
 test:
 	@busted
 
+test-e2e:
+	@npx factorio-test run -p .
+
 consts:
 	@lua tasks/update-consts.lua
 
@@ -24,7 +27,7 @@ mod-description:
 mods:
 	@tasks/update-all-mods.sh
 
-check: consts mods mod-description lint test
+check: consts mods mod-description lint test test-e2e
 
 typecheck:
 	@tsc -p tasks/typecheck/tsconfig.json

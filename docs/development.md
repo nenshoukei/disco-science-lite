@@ -14,7 +14,7 @@ This project's directory (or its symlink) should be located in the `mods` direct
 
 ## Dependencies
 
-To install dependencies by luarocks:
+To install Lua dependencies by luarocks:
 
 ```
 make dev
@@ -26,9 +26,15 @@ If you have installed `pcre2` with Homebrew at `/opt/homebrew`:
 make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
 ```
 
+To install Node.js dependencies by npm:
+
+```
+npm install
+```
+
 ## Tests
 
-To run unit tests, lint, typecheck:
+To run tests, lint, typecheck:
 
 ```
 make check
@@ -40,6 +46,7 @@ This does:
 - `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua).
 - `make lint`: Lints codes by `luacheck`
 - `make test`: Runs unit tests by `busted`
+- `make test-e2e`: Runs end-to-end tests by `factorio-test`
 - `make typecheck`: Type-checks [disco-science-lite.d.ts](/disco-science-lite.d.ts) by `tsc`
 
 ## Special Constants Syntax
