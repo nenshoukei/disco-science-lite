@@ -60,6 +60,7 @@ These mods are supported out of the box.
 - [Schall Machine Scaling](https://mods.factorio.com/mod/SchallMachineScaling) by Schallfalke
 - [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel (Space science lab is not colorized though)
+- [Ultracube: Age of Cube](https://mods.factorio.com/mod/Ultracube) by grandseiken
 
 Supported Space-Age Planet Mods:
 

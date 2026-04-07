@@ -1,0 +1,76 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Ultracube",
+      "files": [
+        {
+          "file": "prototypes/entities/lab.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 2874,
+              "crc": 1390586442
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "krastorio2-assets-ultracube",
+      "files": [
+        {
+          "file": "icons/cards/military-tech-card.png",
+          "size": 8312,
+          "crc": 216835350
+        },
+        {
+          "file": "icons/cards/logistic-tech-card.png",
+          "size": 8438,
+          "crc": 4032968365
+        },
+        {
+          "file": "icons/cards/matter-tech-card.png",
+          "size": 8145,
+          "crc": 2864389233
+        },
+        {
+          "file": "icons/cards/singularity-tech-card.png",
+          "size": 8340,
+          "crc": 3542072995
+        },
+        {
+          "file": "icons/cards/optimization-tech-card.png",
+          "size": 8007,
+          "crc": 2125913200
+        },
+        {
+          "file": "buildings/biusart-lab/biusart-lab-anim-light.png",
+          "size": 244146,
+          "crc": 3318009377
+        },
+        {
+          "file": "buildings/biusart-lab/biusart-lab-anim.png",
+          "size": 194877,
+          "crc": 2404468805
+        },
+        {
+          "file": "buildings/biusart-lab/biusart-lab-light-anim.png",
+          "size": 309438,
+          "crc": 380742781
+        },
+        {
+          "file": "buildings/biusart-lab/biusart-lab-shadow.png",
+          "size": 1869,
+          "crc": 2900810387
+        },
+        {
+          "file": "buildings/biusart-lab/biusart-lab-ao.png",
+          "size": 8965,
+          "crc": 688095337
+        }
+      ]
+    }
+  ]
+}

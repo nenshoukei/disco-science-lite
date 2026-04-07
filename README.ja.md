@@ -56,6 +56,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Schall Machine Scaling](https://mods.factorio.com/mod/SchallMachineScaling) by Schallfalke
 - [Science Pack Galore (Forked)](https://mods.factorio.com/mod/SciencePackGaloreForked) by Semenar and nihilistzsche
 - [Space Exploration](https://mods.factorio.com/mod/space-exploration) by Earendel（ただし宇宙科学研究所は対象外）
+- [Ultracube: Age of Cube](https://mods.factorio.com/mod/Ultracube) by grandseiken
 
 Space-Age 惑星追加 Mod:
 
