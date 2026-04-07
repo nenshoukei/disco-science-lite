@@ -18,6 +18,7 @@
     "ignore": [
       ".*",
       "docs/**",
+      "scripts/prototype/mods/*.json",
       "spec/**",
       "tasks/**",
       "lua_modules/**",
