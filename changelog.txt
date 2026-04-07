@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.4
 Date: ????
+  Features:
+    - Add support for "Ultracube: Age of Cube" mod by grandseiken.
   Bugfixes:
     - Fix tech card colors for Space Exploration with Krastorio 2.
 ---------------------------------------------------------------------------------------------------
