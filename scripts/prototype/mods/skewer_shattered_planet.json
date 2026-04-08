@@ -56,13 +56,19 @@
       "name": "space-exploration-graphics-4",
       "files": [
         {
-          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png"
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png",
+          "size": 168849,
+          "crc": 2163339164
         },
         {
-          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory.png"
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory.png",
+          "size": 2989898,
+          "crc": 3884412936
         },
         {
-          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-tint.png"
+          "file": "graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-tint.png",
+          "size": 2060345,
+          "crc": 4167816259
         }
       ]
     }

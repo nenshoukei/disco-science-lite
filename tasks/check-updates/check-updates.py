@@ -125,7 +125,9 @@ def main() -> None:
         except Exception as e:
             print(f"Error while loading {path}: {e}", file=sys.stderr)
             raise e
-    mod_by_name = {m["name"]: m for m in mods}
+    mods_by_name: dict[str, list[dict]] = {}
+    for m in mods:
+        mods_by_name.setdefault(m["name"], []).append(m)
 
     # Download targets: list of {name, download_url, version, sha1}
     download_targets: list[dict] = []
@@ -149,8 +151,9 @@ def main() -> None:
 
     # --- Full lookup: mods with any file missing size/crc, or all mods when --full ---
     full_lookup_mods = [m for m in mods if args.full or has_missing_checksums(m)]
+    full_lookup_names = {m["name"] for m in full_lookup_mods}
     if full_lookup_mods:
-        names = [m["name"] for m in full_lookup_mods]
+        names = list(full_lookup_names)
         found_names: set[str] = set()
         for i in range(0, len(names), 20):
             batch = names[i : i + 20]
@@ -170,7 +173,6 @@ def main() -> None:
             sys.exit(1)
 
     # --- Incremental lookup: mods not covered by full lookup ---
-    full_lookup_names = {m["name"] for m in full_lookup_mods}
     recent_check_mods = [m for m in mods if m["name"] not in full_lookup_names]
     if recent_check_mods:
         recent_check_by_name = {m["name"]: m for m in recent_check_mods}
@@ -252,8 +254,8 @@ def main() -> None:
             has_error = True
             continue
 
-        mod = mod_by_name.get(name)
-        if not mod:
+        mods_for_name = mods_by_name.get(name, [])
+        if not mods_for_name:
             continue
 
         # Check each monitored file
@@ -265,64 +267,65 @@ def main() -> None:
                 has_error = True
                 continue
 
-            for file_entry in mod.get("files", []):
-                file_path = file_entry["file"]
-                ranges = file_entry.get("ranges")
+            for mod in mods_for_name:
+                for file_entry in mod.get("files", []):
+                    file_path = file_entry["file"]
+                    ranges = file_entry.get("ranges")
 
-                if ranges is not None:
-                    # Multi-range check: read file once, check each range
-                    try:
-                        raw = zf.read(f"{top_dir}/{file_path}")
-                    except KeyError:
-                        print(f"Error: {name}: {file_path} not found in zip", file=sys.stderr)
-                        has_error = True
-                        continue
-
-                    lines = raw.splitlines(keepends=True)
-                    search_from = 0
-                    for i, range_entry in enumerate(ranges):
-                        line_from = range_entry.get("line_from")
-                        line_to = range_entry.get("line_to")
+                    if ranges is not None:
+                        # Multi-range check: read file once, check each range
                         try:
-                            start = find_line_index(lines, line_from, name, file_path, "line_from", search_from) if line_from is not None else 0
-                            end = find_line_index(lines, line_to, name, file_path, "line_to", search_from=start) + 1 if line_to is not None else len(lines)
-                        except ValueError as e:
-                            print(f"Error: {name}: Failed to find ranges[{i}] in {file_path}: {e}", file=sys.stderr)
+                            raw = zf.read(f"{top_dir}/{file_path}")
+                        except KeyError:
+                            print(f"Error: {name}: {file_path} not found in zip", file=sys.stderr)
                             has_error = True
                             continue
 
-                        search_from = end
-                        extracted = b"".join(lines[start:end])
-                        new_size = len(extracted)
-                        new_crc = zlib.crc32(extracted) & 0xFFFFFFFF
+                        lines = raw.splitlines(keepends=True)
+                        search_from = 0
+                        for i, range_entry in enumerate(ranges):
+                            line_from = range_entry.get("line_from")
+                            line_to = range_entry.get("line_to")
+                            try:
+                                start = find_line_index(lines, line_from, name, file_path, "line_from", search_from) if line_from is not None else 0
+                                end = find_line_index(lines, line_to, name, file_path, "line_to", search_from=start) + 1 if line_to is not None else len(lines)
+                            except ValueError as e:
+                                print(f"Error: {name}: Failed to find ranges[{i}] in {file_path}: {e}", file=sys.stderr)
+                                has_error = True
+                                continue
 
-                        prev_size = range_entry.get("size")
-                        prev_crc = range_entry.get("crc")
+                            search_from = end
+                            extracted = b"".join(lines[start:end])
+                            new_size = len(extracted)
+                            new_crc = zlib.crc32(extracted) & 0xFFFFFFFF
+
+                            prev_size = range_entry.get("size")
+                            prev_crc = range_entry.get("crc")
+                            if prev_size is not None and prev_crc is not None:
+                                if new_size != prev_size or new_crc != prev_crc:
+                                    print(f"CHANGED: {name}: {file_path} ranges[{i}]")
+
+                            range_entry["size"] = new_size
+                            range_entry["crc"] = new_crc
+
+                    else:
+                        # Full-file check using zip metadata
+                        try:
+                            info = zf.getinfo(f"{top_dir}/{file_path}")
+                        except KeyError:
+                            print(f"Warning: {name}: {file_path} not found in zip", file=sys.stderr)
+                            continue
+                        new_size = info.file_size
+                        new_crc = info.CRC
+
+                        prev_size = file_entry.get("size")
+                        prev_crc = file_entry.get("crc")
                         if prev_size is not None and prev_crc is not None:
                             if new_size != prev_size or new_crc != prev_crc:
-                                print(f"CHANGED: {name}: {file_path} ranges[{i}]")
+                                print(f"CHANGED: {name}: {file_path}")
 
-                        range_entry["size"] = new_size
-                        range_entry["crc"] = new_crc
-
-                else:
-                    # Full-file check using zip metadata
-                    try:
-                        info = zf.getinfo(f"{top_dir}/{file_path}")
-                    except KeyError:
-                        print(f"Warning: {name}: {file_path} not found in zip", file=sys.stderr)
-                        continue
-                    new_size = info.file_size
-                    new_crc = info.CRC
-
-                    prev_size = file_entry.get("size")
-                    prev_crc = file_entry.get("crc")
-                    if prev_size is not None and prev_crc is not None:
-                        if new_size != prev_size or new_crc != prev_crc:
-                            print(f"CHANGED: {name}: {file_path}")
-
-                    file_entry["size"] = new_size
-                    file_entry["crc"] = new_crc
+                        file_entry["size"] = new_size
+                        file_entry["crc"] = new_crc
 
     # Write updated mod JSON files
     for path, mod_file in mod_files:
