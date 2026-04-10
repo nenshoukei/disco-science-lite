@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.5
-Date: ????
+Date: 2026-04-10
   Features:
     - Exclude "Crash Site" mod labs from colorization.
     - Add support for "Shchierbin" mod by Magistr-Djo.
