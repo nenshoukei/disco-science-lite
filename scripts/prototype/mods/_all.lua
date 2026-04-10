@@ -49,6 +49,7 @@ return {
   require("scripts.prototype.mods.schallmods"),
   require("scripts.prototype.mods.SciencePackGalore"),
   require("scripts.prototype.mods.secretas"),
+  require("scripts.prototype.mods.shchierbin"),
   require("scripts.prototype.mods.skewer_planet_vesta"),
   require("scripts.prototype.mods.skewer_shattered_planet"),
   require("scripts.prototype.mods.slp-dyson-sphere-reworked"),
