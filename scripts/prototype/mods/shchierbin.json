@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "shchierbin",
+      "files": [
+        {
+          "file": "graphics/item/vanadium-science-pack.png",
+          "size": 9342,
+          "crc": 3403649157
+        }
+      ]
+    }
+  ]
+}
