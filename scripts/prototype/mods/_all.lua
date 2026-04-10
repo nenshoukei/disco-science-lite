@@ -4,6 +4,7 @@ return {
   require("scripts.prototype.mods.5dim"),
   require("scripts.prototype.mods.aai-industry"),
   require("scripts.prototype.mods.Age-of-Production"),
+  require("scripts.prototype.mods.atan-crash-site"),
   require("scripts.prototype.mods.atan-nuclear-science"),
   require("scripts.prototype.mods.BigLabFork"),
   require("scripts.prototype.mods.bobsmods"),
