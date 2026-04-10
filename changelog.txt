@@ -3,6 +3,7 @@ Version: 0.4.5
 Date: ????
   Features:
     - Exclude "Crash Site" mod labs from colorization.
+    - Add support for "Planet Crucible" mod by thremtopod.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.4
 Date: 2026-04-07
