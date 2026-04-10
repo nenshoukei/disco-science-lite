@@ -37,6 +37,7 @@ return {
   require("scripts.prototype.mods.panglia_planet"),
   require("scripts.prototype.mods.Paracelsin"),
   require("scripts.prototype.mods.pelagos"),
+  require("scripts.prototype.mods.planet-crucible"),
   require("scripts.prototype.mods.planet-muluna"),
   require("scripts.prototype.mods.planet-rabbasca"),
   require("scripts.prototype.mods.planetaris-arig"),
