@@ -14,7 +14,6 @@ return {
   on_data_final_fixes = function ()
     AnimationHelpers.modify_on_animation("omt-lab", function (modifier)
       modifier:apply_lab_modifications({
-        lab       = "__one-more-tier__/graphics/entity/lab/lab.png",
         lab_light = "__one-more-tier__/graphics/entity/lab/lab-light.png",
       })
     end)

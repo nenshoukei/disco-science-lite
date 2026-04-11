@@ -65,8 +65,7 @@ describe("mods/bobsmods", function ()
       Mod.on_data_final_fixes()
 
       assert.are.equal(3, #on_animation_lab2.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]],
-        on_animation_lab2.layers[1].filename)
+      assert.are.equal("__bobtech__/graphics/entity/lab/lab2.png", on_animation_lab2.layers[1].filename)
       assert.are.equal("__bobtech__/graphics/entity/lab/lab-integration.png", on_animation_lab2.layers[2].filename)
       assert.are.equal("__bobtech__/graphics/entity/lab/lab-shadow.png", on_animation_lab2.layers[3].filename)
       Helper.assert_animation.frozen(1, on_animation_lab2)
@@ -83,8 +82,7 @@ describe("mods/bobsmods", function ()
       Mod.on_data_final_fixes()
 
       assert.are.equal(3, #on_animation_alien.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]],
-        on_animation_alien.layers[1].filename)
+      assert.are.equal("__bobtech__/graphics/entity/lab/lab-alien.png", on_animation_alien.layers[1].filename)
       assert.are.equal("__bobtech__/graphics/entity/lab/lab-integration.png", on_animation_alien.layers[2].filename)
       assert.are.equal("__bobtech__/graphics/entity/lab/lab-shadow.png", on_animation_alien.layers[3].filename)
       Helper.assert_animation.frozen(1, on_animation_alien)

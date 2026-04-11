@@ -35,15 +35,7 @@ return {
 
   on_data_final_fixes = function ()
     AnimationHelpers.modify_on_animation("ei-dark-age-lab", function (modifier)
-      if mods["exotic-space-industries"] then
-        modifier:apply_lab_modifications({
-          lab = "__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png",
-        })
-      else
-        modifier:apply_lab_modifications({
-          lab = "__exotic-space-industries-remembrance-graphics-1__/graphics/entities/dark-age-lab_animation.png",
-        })
-      end
+      modifier:apply_lab_modifications()
     end)
   end,
 }
