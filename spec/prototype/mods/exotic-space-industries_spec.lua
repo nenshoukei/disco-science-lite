@@ -65,7 +65,7 @@ describe("mods/exotic-space-industries", function ()
       Mod.on_data_final_fixes()
 
       assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], on_animation.layers[1].filename)
+      assert.are.equal("__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png", on_animation.layers[1].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
       Helper.assert_animation.frozen(1, on_animation)

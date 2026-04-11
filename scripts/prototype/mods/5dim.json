@@ -16,56 +16,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "5dim_automation",
-      "files": [
-        {
-          "file": "graphics/entities/lab/lab-02.png",
-          "size": 1477980,
-          "crc": 3694764432
-        },
-        {
-          "file": "graphics/entities/lab/lab-03.png",
-          "size": 1435263,
-          "crc": 3538544596
-        },
-        {
-          "file": "graphics/entities/lab/lab-04.png",
-          "size": 1385198,
-          "crc": 2362493052
-        },
-        {
-          "file": "graphics/entities/lab/lab-05.png",
-          "size": 1394677,
-          "crc": 4213358234
-        },
-        {
-          "file": "graphics/entities/lab/lab-06.png",
-          "size": 1483337,
-          "crc": 3480298901
-        },
-        {
-          "file": "graphics/entities/lab/lab-07.png",
-          "size": 1350127,
-          "crc": 9584038
-        },
-        {
-          "file": "graphics/entities/lab/lab-08.png",
-          "size": 1339427,
-          "crc": 3961723206
-        },
-        {
-          "file": "graphics/entities/lab/lab-09.png",
-          "size": 1443404,
-          "crc": 1540917948
-        },
-        {
-          "file": "graphics/entities/lab/lab-10.png",
-          "size": 1471337,
-          "crc": 488438674
-        }
-      ]
     }
   ]
 }

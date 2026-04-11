@@ -636,7 +636,7 @@ describe("OnAnimationModifier", function ()
       local modifier = make_modifier(animation)
       modifier:apply_lab_modifications()
       assert.are.equal(2, #animation.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], animation.layers[1].filename)
+      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
       Helper.assert_animation.frozen(1, animation)
     end)
@@ -644,23 +644,26 @@ describe("OnAnimationModifier", function ()
     it("also removes HD Age lab-light layer when mod is active", function ()
       _G.mods["factorio_hd_age_base_game_production"] = "1.0.0"
       local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
-      })
-      local modifier = make_modifier(animation)
-      modifier:apply_lab_modifications()
-      assert.are.equal(1, #animation.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-mask.png" --[[$GRAPHICS_DIR .. "factorio/lab-mask.png"]], animation.layers[1].filename)
-    end)
-
-    it("does not remove HD Age layer when mod is not active", function ()
-      local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",                                                 frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png",        frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
       })
       local modifier = make_modifier(animation)
       modifier:apply_lab_modifications()
       assert.are.equal(2, #animation.layers)
+      assert.are.equal("__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
+    end)
+
+    it("does not remove HD Age layer when mod is not active", function ()
+      local animation = make_animation_with_layers({
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png",        frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
+      })
+      local modifier = make_modifier(animation)
+      modifier:apply_lab_modifications()
+      assert.are.equal(3, #animation.layers)
     end)
   end)
 
