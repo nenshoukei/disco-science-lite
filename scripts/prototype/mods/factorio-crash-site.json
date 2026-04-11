@@ -1,0 +1,21 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "factorio-crash-site",
+      "files": [
+        {
+          "file": "prototypes/demo-crash-site.lua",
+          "ranges": [
+            {
+              "line_from": "    on_animation =",
+              "line_to": "    },",
+              "size": 1359,
+              "crc": 2413306832
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
