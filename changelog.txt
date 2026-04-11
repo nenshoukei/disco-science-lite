@@ -3,6 +3,8 @@ Version: 0.4.7
 Date: ????
   Graphics:
     - Fix the vanilla lab working animation got a darkened metal frame.
+  Minor Features:
+    - Add "Planet Crucible" mod by Thremtopod to the supported mod list. (Thanks to Thremtopod!)
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.6
 Date: 2026-04-11
