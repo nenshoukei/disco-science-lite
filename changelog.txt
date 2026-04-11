@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.7
-Date: ????
+Date: 2026-04-11
   Graphics:
     - Fix darkened metal frame in vanilla lab working animation.
   Minor Features:
