@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "alchemy-khemia",
+      "files": [
+        {
+          "file": "graphics/items/alchemical-science/alchemical-science-render.png",
+          "size": 21446,
+          "crc": 3074694496
+        }
+      ]
+    }
+  ]
+}

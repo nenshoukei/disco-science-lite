@@ -72,6 +72,7 @@ Supported Space-Age Planet Mods:
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
 - [Janus](https://mods.factorio.com/mod/janus) by RochX
+- [🌐Khemia: Age of Alchemy](https://mods.factorio.com/mod/alchemy-khemia) by GabeWithGlasses
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
 - [Lunar Landings](https://mods.factorio.com/mod/LunarLandings) by Xorimuth
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
