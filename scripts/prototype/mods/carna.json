@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "carna_assets",
+      "files": [
+        {
+          "file": "graphics/icons/item/carnal-science-pack.png",
+          "size": 8194,
+          "crc": 1319189179
+        }
+      ]
+    }
+  ]
+}

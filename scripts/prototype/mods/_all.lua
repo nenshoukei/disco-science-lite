@@ -8,6 +8,7 @@ return {
   require("scripts.prototype.mods.atan-nuclear-science"),
   require("scripts.prototype.mods.BigLabFork"),
   require("scripts.prototype.mods.bobsmods"),
+  require("scripts.prototype.mods.carna"),
   require("scripts.prototype.mods.castra"),
   require("scripts.prototype.mods.Cerys-Moon-of-Fulgora"),
   require("scripts.prototype.mods.CircularColliderLab"),
