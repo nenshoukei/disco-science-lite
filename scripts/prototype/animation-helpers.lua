@@ -222,10 +222,14 @@ end
 
 --- Apply the same modifications as for the vanilla lab.
 ---
---- @param filenames { lab_light: string? }?
+--- @param filenames { lab: string?, lab_light: string? }?
 function OnAnimationModifier:apply_lab_modifications(filenames)
+  local lab_filename = filenames and filenames.lab or "__base__/graphics/entity/lab/lab.png"
   local lab_light_filename = filenames and filenames.lab_light or "__base__/graphics/entity/lab/lab-light.png"
   self:remove_layer(lab_light_filename)
+
+  --- Replace lab animation with darkened one
+  self:replace_filename(lab_filename, "__disco-science-lite__/graphics/factorio/lab-darkened.png" --[[$GRAPHICS_DIR .. "factorio/lab-darkened.png"]])
 
   --- Support Factorio HD Age
   if mods["factorio_hd_age_base_game_production"] then

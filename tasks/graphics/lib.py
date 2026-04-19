@@ -107,21 +107,6 @@ def resize_mask(mask: np.ndarray, width: int, height: int, img_shift: tuple[floa
     return sized_mask
 
 
-def make_mask_frame(img: np.ndarray, alpha: np.ndarray, brightness: float = 0.5) -> np.ndarray:
-    """Return LA frame where alpha controls blending (0=transparent, 255=fully replace with gray).
-    alpha: bool array for binary mask (True→255, False→0),
-           or float/int array (0-255) for soft proportional blend."""
-    r = img[:, :, 0].astype(np.float32)
-    g = img[:, :, 1].astype(np.float32)
-    b = img[:, :, 2].astype(np.float32)
-    gray = (rgb_to_grayscale(r, g, b) * brightness).clip(0, 255).astype(np.uint8)
-    if alpha.dtype == bool:
-        alpha_u8 = np.where(alpha, np.uint8(255), np.uint8(0))
-    else:
-        alpha_u8 = np.clip(alpha, 0, 255).astype(np.uint8)
-    return np.stack([gray, alpha_u8], axis=-1)
-
-
 @contextmanager
 def open_mod_zip(glob_pattern: Path) -> Iterator[Callable[[str], IO[bytes]]]:
     """Find the latest matching zip, auto-detect its top-level directory, and yield

@@ -3,21 +3,47 @@
 import numpy as np
 from PIL import Image, ImageFilter
 
-from lib import FACTORIO_DATA, GRAPHICS_DIR, LAB_LIGHT_PNG, save_image
+from lib import (
+    FACTORIO_DATA,
+    GRAPHICS_DIR,
+    LAB_LIGHT_PNG,
+    LAB_LIGHT_FRAME_W,
+    LAB_LIGHT_FRAME_H,
+    LAB_LIGHT_COLS,
+    extract_frame,
+    resize_mask,
+    save_image,
+)
 
 # --- Lab ---
 
 LAB_SRC = FACTORIO_DATA / "base/graphics/entity/lab/lab.png"
 LAB_FRAME_W, LAB_FRAME_H = 194, 174
 LAB_COLS = 11
+LAB_SHIFT = (0, 1.5 / 32)
 
 LAB_OVERLAY_DST = GRAPHICS_DIR / "factorio/lab-overlay.png"
+LAB_DARKENED_DST = GRAPHICS_DIR / "factorio/lab-darkened.png"
 
 
 def generate_lab_images():
     light = np.array(Image.open(LAB_LIGHT_PNG).convert("L"))  # Grayscaled
     overlay = (light * 1.5).clip(0, 255)  # Brightening
     save_image(Image.fromarray(overlay.astype(np.uint8), "L"), LAB_OVERLAY_DST)
+
+    # Use the second frame of light image as darkening mask
+    light_frame = extract_frame(light, 1, LAB_LIGHT_FRAME_W, LAB_LIGHT_FRAME_H, LAB_LIGHT_COLS)
+    light_mask = resize_mask(light_frame, LAB_FRAME_W, LAB_FRAME_H, LAB_SHIFT)
+    darkening_mask = np.clip(1.2 - (light_mask / 255), 0, 1.0)
+
+    lab_rgba = np.array(Image.open(LAB_SRC).convert("RGBA"))
+    first_frame = extract_frame(lab_rgba, 0, LAB_FRAME_W, LAB_FRAME_H, LAB_COLS)
+    r = first_frame[:, :, 0].astype(np.float32) * darkening_mask
+    g = first_frame[:, :, 1].astype(np.float32) * darkening_mask
+    b = first_frame[:, :, 2].astype(np.float32) * darkening_mask
+    a = first_frame[:, :, 3].astype(np.float32)
+    lab_body = np.stack([r, g, b, a], axis=-1)
+    save_image(Image.fromarray(lab_body.astype(np.uint8), "RGBA"), LAB_DARKENED_DST)
 
 
 # --- Biolab ---

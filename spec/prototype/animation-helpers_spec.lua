@@ -627,7 +627,7 @@ describe("OnAnimationModifier", function ()
       _G.mods = saved_mods
     end)
 
-    it("replaces lab.png with mask, removes lab-light layer and freezes animation", function ()
+    it("replaces lab.png with darkened one, removes lab-light layer and freezes animation", function ()
       local animation = make_animation_with_layers({
         { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
         { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
@@ -636,7 +636,7 @@ describe("OnAnimationModifier", function ()
       local modifier = make_modifier(animation)
       modifier:apply_lab_modifications()
       assert.are.equal(2, #animation.layers)
-      assert.are.equal("__base__/graphics/entity/lab/lab.png", animation.layers[1].filename)
+      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-darkened.png", animation.layers[1].filename)
       assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", animation.layers[2].filename)
       Helper.assert_animation.frozen(1, animation)
     end)
