@@ -28,7 +28,7 @@ check: consts mods mod-description lint test
 
 typecheck:
 	@tsc -p tasks/typecheck/tsconfig.json
-	@lua-language-server --check_format=pretty --configpath=.vscode/settings.json --check=.
+	@lua-language-server --check_format=pretty --check=.
 
 full-check: check typecheck
 

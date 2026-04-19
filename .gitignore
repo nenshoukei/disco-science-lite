@@ -5,6 +5,8 @@
 
 .claude/*.local.json
 
+.luarc.json
+
 *.code-workspace
 *.zip
 

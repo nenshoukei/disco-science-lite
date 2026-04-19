@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "Lua 5.2",
+    "pathStrict": true
+  },
+  "workspace": {
+    "checkThirdParty": "ApplyInMemory",
+    "userThirdParty": [
+      "/Users/user/Library/Application Support/Code/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/sumneko-3rd"
+    ],
+    "library": [
+      "${addons}/luassert/module/library",
+      "${addons}/busted/module/library",
+      "${addons}/lua-cjson/module/library",
+      "/Users/user/Library/Application Support/Code/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/library"
+    ]
+  },
+  "diagnostics": {
+    "globals": ["io", "os"]
+  }
+}
