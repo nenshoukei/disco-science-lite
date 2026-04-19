@@ -81,19 +81,30 @@ declare namespace DiscoScience {
      * Set the color of an ingredient (science pack) at runtime.
      *
      * Overrides colors set at prototype stage.
+     * Pass a single color for a single-color ingredient, or an array of colors for a multi-color ingredient.
      *
      * @param item_name Item prototype name of the ingredient.
-     * @param color Color for the ingredient.
+     * @param color Color or colors for the ingredient.
      */
-    setIngredientColor(item_name: string, color: Color): void;
+    setIngredientColor(item_name: string, color: Color | Color[]): void;
 
     /**
      * Get the color of an ingredient (science pack).
+     *
+     * Returns the first color when multiple colors are registered.
      *
      * @param item_name Item prototype name of the ingredient.
      * @returns Color for the ingredient, or `undefined` if not registered.
      */
     getIngredientColor(item_name: string): Color | undefined;
+
+    /**
+     * Get all colors of an ingredient (science pack).
+     *
+     * @param item_name Item prototype name of the ingredient.
+     * @returns All colors for the ingredient, or `undefined` if not registered.
+     */
+    getIngredientColors(item_name: string): Color[] | undefined;
   }
 }
 
