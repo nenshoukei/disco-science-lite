@@ -79,6 +79,7 @@ Supported Space-Age Planet Mods:
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Nexus Extended Promethium Endgame](https://mods.factorio.com/mod/Nexus) by Karu_Kiruna (Omega lab is not colorized though)
+- [Outer Rim](https://mods.factorio.com/mod/outer-rim) by Frontrider
 - [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Crucible](https://mods.factorio.com/mod/planet-crucible) by thremtopod (has built-in support for Disco Science Lite)
