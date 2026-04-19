@@ -18,9 +18,11 @@ Ask the user for the following (if not already provided via $ARGUMENTS):
 - **New Science Packs**: The new science packs the mod adds. For each science pack:
     - **Science Pack Name**: Name of the science pack prototype. (e.g. `automation-science-pack`)
     - **Color**: Color of the science pack. (e.g. `{ 0.91, 0.16, 0.20 }` or `float4(0.911, 0.164, 0.220, 1.000)` which should be converted into Lua format)
+    - **PNG File Path**: Path of the science pack PNG file. (e.g. `__Cerys-Moon-of-Fulgora__/graphics/icons/cerysian-science-pack.png`)
 - **New Custom Labs**: The new custom labs the mod adds. For each custom lab:
     - **Custom Lab Name**: Name of the custom lab prototype. (e.g. `cerys-lab`)
     - **Source URL for `on_animation`**: A URL to the source code where the lab's `on_animation` is defined (e.g. a GitHub permalink). May be omitted if no public code repository exists.
+    - **Check-Update Range**: Range of the code fragment which contains the custom lab on_animation definition. Each range has `file`, `line_from` and `line_to`. `file` is a path of the Lua file. `line_from` and `line_to` are exact strings of lines which starts/ends the range.
 
 If the user provides a Factorio Mod Portal URL like `https://mods.factorio.com/mod/secretas?from=downloaded`, extract the Mod ID as `secretas` (the path segment after `/mod/`, excluding query strings).
 
@@ -179,7 +181,64 @@ end)
 - The `on_data_final_fixes` test has no assert lines either — just calls `Mod.on_data_final_fixes()`. The user will add asserts once the implementation is written.
 - If `on_data_final_fixes` creates overlay or companion animations, `Helper.load_animation_definitions()` must be called at the top of the `before_each`. Add it if you can tell from the source that this will be needed; otherwise, omit it and let the user add it later.
 
-## Step 4: Update README.md and README.ja.md
+## Step 4: Run make check
+
+Run the following command to update `_all.lua` and mod description:
+
+```bash
+make mods mod-description
+```
+
+Run from the project root directory: `/Users/kotas/Library/Application Support/factorio/mods/disco-science-lite`
+
+## Step 5: Create Check-updates JSON file
+
+Create `scripts/prototype/mods/<Mod ID>.json` using this template:
+
+```json
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "<Mod name>",
+      "files": [
+        //# Foreach new custom lab:
+        {
+          "file": "<Check-Update Range file>",
+          "ranges": [
+            {
+              "line_from": "<Check-Update Range line_from>",
+              "line_to": "<Check-Update Range line_tom>",
+            }
+          ]
+        },
+        //# End Foreach
+        //# Foreach new science pack:
+        {
+          "file": "<PNG File Path>",
+        },
+        //# End Foreach
+      ]
+    }
+  ]
+}
+```
+
+### Notes
+
+- Strip `__mod-name__/` prefix in file paths.
+- If `mod-name` in the prefix is different from the Mod name, use one in the prefix for the `name` field.
+- `size` and `crc` fields should be omitted. These will be inserted on the next check-updates run.
+
+## Step 6: Run make check-updates
+
+Run the following command to update the created JSON file.
+
+```bash
+make check-updates
+```
+
+## Step 7: Update README.md and README.ja.md
 
 Add the following line to the `## Supported Mods` section of `README.md`, ad to the `## 対応 Mod` section of `README.ja.md`:
 
@@ -196,17 +255,7 @@ Add the following line to the `## Supported Mods` section of `README.md`, ad to 
     - Ignore leading symbols like 🌐
     - Do NOT ignore prefixes like "Planet"
 
-## Step 5: Run make check
-
-Run the following command to update `_all.lua` and mod description:
-
-```bash
-make mods mod-description
-```
-
-Run from the project root directory: `/Users/kotas/Library/Application Support/factorio/mods/disco-science-lite`
-
-## Step 6: Update changelog.txt
+## Step 8: Update changelog.txt
 
 In `changelog.txt`, if the `Features:` section does not exist in the top entry, add it.
 
@@ -215,6 +264,8 @@ Add the following line to the `Features:` section in the top entry, at last posi
 ```
     - Add support for "<Mod name>" mod by <Author name>.
 ```
+
+If an empty `Changes:` section exists in the entry, remove it. (This is added by the version bump script)
 
 ## Notes
 
