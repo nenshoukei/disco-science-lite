@@ -14,40 +14,58 @@ describe("PrototypeColorRegistry", function ()
 
   -- -------------------------------------------------------------------
   describe("set", function ()
-    it("sets a new color for a new ingredient", function ()
+    it("sets a new single color for a new ingredient", function ()
       PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
-      local color = PrototypeColorRegistry.registered_colors["custom-pack"]
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.1, color[1])
-      assert.are.equal(0.2, color[2])
-      assert.are.equal(0.3, color[3])
+      local colors = PrototypeColorRegistry.registered_colors["custom-pack"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(1, #colors)
+      assert.are.equal(0.1, colors[1][1])
+      assert.are.equal(0.2, colors[1][2])
+      assert.are.equal(0.3, colors[1][3])
+    end)
+
+    it("sets multiple colors for a new ingredient", function ()
+      PrototypeColorRegistry.set("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local colors = PrototypeColorRegistry.registered_colors["custom-pack"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(2, #colors)
+      assert.are.equal(0.1, colors[1][1])
+      assert.are.equal(0.4, colors[2][1])
     end)
 
     it("overwrites an existing color", function ()
       PrototypeColorRegistry.set("custom-pack", { 0.5, 0.5, 0.5 })
       PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
-      local color = PrototypeColorRegistry.registered_colors["custom-pack"]
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.1, color[1])
+      local colors = PrototypeColorRegistry.registered_colors["custom-pack"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(1, #colors)
+      assert.are.equal(0.1, colors[1][1])
     end)
 
-    it("can set multiple colors independently", function ()
+    it("can set multiple packs independently", function ()
       PrototypeColorRegistry.set("pack-a", { 0.1, 0.0, 0.0 })
       PrototypeColorRegistry.set("pack-b", { 0.0, 0.2, 0.0 })
-      assert.are.equal(0.1, PrototypeColorRegistry.registered_colors["pack-a"][1])
-      assert.are.equal(0.2, PrototypeColorRegistry.registered_colors["pack-b"][2])
+      assert.are.equal(0.1, PrototypeColorRegistry.registered_colors["pack-a"][1][1])
+      assert.are.equal(0.2, PrototypeColorRegistry.registered_colors["pack-b"][1][2])
     end)
   end)
 
   -- -------------------------------------------------------------------
   describe("get", function ()
-    it("returns the color for a registered ingredient as ColorStruct", function ()
+    it("returns the first color for a registered ingredient as ColorStruct", function ()
       PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
       local color = PrototypeColorRegistry.get("custom-pack")
       assert.is_not_nil(color) --- @cast color -nil
       assert.are.equal(0.1, color.r)
       assert.are.equal(0.2, color.g)
       assert.are.equal(0.3, color.b)
+    end)
+
+    it("returns the first of multiple colors", function ()
+      PrototypeColorRegistry.set("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local color = PrototypeColorRegistry.get("custom-pack")
+      assert.is_not_nil(color) --- @cast color -nil
+      assert.are.equal(0.1, color.r)
     end)
 
     it("returns nil for an unregistered ingredient", function ()
@@ -72,22 +90,57 @@ describe("PrototypeColorRegistry", function ()
   end)
 
   -- -------------------------------------------------------------------
+  describe("get_all", function ()
+    it("returns all colors as ColorStruct array", function ()
+      PrototypeColorRegistry.set("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local colors = PrototypeColorRegistry.get_all("custom-pack")
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(2, #colors)
+      assert.are.equal(0.1, colors[1].r)
+      assert.are.equal(0.4, colors[2].r)
+    end)
+
+    it("returns a single-element array for single color", function ()
+      PrototypeColorRegistry.set("custom-pack", { 0.1, 0.2, 0.3 })
+      local colors = PrototypeColorRegistry.get_all("custom-pack")
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(1, #colors)
+      assert.are.equal(0.1, colors[1].r)
+    end)
+
+    it("returns nil for an unregistered ingredient", function ()
+      assert.is_nil(PrototypeColorRegistry.get_all("unknown-pack"))
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
   describe("set_by_table", function ()
     it("sets new colors for new ingredients", function ()
       PrototypeColorRegistry.set_by_table({
         ["custom-pack-a"] = { 0.1, 0.2, 0.3 },
         ["custom-pack-b"] = { 0.4, 0.5, 0.6 },
       })
-      local color_a = PrototypeColorRegistry.registered_colors["custom-pack-a"]
-      local color_b = PrototypeColorRegistry.registered_colors["custom-pack-b"]
-      assert.is_not_nil(color_a) --- @cast color_a -nil
-      assert.are.equal(0.1, color_a[1])
-      assert.are.equal(0.2, color_a[2])
-      assert.are.equal(0.3, color_a[3])
-      assert.is_not_nil(color_b) --- @cast color_b -nil
-      assert.are.equal(0.4, color_b[1])
-      assert.are.equal(0.5, color_b[2])
-      assert.are.equal(0.6, color_b[3])
+      local colors_a = PrototypeColorRegistry.registered_colors["custom-pack-a"]
+      local colors_b = PrototypeColorRegistry.registered_colors["custom-pack-b"]
+      assert.is_not_nil(colors_a) --- @cast colors_a -nil
+      assert.are.equal(0.1, colors_a[1][1])
+      assert.are.equal(0.2, colors_a[1][2])
+      assert.are.equal(0.3, colors_a[1][3])
+      assert.is_not_nil(colors_b) --- @cast colors_b -nil
+      assert.are.equal(0.4, colors_b[1][1])
+      assert.are.equal(0.5, colors_b[1][2])
+      assert.are.equal(0.6, colors_b[1][3])
+    end)
+
+    it("sets multi-color entries", function ()
+      PrototypeColorRegistry.set_by_table({
+        ["custom-pack"] = { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } },
+      })
+      local colors = PrototypeColorRegistry.registered_colors["custom-pack"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(2, #colors)
+      assert.are.equal(0.1, colors[1][1])
+      assert.are.equal(0.4, colors[2][1])
     end)
 
     it("overwrites existing colors", function ()
@@ -95,9 +148,9 @@ describe("PrototypeColorRegistry", function ()
       PrototypeColorRegistry.set_by_table({
         ["custom-pack"] = { 0.1, 0.2, 0.3 },
       })
-      local color = PrototypeColorRegistry.registered_colors["custom-pack"]
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.1, color[1])
+      local colors = PrototypeColorRegistry.registered_colors["custom-pack"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(0.1, colors[1][1])
     end)
 
     it("does not affect colors not in the table", function ()
@@ -105,17 +158,17 @@ describe("PrototypeColorRegistry", function ()
       PrototypeColorRegistry.set_by_table({
         ["custom-pack"] = { 0.1, 0.2, 0.3 },
       })
-      local color = PrototypeColorRegistry.registered_colors["pack-a"]
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.91, color[1])
+      local colors = PrototypeColorRegistry.registered_colors["pack-a"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(0.91, colors[1][1])
     end)
 
     it("does nothing for an empty table", function ()
       PrototypeColorRegistry.set("pack-a", { 0.91, 0.16, 0.20 })
       PrototypeColorRegistry.set_by_table({})
-      local color = PrototypeColorRegistry.registered_colors["pack-a"]
-      assert.is_not_nil(color) --- @cast color -nil
-      assert.are.equal(0.91, color[1])
+      local colors = PrototypeColorRegistry.registered_colors["pack-a"]
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(0.91, colors[1][1])
     end)
   end)
 

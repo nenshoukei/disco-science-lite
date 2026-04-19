@@ -100,15 +100,19 @@ const _color6: DiscoScience.Color = [1, 0];
 // Verify the interface shape (without calling remote.call, which needs typed-factorio)
 const remote: DiscoScience.Remote = {
   setLabScale: (lab_name: string, scale: number) => {},
-  setIngredientColor: (item_name: string, color: DiscoScience.Color) => {},
+  setIngredientColor: (item_name: string, color: DiscoScience.Color | DiscoScience.Color[]) => {},
   getIngredientColor: (item_name: string) => undefined,
+  getIngredientColors: (item_name: string) => undefined,
 };
 
 remote.setLabScale("my-lab", 2);
 remote.setIngredientColor("iron-plate", { r: 1 });
 remote.setIngredientColor("iron-plate", [1, 0, 0]);
+remote.setIngredientColor("iron-plate", [{ r: 1 }, [1, 0, 0]]);
 const remoteColor: DiscoScience.Color | undefined =
   remote.getIngredientColor("iron-plate");
+const remoteColors: DiscoScience.Color[] | undefined =
+  remote.getIngredientColors("iron-plate");
 
 // suppress unused variable warnings
 void color1;

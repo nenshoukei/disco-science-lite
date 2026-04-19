@@ -112,16 +112,25 @@ local DiscoScienceRemote = {
   --- Set the color of an ingredient (science pack) at runtime.
   ---
   --- Overrides colors set at prototype stage.
+  --- Pass a single color for a single-color ingredient, or an array of colors for a multi-color ingredient.
   ---
   --- @param item_name string Item prototype name of the ingredient.
-  --- @param color DiscoScience.Color Color for the ingredient.
+  --- @param color DiscoScience.Color | DiscoScience.Color[] Color or colors for the ingredient.
   setIngredientColor = function (item_name, color) end,
 
   --- Get the color of an ingredient (science pack).
   ---
+  --- Returns the first color when multiple colors are registered.
+  ---
   --- @param item_name string Item prototype name of the ingredient.
   --- @return DiscoScience.Color|nil color Color for the ingredient, or `nil` if not registered.
   getIngredientColor = function (item_name) end,
+
+  --- Get all colors of an ingredient (science pack).
+  ---
+  --- @param item_name string Item prototype name of the ingredient.
+  --- @return DiscoScience.Color[]|nil colors All colors for the ingredient, or `nil` if not registered.
+  getIngredientColors = function (item_name) end,
 
 }
 

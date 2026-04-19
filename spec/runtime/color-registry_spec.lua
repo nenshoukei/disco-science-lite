@@ -23,14 +23,25 @@ local function make_prototypes(techs)
 end
 
 --- Set up mock mod_data for load_prototype_colors tests.
---- @param colors table<string, ColorTuple>|nil
+--- Colors may be in ColorTuple format {r,g,b} or ColorTuple[] format {{r,g,b},...} for convenience.
+--- @param colors table<string, ColorTuple | ColorTuple[]>|nil
 --- @param prefixes string[]|nil
 --- @param suffixes string[]|nil
 local function set_prototype_data(colors, prefixes, suffixes)
   if colors or prefixes or suffixes then
+    local normalized = {}
+    if colors then
+      for name, color in pairs(colors) do
+        if type(color[1]) == "number" then
+          normalized[name] = { color --[[@as ColorTuple]] }
+        else
+          normalized[name] = color --[=[@as ColorTuple[]]=]
+        end
+      end
+    end
     _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ] = ({
       data = {
-        registered_colors = colors or {},
+        registered_colors = normalized,
         registered_color_prefixes = prefixes or {},
         registered_color_suffixes = suffixes or {},
         registered_lab_prefixes = {},
@@ -55,7 +66,7 @@ describe("ColorRegistry", function ()
     end)
 
     it("accepts an overrides table", function ()
-      local overrides = { ["custom-pack"] = { 0.5, 0.6, 0.7 } }
+      local overrides = { ["custom-pack"] = { { 0.5, 0.6, 0.7 } } }
       local r = ColorRegistry.new(overrides)
       assert.are.equal(overrides, r.overrides)
     end)
@@ -310,6 +321,54 @@ describe("ColorRegistry", function ()
         assert.are.equal(0.5, color.r)
       end)
     end)
+
+    describe("with multiple colors", function ()
+      it("accepts an array of colors", function ()
+        local r = ColorRegistry.new()
+        r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+        local color = r:get_ingredient_color("custom-pack")
+        assert.is_not_nil(color) --- @cast color -nil
+        assert.are.equal(0.1, color.r)
+      end)
+
+      it("writes ColorTuple[] to overrides table", function ()
+        local overrides = {}
+        local r = ColorRegistry.new(overrides)
+        r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+        local stored = overrides["custom-pack"]
+        assert.is_not_nil(stored) --- @cast stored -nil
+        assert.are.equal(2, #stored)
+      end)
+    end)
+  end)
+
+  -- -------------------------------------------------------------------
+  describe("get_ingredient_colors", function ()
+    it("returns nil for unknown ingredient", function ()
+      local r = ColorRegistry.new()
+      assert.is_nil(r:get_ingredient_colors("unknown-pack"))
+    end)
+
+    it("returns a single-element array for a single-color ingredient", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("custom-pack", { 0.1, 0.2, 0.3 })
+      local colors = r:get_ingredient_colors("custom-pack")
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(1, #colors)
+      assert.are.equal(0.1, colors[1].r)
+      assert.are.equal(0.2, colors[1].g)
+      assert.are.equal(0.3, colors[1].b)
+    end)
+
+    it("returns all colors for a multi-color ingredient", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local colors = r:get_ingredient_colors("custom-pack")
+      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.are.equal(2, #colors)
+      assert.are.equal(0.1, colors[1].r)
+      assert.are.equal(0.4, colors[2].r)
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -556,6 +615,37 @@ describe("ColorRegistry", function ()
       assert.are.equal(0.5, flat[2])
       assert.are.equal(0.5, flat[3])
     end)
+
+    it("expands multi-color ingredient into multiple entries in the flat array", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local tech = make_tech("custom-pack")
+      local flat, n = r:get_flattened_colors_for_research(tech)
+      assert.are.equal(2, n)
+      assert.are.equal(6, #flat)
+      assert.are.equal(0.1, flat[1])
+      assert.are.equal(0.2, flat[2])
+      assert.are.equal(0.3, flat[3])
+      assert.are.equal(0.4, flat[4])
+      assert.are.equal(0.5, flat[5])
+      assert.are.equal(0.6, flat[6])
+    end)
+
+    it("combines single-color and multi-color ingredients", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("pack-a", { 1.0, 0.0, 0.0 })
+      r:set_ingredient_color("pack-b", { { 0.0, 1.0, 0.0 }, { 0.0, 0.0, 1.0 } })
+      local tech = make_tech("pack-a", "pack-b")
+      local flat, n = r:get_flattened_colors_for_research(tech)
+      assert.are.equal(3, n)
+      assert.are.equal(9, #flat)
+      assert.are.equal(1.0, flat[1]) -- pack-a color 1: r
+      assert.are.equal(0.0, flat[4]) -- pack-b color 1: r
+      assert.are.equal(1.0, flat[5]) -- pack-b color 1: g
+      assert.are.equal(0.0, flat[7]) -- pack-b color 2: r
+      assert.are.equal(0.0, flat[8]) -- pack-b color 2: g
+      assert.are.equal(1.0, flat[9]) -- pack-b color 2: b
+    end)
   end)
 
   -- -------------------------------------------------------------------
@@ -610,6 +700,17 @@ describe("ColorRegistry", function ()
       colors[1][1] = 99 -- mutate returned tuple
       local colors2 = r:get_colors_for_research(tech)
       assert.are_not.equal(99, colors2[1][1])
+    end)
+
+    it("expands multi-color ingredient into multiple color tuples", function ()
+      local r = ColorRegistry.new()
+      r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
+      local tech = make_tech("custom-pack")
+      local colors, n = r:get_colors_for_research(tech)
+      assert.are.equal(2, n)
+      assert.are.equal(2, #colors)
+      assert.are.equal(0.1, colors[1][1])
+      assert.are.equal(0.4, colors[2][1])
     end)
 
     describe("with saturation and brightness", function ()

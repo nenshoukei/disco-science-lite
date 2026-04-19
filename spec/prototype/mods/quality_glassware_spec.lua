@@ -23,7 +23,7 @@ describe("mods/quality_glassware", function ()
 
       Mod.on_data_final_fixes()
 
-      assert.are.same({ 0.35, 0.98, 0.38 }, PrototypeColorRegistry.registered_colors["my-green-pack"])
+      assert.are.same({ { 0.35, 0.98, 0.38 } }, PrototypeColorRegistry.registered_colors["my-green-pack"])
     end)
 
     it("registers color from icons list when icon field is absent", function ()
@@ -37,7 +37,7 @@ describe("mods/quality_glassware", function ()
 
       Mod.on_data_final_fixes()
 
-      assert.are.same({ 0.22, 0.35, 0.98 }, PrototypeColorRegistry.registered_colors["my-blue-pack"])
+      assert.are.same({ { 0.22, 0.35, 0.98 } }, PrototypeColorRegistry.registered_colors["my-blue-pack"])
     end)
 
     it("uses first matching icon from icons list", function ()
@@ -52,7 +52,7 @@ describe("mods/quality_glassware", function ()
 
       Mod.on_data_final_fixes()
 
-      assert.are.same({ 0.75, 0.75, 0.75 }, PrototypeColorRegistry.registered_colors["my-pack"])
+      assert.are.same({ { 0.75, 0.75, 0.75 } }, PrototypeColorRegistry.registered_colors["my-pack"])
     end)
 
     it("overwrites already registered tool", function ()
@@ -67,7 +67,7 @@ describe("mods/quality_glassware", function ()
 
       Mod.on_data_final_fixes()
 
-      assert.are.same({ 1.00, 0.29, 0.29 }, PrototypeColorRegistry.registered_colors["already-registered"])
+      assert.are.same({ { 1.00, 0.29, 0.29 } }, PrototypeColorRegistry.registered_colors["already-registered"])
     end)
 
     it("skips tools with non-Quality-Glassware icon", function ()
@@ -122,7 +122,7 @@ describe("mods/quality_glassware", function ()
 
           Mod.on_data_final_fixes()
 
-          assert.are.same(case.expected, PrototypeColorRegistry.registered_colors["test-pack"])
+          assert.are.same({ case.expected }, PrototypeColorRegistry.registered_colors["test-pack"])
         end)
       end
     end)

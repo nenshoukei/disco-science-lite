@@ -14,6 +14,23 @@ local RAINBOW_COLORS = {
   { 1.0, 0.0, 0.5 },
 }
 
+--- Normalize a Color or Color[] input to ColorTuple[].
+--- @param color Color | Color[]
+--- @return ColorTuple[]
+local function normalize_colors(color)
+  if type(color[1]) == "number" or type(color.r) == "number" then
+    --- @cast color Color
+    return { Utils.color_tuple(color) }
+  end
+  --- @cast color Color[]
+  local n = #color
+  local tuples = {}
+  for i = 1, n do
+    tuples[i] = Utils.color_tuple(color[i])
+  end
+  return tuples
+end
+
 --- Registry for colors of research ingredients
 ---
 --- @class ColorRegistry
@@ -24,17 +41,17 @@ local ColorRegistry = {
 }
 ColorRegistry.__index = ColorRegistry
 
---- @param color_overrides table<string, ColorTuple>?
+--- @param color_overrides table<string, ColorTuple[]>?
 --- @return ColorRegistry
 function ColorRegistry.new(color_overrides)
   --- @class ColorRegistry
   local self = {
     --- Dictionary of registered ingredient colors. Key is ingredient's ItemPrototype name.
     --- Includes pre-expanded entries for all registered prefix/suffix combinations.
-    --- @type table<string, ColorTuple>
+    --- @type table<string, ColorTuple[]>
     registered_colors = {},
     --- Runtime overrides persisted in storage. Reference to storage.color_overrides.
-    --- @type table<string, ColorTuple>
+    --- @type table<string, ColorTuple[]>
     overrides = color_overrides or {},
     --- Ingredient color prefixes for fallback lookup. Loaded from prototype mod-data.
     --- @type string[]
@@ -46,39 +63,54 @@ function ColorRegistry.new(color_overrides)
   return setmetatable(self, ColorRegistry)
 end
 
---- Set color for an ingredient (science pack)
+--- Set color(s) for an ingredient (science pack)
 ---
 --- @param item_name string Name of ItemPrototype of the ingredient
---- @param color Color Color for the ingredient.
+--- @param color Color | Color[] Color or colors for the ingredient.
 function ColorRegistry:set_ingredient_color(item_name, color)
-  local tuple = Utils.color_tuple(color)
+  local tuples = normalize_colors(color)
   local registered_colors = self.registered_colors
-  registered_colors[item_name] = tuple
-  self.overrides[item_name] = tuple
+  registered_colors[item_name] = tuples
+  self.overrides[item_name] = tuples
   -- Expand derived entries for all loaded prefixes and suffixes.
   local color_prefixes = self.color_prefixes
   for j = 1, #color_prefixes do
     local derived = color_prefixes[j] .. item_name
     if registered_colors[derived] == nil then
-      registered_colors[derived] = tuple
+      registered_colors[derived] = tuples
     end
   end
   local color_suffixes = self.color_suffixes
   for j = 1, #color_suffixes do
     local derived = item_name .. color_suffixes[j]
     if registered_colors[derived] == nil then
-      registered_colors[derived] = tuple
+      registered_colors[derived] = tuples
     end
   end
 end
 
---- Get color for an ingredient (science pack)
+--- Get color for an ingredient (science pack).
+--- Returns the first registered color when multiple colors are registered.
 ---
 --- @param item_name string Name of ItemPrototype of the ingredient
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
 function ColorRegistry:get_ingredient_color(item_name)
-  local color = self.registered_colors[item_name]
-  return color and Utils.color_struct(color)
+  local colors = self.registered_colors[item_name]
+  return colors and Utils.color_struct(colors[1])
+end
+
+--- Get all colors for an ingredient (science pack).
+---
+--- @param item_name string Name of ItemPrototype of the ingredient
+--- @return Color[]|nil colors All colors for the ingredient, or `nil` for non-registered ingredients.
+function ColorRegistry:get_ingredient_colors(item_name)
+  local colors = self.registered_colors[item_name]
+  if not colors then return nil end
+  local result = {}
+  for i = 1, #colors do
+    result[i] = Utils.color_struct(colors[i])
+  end
+  return result
 end
 
 --- Validate technology prototypes
@@ -139,8 +171,8 @@ function ColorRegistry:load_prototype_colors()
     self.color_suffixes = {}
   end
   -- Re-apply runtime overrides on top of prototype data.
-  for name, color in pairs(self.overrides) do
-    self.registered_colors[name] = color
+  for name, colors in pairs(self.overrides) do
+    self.registered_colors[name] = colors
   end
   Utils.pre_expand_with_affixes(self.registered_colors, self.color_prefixes, self.color_suffixes)
 end
@@ -203,14 +235,16 @@ function ColorRegistry:get_flattened_colors_for_research(technology, saturation,
   local ingredients = technology.research_unit_ingredients
   for i = 1, #ingredients do
     local name = ingredients[i].name
-    local color = registered_colors[name]
-    if color then
-      n_colors = n_colors + 1
-      local r, g, b = apply_sv_to_color(color, saturation, brightness)
-      flattened_colors[index] = r
-      flattened_colors[index + 1] = g
-      flattened_colors[index + 2] = b
-      index = index + 3
+    local colors = registered_colors[name]
+    if colors then
+      for j = 1, #colors do
+        n_colors = n_colors + 1
+        local r, g, b = apply_sv_to_color(colors[j], saturation, brightness)
+        flattened_colors[index] = r
+        flattened_colors[index + 1] = g
+        flattened_colors[index + 2] = b
+        index = index + 3
+      end
     end
   end
   if n_colors == 0 then

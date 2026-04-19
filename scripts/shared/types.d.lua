@@ -18,7 +18,7 @@ _G.consts = {}
 --- @class (exact) DiscoSciencePrototypeData
 --- @field registered_labs table<string, LabRegistration>
 --- @field excluded_labs table<string, boolean>
---- @field registered_colors table<string, ColorTuple>
+--- @field registered_colors table<string, ColorTuple[]>
 --- @field registered_color_prefixes string[]
 --- @field registered_color_suffixes string[]
 --- @field registered_lab_prefixes string[]

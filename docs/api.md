@@ -237,20 +237,25 @@ Available in `control.lua`.
 
 Set the color of an ingredient (science pack) at runtime. Overrides colors set at prototype stage.
 
+Pass a single color for a single-color ingredient, or an array of colors for a multi-color ingredient. (The array form is available since v0.5.0.)
+
 ```lua
+-- Single color
 remote.call("DiscoScience", "setIngredientColor", item_name, color)
+-- Multiple colors
+remote.call("DiscoScience", "setIngredientColor", item_name, { color1, color2, ... })
 ```
 
 **Parameters:**
 
-| Parameter   | Type                                                          | Description                                    |
-| ----------- | ------------------------------------------------------------- | ---------------------------------------------- |
-| `item_name` | `string`                                                      | Item prototype name of the ingredient          |
-| `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) | Color table (`{r, g, b}` or `{[1], [2], [3]}`) |
+| Parameter   | Type                                                                                                                               | Description                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `item_name` | `string`                                                                                                                           | Item prototype name of the ingredient       |
+| `color`     | [Color](https://lua-api.factorio.com/latest/types/Color.html) or [Color](https://lua-api.factorio.com/latest/types/Color.html)`[]` | Color or array of colors for the ingredient |
 
 #### `getIngredientColor`
 
-Get the color of an ingredient (science pack).
+Get the color of an ingredient (science pack). Returns the first color when multiple colors are registered.
 
 ```lua
 local color = remote.call("DiscoScience", "getIngredientColor", item_name)
@@ -264,7 +269,27 @@ local color = remote.call("DiscoScience", "getIngredientColor", item_name)
 
 **Returns:**
 
-- [Color](https://lua-api.factorio.com/latest/types/Color.html) — Color for the ingredient, or `nil` if not registered.
+- [Color](https://lua-api.factorio.com/latest/types/Color.html) — First color for the ingredient, or `nil` if not registered.
+
+#### `getIngredientColors` ❇️
+
+Since v0.5.0.
+
+Get all colors of an ingredient (science pack).
+
+```lua
+local colors = remote.call("DiscoScience", "getIngredientColors", item_name)
+```
+
+**Parameters:**
+
+| Parameter   | Type     | Description                           |
+| ----------- | -------- | ------------------------------------- |
+| `item_name` | `string` | Item prototype name of the ingredient |
+
+**Returns:**
+
+- [Color](https://lua-api.factorio.com/latest/types/Color.html)`[]` — All colors for the ingredient, or `nil` if not registered.
 
 #### `setLabScale`
 
@@ -334,3 +359,16 @@ Or add a triple-slash reference in one of your `.d.ts` files:
 ```typescript
 /// <reference path="../disco-science-lite/disco-science-lite.d.ts" />
 ```
+
+---
+
+## Changelog
+
+This section records API changes. For the full mod changelog, see [changelog.txt](/changelog.txt).
+
+### v0.5.0
+
+- Runtime Stage API
+    - **Added:** `getIngredientColors` for a multi-color ingredient.
+    - **Changed:** `setIngredientColor` now accepts an array of colors for multi-color ingredients. Passing a single `Color` remains supported (backward compatible).
+    - **Changed:** `getIngredientColor` returns the first color for a multi-color ingredient (backward compatible).
