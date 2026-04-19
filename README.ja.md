@@ -77,6 +77,7 @@ Space-Age 惑星追加 Mod:
 - [Planet Crucible](https://mods.factorio.com/mod/planet-crucible) by thremtopod (Disco Science Lite を公式にサポート)
 - [Planet Foliax](https://mods.factorio.com/mod/foliax) by Crethor
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [🌐 Planet Muria](https://mods.factorio.com/mod/Muria) by AndreusAxolotl
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99

@@ -31,6 +31,7 @@ return {
   require("scripts.prototype.mods.micro-machines"),
   require("scripts.prototype.mods.mini-machines"),
   require("scripts.prototype.mods.Moshine"),
+  require("scripts.prototype.mods.Muria"),
   require("scripts.prototype.mods.Nexus"),
   require("scripts.prototype.mods.omnia"),
   require("scripts.prototype.mods.omnimatter"),

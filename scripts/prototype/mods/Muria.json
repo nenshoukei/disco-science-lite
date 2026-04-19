@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Muria-Graphics",
+      "files": [
+        {
+          "file": "graphics/icons/muriatic-science-pack.png",
+          "size": 5164,
+          "crc": 3377591914
+        }
+      ]
+    }
+  ]
+}
