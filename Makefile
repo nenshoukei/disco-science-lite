@@ -1,4 +1,4 @@
-.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check full-check
+.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check full-check check-updates
 
 dev:
 	# If pcre2 is installed by Homebrew
@@ -31,6 +31,9 @@ typecheck:
 	@lua-language-server --check_format=pretty --configpath=.vscode/settings.json --check=.
 
 full-check: check typecheck
+
+check-updates:
+	@uv run tasks/check-updates/check-updates.py
 
 benchmark:
 	@echo "## Color Functions"
