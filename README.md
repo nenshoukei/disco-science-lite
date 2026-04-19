@@ -73,6 +73,7 @@ Supported Space-Age Planet Mods:
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
 - [Janus](https://mods.factorio.com/mod/janus) by RochX
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
+- [Lunar Landings](https://mods.factorio.com/mod/LunarLandings) by Xorimuth
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower

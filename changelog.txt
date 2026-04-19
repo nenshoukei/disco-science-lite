@@ -7,6 +7,7 @@ Date: ????
     - Add support for "Apia-Carnova planet system" mod by DimonSever000.
     - Add support for "Planet Muria" mod by AndreusAxolotl.
     - Add support for "Carna" mod by amHunter.
+    - Add support for "Lunar Landings" mod by Xorimuth.
   Modding:
     - Runtime API: Add `getIngredientColors` for a multi-color ingredient.
     - Runtime API: `setIngredientColor` now accepts an array of colors for multi-color ingredients. Passing a single `Color` remains supported (backward compatible).

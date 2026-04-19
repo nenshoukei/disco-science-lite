@@ -27,6 +27,7 @@ return {
   require("scripts.prototype.mods.LabOMatic"),
   require("scripts.prototype.mods.lignumis"),
   require("scripts.prototype.mods.linox"),
+  require("scripts.prototype.mods.LunarLandings"),
   require("scripts.prototype.mods.maraxis"),
   require("scripts.prototype.mods.metal-and-stars"),
   require("scripts.prototype.mods.micro-machines"),
