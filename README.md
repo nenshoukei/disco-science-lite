@@ -65,6 +65,7 @@ These mods are supported out of the box.
 
 Supported Space-Age Planet Mods:
 
+- [Apia-Carnova planet system](https://mods.factorio.com/mod/apia) by DimonSever000
 - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider

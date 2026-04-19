@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "apia",
+      "files": [
+        {
+          "file": "graphics/icons/apicultural-science-pack.png",
+          "size": 7540,
+          "crc": 293509848
+        }
+      ]
+    }
+  ]
+}
