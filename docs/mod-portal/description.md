@@ -67,26 +67,33 @@ These mods are supported out of the box.
 
 Supported Space-Age Planet Mods:
 
+- [Apia-Carnova planet system](https://mods.factorio.com/mod/apia) by DimonSever000
+- [Carna](https://mods.factorio.com/mod/carna) by amHunter
 - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
 - [Janus](https://mods.factorio.com/mod/janus) by RochX
+- [🌐Khemia: Age of Alchemy](https://mods.factorio.com/mod/alchemy-khemia) by GabeWithGlasses
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
+- [Lunar Landings](https://mods.factorio.com/mod/LunarLandings) by Xorimuth
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Nexus Extended Promethium Endgame](https://mods.factorio.com/mod/Nexus) by Karu_Kiruna (Omega lab is not colorized though)
+- [Outer Rim](https://mods.factorio.com/mod/outer-rim) by Frontrider
 - [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Crucible](https://mods.factorio.com/mod/planet-crucible) by thremtopod (has built-in support for Disco Science Lite)
 - [Planet Foliax](https://mods.factorio.com/mod/foliax) by Crethor
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [🌐 Planet Muria](https://mods.factorio.com/mod/Muria) by AndreusAxolotl
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [Planet Virentis](https://mods.factorio.com/mod/virentis) by SoulCRYSIS
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
@@ -206,26 +213,33 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 
 Space-Age 惑星追加 Mod:
 
+- [Apia-Carnova planet system](https://mods.factorio.com/mod/apia) by DimonSever000
+- [Carna](https://mods.factorio.com/mod/carna) by amHunter
 - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
 - [🌐Dea Dia System](https://mods.factorio.com/mod/dea-dia-system) by Frontrider
 - [🌐Igrys](https://mods.factorio.com/mod/Igrys) by Egorex W
 - [Janus](https://mods.factorio.com/mod/janus) by RochX
+- [🌐Khemia: Age of Alchemy](https://mods.factorio.com/mod/alchemy-khemia) by GabeWithGlasses
 - [Lignumis](https://mods.factorio.com/mod/lignumis) by cackling fiend
+- [Lunar Landings](https://mods.factorio.com/mod/LunarLandings) by Xorimuth
 - [🌐Metal and Stars](https://mods.factorio.com/mod/metal-and-stars) by Alex Boucher
 - [Moshine](https://mods.factorio.com/mod/Moshine) by snouz
 - [Muluna, Moon of Nauvis](https://mods.factorio.com/mod/planet-muluna) by Nicholas Gower
 - [Nexus Extended Promethium Endgame](https://mods.factorio.com/mod/Nexus) by Karu_Kiruna（ただし Omega lab は対象外）
+- [Outer Rim](https://mods.factorio.com/mod/outer-rim) by Frontrider
 - [Panglia Planet](https://mods.factorio.com/mod/panglia_planet) by snouz
 - [Planet Castra](https://mods.factorio.com/mod/castra) by Bartz24
 - [Planet Crucible](https://mods.factorio.com/mod/planet-crucible) by thremtopod (Disco Science Lite を公式にサポート)
 - [Planet Foliax](https://mods.factorio.com/mod/foliax) by Crethor
 - [Planet Maraxsis](https://mods.factorio.com/mod/maraxsis) by notnotmelon
+- [🌐 Planet Muria](https://mods.factorio.com/mod/Muria) by AndreusAxolotl
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [Planet Virentis](https://mods.factorio.com/mod/virentis) by SoulCRYSIS
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen

@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "virentis-graphics",
+      "files": [
+        {
+          "file": "icons/items/environment-data/mudland-data.png",
+          "size": 8262,
+          "crc": 2034570273
+        }
+      ]
+    }
+  ]
+}

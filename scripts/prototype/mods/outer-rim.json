@@ -1,0 +1,30 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "outer-rim",
+      "files": [
+        {
+          "file": "graphics/icon/thermodynamic-science-pack.png",
+          "size": 5253,
+          "crc": 556745955
+        },
+        {
+          "file": "graphics/icon/cryochemical-science-pack.png",
+          "size": 5390,
+          "crc": 2782497158
+        },
+        {
+          "file": "graphics/icon/insulation-science-pack.png",
+          "size": 5389,
+          "crc": 2618213078
+        },
+        {
+          "file": "graphics/icon/spacecraft-science-pack.png",
+          "size": 5312,
+          "crc": 235050184
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "LunarLandings",
+      "files": [
+        {
+          "file": "graphics/icons/quantum-science-pack.png",
+          "size": 3528,
+          "crc": 3760459208
+        },
+        {
+          "file": "graphics/icons/space-science-pack.png",
+          "size": 3526,
+          "crc": 1419482241
+        }
+      ]
+    }
+  ]
+}

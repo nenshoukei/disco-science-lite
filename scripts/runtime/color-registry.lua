@@ -1,4 +1,5 @@
 local Utils = require("scripts.shared.utils")
+local Settings = require("scripts.shared.settings")
 
 local RAINBOW_COLORS = {
   { 1.0, 0.0, 0.0 },
@@ -150,6 +151,9 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
     )
     return names
   else
+    if Settings.is_development then
+      log("Disco Science Lite: All ingredient colors are registered.")
+    end
     return nil
   end
 end
