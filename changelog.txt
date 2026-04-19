@@ -2,14 +2,14 @@
 Version: 0.5.0
 Date: ????
   Features:
-    - Add support for "Voidcraft" mod by S6X.
-    - Add support for "Planet Virentis" mod by SoulCRYSIS.
     - Add support for "Apia-Carnova planet system" mod by DimonSever000.
-    - Add support for "Planet Muria" mod by AndreusAxolotl.
     - Add support for "Carna" mod by amHunter.
-    - Add support for "Lunar Landings" mod by Xorimuth.
     - Add support for "Khemia: Age of Alchemy" mod by GabeWithGlasses.
+    - Add support for "Lunar Landings" mod by Xorimuth.
     - Add support for "Outer Rim" mod by Frontrider.
+    - Add support for "Planet Muria" mod by AndreusAxolotl.
+    - Add support for "Planet Virentis" mod by SoulCRYSIS.
+    - Add support for "Voidcraft" mod by S6X.
   Modding:
     - Runtime API: Add `getIngredientColors` for a multi-color ingredient.
     - Runtime API: `setIngredientColor` now accepts an array of colors for multi-color ingredients. Passing a single `Color` remains supported (backward compatible).
