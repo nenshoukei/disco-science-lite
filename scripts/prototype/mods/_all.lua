@@ -55,5 +55,6 @@ return {
   require("scripts.prototype.mods.space-exploration"),
   require("scripts.prototype.mods.tenebris"),
   require("scripts.prototype.mods.Ultracube"),
+  require("scripts.prototype.mods.Voidcraft"),
   require("scripts.prototype.mods.VoidProcessing"),
 }

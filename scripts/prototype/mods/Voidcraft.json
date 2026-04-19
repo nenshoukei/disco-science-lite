@@ -1,0 +1,25 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "Voidcraft",
+      "files": [
+        {
+          "file": "graphics/icons/void-science-pack.png",
+          "size": 6965,
+          "crc": 2386308847
+        },
+        {
+          "file": "graphics/icons/esoteric-science-pack.png",
+          "size": 6985,
+          "crc": 1222785055
+        },
+        {
+          "file": "graphics/icons/celestial-science-pack.png",
+          "size": 6633,
+          "crc": 851142847
+        }
+      ]
+    }
+  ]
+}

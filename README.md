@@ -96,6 +96,7 @@ Supported Space-Age Planet Mods:
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
 - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 - [Void Processing](https://mods.factorio.com/mod/VoidProcessing) by RustyNova016
+- [Voidcraft](https://mods.factorio.com/mod/Voidcraft) by S6X
 
 In addition to the mods listed above, mods that support the original Disco Science mod may still work, unless it specifically checks for the original mod by name and doesn't recognize Disco Science Lite as a compatible mod.
 
