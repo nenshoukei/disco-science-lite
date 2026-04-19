@@ -30,6 +30,7 @@ return {
   on_data_final_fixes = function ()
     AnimationHelpers.modify_on_animation("bob-lab-2", function (modifier)
       modifier:apply_lab_modifications({
+        lab       = "__bobtech__/graphics/entity/lab/lab2.png",
         lab_light = "__bobtech__/graphics/entity/lab/lab2-light.png",
       })
     end)
@@ -41,6 +42,7 @@ return {
 
     AnimationHelpers.modify_on_animation("bob-lab-alien", function (modifier)
       modifier:apply_lab_modifications({
+        lab       = "__bobtech__/graphics/entity/lab/lab-alien.png",
         lab_light = "__bobtech__/graphics/entity/lab/lab-alien-light.png",
       })
     end)

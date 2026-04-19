@@ -29,6 +29,7 @@ return {
     end)
     AnimationHelpers.modify_on_animation("micro-alien-lab-1", function (modifier)
       modifier:apply_lab_modifications({
+        lab       = "__bobtech__/graphics/entity/lab/lab-alien.png",
         lab_light = "__bobtech__/graphics/entity/lab/lab-alien-light.png",
       })
     end)

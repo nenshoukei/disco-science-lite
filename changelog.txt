@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: ????
+  Graphics:
+    - Fix vanilla lab colors being unintentionally brightened toward white.
   Features:
     - Add support for "Apia-Carnova planet system" mod by DimonSever000.
     - Add support for "Carna" mod by amHunter.
