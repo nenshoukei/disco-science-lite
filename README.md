@@ -85,6 +85,7 @@ Supported Space-Age Planet Mods:
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
+- [Planet Virentis](https://mods.factorio.com/mod/virentis) by SoulCRYSIS
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
