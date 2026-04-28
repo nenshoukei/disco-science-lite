@@ -4,6 +4,8 @@ Date: ????
   Features:
     - Add support for "Workshop Science" mod by Frontrider.
     - Exclude "Planet Obsidiax" mod's Obsidian lab from colorization.
+  Debug:
+    - Remove hidden "mks-dsl-is-development" setting. (Replaced by FMTK new tags feature)
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: 2026-04-19
