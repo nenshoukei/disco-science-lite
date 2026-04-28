@@ -36,6 +36,7 @@ return {
   require("scripts.prototype.mods.Moshine"),
   require("scripts.prototype.mods.Muria"),
   require("scripts.prototype.mods.Nexus"),
+  require("scripts.prototype.mods.obsidiax"),
   require("scripts.prototype.mods.omnia"),
   require("scripts.prototype.mods.omnimatter"),
   require("scripts.prototype.mods.one-more-tier"),
