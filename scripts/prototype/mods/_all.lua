@@ -64,4 +64,5 @@ return {
   require("scripts.prototype.mods.virentis"),
   require("scripts.prototype.mods.Voidcraft"),
   require("scripts.prototype.mods.VoidProcessing"),
+  require("scripts.prototype.mods.workshop-science"),
 }

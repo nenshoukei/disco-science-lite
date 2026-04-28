@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "workshop-science",
+      "files": [
+        {
+          "file": "workshop-science-pack.png",
+          "size": 23716,
+          "crc": 1153051542
+        }
+      ]
+    }
+  ]
+}
