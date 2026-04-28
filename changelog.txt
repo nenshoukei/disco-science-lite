@@ -3,6 +3,7 @@ Version: 0.5.1
 Date: ????
   Features:
     - Add support for "Workshop Science" mod by Frontrider.
+    - Exclude "Planet Obsidiax" mod's Obsidian lab from colorization.
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: 2026-04-19
