@@ -398,9 +398,9 @@ describe("ColorRegistry", function ()
       set_prototype_data({ ["pack"] = { 0.1, 0.2, 0.3 } })
       local r = ColorRegistry.new()
       r:load_prototype_colors()
-      local proto_data = _G.prototypes.mod_data
-        [ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ].data.registered_colors
-      assert.are_not.equal(proto_data["pack"], r.registered_colors["pack"])
+      --- @type DiscoSciencePrototypeData
+      local mod_data = _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ].data
+      assert.are_not.equal(mod_data.registered_colors["pack"], r.registered_colors["pack"])
     end)
 
     it("replaces previously loaded colors on re-load", function ()

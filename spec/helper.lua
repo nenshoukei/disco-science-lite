@@ -81,9 +81,13 @@ local function reset_mocks()
 
   --- @diagnostic disable-next-line: missing-fields
   _G.prototypes = {
+    --- @diagnostic disable-next-line: missing-fields
     shortcut = {},
+    --- @diagnostic disable-next-line: missing-fields
     item = {},
+    --- @diagnostic disable-next-line: missing-fields
     mod_data = {},
+    --- @diagnostic disable-next-line: missing-fields
     technology = {},
   }
 
@@ -157,6 +161,7 @@ local function reset_mocks()
 
   --- @diagnostic disable-next-line: missing-fields
   _G.data = {
+    --- @diagnostic disable-next-line: missing-fields
     raw = { lab = {}, animation = {} },
     extend = function (self, defs)
       for _, def in ipairs(defs) do

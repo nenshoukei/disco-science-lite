@@ -416,9 +416,9 @@ describe("LabRegistry", function ()
       set_prototype_data({ ["my-lab"] = { animation = "proto-anim", scale = 2 } })
       local r = LabRegistry.new()
       r:load_prototype_registrations()
-      local proto_data = _G.prototypes.mod_data
-        [ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ].data.registered_labs
-      assert.are_not.equal(proto_data["my-lab"], r:get_registration("my-lab"))
+      --- @type DiscoSciencePrototypeData
+      local mod_data = _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ].data
+      assert.are_not.equal(mod_data.registered_labs["my-lab"], r:get_registration("my-lab"))
     end)
   end)
 
