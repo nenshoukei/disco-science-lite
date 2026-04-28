@@ -143,7 +143,6 @@ local function reset_mocks()
     startup = {
       [ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true },
       [ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ] = { value = false },
-      [ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ] = { value = true },
     },
     global = {
       [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]] },

@@ -20,10 +20,11 @@ describe("Settings", function ()
       assert.are.equal(true, Settings.is_lab_blinking_disabled)
     end)
 
-    it("reads is_development from startup", function ()
-      _G.settings.startup[ "mks-dsl-is-development" --[[$IS_DEVELOPMENT_NAME]] ] = { value = false }
+    it("reads is_development from __DebugAdapter.tags", function ()
+      _G.__DebugAdapter = _G.__DebugAdapter or {}
+      _G.__DebugAdapter.tags = { ["dsl_is_development"] = true }
       Settings.reload()
-      assert.are.equal(false, Settings.is_development)
+      assert.are.equal(true, Settings.is_development)
     end)
 
     it("reads is_rainbow_mode from global", function ()

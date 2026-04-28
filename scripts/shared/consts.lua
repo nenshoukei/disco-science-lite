@@ -36,7 +36,6 @@ local consts = {
   COLOR_SATURATION_NAME = NAME_PREFIX .. "color-saturation",
   COLOR_BRIGHTNESS_NAME = NAME_PREFIX .. "color-brightness",
   COLOR_UPDATE_PRESET_NAME = NAME_PREFIX .. "color-update-preset",
-  IS_DEVELOPMENT_NAME = NAME_PREFIX .. "is-development",
   DEFAULT_COLOR_PATTERN_DURATION = 180,
 
   --- State update period in ticks
