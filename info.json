@@ -18,6 +18,7 @@
     "ignore": [
       ".*",
       "docs/**",
+      "e2e/**",
       "scripts/prototype/mods/*.json",
       "spec/**",
       "tasks/**",
@@ -27,7 +28,11 @@
       "luarocks",
       "Makefile",
       "pyproject.toml",
-      "uv.lock"
+      "uv.lock",
+      "node_modules/**",
+      "package-lock.json",
+      "package.json",
+      "factorio-test.json"
     ]
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "disco-science-lite",
+  "version": "1.0.0",
+  "description": "A Factorio mod to colorize Science Labs by their consuming science packs.",
+  "author": "nenshoukei",
+  "license": "MIT",
+  "devDependencies": {
+    "factorio-test-cli": "^3.5.1",
+    "factoriomod-debug": "^2.0.10"
+  }
+}
