@@ -69,6 +69,7 @@ These mods are supported out of the box.
 Supported Space-Age Planet Mods:
 
 - [Apia-Carnova planet system](https://mods.factorio.com/mod/apia) by DimonSever000
+- [Arboria](https://mods.factorio.com/mod/arboria) by nicvampire
 - [Carna](https://mods.factorio.com/mod/carna) by amHunter
 - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky
@@ -218,6 +219,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 Space-Age 惑星追加 Mod:
 
 - [Apia-Carnova planet system](https://mods.factorio.com/mod/apia) by DimonSever000
+- [Arboria](https://mods.factorio.com/mod/arboria) by nicvampire
 - [Carna](https://mods.factorio.com/mod/carna) by amHunter
 - [Cerys](https://mods.factorio.com/mod/Cerys-Moon-of-Fulgora) by thesixthroc
 - [🌐Corrundum](https://mods.factorio.com/mod/corrundum) by Zach Kolansky

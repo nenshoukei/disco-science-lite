@@ -6,6 +6,7 @@ return {
   require("scripts.prototype.mods.Age-of-Production"),
   require("scripts.prototype.mods.alchemy-khemia"),
   require("scripts.prototype.mods.apia"),
+  require("scripts.prototype.mods.arboria"),
   require("scripts.prototype.mods.atan-nuclear-science"),
   require("scripts.prototype.mods.BigLabFork"),
   require("scripts.prototype.mods.bobsmods"),
