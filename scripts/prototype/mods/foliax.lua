@@ -15,7 +15,7 @@ return {
       ["foliax-research-biology"]        = { 0.60, 0.78, 0.35 },
       ["foliax-research-power"]          = { 0.28, 0.77, 0.78 },
       ["foliax-research-optimization"]   = { 0.77, 0.35, 0.78 },
-      ["foliax-research-violence"]       = { 0.58, 0.58, 0.58 },
+      ["foliax-research-violence"]       = { 0.76, 0.27, 0.27 },
     })
 
     PrototypeLabRegistry.register("foliax-burner-biolab", {
