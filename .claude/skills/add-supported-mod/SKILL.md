@@ -74,6 +74,13 @@ return {
 }
 ```
 
+### Example files
+
+- For single science pack: `/scripts/prototype/mods/carna.lua`
+- For multi science packs: `/scripts/prototype/mods/apia.lua`
+- For Biolab-like labs: `/scripts/prototype/mods/foliax.lua`
+- For custom graphic labs: `/scripts/prototype/mods/fusion-lab.lua`
+
 ## Step 3: Create Spec File
 
 Create `spec/prototype/mods/<Mod ID>_spec.lua`.
