@@ -51,6 +51,7 @@ return {
   require("scripts.prototype.mods.planetaris-tellus"),
   require("scripts.prototype.mods.pyanodon"),
   require("scripts.prototype.mods.quality_glassware"),
+  require("scripts.prototype.mods.ribbonia"),
   require("scripts.prototype.mods.rubia"),
   require("scripts.prototype.mods.schallmods"),
   require("scripts.prototype.mods.SciencePackGalore"),

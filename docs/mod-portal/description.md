@@ -92,6 +92,7 @@ Supported Space-Age Planet Mods:
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
+- [Planet Ribbonia](https://mods.factorio.com/mod/ribbonia) by Powerscooter
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
 - [Planet Virentis](https://mods.factorio.com/mod/virentis) by SoulCRYSIS
@@ -239,6 +240,7 @@ Space-Age 惑星追加 Mod:
 - [Planet Omnia](https://mods.factorio.com/mod/omnia) by Wwombatt
 - [🌐 Planet Paracelsin](https://mods.factorio.com/mod/Paracelsin) by Andreus
 - [Planet Pelagos](https://mods.factorio.com/mod/pelagos) by Talandar99
+- [Planet Ribbonia](https://mods.factorio.com/mod/ribbonia) by Powerscooter
 - [🌐Planet Rubia](https://mods.factorio.com/mod/rubia) by Loup&Snoop
 - [Planet Vesta](https://mods.factorio.com/mod/skewer_planet_vesta) by CPU_BlackHeart
 - [Planet Virentis](https://mods.factorio.com/mod/virentis) by SoulCRYSIS

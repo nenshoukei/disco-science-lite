@@ -1,0 +1,15 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "ribbonia",
+      "files": [
+        {
+          "file": "graphics/icons/alien-science-pack.png",
+          "size": 1487,
+          "crc": 1871270499
+        }
+      ]
+    }
+  ]
+}
