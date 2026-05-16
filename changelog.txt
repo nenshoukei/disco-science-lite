@@ -2,6 +2,7 @@
 Version: 0.5.2
 Date: ????
   Changes:
+    - Update color for Violence research science pack in "Planet Foliax" mod.
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.1
 Date: 2026-04-28
