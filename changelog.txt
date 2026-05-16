@@ -3,6 +3,7 @@ Version: 0.5.2
 Date: ????
   Features:
     - Add support for "Planet Ribbonia" mod by Powerscooter.
+    - Add support for "Pyroclast" mod by zoli85.
   Changes:
     - Update color for Violence research science pack in "Planet Foliax" mod.
 ---------------------------------------------------------------------------------------------------
