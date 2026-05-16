@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.2
 Date: ????
+  Features:
+    - Add support for "Planet Ribbonia" mod by Powerscooter.
   Changes:
     - Update color for Violence research science pack in "Planet Foliax" mod.
 ---------------------------------------------------------------------------------------------------
