@@ -1,0 +1,35 @@
+{
+  "$schema": "./_schema.json",
+  "mods": [
+    {
+      "name": "subterranio-nauvis",
+      "files": [
+        {
+          "file": "graphics/entity/subterranean-science-pack.png",
+          "size": 57236,
+          "crc": 3163823825
+        }
+      ]
+    },
+    {
+      "name": "subterranio-vulcanus",
+      "files": [
+        {
+          "file": "graphics/item/propulsion-science-pack.png",
+          "size": 49945,
+          "crc": 1305700238
+        }
+      ]
+    },
+    {
+      "name": "subterranio-fulgora",
+      "files": [
+        {
+          "file": "graphics/entity/induction-science-pack.png",
+          "size": 53013,
+          "crc": 1611642435
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ Date: ????
     - Add support for "Planet Ribbonia" mod by Powerscooter.
     - Add support for "Pyroclast" mod by zoli85.
     - Add support for "Arboria" mod by nicvampire.
+    - Add support for "Subterranio" mod by TheKingTut.
   Changes:
     - Update color for Violence research science pack in "Planet Foliax" mod.
 ---------------------------------------------------------------------------------------------------

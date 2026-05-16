@@ -104,6 +104,7 @@ Supported Space-Age Planet Mods:
 - [Shattered Planet](https://mods.factorio.com/mod/skewer_shattered_planet) by CPU_BlackHeart
 - [Shchierbin](https://mods.factorio.com/mod/shchierbin) by Magistr-Djo
 - [SLP - Dyson Sphere Reworked](https://mods.factorio.com/mod/slp-dyson-sphere-reworked) by SLywnow
+- [Subterranio](https://mods.factorio.com/mod/subterranio) by TheKingTut
 - [Tenebris](https://mods.factorio.com/mod/tenebris) by Big_J
 - [Tenebris Prime](https://mods.factorio.com/mod/tenebris-prime) by MeteorSwarm
 - [Void Processing](https://mods.factorio.com/mod/VoidProcessing) by RustyNova016
