@@ -28,33 +28,33 @@
       "files": [
         {
           "file": "graphics/icons/research-transportation.png",
-          "size": 6476,
-          "crc": 4148431975
+          "size": 6422,
+          "crc": 3333559959
         },
         {
           "file": "graphics/icons/research-machine.png",
-          "size": 6444,
-          "crc": 3401982237
+          "size": 6440,
+          "crc": 2555475669
         },
         {
           "file": "graphics/icons/research-biology.png",
-          "size": 6403,
-          "crc": 1194471649
+          "size": 6437,
+          "crc": 1651655700
         },
         {
           "file": "graphics/icons/research-power.png",
-          "size": 6431,
-          "crc": 3756634821
+          "size": 6428,
+          "crc": 4144276079
         },
         {
           "file": "graphics/icons/research-optimization.png",
-          "size": 6488,
-          "crc": 2590339073
+          "size": 6468,
+          "crc": 4291344028
         },
         {
           "file": "graphics/icons/research-violence.png",
-          "size": 5579,
-          "crc": 2922989713
+          "size": 6116,
+          "crc": 812211827
         },
         {
           "file": "graphics/entity/biolab/biolab-color-mask.png",
