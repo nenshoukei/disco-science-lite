@@ -50,6 +50,7 @@ return {
   require("scripts.prototype.mods.planetaris-hyarion"),
   require("scripts.prototype.mods.planetaris-tellus"),
   require("scripts.prototype.mods.pyanodon"),
+  require("scripts.prototype.mods.Pyroclast"),
   require("scripts.prototype.mods.quality_glassware"),
   require("scripts.prototype.mods.ribbonia"),
   require("scripts.prototype.mods.rubia"),

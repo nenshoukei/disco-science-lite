@@ -99,6 +99,7 @@ Supported Space-Age Planet Mods:
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
+- [Pyroclast](https://mods.factorio.com/mod/Pyroclast) by zoli85
 - [🌐 Rabbasca, the forgotten Moon](https://mods.factorio.com/mod/planet-rabbasca) by PizzaPlanner
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [Shattered Planet](https://mods.factorio.com/mod/skewer_shattered_planet) by CPU_BlackHeart
@@ -247,6 +248,7 @@ Space-Age 惑星追加 Mod:
 - [🌐Planetaris: Arig](https://mods.factorio.com/mod/planetaris-arig) by Syen
 - [🌐Planetaris: Hyarion](https://mods.factorio.com/mod/planetaris-hyarion) by Syen
 - [🌐Planetaris: Tellus](https://mods.factorio.com/mod/planetaris-tellus) by Syen
+- [Pyroclast](https://mods.factorio.com/mod/Pyroclast) by zoli85
 - [🌐 Rabbasca, the forgotten Moon](https://mods.factorio.com/mod/planet-rabbasca) by PizzaPlanner
 - [🌐Secretas&Frozeta](https://mods.factorio.com/mod/secretas) by Zach Kolansky
 - [Shattered Planet](https://mods.factorio.com/mod/skewer_shattered_planet) by CPU_BlackHeart
