@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.2
-Date: ????
+Date: 2026-05-16
   Features:
     - Add support for "Planet Ribbonia" mod by Powerscooter.
     - Add support for "Pyroclast" mod by zoli85.
