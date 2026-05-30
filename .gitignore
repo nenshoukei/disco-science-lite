@@ -23,4 +23,8 @@ __pycache__/
 /.venv
 /.ruff_cache
 
+/node_modules
+
+/e2e/factorio-test-data-dir
+
 /tasks/check-updates/.downloaded

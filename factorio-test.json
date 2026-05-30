@@ -1,0 +1,4 @@
+{
+  "dataDirectory": "e2e/factorio-test-data-dir",
+  "mods": ["base", "elevated-rails", "quality", "space-age"]
+}
