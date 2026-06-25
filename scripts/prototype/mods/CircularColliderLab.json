@@ -6,8 +6,14 @@
       "files": [
         {
           "file": "data.lua",
-          "size": 15177,
-          "crc": 81342763
+          "ranges": [
+            {
+              "line_from": "    on_animation = {",
+              "line_to": "    },",
+              "size": 1162,
+              "crc": 325008897
+            }
+          ]
         },
         {
           "file": "graphics/circular-collider-lab-animation.png",
