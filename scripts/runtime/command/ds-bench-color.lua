@@ -25,7 +25,7 @@ commands.add_command(
         func(output, phase, colors, n_colors, scale, px, py, lx, ly)
       end
 
-      local p = game.create_profiler()
+      local p = helpers.create_profiler()
       for _ = 1, ROUNDS do
         for _ = 1, N do
           func(output, phase, colors, n_colors, scale, px, py, lx, ly)

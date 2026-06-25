@@ -101,7 +101,7 @@ ColorFunctions._compile_function = compile_function -- for testing and benchmark
 --- @type ColorFunction[]
 local functions = {
   -- In Factorio's Lua environment, even standard library function calls carry significant overhead compared to inline arithmetic.
-  -- Benchmarks run inside the Factorio runtime (100,000+ iterations via `game.create_profiler()`) guided these choices:
+  -- Benchmarks run inside the Factorio runtime (100,000+ iterations via `helpers.create_profiler()`) guided these choices:
   --
   -- * Avoid `math.abs`, `math.max`, `math.floor`:
   --     Replaced with inline equivalents (`x < 0 and -x or x`, `a > b and a or b`, `t - t % 1`). These are meaningfully faster in a hot loop.

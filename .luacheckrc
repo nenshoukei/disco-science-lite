@@ -31,5 +31,5 @@ globals = {
     "mods",
     "util",
     "table_size",
-    "__DebugAdapter"
+    "debugadapter"
 }

@@ -14,11 +14,6 @@ commands.add_command(
     local player_index = event.player_index
     if not player_index then return end
 
-    if script.active_mods["debugadapter"] then
-      game.print("Error: The benchmark should not be run with the FMTK debugger enabled.")
-      return
-    end
-
     local pi = math.pi
     local inv_pi = 1 / pi
     local negative = -12345
@@ -247,12 +242,12 @@ commands.add_command(
       for name, func in pairs(ts.tests) do
         if ts.setup_suite then ts.setup_suite() end
 
-        local average = game.create_profiler(true)
+        local average = helpers.create_profiler(true)
         local row = { category, name, average }
         for i = 1, WARMUP + ROUNDS do
           if ts.setup_round then ts.setup_round() end
 
-          local profiler = game.create_profiler()
+          local profiler = helpers.create_profiler()
           for _ = 1, N do
             if setup_each then setup_each() end
             func()
