@@ -1,0 +1,47 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DSL Mod List: Clean Mod List",
+      "type": "factorio",
+      "command": "adjustMods",
+      "disableExtraMods": true,
+      "adjustMods": {
+        "elevated-rails": true,
+        "quality": true,
+        "space-age": true,
+        "disco-science-lite": true
+      }
+    },
+    {
+      "label": "DSL Mod List: Showcase for gallery",
+      "type": "factorio",
+      "command": "adjustMods",
+      "disableExtraMods": true,
+      "adjustMods": {
+        "elevated-rails": true,
+        "quality": true,
+        "space-age": true,
+        "Age-of-Production": true,
+        "Age-of-Production-Graphics": true,
+        "bioprocessing-tab": true,
+        "CircularColliderLab": true,
+        "Cold_biters": true,
+        "corrundum": true,
+        "dea-dia-system": true,
+        "disco-science-lite": true,
+        "est-tiny-storage-tank": true,
+        "fusion-lab": true,
+        "LabOMatic": true,
+        "lex-aircraft": true,
+        "PlanetsLib": true,
+        "quality_glassware": true,
+        "Robocharger-Updated": true,
+        "SpidertronEnhancements": true,
+        "SpidertronPatrols": true
+      }
+    }
+  ]
+}

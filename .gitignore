@@ -2,6 +2,7 @@
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/settings.default.json
+!.vscode/tasks.json
 
 .claude/*.local.json
 

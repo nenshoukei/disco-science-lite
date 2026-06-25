@@ -33,8 +33,7 @@ function Settings.reload()
   local global = settings.global
   if not startup then return end
 
-  --- @diagnostic disable-next-line: undefined-global
-  Settings.is_development = (__DebugAdapter and __DebugAdapter.tags and __DebugAdapter.tags.dsl_is_development) == true
+  Settings.is_development = (debugadapter and type(debugadapter.tags) == "table" and debugadapter.tags.dsl_is_development) == true
 
   Settings.is_fallback_enabled = startup[ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ].value --[[@as boolean]]
   Settings.is_lab_blinking_disabled = startup[ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ].value --[[@as boolean]]
