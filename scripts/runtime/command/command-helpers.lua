@@ -91,7 +91,7 @@ function CommandHelpers.fill_lab_entity_with_ingredients(lab)
     local fluid = fluid_box.filter or prototypes.fluid["steam"]
     lab.insert_fluid({
       name = fluid.name,
-      amount = fluid_box.volume,
+      amount = fluid_box.get_volume(),
       temperature = fluid.max_temperature,
     })
   end
