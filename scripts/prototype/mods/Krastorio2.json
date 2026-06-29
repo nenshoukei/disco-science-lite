@@ -159,29 +159,32 @@
       ]
     },
     {
-      "name": "Krastorio2-spaced-out",
+      "name": "k2so-assets",
       "files": [
         {
-          "file": "prototypes/buildings/advanced-lab.lua",
-          "ranges": [
-            {
-              "line_from": "\t\ton_animation = {",
-              "line_to": "\t\t},",
-              "size": 2288,
-              "crc": 2945384534
-            }
-          ]
+          "file": "icons/cards/metallurgy-tech-card.png",
+          "size": 10200,
+          "crc": 1138482308
         },
         {
-          "file": "prototypes/buildings/singularity-lab.lua",
-          "ranges": [
-            {
-              "line_from": "\t\ton_animation = {",
-              "line_to": "\t\t},",
-              "size": 1509,
-              "crc": 3410351940
-            }
-          ]
+          "file": "icons/cards/electromagnetic-tech-card.png",
+          "size": 9956,
+          "crc": 2975965699
+        },
+        {
+          "file": "icons/cards/agricultural-tech-card.png",
+          "size": 10505,
+          "crc": 1770355953
+        },
+        {
+          "file": "icons/cards/cryogenic-tech-card.png",
+          "size": 10460,
+          "crc": 497584440
+        },
+        {
+          "file": "icons/cards/promethium-tech-card.png",
+          "size": 10398,
+          "crc": 3869827254
         }
       ]
     }
