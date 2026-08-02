@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,12 +17,14 @@ describe("mods/metal-and-stars", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors for metal-and-stars science packs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["quantum-science-pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["ring-science-pack"])
     end)
 
     it("registers microgravity-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["microgravity-lab"])
     end)
@@ -29,14 +32,19 @@ describe("mods/metal-and-stars", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- Source: https://github.com/aboucher51/metal-and-stars/blob/main/prototypes/entity/particle-accelerator.lua#L60
       on_animation = {
         layers = {
-          { filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-shadow.png",             frame_count = 1, repeat_count = 60 },
-          { filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation.png",          frame_count = 60 },
+          {
+            filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-shadow.png",
+            frame_count = 1,
+            repeat_count = 60,
+          },
+          { filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation.png", frame_count = 60 },
           { filename = "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation-emission.png", frame_count = 60 },
         },
       }
@@ -44,22 +52,19 @@ describe("mods/metal-and-stars", function ()
     end)
 
     it("removes the emission layer and creates overlay with stripes", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      -- 3 original - 1 emission removed = 2
-      assert.are.equal(2, #on_animation.layers)
-      assert.are.equal("__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-shadow.png", on_animation.layers[1].filename)
-      assert.are.equal("__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation.png", on_animation.layers[2]
-        .filename)
+      Helper.assert_animation.has_layers({
+        "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-shadow.png",
+        "__metal-and-stars-graphics__/graphics/entity/particle-accelerator/particle-accelerator-hr-animation.png",
+      }, on_animation)
 
       local overlay = _G.data.raw["animation"]["mks-dsl-microgravity-lab-overlay"]
-      assert.is_not_nil(overlay)
-      --- @cast overlay -nil
-      assert.is_not_nil(overlay.stripes)
-      assert.are.equal(
-        "__disco-science-lite__/graphics/hurricane/fusion-reactor-hr-overlay.png",
-        overlay.stripes[1].filename
-      )
+      assert.is_not_nil(overlay) --- @cast overlay - nil
+      assert.is_not_nil(overlay.stripes) --- @cast overlay.stripes - nil
+      --- @diagnostic disable-next-line: need-check-nil
+      assert.are.equal("__disco-science-lite__/graphics/hurricane/fusion-reactor-hr-overlay.png", overlay.stripes[1].filename)
     end)
 
     it("does not extend when emission layer is missing", function ()
@@ -69,6 +74,7 @@ describe("mods/metal-and-stars", function ()
         },
       }
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_nil(_G.data.raw["animation"]["mks-dsl-microgravity-lab-overlay"])

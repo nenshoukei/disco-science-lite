@@ -1,7 +1,9 @@
 --- Quality Glassware by Hornwitser
 --- https://mods.factorio.com/mod/quality_glassware
 
-if not mods["quality_glassware"] then return {} end
+--- @type ModSupport
+local mod = {}
+if not mods["quality_glassware"] then return mod end
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local string_match = string.match
@@ -72,14 +74,14 @@ local function tool_to_color(tool)
   return nil
 end
 
-return {
-  on_data_final_fixes = function ()
-    -- Register all science-packs using Quality Glassware
-    for _, tool in pairs(data.raw["tool"]) do
-      local color = tool_to_color(tool)
-      if color then
-        PrototypeColorRegistry.set(tool.name, color)
-      end
+mod.on_data_final_fixes = function ()
+  -- Register all science-packs using Quality Glassware
+  for _, tool in pairs(data.raw["tool"]) do
+    local color = tool_to_color(tool)
+    if color then
+      PrototypeColorRegistry.set(tool.name, color)
     end
-  end,
-}
+  end
+end
+
+return mod

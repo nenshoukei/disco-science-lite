@@ -1,3 +1,5 @@
+--- @diagnostic disable: global-in-non-module
+local assert = require("luassert")
 local helper = require("spec.helper")
 local Settings = require("scripts.shared.settings")
 
@@ -105,7 +107,10 @@ describe("Settings", function ()
       end)
 
       it("uses default color_pattern_duration of 180", function ()
-        assert.are.equal(180 --[[$DEFAULT_COLOR_PATTERN_DURATION]], Settings.color_pattern_duration)
+        assert.are.equal(
+          180, --[[$DEFAULT_COLOR_PATTERN_DURATION]]
+          Settings.color_pattern_duration
+        )
       end)
 
       it("uses default color_update_preset of 'balanced'", function ()
@@ -132,6 +137,7 @@ describe("Settings", function ()
         _G.settings.global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ] = { value = 0 }
         Settings.reload()
 
+        --- @diagnostic disable-next-line: preferred-local-alias
         assert.are.equal(prev_fallback, Settings.is_fallback_enabled)
         assert.are_not.equal(0.0, Settings.color_saturation)
       end)
@@ -146,6 +152,7 @@ describe("Settings", function ()
         _G.settings = nil
         Settings.reload()
 
+        --- @diagnostic disable-next-line: preferred-local-alias
         assert.are.equal(prev_fallback, Settings.is_fallback_enabled)
       end)
     end)

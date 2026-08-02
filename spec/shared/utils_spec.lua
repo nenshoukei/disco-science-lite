@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Utils = require("scripts.shared.utils")
 
 describe("Utils", function ()

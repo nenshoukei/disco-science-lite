@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,11 +17,13 @@ describe("mods/planet-rabbasca", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["athletic-science-pack"])
     end)
 
     it("registers prefix for infused labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.are.same({ "harene-infused-" }, PrototypeLabRegistry.registered_prefixes)
     end)

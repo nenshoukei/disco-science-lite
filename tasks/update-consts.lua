@@ -1,5 +1,4 @@
 #!/usr/bin/env lua
-
 package.path = "./?.lua;./?/init.lua;./lua_modules/share/lua/5.2/?.lua;" .. package.path
 package.cpath = "./lua_modules/lib/lua/5.2/?.so;" .. package.cpath
 
@@ -35,7 +34,13 @@ local consts_regex = Regex(TAGGED_LITERAL .. "|" .. NAKED_CONST)
 --- @return string
 local function update_content(content)
   -- Update all existing consts expressions
-  local processed_content = consts_regex:gsub(content, function (matched, matched_tag, tagged_const_expr, naked_const_name)
+
+  --- @param matched           string
+  --- @param matched_tag       string
+  --- @param tagged_const_expr string
+  --- @param naked_const_name  string
+  --- @return string
+  local function replacer(matched, matched_tag, tagged_const_expr, naked_const_name)
     if tagged_const_expr ~= "" then
       local eval_func, load_error = load("return " .. tagged_const_expr, tagged_const_expr, "bt", consts)
       if not eval_func then
@@ -65,13 +70,15 @@ local function update_content(content)
       end
       return to_literal(returned_value) .. matched_tag
     else
-      local const_value = consts[naked_const_name]
+      local const_value = consts[naked_const_name] --- @cast const_value string|number|boolean|nil
       if const_value == nil then
         error("Constant not found: consts." .. naked_const_name)
       end
       return to_literal(const_value) .. " --[[$" .. naked_const_name .. "]]"
     end
-  end)
+  end
+
+  local processed_content = consts_regex:gsub(content, replacer)
   return processed_content
 end
 
@@ -104,9 +111,13 @@ end
 if arg and arg[0] and arg[0]:match("update%-consts%.lua$") then
   -- Scan *.lua in `scripts/`, `spec/` or on top-level.
   local handle = io.popen(
-    'find . \\( -regex "\\./[^/]*\\.lua" \\) -or \\( -path "./scripts/**.lua" -not -path "./scripts/shared/consts.lua" \\) -or \\( -path "./spec/**.lua" -not -path "./spec/tasks/update-consts_spec.lua" \\)')
+    'find . \\( -regex "\\./[^/]*\\.lua" \\) -or \\( -path "./scripts/**.lua" -not -path "./scripts/shared/consts.lua" \\) -or \\( -path "./spec/**.lua" -not -path "./spec/tasks/update-consts_spec.lua" \\)'
+  )
   if handle then
     for path in handle:lines() do
+      if type(path) == "number" then
+        error(string.format("Failed to find files (code:%d)", path))
+      end
       process_file(path)
     end
     handle:close()
@@ -115,7 +126,9 @@ end
 
 -- Return for testing
 return {
-  set_consts = function (new_consts) consts = new_consts end,
+  set_consts = function (new_consts)
+    consts = new_consts
+  end,
   update_content = update_content,
   to_literal = to_literal,
 }

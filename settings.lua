@@ -1,36 +1,36 @@
 data:extend({
   {
     type = "bool-setting",
-    name = "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]],
+    name = "mks-dsl-fallback-overlay-enabled", --[[$FALLBACK_OVERLAY_ENABLED_NAME]]
     setting_type = "startup",
     default_value = true,
     order = "su-a[visual]-a",
   },
   {
     type = "bool-setting",
-    name = "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]],
+    name = "mks-dsl-lab-blinking-disabled", --[[$LAB_BLINKING_DISABLED_NAME]]
     setting_type = "startup",
     default_value = false,
     order = "su-a[visual]-b",
   },
   {
     type = "int-setting",
-    name = "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]],
+    name = "mks-dsl-color-pattern-duration", --[[$COLOR_PATTERN_DURATION_NAME]]
     setting_type = "runtime-global",
-    default_value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]],
+    default_value = 180, --[[$DEFAULT_COLOR_PATTERN_DURATION]]
     minimum_value = 1,
     order = "rg-a[visual]-b",
   },
   {
     type = "bool-setting",
-    name = "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]],
+    name = "mks-dsl-rainbow-mode", --[[$RAINBOW_MODE_NAME]]
     setting_type = "runtime-global",
     default_value = false,
     order = "rg-a[visual]-c",
   },
   {
     type = "int-setting",
-    name = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]],
+    name = "mks-dsl-color-saturation", --[[$COLOR_SATURATION_NAME]]
     setting_type = "runtime-global",
     default_value = 100,
     minimum_value = 1,
@@ -39,7 +39,7 @@ data:extend({
   },
   {
     type = "int-setting",
-    name = "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]],
+    name = "mks-dsl-color-brightness", --[[$COLOR_BRIGHTNESS_NAME]]
     setting_type = "runtime-global",
     default_value = 100,
     minimum_value = 1,
@@ -48,7 +48,7 @@ data:extend({
   },
   {
     type = "string-setting",
-    name = "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]],
+    name = "mks-dsl-color-update-preset", --[[$COLOR_UPDATE_PRESET_NAME]]
     setting_type = "runtime-global",
     default_value = "balanced",
     allowed_values = { "smooth", "balanced", "performance" },

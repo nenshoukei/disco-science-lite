@@ -1,0 +1,3 @@
+--- @class ModSupport
+--- @field on_data             fun()?
+--- @field on_data_final_fixes fun()?

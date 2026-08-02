@@ -6,41 +6,62 @@ Requirements:
 
 - `lua` 5.2
 - `luarocks`
-- `lua-language-server` + [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)
 - `pcre2`
+- `python3` + `uv`
+- `tsc`
 - [Factorio Modding Tool Kit](https://marketplace.visualstudio.com/items?itemName=justarandomgeek.factoriomod-debug)
+- [EmmyLua](https://marketplace.visualstudio.com/items?itemName=tangzx.emmylua)
 
 This project's directory (or its symlink) should be located in the `mods` directory of [Factorio's use data directory](https://wiki.factorio.com/Application_directory) to be loaded by Factorio.
 
-## Dependencies
+## Setup
 
-To install dependencies by luarocks:
+### Configuration
+
+First, copy `.luarc.json.example` to `.luarc.json` and edit it for your environment. The path to FMTK and Factorio data directory should be fixed.
 
 ```
-make dev
+cp .luarc.json.example .luarc.json
+```
+
+### luarocks
+
+To install Lua dependencies by luarocks:
+
+```
+luarocks install --deps-only disco-science-lite-dev-1.rockspec
 ```
 
 If you have installed `pcre2` with Homebrew at `/opt/homebrew`:
 
 ```
-make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
+luarocks install --deps-only disco-science-lite-dev-1.rockspec C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
+```
+
+### EmmyLua
+
+To install EmmyLua binaries:
+
+```
+cargo install emmylua_formatter
+cargo install emmylua_check
 ```
 
 ## Tests
 
-To run unit tests, lint, typecheck:
+To format codes and run type check and unit tests:
 
 ```
 make check
 ```
 
-This does:
+This does all following:
 
 - `make consts`: Updates constant values for special syntax (See below)
-- `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua).
-- `make lint`: Lints codes by `luacheck`
+- `make mods`: Updates the [mod list](/scripts/prototype/mods/_all.lua).
+- `make format`: Format Lua files by `luafmt`
+- `make typecheck`: Type check by `emmylua_check` and `tsc`
 - `make test`: Runs unit tests by `busted`
-- `make typecheck`: Type-checks [disco-science-lite.d.ts](/disco-science-lite.d.ts) by `tsc`
 
 ## Special Constants Syntax
 

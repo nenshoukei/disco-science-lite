@@ -98,6 +98,7 @@ Use the actual lab entity name (the key in `data.raw.lab`) from the source code 
 ### Template
 
 ```lua
+local assert = require("luassert")
 local Helper = require("spec.helper")
 --# If any `New Science Packs`:
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
@@ -125,6 +126,7 @@ describe("mods/<Mod ID>", function ()
   describe("on_data", function ()
     --# If any `New Science Packs`:
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       --# Foreach new science pack:
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["<Science Pack Name>"])
@@ -134,6 +136,7 @@ describe("mods/<Mod ID>", function ()
 
     --# If any `New Custom Labs`:
     it("registers labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       --# Foreach new custom lab:
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["<Lab Name>"])
@@ -146,10 +149,12 @@ describe("mods/<Mod ID>", function ()
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
     --# If only one `New Custom Labs`:
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
     --# Else If multiple `New Custom Labs`:
     --# Foreach `New Custom Labs`:
-    local on_animation_<Lab Name> --- @type data.Animation
+    --- @type data.Animation
+    local on_animation_<Lab Name>
     --# End Foreach
     --# End If
 
@@ -166,12 +171,14 @@ describe("mods/<Mod ID>", function ()
     end)
 
     it("applies lab modifications", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
       -- TODO: Write assertions
     end)
 
     --# Foreach new custom lab:
     it("creates the <Lab Name> overlay animation", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
       local overlay = _G.data.raw["animation"]["mks-dsl-<Lab Name>-overlay"]
       assert.is_not_nil(overlay) --- @cast overlay -nil
@@ -196,8 +203,6 @@ Run the following command to update `_all.lua` and mod description:
 make mods mod-description
 ```
 
-Run from the project root directory: `/Users/kotas/Library/Application Support/factorio/mods/disco-science-lite`
-
 ## Step 5: Create Check-updates JSON file
 
 Create `scripts/prototype/mods/<Mod ID>.json` using this template:
@@ -215,15 +220,15 @@ Create `scripts/prototype/mods/<Mod ID>.json` using this template:
           "ranges": [
             {
               "line_from": "<Check-Update Range line_from>",
-              "line_to": "<Check-Update Range line_tom>",
+              "line_to": "<Check-Update Range line_tom>"
             }
           ]
         },
         //# End Foreach
         //# Foreach new science pack:
         {
-          "file": "<PNG File Path>",
-        },
+          "file": "<PNG File Path>"
+        }
         //# End Foreach
       ]
     }

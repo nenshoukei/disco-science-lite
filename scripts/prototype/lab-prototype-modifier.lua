@@ -29,7 +29,7 @@ local function add_lab_trigger(lab)
       type = "instant",
       source_effects = {
         type = "script",
-        effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]],
+        effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
       },
     },
   }
@@ -37,7 +37,9 @@ local function add_lab_trigger(lab)
   if lab.created_effect then
     if lab.created_effect.type then
       -- Change the TriggerItem to array[TriggerItem]
-      lab.created_effect = { lab.created_effect --[[@as data.AnyTriggerItem]] }
+      lab.created_effect = {
+        lab.created_effect, --[[@as data.AnyTriggerItem]]
+      }
     end
     lab.created_effect[#lab.created_effect + 1] = trigger
   else
@@ -51,7 +53,7 @@ end
 --- If `fallback_overlay_enabled` setting is `true`, all lab prototypes without registration
 --- and exclusion will also be modified for colorization.
 ---
---- @param lab_prototypes { [string]: data.LabPrototype }
+--- @param lab_prototypes table<string, data.LabPrototype>
 function LabPrototypeModifier.modify_registered_labs(lab_prototypes)
   local registered_labs = PrototypeLabRegistry.registered_labs
   local excluded_labs = PrototypeLabRegistry.excluded_labs

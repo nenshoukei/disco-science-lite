@@ -1,6 +1,7 @@
 local Utils = require("scripts.shared.utils")
 local Settings = require("scripts.shared.settings")
 
+--- @type ColorTuple[]
 local RAINBOW_COLORS = {
   { 1.0, 0.0, 0.0 },
   { 1.0, 0.5, 0.0 },
@@ -16,7 +17,7 @@ local RAINBOW_COLORS = {
 }
 
 --- Normalize a Color or Color[] input to ColorTuple[].
---- @param color Color | Color[]
+--- @param color Color|Color[]
 --- @return ColorTuple[]
 local function normalize_colors(color)
   if type(color[1]) == "number" or type(color.r) == "number" then
@@ -27,14 +28,16 @@ local function normalize_colors(color)
   local n = #color
   local tuples = {}
   for i = 1, n do
-    tuples[i] = Utils.color_tuple(color[i])
+    tuples[i] = Utils.color_tuple(
+      color[i] --[[@as Color]]
+    )
   end
   return tuples
 end
 
 --- Registry for colors of research ingredients
 ---
---- @class ColorRegistry
+--- @class (partial) ColorRegistry
 local ColorRegistry = {
   --- Default color for research
   --- @type ColorTuple
@@ -45,7 +48,7 @@ ColorRegistry.__index = ColorRegistry
 --- @param color_overrides table<string, ColorTuple[]>?
 --- @return ColorRegistry
 function ColorRegistry.new(color_overrides)
-  --- @class ColorRegistry
+  --- @class (partial) ColorRegistry
   local self = {
     --- Dictionary of registered ingredient colors. Key is ingredient's ItemPrototype name.
     --- Includes pre-expanded entries for all registered prefix/suffix combinations.
@@ -66,8 +69,8 @@ end
 
 --- Set color(s) for an ingredient (science pack)
 ---
---- @param item_name string Name of ItemPrototype of the ingredient
---- @param color Color | Color[] Color or colors for the ingredient.
+--- @param item_name string        Name of ItemPrototype of the ingredient
+--- @param color     Color|Color[] Color or colors for the ingredient.
 function ColorRegistry:set_ingredient_color(item_name, color)
   local tuples = normalize_colors(color)
   local registered_colors = self.registered_colors
@@ -97,7 +100,7 @@ end
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
 function ColorRegistry:get_ingredient_color(item_name)
   local colors = self.registered_colors[item_name]
-  return colors and Utils.color_struct(colors[1])
+  return colors and colors[1] and Utils.color_struct(colors[1])
 end
 
 --- Get all colors for an ingredient (science pack).
@@ -145,10 +148,7 @@ function ColorRegistry:validate_technology_prototypes(all_prototypes)
       i = i + 1
     end
     table.sort(names)
-    log(
-      "Disco Science Lite encountered the following ingredients with no registered color: " ..
-      table.concat(names, ", ")
-    )
+    log("Disco Science Lite encountered the following ingredients with no registered color: " .. table.concat(names, ", "))
     return names
   else
     if Settings.is_development then
@@ -181,38 +181,34 @@ function ColorRegistry:load_prototype_colors()
   Utils.pre_expand_with_affixes(self.registered_colors, self.color_prefixes, self.color_suffixes)
 end
 
---- @param color ColorTuple
---- @param saturation number Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
---- @param brightness number Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param color      ColorTuple
+--- @param saturation number     Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param brightness number     Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return number r
 --- @return number g
 --- @return number b
 local function apply_sv_to_color(color, saturation, brightness)
   local r, g, b = color[1], color[2], color[3]
   local lum = 0.299 * r + 0.587 * g + 0.114 * b
-  return
-    (lum + (r - lum) * saturation) * brightness,
-    (lum + (g - lum) * saturation) * brightness,
-    (lum + (b - lum) * saturation) * brightness
+  return (lum + (r - lum) * saturation) * brightness, (lum + (g - lum) * saturation) * brightness, (lum + (b - lum) * saturation) * brightness
 end
 
 --- @param flattened_colors number[]
---- @param n_colors integer
+--- @param n_colors         integer
 --- @return ColorTuple[] colors
---- @return integer      n_colors
+--- @return integer n_colors
 local function flattened_colors_to_colors(flattened_colors, n_colors)
   --- @type ColorTuple[]
   local colors = {}
   local index = 1
-  for i = 1, n_colors do
-    colors[i] = {
-      flattened_colors[index],
-      flattened_colors[index + 1],
-      flattened_colors[index + 2],
-    }
+  for _ = 1, n_colors do
+    local r, g, b = flattened_colors[index], flattened_colors[index + 1], flattened_colors[index + 2]
+    if r and g and b then
+      colors[#colors + 1] = { r, g, b }
+    end
     index = index + 3
   end
-  return colors, n_colors
+  return colors, #colors
 end
 
 --- Get flattened color array of ingredients for research of technology.
@@ -224,10 +220,10 @@ end
 --- Brightness then scales all components uniformly.
 ---
 --- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
---- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
---- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param saturation number?                              Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param brightness number?                              Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return number[] flattened_colors Flattened color array: `{ r, g, b, r, g, b, ... }`
---- @return integer  n_colors         Number of colors: `#flattened_colors / 3`
+--- @return integer n_colors          Number of colors: `#flattened_colors / 3`
 function ColorRegistry:get_flattened_colors_for_research(technology, saturation, brightness)
   saturation = saturation or 1.0
   brightness = brightness or 1.0
@@ -264,10 +260,10 @@ end
 --- Get colors of ingredients for research of technology.
 ---
 --- @param technology LuaTechnology|LuaTechnologyPrototype Technology, or its prototype
---- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
---- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param saturation number?                              Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
+--- @param brightness number?                              Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return ColorTuple[] colors
---- @return integer      n_colors
+--- @return integer n_colors
 function ColorRegistry:get_colors_for_research(technology, saturation, brightness)
   local flattened_colors, n_colors = self:get_flattened_colors_for_research(technology, saturation, brightness)
   return flattened_colors_to_colors(flattened_colors, n_colors)
@@ -278,8 +274,8 @@ end
 --- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return number[] flattened_colors Flattened color array: `{ r, g, b, r, g, b, ... }`
---- @return integer  n_colors         Number of colors: `#flattened_colors / 3`
-function ColorRegistry:get_flattened_rainbow_colors(saturation, brightness)
+--- @return integer n_colors          Number of colors: `#flattened_colors / 3`
+function ColorRegistry.get_flattened_rainbow_colors(saturation, brightness)
   saturation = saturation or 1.0
   brightness = brightness or 1.0
   --- @type number[]
@@ -287,7 +283,7 @@ function ColorRegistry:get_flattened_rainbow_colors(saturation, brightness)
   local index = 1
   local n_colors = #RAINBOW_COLORS
   for i = 1, n_colors do
-    local color = RAINBOW_COLORS[i]
+    local color = RAINBOW_COLORS[i] --[[@as ColorTuple]]
     local r, g, b = apply_sv_to_color(color, saturation, brightness)
     flattened_colors[index] = r
     flattened_colors[index + 1] = g
@@ -302,9 +298,9 @@ end
 --- @param saturation number? Saturation multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @param brightness number? Brightness multiplier in range [0.0, 1.0]. Defaults to 1.0.
 --- @return ColorTuple[] colors
---- @return integer      n_colors
+--- @return integer n_colors
 function ColorRegistry:get_rainbow_colors(saturation, brightness)
-  local flattened_colors, n_colors = self:get_flattened_rainbow_colors(saturation, brightness)
+  local flattened_colors, n_colors = self.get_flattened_rainbow_colors(saturation, brightness)
   return flattened_colors_to_colors(flattened_colors, n_colors)
 end
 

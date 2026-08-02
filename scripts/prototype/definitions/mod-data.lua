@@ -15,7 +15,7 @@ local prototype_data = {
 data:extend({
   {
     type = "mod-data",
-    name = "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]],
+    name = "mks-dsl-prototype-data", --[[$PROTOTYPE_DATA_MOD_DATA_NAME]]
     data = prototype_data,
   },
 })

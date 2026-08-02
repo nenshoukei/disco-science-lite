@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,6 +17,7 @@ describe("mods/foliax", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["foliax-research-transportation"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["foliax-research-machine"])
@@ -26,6 +28,7 @@ describe("mods/foliax", function ()
     end)
 
     it("registers labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["foliax-burner-biolab"])
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["foliax-burner-biolab-mk2"])
@@ -34,8 +37,10 @@ describe("mods/foliax", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation_foliax_burner_biolab     --- @type data.Animation
-    local on_animation_foliax_burner_biolab_mk2 --- @type data.Animation
+    --- @type data.Animation
+    local on_animation_foliax_burner_biolab
+    --- @type data.Animation
+    local on_animation_foliax_burner_biolab_mk2
 
     before_each(function ()
       -- No public code repositories
@@ -63,23 +68,27 @@ describe("mods/foliax", function ()
     end)
 
     it("applies lab modifications to foliax-burner-biolab", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
-      -- 5 original - 1 light = 4
-      assert.are.equal(4, #on_animation_foliax_burner_biolab.layers)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-anim.png", on_animation_foliax_burner_biolab.layers[1].filename)
-      assert.are.equal("__cr-commons__/graphics/entity/biolab/biolab-color-mask.png", on_animation_foliax_burner_biolab.layers[2].filename)
-      assert.are.equal("__cr-commons__/graphics/entity/biolab/biolab-light-mask.png", on_animation_foliax_burner_biolab.layers[3].filename)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-shadow.png", on_animation_foliax_burner_biolab.layers[4].filename)
+
+      Helper.assert_animation.has_layers({
+        "__space-age__/graphics/entity/biolab/biolab-anim.png",
+        "__cr-commons__/graphics/entity/biolab/biolab-color-mask.png",
+        "__cr-commons__/graphics/entity/biolab/biolab-light-mask.png",
+        "__space-age__/graphics/entity/biolab/biolab-shadow.png",
+      }, on_animation_foliax_burner_biolab)
     end)
 
     it("applies lab modifications to foliax-burner-biolab-mk2", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
-      -- 5 original - 1 light = 4
-      assert.are.equal(4, #on_animation_foliax_burner_biolab_mk2.layers)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-anim.png", on_animation_foliax_burner_biolab_mk2.layers[1].filename)
-      assert.are.equal("__cr-commons__/graphics/entity/biolab/biolab-color-mask.png", on_animation_foliax_burner_biolab_mk2.layers[2].filename)
-      assert.are.equal("__cr-commons__/graphics/entity/biolab/biolab-light-mask.png", on_animation_foliax_burner_biolab_mk2.layers[3].filename)
-      assert.are.equal("__space-age__/graphics/entity/biolab/biolab-shadow.png", on_animation_foliax_burner_biolab_mk2.layers[4].filename)
+
+      Helper.assert_animation.has_layers({
+        "__space-age__/graphics/entity/biolab/biolab-anim.png",
+        "__cr-commons__/graphics/entity/biolab/biolab-color-mask.png",
+        "__cr-commons__/graphics/entity/biolab/biolab-light-mask.png",
+        "__space-age__/graphics/entity/biolab/biolab-shadow.png",
+      }, on_animation_foliax_burner_biolab_mk2)
     end)
   end)
 end)

@@ -1,16 +1,16 @@
 --- Mod Settings of Disco Science Lite
 ---
 --- @class Settings
---- @field is_fallback_enabled         boolean  Whether the fallback overlay is enabled.
---- @field is_lab_blinking_disabled    boolean  Whether the lab blinking is disabled.
---- @field is_development              boolean  Whether Development mode is enabled.
---- @field is_rainbow_mode             boolean  Whether Rainbow mode is enabled.
---- @field color_saturation            number   Color saturation. [0, 1]
---- @field color_brightness            number   Color brightness. [0, 1]
---- @field color_pattern_duration      integer  Color function duration in ticks.
---- @field color_update_preset         string   Color update preset name. One of "smooth", "balanced", "performance".
---- @field color_update_budget         integer  Max color updates per game tick, derived from color_update_preset.
---- @field color_update_max_per_call   integer  Max overlay updates per single tick function call, derived from color_update_preset.
+--- @field is_fallback_enabled       boolean Whether the fallback overlay is enabled.
+--- @field is_lab_blinking_disabled  boolean Whether the lab blinking is disabled.
+--- @field is_development            boolean Whether Development mode is enabled.
+--- @field is_rainbow_mode           boolean Whether Rainbow mode is enabled.
+--- @field color_saturation          number  Color saturation. [0, 1]
+--- @field color_brightness          number  Color brightness. [0, 1]
+--- @field color_pattern_duration    integer Color function duration in ticks.
+--- @field color_update_preset       string  Color update preset name. One of "smooth", "balanced", "performance".
+--- @field color_update_budget       integer Max color updates per game tick, derived from color_update_preset.
+--- @field color_update_max_per_call integer Max overlay updates per single tick function call, derived from color_update_preset.
 local Settings = {}
 
 --- @type table<string, integer>
@@ -41,14 +41,10 @@ function Settings.reload()
   Settings.is_rainbow_mode = global and
     global[ "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]] ].value --[[@as boolean]]
     or false
-  Settings.color_saturation = global and
-    (global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ].value * 0.01)
-    or 1.0
-  Settings.color_brightness = global and
-    (global[ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ].value * 0.01)
-    or 1.0
+  Settings.color_saturation = global and (global[ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ].value * 0.01) or 1.0
+  Settings.color_brightness = global and (global[ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ].value * 0.01) or 1.0
   Settings.color_pattern_duration = global and
-    global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as number]]
+    global[ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ].value --[[@as integer]]
     or 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]]
   Settings.color_update_preset = global and
     global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ].value --[[@as string]]

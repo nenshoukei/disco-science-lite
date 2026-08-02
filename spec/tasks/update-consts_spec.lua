@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local task = require("tasks.update-consts")
 
 describe("tasks/update-consts", function ()

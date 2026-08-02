@@ -1,0 +1,6 @@
+[submodule "vendor/lua/luassert"]
+	path = vendor/lua/luassert
+	url = https://github.com/LuaCATS/luassert.git
+[submodule "vendor/lua/lua-cjson-definitions"]
+	path = vendor/lua/lua-cjson-definitions
+	url = https://github.com/goldenstein64/lua-cjson-definitions.git

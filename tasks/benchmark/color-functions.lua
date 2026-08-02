@@ -1,5 +1,4 @@
 #!/usr/bin/env lua
-
 -- Setup package paths
 package.path = "./?.lua;./?/init.lua;./lua_modules/share/lua/5.2/?.lua;" .. package.path
 
@@ -16,12 +15,30 @@ local ITERATIONS = 1000000 -- 1M calls for each function
 local output = { 0, 0, 0 }
 local phase = 123.456
 local colors = {
-  1, 0, 0, -- Red
-  0, 1, 0, -- Green
-  0, 0, 1, -- Blue
-  1, 1, 0, -- Yellow
-  0, 1, 1, -- Cyan
-  1, 0, 1, -- Magenta
+  -- Red
+  1,
+  0,
+  0,
+  -- Green
+  0,
+  1,
+  0,
+  -- Blue
+  0,
+  0,
+  1,
+  -- Yellow
+  1,
+  1,
+  0,
+  -- Cyan
+  0,
+  1,
+  1,
+  -- Magenta
+  1,
+  0,
+  1,
 }
 local n_colors = #colors / 3
 local px, py = 10.5, 20.5

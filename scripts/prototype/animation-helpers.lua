@@ -3,9 +3,21 @@ local table_merge = require("scripts.shared.utils").table_merge
 --- Geometric properties to copy from a source layer to a new layer or animation.
 --- Note: `lines_per_file` is excluded because it is only relevant for multi-file layers.
 local GEOMETRIC_PROPERTIES = {
-  "size", "width", "height", "x", "y", "position",
-  "shift", "scale", "run_mode", "frame_count", "line_length",
-  "animation_speed", "max_advance", "repeat_count", "frame_sequence",
+  "size",
+  "width",
+  "height",
+  "x",
+  "y",
+  "position",
+  "shift",
+  "scale",
+  "run_mode",
+  "frame_count",
+  "line_length",
+  "animation_speed",
+  "max_advance",
+  "repeat_count",
+  "frame_sequence",
 }
 
 --- Copy geometric properties from a source animation to a new animation.
@@ -151,25 +163,29 @@ end
 --- uses `filenames` instead of `filename`.
 ---
 --- @param target_filename string|string[]
---- @param mask_filename string|string[]
---- @param override_props data.Animation?
+--- @param mask_filename   string|string[]
+--- @param override_props  data.Animation?
 function OnAnimationModifier:insert_mask_layer(target_filename, mask_filename, override_props)
   local layers = self.animation.layers
   if not layers then return end
 
-  local target_key --- @type string
+  --- @type string
+  local target_key
   if type(target_filename) == "table" then
-    target_key = table.concat(target_filename --[[@as string[] ]], "|")
+    target_key = table.concat(target_filename, "|")
   else
-    target_key = target_filename --[[@as string]]
+    target_key = target_filename
   end
 
-  local insertion_index = nil --- @type integer?
-  local source_layer = nil    --- @type data.Animation?
+  --- @type integer?
+  local insertion_index = nil
+  --- @type data.Animation?
+  local source_layer = nil
 
   for i = #layers, 1, -1 do
     local layer = layers[i]
-    local layer_key --- @type string?
+    --- @type string?
+    local layer_key
     if layer.filename then
       layer_key = layer.filename
     elseif layer.filenames then
@@ -183,7 +199,7 @@ function OnAnimationModifier:insert_mask_layer(target_filename, mask_filename, o
     end
   end
 
-  if not insertion_index then return end --- @cast source_layer -nil
+  if not insertion_index then return end --- @cast source_layer - nil
 
   local new_layer = copy_geometric_properties(source_layer)
 
@@ -196,6 +212,7 @@ function OnAnimationModifier:insert_mask_layer(target_filename, mask_filename, o
 
   if override_props then
     for k, v in pairs(override_props) do
+      --- @diagnostic disable-next-line: assign-type-mismatch
       new_layer[k] = v
     end
   end
@@ -229,7 +246,10 @@ function OnAnimationModifier:apply_lab_modifications(filenames)
   self:remove_layer(lab_light_filename)
 
   --- Replace lab animation with darkened one
-  self:replace_filename(lab_filename, "__disco-science-lite__/graphics/factorio/lab-darkened.png" --[[$GRAPHICS_DIR .. "factorio/lab-darkened.png"]])
+  self:replace_filename(
+    lab_filename,
+    "__disco-science-lite__/graphics/factorio/lab-darkened.png" --[[$GRAPHICS_DIR .. "factorio/lab-darkened.png"]]
+  )
 
   --- Support Factorio HD Age
   if mods["factorio_hd_age_base_game_production"] then
@@ -260,12 +280,12 @@ local AnimationHelpers = {}
 
 AnimationHelpers.copy_geometric_properties = copy_geometric_properties
 
---- @class AnimationOverrideProps : data.Animation
+--- @class AnimationOverrideProps: data.Animation
 --- @field name string
 
 --- Convert an Animation to an AnimationPrototype with override properties applied.
 ---
---- @param animation data.Animation
+--- @param animation      data.Animation
 --- @param override_props AnimationOverrideProps?
 --- @return data.AnimationPrototype
 function AnimationHelpers.convert_to_animation_prototype(animation, override_props)
@@ -277,10 +297,13 @@ end
 --- Convert an AnimationPrototype to an Animation with override properties applied.
 ---
 --- @param animation_proto data.AnimationPrototype
---- @param override_props data.Animation?
+--- @param override_props  data.Animation?
 --- @return data.Animation
 function AnimationHelpers.convert_to_animation(animation_proto, override_props)
-  local animation = table_merge(animation_proto, override_props or {})
+  local animation = table_merge(
+    animation_proto,
+    (override_props or {}) --[[@as data.AnimationPrototype]]
+  )
   animation.type = nil
   animation.name = nil
   return animation --[[@as data.Animation]]

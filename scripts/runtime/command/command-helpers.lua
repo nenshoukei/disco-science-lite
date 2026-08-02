@@ -39,22 +39,30 @@ end
 --- Set the current research for the given force.
 ---
 --- @param force ForceID
---- @param tech TechnologyID
+--- @param tech  TechnologyID
 --- @return LuaTechnology
 function CommandHelpers.set_current_research(force, tech)
   local target_force = (type(force) == "string" or type(force) == "number") and game.forces[force] or force --[[@as LuaForce]]
   assert(target_force, "target force does not exist")
 
-  local tech_name = type(tech) == "string" and tech or tech.name
-  local target_tech = force.technologies[tech_name]
+  local tech_name
+  if type(tech) == "string" then
+    tech_name = tech
+  elseif tech then
+    tech_name = tech.name
+  else
+    error("Invalid TechnologyID: " .. tech)
+  end
+
+  local target_tech = target_force.technologies[tech_name]
   assert(target_tech, "technology " .. tech_name .. " does not exist")
   target_tech.research_recursive() -- researches all prerequisites recursively
   target_tech.researched = false
-  target_tech.saved_progress = 0   -- resets the progress
+  target_tech.saved_progress = 0 -- resets the progress
 
   -- Start research on the target technology
-  force.cancel_current_research()
-  local added = force.add_research(target_tech)
+  target_force.cancel_current_research()
+  local added = target_force.add_research(target_tech)
   assert(added, "force.add_research failed for technology " .. tech_name)
 
   return target_tech
@@ -109,8 +117,8 @@ local is_translating = false
 --- If `strings` is empty, the callback is called with `{}` synchronously.
 ---
 --- @generic K
---- @param player LuaPlayer
---- @param strings table<K, LocalisedString|LuaProfiler>
+--- @param player   LuaPlayer
+--- @param strings  table<K, LocalisedString|LuaProfiler>
 --- @param callback fun(translated: table<K, string>)
 function CommandHelpers.translate_strings(player, strings, callback)
   if next(strings) == nil then

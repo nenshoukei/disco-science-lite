@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/bobsmods", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers all 3 bob labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["bob-lab-2"])
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["bob-burner-lab"])
@@ -23,18 +25,21 @@ describe("mods/bobsmods", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation_lab2   --- @type data.Animation
-    local on_animation_burner --- @type data.Animation
-    local on_animation_alien  --- @type data.Animation
+    --- @type data.Animation
+    local on_animation_lab2
+    --- @type data.Animation
+    local on_animation_burner
+    --- @type data.Animation
+    local on_animation_alien
 
     before_each(function ()
       -- Source: https://github.com/modded-factorio/bobsmods/blob/main/bobtech/prototypes/entity/entity.lua#L15
       on_animation_lab2 = {
         layers = {
-          { filename = "__bobtech__/graphics/entity/lab/lab2.png",            frame_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab2.png", frame_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
-          { filename = "__bobtech__/graphics/entity/lab/lab2-light.png",      frame_count = 33 },
-          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab2-light.png", frame_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png", frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["bob-lab-2"] = ({ on_animation = on_animation_lab2 }) --[[@as data.LabPrototype]]
@@ -42,9 +47,9 @@ describe("mods/bobsmods", function ()
       -- Source: https://github.com/modded-factorio/bobsmods/blob/main/bobtech/prototypes/entity/entity.lua#L180
       on_animation_burner = {
         layers = {
-          { filename = "__bobtech__/graphics/entity/lab/lab-red.png",         frame_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-red.png", frame_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
-          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png", frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["bob-burner-lab"] = ({ on_animation = on_animation_burner }) --[[@as data.LabPrototype]]
@@ -52,26 +57,29 @@ describe("mods/bobsmods", function ()
       -- Source: https://github.com/modded-factorio/bobsmods/blob/main/bobtech/prototypes/entity/entity-alien.lua#L22
       on_animation_alien = {
         layers = {
-          { filename = "__bobtech__/graphics/entity/lab/lab-alien.png",       frame_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-alien.png", frame_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
           { filename = "__bobtech__/graphics/entity/lab/lab-alien-light.png", frame_count = 33 },
-          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png",      frame_count = 1, repeat_count = 33 },
+          { filename = "__bobtech__/graphics/entity/lab/lab-shadow.png", frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["bob-lab-alien"] = ({ on_animation = on_animation_alien }) --[[@as data.LabPrototype]]
     end)
 
     it("applies vanilla lab modifications to bob-lab-2", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation_lab2.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-darkened.png", on_animation_lab2.layers[1].filename)
-      assert.are.equal("__bobtech__/graphics/entity/lab/lab-integration.png", on_animation_lab2.layers[2].filename)
-      assert.are.equal("__bobtech__/graphics/entity/lab/lab-shadow.png", on_animation_lab2.layers[3].filename)
+      Helper.assert_animation.has_layers({
+        "__disco-science-lite__/graphics/factorio/lab-darkened.png",
+        "__bobtech__/graphics/entity/lab/lab-integration.png",
+        "__bobtech__/graphics/entity/lab/lab-shadow.png",
+      }, on_animation_lab2)
       Helper.assert_animation.frozen(1, on_animation_lab2)
     end)
 
     it("freezes bob-burner-lab without removing any layer", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.equal(3, #on_animation_burner.layers)
@@ -79,12 +87,14 @@ describe("mods/bobsmods", function ()
     end)
 
     it("applies vanilla lab modifications to bob-lab-alien", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation_alien.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-darkened.png", on_animation_alien.layers[1].filename)
-      assert.are.equal("__bobtech__/graphics/entity/lab/lab-integration.png", on_animation_alien.layers[2].filename)
-      assert.are.equal("__bobtech__/graphics/entity/lab/lab-shadow.png", on_animation_alien.layers[3].filename)
+      Helper.assert_animation.has_layers({
+        "__disco-science-lite__/graphics/factorio/lab-darkened.png",
+        "__bobtech__/graphics/entity/lab/lab-integration.png",
+        "__bobtech__/graphics/entity/lab/lab-shadow.png",
+      }, on_animation_alien)
       Helper.assert_animation.frozen(1, on_animation_alien)
     end)
   end)

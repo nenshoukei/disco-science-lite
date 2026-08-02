@@ -1,22 +1,58 @@
 {
-  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "$schema": "https://raw.githubusercontent.com/EmmyLuaLs/emmylua-analyzer-rust/refs/heads/main/crates/emmylua_code_analysis/resources/schema.json",
   "runtime": {
-    "version": "Lua 5.2",
-    "pathStrict": true
+    "version": "Lua5.2",
+    "requirePattern": ["?", "?.lua"]
   },
   "workspace": {
-    "checkThirdParty": "ApplyInMemory",
-    "userThirdParty": [
-      "/Users/user/Library/Application Support/Code/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/sumneko-3rd"
-    ],
+    "ignoreDir": ["lua_modules", "vendor"],
     "library": [
-      "${addons}/luassert/module/library",
-      "${addons}/busted/module/library",
-      "${addons}/lua-cjson/module/library",
-      "/Users/user/Library/Application Support/Code/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/library"
+      "vendor/lua/busted/library",
+      "vendor/lua/lua-cjson-definitions/library",
+      "vendor/lua/luassert/library",
+      "vendor/lua/typings",
+      "/Users/user/Library/Application Support/Code/User/workspaceStorage/5c72b824d35a41d120942cec2d56378e/justarandomgeek.factoriomod-debug/emmylua/factorio/library",
+      {
+        "path": "/Users/user/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents/data",
+        "ignoreDir": [
+          "core/lualib/event_handler.lua",
+          "core/lualib/crash-site.lua",
+          "core/lualib/math2d.lua",
+          "core/lualib/meld.lua",
+          "core/lualib/mod-gui.lua",
+          "core/lualib/sound-util.lua",
+          "core/lualib/util.lua",
+          "core/lualib/silo-script.lua",
+          "core/lualib/space-finish-script.lua",
+          "core/lualib/prototype-info.lua",
+          "core/lualib/circuit-connector-sprites.lua",
+          "core/lualib/resource-autoplace.lua",
+          "base/scripts/freeplay/",
+          "base/scripts/pvp/",
+          "base/scripts/sandbox/",
+          "base/scripts/wave-defense/"
+        ],
+        "ignoreGlobs": [
+          "*/migrations/**",
+          "*/scenarios/**",
+          "*/campaigns/**",
+          "*/tutorials/**",
+          "*/menu-simulations/**"
+        ]
+      }
+    ],
+    "moduleMap": [
+      {
+        "pattern": "^__(.*)__(.*)$",
+        "replace": "$1$2"
+      },
+      {
+        "pattern": "^(.*)\\.lua$",
+        "replace": "$1"
+      }
     ]
   },
   "diagnostics": {
-    "globals": ["io", "os"]
+    "disable": ["unnecessary-if", "unnecessary-assert"]
   }
 }

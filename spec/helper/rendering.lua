@@ -6,7 +6,7 @@ _G.rendering = {
   clear = function ()
     _G.rendering.objects = {}
   end,
-  get_all_objects = function (mod_name)
+  get_all_objects = function (_mod_name)
     local objects = {}
     for _, obj in pairs(_G.rendering.objects) do
       objects[#objects + 1] = obj

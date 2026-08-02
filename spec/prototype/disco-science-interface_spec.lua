@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local DiscoScienceInterface = require("scripts.prototype.disco-science-interface")
 
@@ -38,16 +39,26 @@ describe("DiscoScienceInterface", function ()
 
     describe("validation", function ()
       it("errors for invalid arguments", function ()
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.excludeLab(123) end)
-        assert.has_error(function () DiscoScienceInterface.excludeLab("") end)
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.excludeLab({}) end)
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.excludeLab(123)
+        end)
+        assert.has_error(function ()
+          DiscoScienceInterface.excludeLab("")
+        end)
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.excludeLab({})
+        end)
       end)
 
       it("accepts valid arguments", function ()
-        assert.no_error(function () DiscoScienceInterface.excludeLab("my-lab") end)
-        assert.no_error(function () DiscoScienceInterface.excludeLab(make_lab("my-lab")) end)
+        assert.no_error(function ()
+          DiscoScienceInterface.excludeLab("my-lab")
+        end)
+        assert.no_error(function ()
+          DiscoScienceInterface.excludeLab(make_lab("my-lab"))
+        end)
       end)
     end)
   end)
@@ -59,7 +70,7 @@ describe("DiscoScienceInterface", function ()
       DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
 
       local registration = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("my-anim", registration.animation)
     end)
 
@@ -67,7 +78,7 @@ describe("DiscoScienceInterface", function ()
       local lab = make_lab("my-lab")
       DiscoScienceInterface.prepareLab(lab)
       local registration = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.is_nil(registration.animation)
       assert.is_nil(registration.scale)
     end)
@@ -92,8 +103,10 @@ describe("DiscoScienceInterface", function ()
     describe("validation", function ()
       it("errors for invalid lab prototype", function ()
         local lab = make_lab()
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.prepareLab(("not-a-table")) end)
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.prepareLab(("not-a-table"))
+        end)
         assert.has_error(function ()
           lab.type = "item" --[[@as any]]
           DiscoScienceInterface.prepareLab(lab)
@@ -107,15 +120,23 @@ describe("DiscoScienceInterface", function ()
 
       it("errors for invalid options", function ()
         local lab = make_lab()
-        --- @diagnostic disable-next-line: param-type-mismatch
-        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, ("not-a-table")) end)
-        assert.has_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "" }) end)
+        assert.has_error(function ()
+          --- @diagnostic disable-next-line: param-type-mismatch
+          DiscoScienceInterface.prepareLab(lab, ("not-a-table"))
+        end)
+        assert.has_error(function ()
+          DiscoScienceInterface.prepareLab(lab, { animation = "" })
+        end)
       end)
 
       it("accepts valid options", function ()
         local lab = make_lab()
-        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = nil }) end)
-        assert.no_error(function () DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" }) end)
+        assert.no_error(function ()
+          DiscoScienceInterface.prepareLab(lab, { animation = nil })
+        end)
+        assert.no_error(function ()
+          DiscoScienceInterface.prepareLab(lab, { animation = "my-anim" })
+        end)
       end)
     end)
   end)

@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/obsidiax", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("excludes obsidiax-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_true(PrototypeLabRegistry.excluded_labs["obsidiax-lab"])
     end)

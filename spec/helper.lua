@@ -1,7 +1,9 @@
+--- @diagnostic disable: global-in-non-module
 -- Helper functions for busted tests
 -- This file is automatically loaded by busted
 
 if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+  --- @diagnostic disable-next-line: unresolved-require
   require("lldebugger").start()
 end
 
@@ -143,19 +145,19 @@ local function reset_mocks()
   }
 
   --- @diagnostic disable-next-line: missing-fields
-  _G.settings = ({
+  _G.settings = {
     startup = {
-      [ "mks-dsl-fallback-overlay-enabled" --[[$FALLBACK_OVERLAY_ENABLED_NAME]] ] = { value = true },
-      [ "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] ] = { value = false },
+      ["mks-dsl-fallback-overlay-enabled"] = { value = true },
+      ["mks-dsl-lab-blinking-disabled"]    = { value = false },
     },
     global = {
-      [ "mks-dsl-color-pattern-duration" --[[$COLOR_PATTERN_DURATION_NAME]] ] = { value = 180 --[[$DEFAULT_COLOR_PATTERN_DURATION]] },
-      [ "mks-dsl-rainbow-mode" --[[$RAINBOW_MODE_NAME]] ]                     = { value = false },
-      [ "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] ]             = { value = 100 },
-      [ "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] ]             = { value = 100 },
-      [ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ]       = { value = "balanced" },
+      ["mks-dsl-color-pattern-duration"] = { value = 180 },
+      ["mks-dsl-rainbow-mode"]           = { value = false },
+      ["mks-dsl-color-saturation"]       = { value = 100 },
+      ["mks-dsl-color-brightness"]       = { value = 100 },
+      ["mks-dsl-color-update-preset"]    = { value = "balanced" },
     },
-  })
+  }
 
   _G.mods = {}
 
@@ -163,7 +165,7 @@ local function reset_mocks()
   _G.data = {
     --- @diagnostic disable-next-line: missing-fields
     raw = { lab = {}, animation = {} },
-    extend = function (self, defs)
+    extend = function (_self, defs)
       for _, def in ipairs(defs) do
         local type_table = _G.data.raw[def.type]
         if not type_table then
@@ -185,9 +187,12 @@ end
 
 reset_mocks()
 
-return {
+--- @class helper
+local helper = {
   reset_mocks = reset_mocks,
   load_animation_definitions = load_animation_definitions,
   table_deep_copy = table_deep_copy,
   assert_animation = AnimationAssertion,
 }
+
+return helper

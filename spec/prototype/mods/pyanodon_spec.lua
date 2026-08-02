@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -18,6 +19,7 @@ describe("mods/pyanodon", function ()
     it("registers py-science-pack colors when only pyalienlife is active", function ()
       _G.mods["pyalienlife"] = "1.0.0"
 
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
 
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["py-science-pack-1"])
@@ -31,6 +33,7 @@ describe("mods/pyanodon", function ()
     it("registers production-science-pack color when only pyfusionenergy is active", function ()
       _G.mods["pyfusionenergy"] = "1.0.0"
 
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
 
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["production-science-pack"])
@@ -39,6 +42,7 @@ describe("mods/pyanodon", function ()
     it("registers lab override when only pycoalprocessing is active", function ()
       _G.mods["pycoalprocessing"] = "1.0.0"
 
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
 
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["lab"])
@@ -49,17 +53,18 @@ describe("mods/pyanodon", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- Source: https://github.com/pyanodon/pycoalprocessing/blob/master/prototypes/buildings/lab.lua#L15
       on_animation = {
         layers = {
-          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw.png",  frame_count = 30 },
-          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png",    frame_count = 1, repeat_count = 60 },
+          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw.png", frame_count = 30 },
+          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/l.png", frame_count = 1, repeat_count = 60 },
           { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png", frame_count = 60 },
           { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/beam.png", frame_count = 60 },
-          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/sh.png",   frame_count = 1, repeat_count = 60 },
+          { filename = "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/sh.png", frame_count = 1, repeat_count = 60 },
         },
       }
       _G.data.raw.lab["lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
@@ -68,7 +73,10 @@ describe("mods/pyanodon", function ()
     it("does nothing when pycoalprocessing is not active", function ()
       _G.mods["pyalienlife"] = "1.0.0"
 
-      assert.no_error(function () Mod.on_data_final_fixes() end)
+      assert.no_error(function ()
+        assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
+        Mod.on_data_final_fixes()
+      end)
 
       -- on_animation must be untouched.
       assert.are.equal(5, #on_animation.layers)
@@ -78,21 +86,16 @@ describe("mods/pyanodon", function ()
     it("removes l and both beam layers, replaces raw filename, and creates overlay with 2 layers", function ()
       _G.mods["pycoalprocessing"] = "1.0.0"
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      -- l and both beam layers removed; only raw and sh should remain.
-      assert.are.equal(2, #on_animation.layers)
-      assert.are.equal(
+      Helper.assert_animation.has_layers({
         "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/raw-bw.png",
-        on_animation.layers[1].filename
-      )
-      assert.are.equal(
         "__pycoalprocessinggraphics__/graphics/entity/lab-mk01/sh.png",
-        on_animation.layers[2].filename
-      )
+      }, on_animation)
 
       local overlay = _G.data.raw["animation"]["mks-dsl-pyanodon-lab-overlay"]
-      assert.is_not_nil(overlay) --- @cast overlay -nil
+      assert.is_not_nil(overlay) --- @cast overlay - nil
       assert.are.equal(2, #overlay.layers)
     end)
   end)

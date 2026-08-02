@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,6 +17,7 @@ describe("mods/skewer_shattered_planet", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["ske_heu_science_pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["ske_hep_science_pack"])
@@ -26,6 +28,7 @@ describe("mods/skewer_shattered_planet", function ()
     end)
 
     it("registers labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["pearl_realizer"])
     end)
@@ -33,7 +36,8 @@ describe("mods/skewer_shattered_planet", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       Helper.load_animation_definitions()
@@ -50,19 +54,23 @@ describe("mods/skewer_shattered_planet", function ()
     end)
 
     it("applies lab modifications", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
-      assert.are.equal(1, #on_animation.layers)
-      assert.are.equal("__space-exploration-graphics-4__/graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png",
-        on_animation.layers[1].filename)
+
+      Helper.assert_animation.has_layers({
+        "__space-exploration-graphics-4__/graphics/entity/gravimetrics-laboratory/gravimetrics-laboratory-shadow.png",
+      }, on_animation)
     end)
 
     it("creates overlay animation", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
       local overlay = data.raw.animation["mks-dsl-pearl-realizer-overlay"]
       assert.is_not_nil(overlay)
     end)
 
     it("creates companion animation", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
       local companion = data.raw.animation["mks-dsl-pearl-realizer-companion"]
       assert.is_not_nil(companion)

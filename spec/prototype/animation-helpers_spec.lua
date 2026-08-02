@@ -1,3 +1,5 @@
+--- @diagnostic disable: need-check-nil
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local AnimationHelpers = require("scripts.prototype.animation-helpers")
 local OnAnimationModifier = AnimationHelpers.OnAnimationModifier
@@ -118,8 +120,14 @@ describe("AnimationHelpers", function ()
     it("does not modify the original animation", function ()
       local animation = ({ filename = "on.png" }) --[[@as data.Animation]]
       AnimationHelpers.convert_to_animation_prototype(animation, { name = "my-anim" })
-      assert.is_nil((animation) --[[@as data.AnimationPrototype]].type)
-      assert.is_nil((animation) --[[@as data.AnimationPrototype]].name)
+      assert.is_nil(
+        (animation) --[[@as data.AnimationPrototype]]
+          .type
+      )
+      assert.is_nil(
+        (animation) --[[@as data.AnimationPrototype]]
+          .name
+      )
     end)
   end)
 
@@ -128,8 +136,14 @@ describe("AnimationHelpers", function ()
     it("converts an animation prototype to an animation", function ()
       local proto = ({ type = "animation", name = "my-anim", filename = "on.png", width = 100 }) --[[@as data.AnimationPrototype]]
       local result = AnimationHelpers.convert_to_animation(proto)
-      assert.is_nil((result) --[[@as any]].type)
-      assert.is_nil((result) --[[@as any]].name)
+      assert.is_nil(
+        (result) --[[@as any]]
+          .type
+      )
+      assert.is_nil(
+        (result) --[[@as any]]
+          .name
+      )
       assert.are.equal("on.png", result.filename)
       assert.are.equal(100, result.width)
     end)
@@ -159,7 +173,7 @@ describe("AnimationHelpers", function ()
 
     before_each(function ()
       saved_data_raw = _G.data and _G.data.raw
-      --- @diagnostic disable-next-line: missing-fields
+      --- @diagnostic disable-next-line: missing-fields, global-in-non-module
       _G.data = {
         raw = { lab = {} },
       }
@@ -169,6 +183,7 @@ describe("AnimationHelpers", function ()
       if saved_data_raw then
         _G.data.raw = saved_data_raw
       else
+        --- @diagnostic disable-next-line: global-in-non-module
         _G.data = nil
       end
     end)
@@ -239,7 +254,9 @@ describe("OnAnimationModifier", function ()
   -- -------------------------------------------------------------------
   describe("get_layer", function ()
     it("returns nil when layers is nil", function ()
-      local modifier = make_modifier({} --[[@as data.Animation]])
+      local modifier = make_modifier(
+        {} --[[@as data.Animation]]
+      )
       local layer, index = modifier:get_layer("on.png")
       assert.is_nil(layer)
       assert.is_nil(index)
@@ -303,8 +320,12 @@ describe("OnAnimationModifier", function ()
   -- -------------------------------------------------------------------
   describe("remove_layer", function ()
     it("does nothing when layers is nil", function ()
-      local modifier = make_modifier({} --[[@as data.Animation]])
-      assert.no_error(function () modifier:remove_layer("light.png") end)
+      local modifier = make_modifier(
+        {} --[[@as data.Animation]]
+      )
+      assert.no_error(function ()
+        modifier:remove_layer("light.png")
+      end)
     end)
 
     it("removes a layer matching filename", function ()
@@ -461,7 +482,9 @@ describe("OnAnimationModifier", function ()
   -- -------------------------------------------------------------------
   describe("insert_mask_layer", function ()
     it("does nothing when layers is nil", function ()
-      local modifier = make_modifier({} --[[@as data.Animation]])
+      local modifier = make_modifier(
+        {} --[[@as data.Animation]]
+      )
       assert.no_error(function ()
         modifier:insert_mask_layer("on.png", "mask.png")
       end)
@@ -527,7 +550,7 @@ describe("OnAnimationModifier", function ()
       assert.are.equal(5, mask.line_length)
       assert.are.equal(0.85, mask.animation_speed)
       assert.are.equal(60, mask.frame_count) -- inherited
-      assert.are.equal(0.5, mask.scale)      -- inherited
+      assert.are.equal(0.5, mask.scale) -- inherited
     end)
 
     it("does not insert mask when target filename is not found", function ()
@@ -584,14 +607,18 @@ describe("OnAnimationModifier", function ()
   -- -------------------------------------------------------------------
   describe("freeze_animation", function ()
     it("does nothing when layers is nil", function ()
-      local modifier = make_modifier({} --[[@as data.Animation]])
-      assert.no_error(function () modifier:freeze_animation() end)
+      local modifier = make_modifier(
+        {} --[[@as data.Animation]]
+      )
+      assert.no_error(function ()
+        modifier:freeze_animation()
+      end)
     end)
 
     it("freezes all layers", function ()
       local animation = make_animation_with_layers({
-        { filename = "on.png",     frame_count = 33 },
-        { filename = "other.png",  frame_count = 33 },
+        { filename = "on.png", frame_count = 33 },
+        { filename = "other.png", frame_count = 33 },
         { filename = "static.png", frame_count = 1, repeat_count = 33 },
       })
       local modifier = make_modifier(animation)
@@ -604,7 +631,7 @@ describe("OnAnimationModifier", function ()
 
     it("freezes all layers at specified frame index", function ()
       local animation = make_animation_with_layers({
-        { filename = "on.png",    frame_count = 33 },
+        { filename = "on.png", frame_count = 33 },
         { filename = "other.png", frame_count = 33 },
       })
       local modifier = make_modifier(animation)
@@ -620,17 +647,19 @@ describe("OnAnimationModifier", function ()
 
     before_each(function ()
       saved_mods = _G.mods
+      --- @diagnostic disable-next-line: global-in-non-module
       _G.mods = {}
     end)
 
     after_each(function ()
+      --- @diagnostic disable-next-line: global-in-non-module
       _G.mods = saved_mods
     end)
 
     it("replaces lab.png with darkened one, removes lab-light layer and freezes animation", function ()
       local animation = make_animation_with_layers({
-        { filename = "__base__/graphics/entity/lab/lab.png",        frame_count = 33 },
-        { filename = "__base__/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab.png", frame_count = 33 },
+        { filename = "__base__/graphics/entity/lab/lab-light.png", frame_count = 33 },
         { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
       })
       local modifier = make_modifier(animation)
@@ -644,8 +673,8 @@ describe("OnAnimationModifier", function ()
     it("also removes HD Age lab-light layer when mod is active", function ()
       _G.mods["factorio_hd_age_base_game_production"] = "1.0.0"
       local animation = make_animation_with_layers({
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png",        frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png", frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
         { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
       })
       local modifier = make_modifier(animation)
@@ -657,8 +686,8 @@ describe("OnAnimationModifier", function ()
 
     it("does not remove HD Age layer when mod is not active", function ()
       local animation = make_animation_with_layers({
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png",        frame_count = 33 },
-        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png",  frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab.png", frame_count = 33 },
+        { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-light.png", frame_count = 33 },
         { filename = "__factorio_hd_age_base_game_production__/data/base/graphics/entity/lab/lab-shadow.png", frame_count = 33 },
       })
       local modifier = make_modifier(animation)
@@ -673,10 +702,12 @@ describe("OnAnimationModifier", function ()
 
     before_each(function ()
       saved_mods = _G.mods
+      --- @diagnostic disable-next-line: global-in-non-module
       _G.mods = {}
     end)
 
     after_each(function ()
+      --- @diagnostic disable-next-line: global-in-non-module
       _G.mods = saved_mods
     end)
 

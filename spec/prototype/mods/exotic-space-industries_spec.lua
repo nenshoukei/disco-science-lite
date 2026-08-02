@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -18,6 +19,7 @@ describe("mods/exotic-space-industries", function ()
       _G.mods["exotic-space-industries"] = nil
       _G.mods["exotic-space-industries-remembrance"] = "1.0.0"
       package.loaded["scripts.prototype.mods.exotic-space-industries"] = nil
+      --- @diagnostic disable-next-line: duplicate-require
       local mod = require("scripts.prototype.mods.exotic-space-industries")
       assert.is_function(mod.on_data)
       assert.is_function(mod.on_data_final_fixes)
@@ -27,17 +29,20 @@ describe("mods/exotic-space-industries", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors for ESI science packs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["ei-dark-age-tech"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["ei-quantum-age-tech"])
     end)
 
     it("registers ei-dark-age-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["ei-dark-age-lab"])
     end)
 
     it("excludes ei-big-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_true(PrototypeLabRegistry.excluded_labs["ei-big-lab"])
     end)
@@ -45,7 +50,8 @@ describe("mods/exotic-space-industries", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- No public code repository for ESI
@@ -53,21 +59,24 @@ describe("mods/exotic-space-industries", function ()
       on_animation = {
         layers = {
           { filename = "__exotic-space-industries-graphics-1__/graphics/entities/dark-age-lab_animation.png", frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png",                                    frame_count = 1, repeat_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-light.png",                                          frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",                                         frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-light.png", frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["ei-dark-age-lab"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
     it("applies vanilla lab modifications to ei-dark-age-lab", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-darkened.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
+      Helper.assert_animation.has_layers({
+        "__disco-science-lite__/graphics/factorio/lab-darkened.png",
+        "__base__/graphics/entity/lab/lab-integration.png",
+        "__base__/graphics/entity/lab/lab-shadow.png",
+      }, on_animation)
+
       Helper.assert_animation.frozen(1, on_animation)
     end)
 
@@ -75,6 +84,7 @@ describe("mods/exotic-space-industries", function ()
       _G.data.raw.lab["ei-dark-age-lab"] = nil
 
       assert.no_error(function ()
+        assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
         Mod.on_data_final_fixes()
       end)
     end)

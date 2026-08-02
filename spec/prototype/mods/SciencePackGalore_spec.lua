@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
@@ -14,6 +15,7 @@ describe("mods/SciencePackGaloreForked", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       for i = 1, 36 do
         assert.is_not_nil(PrototypeColorRegistry.registered_colors["sem-spg_science-pack-" .. i])

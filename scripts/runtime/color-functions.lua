@@ -24,7 +24,7 @@ local random = math.random
 --- - `px`, `py` - Coordinates of the player. (`LuaPlayer::position`)
 --- - `lx`, `ly` - Coordinates of the lab entity. (`LuaEntity::position`)
 ---
---- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: ColorTuple[], n_colors: integer, scale: number, px: number, py: number, lx: number, ly: number)
+--- @alias ColorFunction fun(output: ColorTuple, phase: number, colors: number[], n_colors: integer, scale: number, px: number, py: number, lx: number, ly: number)
 
 -- Constants for pre-processing. These will be embedded as numeric literals.
 -- Inversed for folding constant divisions into multiplications. (much faster in Lua 5.2)
@@ -80,8 +80,8 @@ ColorFunctions.function_names = function_names
 
 --- Compiles a color function.
 ---
---- @param name string Function name for debugging.
---- @param body string Function body for the template.
+--- @param name                 string Function name for debugging.
+--- @param body                 string Function body for the template.
 --- @param transition_sharpness number Transition sharpness.
 --- @return ColorFunction
 local function compile_function(name, body, transition_sharpness)
@@ -110,133 +110,197 @@ local functions = {
   --     However, for a single-quadrant case like the Kaleidoscope pattern, a simple division (`dy / (dx + dy)`) beats `atan2`.
 
   -- [1] Radial: color cycles based on the distance between the player and the lab.
-  compile_function("Radial", [[
-    local dx = lx - px
-    local dy = ly - py
-    t = sqrt(dx * dx + dy * dy) * scale + phase
-  ]], 2),
+  compile_function(
+    "Radial",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      t = sqrt(dx * dx + dy * dy) * scale + phase
+    ]],
+    2
+  ),
 
   -- [2] Angular: color cycles around the lab position based on the angle from the player.
-  compile_function("Angular", [[
-    t = (atan2(ly - py, lx - px) / TWO_PI + 0.5) * n_colors + phase
-  ]], 2),
+  compile_function(
+    "Angular",
+    [[
+      t = (atan2(ly - py, lx - px) / TWO_PI + 0.5) * n_colors + phase
+    ]],
+    2
+  ),
 
   -- [3] Horizontal: color cycles based on horizontal separation only.
-  compile_function("Horizontal", [[
-    local d = lx - px
-    t = (d < 0 and -d or d) * scale + phase
-  ]], 2),
+  compile_function(
+    "Horizontal",
+    [[
+      local d = lx - px
+      t = (d < 0 and -d or d) * scale + phase
+    ]],
+    2
+  ),
 
   -- [4] Vertical: color cycles based on vertical separation only.
-  compile_function("Vertical", [[
-    local d = ly - py
-    t = (d < 0 and -d or d) * scale + phase
-  ]], 2),
+  compile_function(
+    "Vertical",
+    [[
+      local d = ly - py
+      t = (d < 0 and -d or d) * scale + phase
+    ]],
+    2
+  ),
 
   -- [5] Diagonal: color cycles based on 45-degree diagonal axis.
-  compile_function("Diagonal", [[
-    local d = lx - px + ly - py
-    t = (d < 0 and -d or d) * scale + phase
-  ]], 2),
+  compile_function(
+    "Diagonal",
+    [[
+      local d = lx - px + ly - py
+      t = (d < 0 and -d or d) * scale + phase
+    ]],
+    2
+  ),
 
   -- [6] Grid: color cycles in discrete steps based on the lab's grid cell (9x9 units) relative to the player.
-  compile_function("Grid", [[
-    local dx = (lx - px) / 9
-    local dy = (ly - py) / 9
-    local fdx = dx - dx % 1
-    local fdy = dy - dy % 1
-    local val = fdx + fdy
-    t = (val < 0 and -val or val) + phase
-  ]], 5),
+  compile_function(
+    "Grid",
+    [[
+      local dx = (lx - px) / 9
+      local dy = (ly - py) / 9
+      local fdx = dx - dx % 1
+      local fdy = dy - dy % 1
+      local val = fdx + fdy
+      t = (val < 0 and -val or val) + phase
+    ]],
+    5
+  ),
 
   -- [7] Spiral: color follows a clockwise spiral outward from the player; the spiral slowly rotates over time.
-  compile_function("Spiral", [[
-    -- Uses diamond angle instead of expensive atan2 call.
-    local dx = lx - px
-    local dy = ly - py
-    local ax = dx < 0 and -dx or dx
-    local ay = dy < 0 and -dy or dy
-    local s = ax + ay
-    local a = s > 0 and ay / s * 0.25 or 0
-    if dx < 0 then a = 0.5 - a end
-    if dy < 0 then a = 1 - a end
-    t = sqrt(dx * dx + dy * dy) * scale - a * n_colors + phase
-  ]], 2),
+  compile_function(
+    "Spiral",
+    [[
+      -- Uses diamond angle instead of expensive atan2 call.
+      local dx = lx - px
+      local dy = ly - py
+      local ax = dx < 0 and -dx or dx
+      local ay = dy < 0 and -dy or dy
+      local s = ax + ay
+      local a = s > 0 and ay / s * 0.25 or 0
+      if dx < 0 then a = 0.5 - a end
+      if dy < 0 then a = 1 - a end
+      t = sqrt(dx * dx + dy * dy) * scale - a * n_colors + phase
+    ]],
+    2
+  ),
 
   -- [8] Diamond: concentric diamond rings (Manhattan distance) expand outward from the player.
-  compile_function("Diamond", [[
-    local dx = lx - px
-    local dy = ly - py
-    t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * scale + phase
-  ]], 2),
+  compile_function(
+    "Diamond",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      t = ((dx < 0 and -dx or dx) + (dy < 0 and -dy or dy)) * scale + phase
+    ]],
+    2
+  ),
 
   -- [9] Kaleidoscope: 4-fold mirror symmetry (fold both axes) combined with radial distance bands.
-  compile_function("Kaleidoscope", [[
-    local dx = lx - px
-    local dy = ly - py
-    dx = dx < 0 and -dx or dx
-    dy = dy < 0 and -dy or dy
-    local dist = dx + dy
-    t = dist  * scale + (dy * n_colors) / (dist + 1e-9) + phase
-  ]], 3),
+  compile_function(
+    "Kaleidoscope",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      dx = dx < 0 and -dx or dx
+      dy = dy < 0 and -dy or dy
+      local dist = dx + dy
+      t = dist  * scale + (dy * n_colors) / (dist + 1e-9) + phase
+    ]],
+    3
+  ),
 
   -- [10] Square: concentric square rings (Chebyshev distance) expand outward from the player position.
-  compile_function("Square", [[
-    local dx = lx - px
-    local dy = ly - py
-    dx = dx < 0 and -dx or dx
-    dy = dy < 0 and -dy or dy
-    t = (dx > dy and dx or dy) * scale + phase
-  ]], 2),
+  compile_function(
+    "Square",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      dx = dx < 0 and -dx or dx
+      dy = dy < 0 and -dy or dy
+      t = (dx > dy and dx or dy) * scale + phase
+    ]],
+    2
+  ),
 
   -- [11] Lattice: repeating tiled pattern of circular rings across the map.
-  compile_function("Lattice", [[
-    local dx = (lx + 16) % 32 - 16
-    local dy = (ly + 16) % 32 - 16
-    dx = dx < 0 and -dx or dx
-    dy = dy < 0 and -dy or dy
-    t = sqrt(dx * dx + dy * dy) * scale - phase
-  ]], 2),
+  compile_function(
+    "Lattice",
+    [[
+      local dx = (lx + 16) % 32 - 16
+      local dy = (ly + 16) % 32 - 16
+      dx = dx < 0 and -dx or dx
+      dy = dy < 0 and -dy or dy
+      t = sqrt(dx * dx + dy * dy) * scale - phase
+    ]],
+    2
+  ),
 
   -- [12] Pulse: all labs change color in unison regardless of position.
-  compile_function("Pulse", [[
-    t = phase
-  ]], 1.2),
+  compile_function(
+    "Pulse",
+    [[
+      t = phase
+    ]],
+    1.2
+  ),
 
   -- [13] Random: color changes at random periodically.
-  compile_function("Random", [[
-    -- LCG-style pseudo-random number.
-    local flx = lx - lx % 1
-    local fly = ly - ly % 1
-    local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 / 1024
-    t = r * n_colors
-  ]], 20),
+  compile_function(
+    "Random",
+    [[
+      -- LCG-style pseudo-random number.
+      local flx = lx - lx % 1
+      local fly = ly - ly % 1
+      local r = (flx * 137 + fly * 149 + (phase - phase % 1) * 163) % 1024 / 1024
+      t = r * n_colors
+    ]],
+    20
+  ),
 
   -- [14] Cross: same color extends along both axes forming a cross/plus shape.
-  compile_function("Cross", [[
-    local dx = lx - px
-    local dy = ly - py
-    dx = dx < 0 and -dx or dx
-    dy = dy < 0 and -dy or dy
-    t = (dx < dy and dx or dy) * scale + phase
-  ]], 2),
+  compile_function(
+    "Cross",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      dx = dx < 0 and -dx or dx
+      dy = dy < 0 and -dy or dy
+      t = (dx < dy and dx or dy) * scale + phase
+    ]],
+    2
+  ),
 
   -- [15] Hyperbolic: four curved quadrants with hyperbolic contour lines.
-  compile_function("Hyperbolic", [[
-    local dx = lx - px
-    local dy = ly - py
-    t = dx * dy  * scale * 0.125 + phase
-  ]], 2),
+  compile_function(
+    "Hyperbolic",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      t = dx * dy  * scale * 0.125 + phase
+    ]],
+    2
+  ),
 
   -- [16] Pinwheel: windmill pattern, rotational symmetry where each quadrant offsets the color by a quarter cycle.
-  compile_function("Pinwheel", [[
-    local dx = lx - px
-    local dy = ly - py
-    local q = 0
-    if dx < 0 then q = q + 1; dx = -dx end
-    if dy < 0 then q = q + 2; dy = -dy end
-    t = (dx + dy) * scale + q * n_colors * 0.25 + phase
-  ]], 2),
+  compile_function(
+    "Pinwheel",
+    [[
+      local dx = lx - px
+      local dy = ly - py
+      local q = 0
+      if dx < 0 then q = q + 1; dx = -dx end
+      if dy < 0 then q = q + 2; dy = -dy end
+      t = (dx + dy) * scale + q * n_colors * 0.25 + phase
+    ]],
+    2
+  ),
 }
 ColorFunctions.functions = functions
 local n_functions = #functions
@@ -245,15 +309,16 @@ local n_functions = #functions
 ---
 --- If `prev_index` is given, that index will not be chosen.
 ---
---- @param prev_index integer? Previous color function index. `nil` for first time.
---- @param rng LuaRandomGenerator? Optional random generator for deterministic choice.
+--- @param prev_index integer?            Previous color function index. `nil` for first time.
+--- @param rng        LuaRandomGenerator? Optional random generator for deterministic choice.
 --- @return ColorFunction # Chosen color function.
---- @return integer # Index of chosen color function.
+--- @return integer       # Index of chosen color function.
 function ColorFunctions.choose_random(prev_index, rng)
+  --- @type integer
   local new_index
   if prev_index then
     if rng then
-      new_index = rng(1, n_functions - 1)
+      new_index = rng(1, n_functions - 1) --[[@as integer]]
     else
       new_index = random(1, n_functions - 1)
     end
@@ -262,12 +327,13 @@ function ColorFunctions.choose_random(prev_index, rng)
     end
   else
     if rng then
-      new_index = rng(1, n_functions)
+      new_index = rng(1, n_functions) --[[@as integer]]
     else
       new_index = random(1, n_functions)
     end
   end
-  return functions[new_index], new_index
+  local func = functions[new_index] --- @cast func - nil
+  return func, new_index
 end
 
 return ColorFunctions

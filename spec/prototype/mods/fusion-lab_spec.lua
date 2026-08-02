@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/fusion-lab", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers fusion-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["fusion-lab"])
     end)
@@ -21,7 +23,8 @@ describe("mods/fusion-lab", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- No public code repository
@@ -48,23 +51,26 @@ describe("mods/fusion-lab", function ()
     end)
 
     it("removes the emission layer and creates overlay and companion", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.equal(2, #on_animation.layers)
+      --- @diagnostic disable-next-line: need-check-nil
       assert.are.equal("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-shadow.png", on_animation.layers[1].filename)
+      --- @diagnostic disable-next-line: need-check-nil
       assert.are.equal("__fusion-lab__/graphics/entity/fusion-lab/photometric-lab-hr-animation-1.png", on_animation.layers[2].filenames[1])
 
       local overlay = _G.data.raw["animation"]["mks-dsl-fusion-lab-overlay"]
-      assert.is_not_nil(overlay) --- @cast overlay -nil
-      assert.is_not_nil(overlay.filenames)
+      assert.is_not_nil(overlay) --- @cast overlay - nil
+      assert.is_not_nil(overlay.filenames) --- @cast overlay.filenames - nil
       assert.are.equal(
         "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-overlay-1.png",
         overlay.filenames[1]
       )
 
       local companion = _G.data.raw["animation"]["mks-dsl-fusion-lab-companion"]
-      assert.is_not_nil(companion) --- @cast companion -nil
-      assert.is_not_nil(companion.filenames)
+      assert.is_not_nil(companion) --- @cast companion - nil
+      assert.is_not_nil(companion.filenames) --- @cast companion.filenames - nil
       assert.are.equal(
         "__disco-science-lite__/graphics/hurricane/photometric-lab-hr-override-1.png",
         companion.filenames[1]
@@ -78,6 +84,7 @@ describe("mods/fusion-lab", function ()
         },
       }
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_nil(_G.data.raw["animation"]["mks-dsl-fusion-lab-overlay"])
