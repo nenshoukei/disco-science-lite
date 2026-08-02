@@ -2,6 +2,8 @@
 --- https://mods.factorio.com/mod/factorio-crash-site
 --- Crash Site by atanvarno
 --- https://mods.factorio.com/mod/atan-crash-site
+--- Crash Site Settings by Kryzeth
+--- https://mods.factorio.com/mod/kry-crash-site-settings
 
 if not mods["factorio-crash-site"] then return {} end
 
@@ -16,6 +18,12 @@ return {
 
     if mods["atan-crash-site"] then
       PrototypeLabRegistry.register("crash-site-lab", {
+        animation = "mks-dsl-crash-site-lab-repaired-overlay" --[[$NAME_PREFIX .. "crash-site-lab-repaired-overlay"]],
+      })
+    end
+
+    if mods["kry-crash-site-settings"] then
+      PrototypeLabRegistry.register("crash-site-kry-lab", {
         animation = "mks-dsl-crash-site-lab-repaired-overlay" --[[$NAME_PREFIX .. "crash-site-lab-repaired-overlay"]],
       })
     end
@@ -37,6 +45,12 @@ return {
 
     if mods["atan-crash-site"] then
       AnimationHelpers.modify_on_animation("crash-site-lab", function (modifier)
+        modifier:remove_layer("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-beams.png")
+      end)
+    end
+
+    if mods["kry-crash-site-settings"] then
+      AnimationHelpers.modify_on_animation("crash-site-kry-lab", function (modifier)
         modifier:remove_layer("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-beams.png")
       end)
     end

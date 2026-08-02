@@ -37,6 +37,7 @@ Disco Science Lite は、Daniel Brauer 氏の人気 Mod [Disco Science](https://
 - [Big Lab](https://mods.factorio.com/mod/BigLabFork) by DellAquila and \_CodeGreen
 - [Bob's Tech](https://mods.factorio.com/mod/bobtech) by Bobingabout
 - [Crash Site](https://mods.factorio.com/mod/atan-crash-site) by atanvarno
+- [Crash Site Settings](https://mods.factorio.com/mod/kry-crash-site-settings) by Kryzeth
 - [Exotic Space Industries](https://mods.factorio.com/mod/exotic-space-industries) by eliont and PreLeyZero
 - [Exotic Space Industries: Remembrance](https://mods.factorio.com/mod/exotic-space-industries-remembrance) by aRighteousGod
 - [Factorio and Conquer: Tiberian Dawn](https://mods.factorio.com/mod/Factorio-Tiberium) by James-Fire
