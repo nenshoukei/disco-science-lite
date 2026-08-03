@@ -1,3 +1,5 @@
+--- @diagnostic disable: need-check-nil
+local assert = require("luassert")
 local LabPrototypeModifier = require("scripts.prototype.lab-prototype-modifier")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 local Settings = require("scripts.shared.settings")
@@ -21,7 +23,7 @@ local function make_lab_with_layers()
     name = "test-lab",
     on_animation = {
       layers = {
-        { filename = "on.png",       frame_count = 8 },
+        { filename = "on.png", frame_count = 8 },
         { filename = "on-light.png", frame_count = 8 },
       },
     },
@@ -49,7 +51,9 @@ describe("LabPrototypeModifier", function ()
     it("does nothing when on_animation is nil", function ()
       local lab = make_lab(nil)
       lab.on_animation = nil --[[@as any]]
-      assert.no_error(function () LabPrototypeModifier.modify_lab(lab) end)
+      assert.no_error(function ()
+        LabPrototypeModifier.modify_lab(lab)
+      end)
     end)
 
     describe("on_animation freeze", function ()
@@ -62,7 +66,7 @@ describe("LabPrototypeModifier", function ()
         _G.data.raw["lab"][lab.name] = lab
         PrototypeLabRegistry.register(lab.name)
         LabPrototypeModifier.modify_lab(lab)
-        local layers = lab.on_animation.layers --- @cast layers -nil
+        local layers = lab.on_animation.layers --- @cast layers - nil
         assert.are.same({ 1 }, layers[1].frame_sequence)
         assert.are.same({ 1 }, layers[2].frame_sequence)
         assert.is_nil(layers[1].repeat_count)
@@ -73,7 +77,9 @@ describe("LabPrototypeModifier", function ()
         local lab = make_lab(nil)
         _G.data.raw["lab"][lab.name] = lab
         PrototypeLabRegistry.register(lab.name)
-        assert.no_error(function () LabPrototypeModifier.modify_lab(lab) end)
+        assert.no_error(function ()
+          LabPrototypeModifier.modify_lab(lab)
+        end)
         assert.are.equal("on.png", lab.on_animation.filename)
       end)
 
@@ -82,7 +88,7 @@ describe("LabPrototypeModifier", function ()
         _G.data.raw["lab"][lab.name] = lab
         PrototypeLabRegistry.register(lab.name, { animation = "custom-anim" })
         LabPrototypeModifier.modify_lab(lab)
-        local layers = lab.on_animation.layers --- @cast layers -nil
+        local layers = lab.on_animation.layers --- @cast layers - nil
         assert.is_nil(layers[1].frame_sequence)
         assert.is_nil(layers[2].frame_sequence)
       end)
@@ -91,7 +97,7 @@ describe("LabPrototypeModifier", function ()
         local lab = make_lab_with_layers()
         _G.data.raw["lab"][lab.name] = lab
         LabPrototypeModifier.modify_lab(lab)
-        local layers = lab.on_animation.layers --- @cast layers -nil
+        local layers = lab.on_animation.layers --- @cast layers - nil
         assert.is_nil(layers[1].frame_sequence)
         assert.is_nil(layers[2].frame_sequence)
       end)

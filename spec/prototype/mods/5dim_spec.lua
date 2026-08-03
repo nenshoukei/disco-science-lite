@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/5dim", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers all 9 labs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["5d-lab-02"])
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["5d-lab-03"])
@@ -29,7 +31,8 @@ describe("mods/5dim", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- Source: https://github.com/McGuten/Factorio5DimMods/blob/master/5dim_core/lib/automation/generation-lab.lua
@@ -37,21 +40,24 @@ describe("mods/5dim", function ()
       on_animation = {
         layers = {
           { filename = "__5dim_automation__/graphics/entities/lab/lab-02.png", frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-integration.png",     frame_count = 1, repeat_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-light.png",           frame_count = 33 },
-          { filename = "__base__/graphics/entity/lab/lab-shadow.png",          frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-integration.png", frame_count = 1, repeat_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-light.png", frame_count = 33 },
+          { filename = "__base__/graphics/entity/lab/lab-shadow.png", frame_count = 1, repeat_count = 33 },
         },
       }
       _G.data.raw.lab["5d-lab-02"] = ({ on_animation = on_animation }) --[[@as data.LabPrototype]]
     end)
 
     it("applies vanilla lab modifications to 5d-lab", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(3, #on_animation.layers)
-      assert.are.equal("__disco-science-lite__/graphics/factorio/lab-darkened.png", on_animation.layers[1].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-integration.png", on_animation.layers[2].filename)
-      assert.are.equal("__base__/graphics/entity/lab/lab-shadow.png", on_animation.layers[3].filename)
+      Helper.assert_animation.has_layers({
+        "__disco-science-lite__/graphics/factorio/lab-darkened.png",
+        "__base__/graphics/entity/lab/lab-integration.png",
+        "__base__/graphics/entity/lab/lab-shadow.png",
+      }, on_animation)
+
       Helper.assert_animation.frozen(1, on_animation)
     end)
   end)

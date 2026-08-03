@@ -1,12 +1,14 @@
 --- Factorio and Conquer: Tiberian Dawn by James-Fire
 --- https://mods.factorio.com/mod/Factorio-Tiberium
 
-if not mods["Factorio-Tiberium"] then return {} end
+--- @type ModSupport
+local mod = {}
+if not mods["Factorio-Tiberium"] then return mod end
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
-return {
-  on_data = function ()
-    PrototypeColorRegistry.set("tiberium-science", { r = 0.0, g = 1.0, b = 0.0 })
-  end,
-}
+mod.on_data = function ()
+  PrototypeColorRegistry.set("tiberium-science", { 0.0, 1.0, 0.0 })
+end
+
+return mod

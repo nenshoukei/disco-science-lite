@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local ChunkMap = require("scripts.runtime.chunk-map")
 
 --- Create a minimal LabOverlay-like value for ChunkMap tests.
@@ -9,10 +10,10 @@ local function make_overlay(unit_number)
 end
 
 --- Create a mock LuaEntity.
---- @param unit_number number
+--- @param unit_number   number
 --- @param surface_index number
---- @param x number
---- @param y number
+--- @param x             number
+--- @param y             number
 --- @return LuaEntity
 local function make_entity(unit_number, surface_index, x, y)
   return ({
@@ -24,8 +25,8 @@ end
 
 --- Create a mock LuaPlayer for furthest_game_view tests.
 --- @param zoom_spec ZoomSpecification
---- @param width number
---- @param height number
+--- @param width     number
+--- @param height    number
 --- @return LuaPlayer
 local function make_player(zoom_spec, width, height)
   return ({
@@ -67,7 +68,7 @@ describe("ChunkMap", function ()
     it("does not mark dirty when updating overlay in-place (same keys)", function ()
       local m = ChunkMap.new()
       m:insert(make_entity(1, 1, 0, 0), make_overlay(1))
-      m.surface_bounds_dirty[1] = nil                    -- clear dirty
+      m.surface_bounds_dirty[1] = nil -- clear dirty
       m:insert(make_entity(1, 1, 0, 0), make_overlay(1)) -- same position
       assert.is_nil(m.surface_bounds_dirty[1])
     end)
@@ -78,7 +79,7 @@ describe("ChunkMap", function ()
       local v = make_overlay(1)
       m:insert(e, v)
       local chunks = m.data[1]
-      assert.is_not_nil(chunks) --- @cast chunks -nil
+      assert.is_not_nil(chunks) --- @cast chunks - nil
       assert.is_not_nil(chunks[0])
       assert.is_not_nil(chunks[0][0])
       assert.are.equal(v, chunks[0][0][1])
@@ -105,7 +106,7 @@ describe("ChunkMap", function ()
       m:insert(e, v1)
       m:insert(e, v2)
       local chunks = m.data[1]
-      assert.is_not_nil(chunks) --- @cast chunks -nil
+      assert.is_not_nil(chunks) --- @cast chunks - nil
       -- Only one entry should remain in the chunk
       assert.are.equal(1, #chunks[0][0])
       assert.are.equal(v2, chunks[0][0][1])
@@ -240,24 +241,24 @@ describe("ChunkMap", function ()
       m.max_reach_y = 50
       m:update_surface_bounds(1)
       local bounds = m.surface_bounds[1]
-      assert.is_not_nil(bounds) --- @cast bounds -nil
+      assert.is_not_nil(bounds) --- @cast bounds - nil
       -- min_cx=0, max_cx=0 → tile range [0, 32]; expanded → [-100, 132]
       -- min_cy=0, max_cy=0 → tile range [0, 32]; expanded → [-50, 82]
       assert.are.equal(-100, bounds[1]) -- left
-      assert.are.equal(-50, bounds[2])  -- top
-      assert.are.equal(132, bounds[3])  -- right
-      assert.are.equal(82, bounds[4])   -- bottom
+      assert.are.equal(-50, bounds[2]) -- top
+      assert.are.equal(132, bounds[3]) -- right
+      assert.are.equal(82, bounds[4]) -- bottom
     end)
 
     it("handles multiple labs spanning different chunks", function ()
       local m = ChunkMap.new()
-      m:insert(make_entity(1, 1, 0, 0), make_overlay(1))   -- chunk (0, 0)
+      m:insert(make_entity(1, 1, 0, 0), make_overlay(1)) -- chunk (0, 0)
       m:insert(make_entity(2, 1, 64, 64), make_overlay(2)) -- chunk (2, 2)
       m.max_reach_x = 10
       m.max_reach_y = 5
       m:update_surface_bounds(1)
       local bounds = m.surface_bounds[1]
-      assert.is_not_nil(bounds) --- @cast bounds -nil
+      assert.is_not_nil(bounds) --- @cast bounds - nil
       -- min_cx=0, max_cx=2 → tile range [0, 96]; expanded → [-10, 106]
       -- min_cy=0, max_cy=2 → tile range [0, 96]; expanded → [-5, 101]
       assert.are.equal(-10, bounds[1])
@@ -321,7 +322,7 @@ describe("ChunkMap", function ()
       m.max_reach_x = 10
       m.max_reach_y = 5
       m:update_all_surface_bounds() -- creates surface_bounds[1]
-      m:remove(1)                   -- marks dirty, removes data[1]
+      m:remove(1) -- marks dirty, removes data[1]
       m:update_all_surface_bounds() -- should clear surface_bounds[1]
       assert.is_nil(m.surface_bounds[1])
       assert.is_nil(m.surface_bounds_dirty[1])
@@ -423,8 +424,8 @@ describe("ChunkMap", function ()
       local m = ChunkMap.new()
       m:insert(make_entity(1, 1, 0, 0), make_overlay(1))
       m:set_furthest_game_view({ zoom = 0.5 }, 640, 480)
-      m.surface_bounds_dirty[1] = nil  -- clear dirty
-      m:set_furthest_game_view({ zoom = 0.5 }, 640, 480)  -- same zoom
+      m.surface_bounds_dirty[1] = nil -- clear dirty
+      m:set_furthest_game_view({ zoom = 0.5 }, 640, 480) -- same zoom
       assert.is_nil(m.surface_bounds_dirty[1])
     end)
 
@@ -432,7 +433,7 @@ describe("ChunkMap", function ()
       local m = ChunkMap.new()
       m:insert(make_entity(1, 1, 0, 0), make_overlay(1))
       m:set_furthest_game_view({ zoom = 0.5 }, 640, 480)
-      m.surface_bounds_dirty[1] = nil  -- clear dirty
+      m.surface_bounds_dirty[1] = nil -- clear dirty
       m:set_furthest_game_view({ zoom = 0.25 }, 640, 480)
       -- max_reach_x = 640/(0.25*64)+6 = 640/16+6 = 40+6 = 46
       assert.are.equal(46, m.max_reach_x)

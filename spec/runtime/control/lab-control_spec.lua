@@ -1,3 +1,5 @@
+--- @diagnostic disable: global-in-non-module, need-check-nil
+local assert = require("luassert")
 local reset_mocks = require("spec.helper").reset_mocks
 local RemoteInterface = require("scripts.runtime.remote-interface")
 local LabControl = require("scripts.runtime.control.lab-control")
@@ -12,7 +14,7 @@ local function make_storage()
 end
 
 --- Build a minimal mock lab entity.
---- @param unit_number number
+--- @param unit_number   number
 --- @param surface_index number?
 --- @return LuaEntity
 local function make_entity(unit_number, surface_index)
@@ -29,7 +31,7 @@ local function make_entity(unit_number, surface_index)
     tile_width    = 3,
     tile_height   = 3,
     prototype     = { tile_width = 3, tile_height = 3 },
-    surface       = ({ index = surface_index }) --[[@as LuaSurface]],
+    surface       = ({ index = surface_index }), --[[@as LuaSurface]]
     status        = defines.entity_status.working,
   }) --[[@as LuaEntity]]
 end
@@ -59,7 +61,9 @@ local function setup_common()
 
   -- Reset RemoteInterface to unbound state so pending_calls is empty.
   RemoteInterface.bind_registries(nil, nil)
-  RemoteInterface.bind_rebuild_callback(nil --[[@as fun()]])
+  RemoteInterface.bind_rebuild_callback(
+    nil --[[@as fun()]]
+  )
 end
 
 describe("LabControl", function ()
@@ -84,9 +88,9 @@ describe("LabControl", function ()
       LabControl.on_load()
 
       assert.are.equal(
-        0, #write_keys,
-        "on_load must not write to storage (causes CRC desync); wrote keys: " ..
-        table.concat(write_keys, ", ")
+        0,
+        #write_keys,
+        "on_load must not write to storage (causes CRC desync); wrote keys: " .. table.concat(write_keys, ", ")
       )
     end)
 
@@ -118,7 +122,7 @@ describe("LabControl", function ()
 
       -- After the first tick, the pending call must be applied.
       local color = RemoteInterface.functions.getIngredientColor("pending-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.5, color.r)
       assert.are.equal(0.6, color.g)
       assert.are.equal(0.7, color.b)
@@ -156,7 +160,7 @@ describe("LabControl", function ()
 
       -- The call must already be applied — no tick needed.
       local color = RemoteInterface.functions.getIngredientColor("pending-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.5, color.r)
       assert.are.equal(0.6, color.g)
       assert.are.equal(0.7, color.b)
@@ -176,7 +180,7 @@ describe("LabControl", function ()
 
       -- Must be applied immediately without firing any tick.
       local color = RemoteInterface.functions.getIngredientColor("post-load-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.1, color.r)
     end)
   end)
@@ -196,7 +200,7 @@ describe("LabControl", function ()
 
       -- The call must already be applied — no tick needed.
       local color = RemoteInterface.functions.getIngredientColor("pending-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.5, color.r)
       assert.are.equal(0.6, color.g)
       assert.are.equal(0.7, color.b)
@@ -238,23 +242,50 @@ describe("LabControl events", function ()
     it("renders an overlay when effect_id matches and target_entity is provided", function ()
       local entity = make_entity(42, 1)
 
-      handler(({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = entity }) --[[@as EventData.on_script_trigger_effect]])
+      handler(
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = entity,
+        }) --[[@as EventData.on_script_trigger_effect]]
+      )
 
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("ignores effects with a non-matching effect_id", function ()
       local entity = make_entity(42, 1)
 
-      handler(({ effect_id = "other-effect", target_entity = entity }) --[[@as EventData.on_script_trigger_effect]])
+      handler(
+        ({ effect_id = "other-effect", target_entity = entity }) --[[@as EventData.on_script_trigger_effect]]
+      )
 
-      assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        0,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("ignores effects with no target_entity", function ()
-      handler(({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = nil }) --[[@as EventData.on_script_trigger_effect]])
+      handler(
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = nil,
+        }) --[[@as EventData.on_script_trigger_effect]]
+      )
 
-      assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        0,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
   end)
 
@@ -269,25 +300,53 @@ describe("LabControl events", function ()
     it("removes the overlay for a destroyed lab entity", function ()
       local entity = make_entity(42, 1)
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = entity }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = entity,
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
 
-      handler(({ type = defines.target_type.entity, useful_id = 42 }) --[[@as EventData.on_object_destroyed]])
+      handler(
+        ({ type = defines.target_type.entity, useful_id = 42 }) --[[@as EventData.on_object_destroyed]]
+      )
 
-      assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        0,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("does not remove overlays for non-entity destroyed objects", function ()
       local entity = make_entity(42, 1)
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = entity }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = entity,
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
 
       -- type != defines.target_type.entity, so the overlay must not be removed.
-      handler(({ type = 2 --[[@as defines.target_type]], useful_id = 42 }) --[[@as EventData.on_object_destroyed]])
+      handler(
+        ({
+          type = 2, --[[@as defines.target_type]]
+          useful_id = 42,
+        }) --[[@as EventData.on_object_destroyed]]
+      )
 
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
   end)
 
@@ -295,30 +354,61 @@ describe("LabControl events", function ()
   describe("on_surface_cleared and on_surface_deleted", function ()
     it("removes all overlays on the cleared surface", function ()
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(10, 1) }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = make_entity(10, 1),
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(11, 1) }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = make_entity(11, 1),
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
-      assert.are.equal(2, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        2,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
 
-      captured_handlers[defines.events.on_surface_cleared](({ surface_index = 1 }) --[[@as EventData.on_surface_cleared]])
+      captured_handlers[defines.events.on_surface_cleared](
+        ({ surface_index = 1 }) --[[@as EventData.on_surface_cleared]]
+      )
 
-      assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        0,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("does not remove overlays on other surfaces", function ()
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(10, 1) }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = make_entity(10, 1),
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(20, 2) }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = make_entity(20, 2),
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
 
-      captured_handlers[defines.events.on_surface_cleared](({ surface_index = 2 }) --[[@as EventData.on_surface_cleared]])
+      captured_handlers[defines.events.on_surface_cleared](
+        ({ surface_index = 2 }) --[[@as EventData.on_surface_cleared]]
+      )
 
       -- Only the overlay on surface 2 should be removed.
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("on_surface_deleted uses the same handler as on_surface_cleared", function ()
@@ -334,15 +424,25 @@ describe("LabControl events", function ()
     it("keeps the overlay alive after the lab is teleported on the same surface", function ()
       local entity = make_entity(42, 1)
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = entity }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = entity,
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
 
       -- Teleport to a new position on the same surface.
       entity.position = { x = 10, y = 10 }
-      captured_handlers[defines.events.script_raised_teleported](({ entity = entity }) --[[@as EventData.script_raised_teleported]])
+      captured_handlers[defines.events.script_raised_teleported](
+        ({ entity = entity }) --[[@as EventData.script_raised_teleported]]
+      )
 
       -- Overlay must still exist.
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
   end)
 
@@ -357,7 +457,9 @@ describe("LabControl events", function ()
     it("ignores settings with a non-matching prefix", function ()
       captured_handlers = {}
 
-      handler(({ setting = "other-mod-setting" }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(
+        ({ setting = "other-mod-setting" }) --[[@as EventData.on_runtime_mod_setting_changed]]
+      )
 
       -- setup_event_handlers must NOT have been called.
       assert.is_nil(next(captured_handlers))
@@ -366,7 +468,11 @@ describe("LabControl events", function ()
     it("re-registers event handlers when color-saturation setting changes", function ()
       captured_handlers = {}
 
-      handler(({ setting = "mks-dsl-color-saturation" --[[$COLOR_SATURATION_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(
+        ({
+          setting = "mks-dsl-color-saturation", --[[$COLOR_SATURATION_NAME]]
+        }) --[[@as EventData.on_runtime_mod_setting_changed]]
+      )
 
       assert.is_not_nil(next(captured_handlers))
     end)
@@ -374,21 +480,42 @@ describe("LabControl events", function ()
     it("re-registers event handlers when color-brightness setting changes", function ()
       captured_handlers = {}
 
-      handler(({ setting = "mks-dsl-color-brightness" --[[$COLOR_BRIGHTNESS_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(
+        ({
+          setting = "mks-dsl-color-brightness", --[[$COLOR_BRIGHTNESS_NAME]]
+        }) --[[@as EventData.on_runtime_mod_setting_changed]]
+      )
 
       assert.is_not_nil(next(captured_handlers))
     end)
 
     it("force re-renders all overlays when lab-blinking-disabled setting changes", function ()
       captured_handlers[defines.events.on_script_trigger_effect](
-        ({ effect_id = "ds-create-lab" --[[$LAB_CREATED_EFFECT_ID]], target_entity = make_entity(42, 1) }) --[[@as EventData.on_script_trigger_effect]]
+        ({
+          effect_id = "ds-create-lab", --[[$LAB_CREATED_EFFECT_ID]]
+          target_entity = make_entity(42, 1),
+        }) --[[@as EventData.on_script_trigger_effect]]
       )
-      assert.are.equal(1, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        1,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
 
       -- Force re-render clears all objects (game.surfaces is empty so nothing is recreated).
-      handler(({ setting = "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(
+        ({
+          setting = "mks-dsl-lab-blinking-disabled", --[[$LAB_BLINKING_DISABLED_NAME]]
+        }) --[[@as EventData.on_runtime_mod_setting_changed]]
+      )
 
-      assert.are.equal(0, #_G.rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]]))
+      assert.are.equal(
+        0,
+        #_G.rendering.get_all_objects(
+          "disco-science-lite" --[[$MOD_NAME]]
+        )
+      )
     end)
 
     it("re-registers event handlers when color-update-interval preset changes", function ()
@@ -396,7 +523,11 @@ describe("LabControl events", function ()
 
       _G.settings.global[ "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] ].value = "performance"
 
-      handler(({ setting = "mks-dsl-color-update-preset" --[[$COLOR_UPDATE_PRESET_NAME]] }) --[[@as EventData.on_runtime_mod_setting_changed]])
+      handler(
+        ({
+          setting = "mks-dsl-color-update-preset", --[[$COLOR_UPDATE_PRESET_NAME]]
+        }) --[[@as EventData.on_runtime_mod_setting_changed]]
+      )
 
       assert.is_not_nil(next(captured_handlers))
     end)

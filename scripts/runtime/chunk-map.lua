@@ -3,7 +3,7 @@
 --- Entries are bucketed by (surface_index, chunk_x, chunk_y). The map supports O(1) insert and O(1) remove.
 --- The raw chunk data is exposed for direct iteration in performance-critical code (e.g. on_tick handlers).
 ---
---- @class ChunkMap
+--- @class (partial) ChunkMap
 local ChunkMap = {}
 ChunkMap.__index = ChunkMap
 
@@ -19,7 +19,7 @@ ChunkMap.__index = ChunkMap
 ---
 --- @return ChunkMap
 function ChunkMap.new()
-  --- @class ChunkMap
+  --- @class (partial) ChunkMap
   local self = {
     --- Nested chunk data. `data[surface_index][chunk_x][chunk_y]` is an array of overlays.
     --- @type table<number, table<number, table<number, LabOverlay[]>>>
@@ -30,13 +30,16 @@ function ChunkMap.new()
     entries = {},
 
     --- Pre-expanded surface bounds per surface, keyed by surface_index.
+    ---
     --- Each entry is [left, top, right, bottom] in tile coords, expanded by max_reach from the
     --- outermost lab positions. Used for fast player-outside-all-labs early-exit checks.
+    ---
     --- nil for surfaces with no overlays, or before the first call to update_surface_bounds.
     --- @type table<number, MapPositionRect>
     surface_bounds = {},
 
     --- Surfaces whose bounds need recomputation, keyed by surface_index.
+    ---
     --- Set to true by insert/remove; cleared by update_surface_bounds.
     --- @type table<number, boolean>
     surface_bounds_dirty = {},
@@ -63,8 +66,8 @@ end
 --- then capped by max_distance (defaults to 500) along the longer axis.
 ---
 --- @param zoom_spec ZoomSpecification
---- @param width number Display width in pixels.
---- @param height number Display height in pixels.
+--- @param width     number            Display width in pixels.
+--- @param height    number            Display height in pixels.
 --- @return number zoom
 function ChunkMap.zoom_spec_to_zoom(zoom_spec, width, height)
   if zoom_spec.zoom then
@@ -96,15 +99,11 @@ end
 
 --- Apply new zoom/reach values and mark all surface bounds dirty if any value changed.
 ---
---- @param new_zoom number
+--- @param new_zoom    number
 --- @param new_reach_x number
 --- @param new_reach_y number
 function ChunkMap:_set_reach(new_zoom, new_reach_x, new_reach_y)
-  if
-    new_zoom == self.furthest_zoom and
-    new_reach_x == self.max_reach_x and
-    new_reach_y == self.max_reach_y
-  then
+  if new_zoom == self.furthest_zoom and new_reach_x == self.max_reach_x and new_reach_y == self.max_reach_y then
     return
   end
 
@@ -120,8 +119,8 @@ end
 --- all surfaces dirty if the zoom changed.
 ---
 --- @param zoom_spec ZoomSpecification
---- @param width number Display width in pixels.
---- @param height number Display height in pixels.
+--- @param width     number            Display width in pixels.
+--- @param height    number            Display height in pixels.
 function ChunkMap:set_furthest_game_view(zoom_spec, width, height)
   local new_zoom = ChunkMap.zoom_spec_to_zoom(zoom_spec, width, height)
   local new_reach_x = width / (new_zoom * 64 --[[$TILE_SIZE * 2]]) + 6 --[[$VIEW_RECT_MARGIN]]
@@ -139,7 +138,9 @@ end
 function ChunkMap:set_furthest_game_view_for_players(players)
   local has_player = false
   local min_zoom = math.huge
+  --- @type number
   local max_reach_x = 0
+  --- @type number
   local max_reach_y = 0
 
   for _, player in pairs(players) do
@@ -170,7 +171,7 @@ end
 ---
 --- If the entity already exists in the map, it just updates the existing one with new overlay values.
 ---
---- @param entity LuaEntity
+--- @param entity  LuaEntity
 --- @param overlay LabOverlay The overlay to store for the entity.
 function ChunkMap:insert(entity, overlay)
   local unit_number = entity.unit_number
@@ -178,8 +179,8 @@ function ChunkMap:insert(entity, overlay)
 
   local surface_index = entity.surface_index
   local position = entity.position
-  local chunk_x = (position.x or position[1]) / 32 --[[$CHUNK_SIZE]]
-  local chunk_y = (position.y or position[2]) / 32 --[[$CHUNK_SIZE]]
+  local chunk_x = (position.x or position[1] or 0) / 32 --[[$CHUNK_SIZE]]
+  local chunk_y = (position.y or position[2] or 0) / 32 --[[$CHUNK_SIZE]]
   chunk_x = chunk_x - chunk_x % 1 -- equivalent to math.floor()
   chunk_y = chunk_y - chunk_y % 1
 
@@ -216,13 +217,7 @@ function ChunkMap:insert(entity, overlay)
   local index = #chunk + 1
   chunk[index] = overlay
 
-  entries[unit_number] = {
-    surface_index = surface_index,
-    chunk_x = chunk_x,
-    chunk_y = chunk_y,
-    index = index,
-    overlay = overlay,
-  }
+  entries[unit_number] = { surface_index = surface_index, chunk_x = chunk_x, chunk_y = chunk_y, index = index, overlay = overlay }
 
   self.surface_bounds_dirty[surface_index] = true
 end
@@ -268,7 +263,7 @@ function ChunkMap:remove(unit_number)
         -- [A, B, C, D] → remove(B) → [A, D, C]
         local last_index = #chunk
         if index ~= last_index then
-          local last = chunk[last_index]
+          local last = chunk[last_index] --- @cast last - nil
           chunk[index] = last
           self.entries[last.unit_number].index = index
         end

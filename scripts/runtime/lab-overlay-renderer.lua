@@ -3,7 +3,7 @@ local ChunkMap = require("scripts.runtime.chunk-map")
 local Settings = require("scripts.shared.settings")
 local Utils = require("scripts.shared.utils")
 
---- @class LabOverlayRenderer
+--- @class (partial) LabOverlayRenderer
 local LabOverlayRenderer = {}
 LabOverlayRenderer.__index = LabOverlayRenderer
 
@@ -26,7 +26,7 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field y             number           Y coordinate.
 --- @field visible       boolean          Last known visible state of the animation (cached, avoids repeated C bridge reads).
 --- @field unit_number   number           Unit number of the lab entity (required by ChunkMap for swap-and-pop removal).
---- @field force_index   number           Force index of the lab entity.
+--- @field force_index   integer          Force index of the lab entity.
 --- @field surface_index number           Surface index of the lab entity.
 --- @field viewer_index  integer          Player index of the viewer for spatial color functions in multiplayer.
 
@@ -44,14 +44,14 @@ local RENDER_MODE_CHART = defines.render_mode.chart
 --- @field chunk_right     number
 --- @field chunk_bottom    number
 --- @field surface_index   number
---- @field was_skipped     boolean  true if player was in chart mode or outside surface bounds
---- @field player_index    integer  player.index for overlay.viewer_index assignment
+--- @field was_skipped     boolean true if player was in chart mode or outside surface bounds
+--- @field player_index    integer player.index for overlay.viewer_index assignment
 
 --- @param color_registry ColorRegistry
---- @param lab_registry LabRegistry
+--- @param lab_registry   LabRegistry
 --- @return LabOverlayRenderer
 function LabOverlayRenderer.new(color_registry, lab_registry)
-  --- @class LabOverlayRenderer
+  --- @class (partial) LabOverlayRenderer
   local self = {
     color_registry = color_registry,
     lab_registry = lab_registry,
@@ -61,7 +61,7 @@ function LabOverlayRenderer.new(color_registry, lab_registry)
     chunk_map = ChunkMap.new(),
 
     --- Overlay animation RenderObject.id to lab entity unit_number.
-    --- @type table<integer, integer>
+    --- @type table<number, number>
     render_object_id_to_unit_number = {},
   }
   self = setmetatable(self, LabOverlayRenderer)
@@ -70,8 +70,8 @@ end
 
 --- Render an overlay for a lab entity.
 ---
---- @param lab LuaEntity The lab entity. Must be valid.
---- @param existing_overlay LuaRenderObject? An existing overlay render object to reuse (optional, used when rebuilding all). Must be valid.
+--- @param lab                LuaEntity        The lab entity. Must be valid.
+--- @param existing_overlay   LuaRenderObject? An existing overlay render object to reuse (optional, used when rebuilding all). Must be valid.
 --- @param existing_companion LuaRenderObject? An existing companion render object to reuse. Must be valid.
 --- @return LabOverlay|nil # The rendered overlay. `nil` if the lab is not target.
 function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existing_companion)
@@ -108,10 +108,14 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   local status = lab.status
   local is_visible = (status == STATUS_WORKING or status == STATUS_LOW_POWER) and lab.force.current_research ~= nil
 
-  local animation                  --- @type string
-  local companion                  --- @type string|nil
-  local is_companion_under_overlay --- @type boolean|nil
-  local scale                      --- @type number
+  --- @type string
+  local animation
+  --- @type string|nil
+  local companion
+  --- @type boolean|nil
+  local is_companion_under_overlay
+  --- @type number
+  local scale
   if registration then
     -- If lab is registered but no overlay animation specified, use animation for the standard Factorio lab.
     animation = registration.animation or "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]]
@@ -126,7 +130,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
     scale = max(prototype.tile_width, prototype.tile_height) * 0.5
   end
 
-  local render_object --- @type LuaRenderObject
+  --- @type LuaRenderObject
+  local render_object
   if existing_overlay then
     render_object = existing_overlay
     -- Check if settings changed; avoid setting the same value, which forces re-rendering.
@@ -157,7 +162,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   end
   self.render_object_id_to_unit_number[render_object.id] = lab_unit_number
 
-  local companion_object --- @type LuaRenderObject?
+  --- @type LuaRenderObject?
+  local companion_object
   if companion and existing_companion then
     companion_object = existing_companion
     if companion_object.animation ~= companion then
@@ -197,8 +203,8 @@ function LabOverlayRenderer:render_overlay_for_lab(lab, existing_overlay, existi
   end
 
   local lab_position = lab.position
-  local lab_x = lab_position.x or lab_position[1]
-  local lab_y = lab_position.y or lab_position[2]
+  local lab_x = lab_position.x or lab_position[1] or 0
+  local lab_y = lab_position.y or lab_position[2] or 0
 
   --- @type LabOverlay
   local new_overlay = {
@@ -234,11 +240,15 @@ function LabOverlayRenderer:render_overlays_for_all_labs(force)
   local existing_companions = {}
   if force then
     -- Destroy all rendering objects
-    rendering_clear("disco-science-lite" --[[$MOD_NAME]])
+    rendering_clear(
+      "disco-science-lite" --[[$MOD_NAME]]
+    )
   else
     -- Collect all existing valid render objects from the mod.
     -- Index them by their target unit_number for fast lookup.
-    local all_objects = rendering_get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+    local all_objects = rendering_get_all_objects(
+      "disco-science-lite" --[[$MOD_NAME]]
+    )
     for i = 1, #all_objects do
       local object = all_objects[i]
       local entity = object.target.entity
@@ -297,7 +307,7 @@ end
 ---
 --- The `request_viewport_update` returned by `get_tick_function()` should be called afterwards.
 ---
---- @param lab_unit_number number The unit_number of the removed lab entity.
+--- @param lab_unit_number       number   The unit_number of the removed lab entity.
 --- @param skip_chunk_map_remove boolean? If `true`, skips removing from chunk_map. (Default: false)
 function LabOverlayRenderer:remove_overlay_from_lab(lab_unit_number, skip_chunk_map_remove)
   if not lab_unit_number then return end
@@ -444,7 +454,7 @@ local function random_phase_speed(generator)
 end
 
 --- Update research state for all forces.
---- @param force_states table<number, ForceResearchState>
+--- @param force_states   table<number, ForceResearchState>
 --- @param color_registry ColorRegistry
 --- @return boolean has_any_research
 --- @return boolean research_changed
@@ -462,7 +472,7 @@ local function update_all_force_research_states(force_states, color_registry)
       research_changed = true
       if new_current_research then
         if is_rainbow_mode then
-          state.colors, state.n_colors = color_registry:get_flattened_rainbow_colors(saturation, brightness)
+          state.colors, state.n_colors = color_registry.get_flattened_rainbow_colors(saturation, brightness)
         else
           state.colors, state.n_colors = color_registry:get_flattened_colors_for_research(new_current_research, saturation, brightness)
         end
@@ -479,10 +489,10 @@ local function update_all_force_research_states(force_states, color_registry)
 end
 
 --- Calculate chunk bounds for a player's viewport.
---- @param player_x number
---- @param player_y number
---- @param zoom number
---- @param viewport_width number
+--- @param player_x        number
+--- @param player_y        number
+--- @param zoom            number
+--- @param viewport_width  number
 --- @param viewport_height number
 --- @return number left
 --- @return number top
@@ -500,10 +510,10 @@ local function calculate_viewport_chunks(player_x, player_y, zoom, viewport_widt
 end
 
 --- Update a player's viewport state and detect changes.
---- @param player LuaPlayer
---- @param vstate PlayerViewportState
---- @param px number
---- @param py number
+--- @param player    LuaPlayer
+--- @param vstate    PlayerViewportState
+--- @param px        number
+--- @param py        number
 --- @param chunk_map ChunkMap
 --- @return boolean changed
 local function update_player_viewport_state(player, vstate, px, py, chunk_map)
@@ -527,14 +537,8 @@ local function update_player_viewport_state(player, vstate, px, py, chunk_map)
   end
 
   local cl, ct, cr, cb = calculate_viewport_chunks(px, py, player.zoom, vstate.viewport_width, vstate.viewport_height)
-  if (
-      vstate.was_skipped or
-      cl ~= vstate.chunk_left or
-      ct ~= vstate.chunk_top or
-      cr ~= vstate.chunk_right or
-      cb ~= vstate.chunk_bottom or
-      surface_index ~= vstate.surface_index
-    ) then
+  if (vstate.was_skipped or cl ~= vstate.chunk_left or ct ~= vstate.chunk_top or cr ~= vstate.chunk_right or cb ~= vstate.chunk_bottom
+    or surface_index ~= vstate.surface_index) then
     vstate.was_skipped = false
     vstate.chunk_left, vstate.chunk_top, vstate.chunk_right, vstate.chunk_bottom = cl, ct, cr, cb
     vstate.surface_index = surface_index
@@ -545,15 +549,15 @@ local function update_player_viewport_state(player, vstate, px, py, chunk_map)
 end
 
 --- Rebuild the list of overlays currently in a player's viewport.
---- @param vstate PlayerViewportState
---- @param chunks table<number, table<number, LabOverlay[]>>
+--- @param vstate               PlayerViewportState
+--- @param chunks               table<number, table<number, LabOverlay[]>>
 --- @param all_overlays_in_view LabOverlay[]
---- @param n_all_in_view number
---- @param n_visible_overlays number
---- @param current_tick number
---- @param mp_visited_tick table<LabOverlay[], number>|nil
---- @return integer n_all_in_view
---- @return integer n_visible_overlays
+--- @param n_all_in_view        number
+--- @param n_visible_overlays   number
+--- @param current_tick         number
+--- @param mp_visited_tick      table<LabOverlay[], number>|nil
+--- @return number n_all_in_view
+--- @return number n_visible_overlays
 local function collect_overlays_in_player_view(vstate, chunks, all_overlays_in_view, n_all_in_view, n_visible_overlays, current_tick, mp_visited_tick)
   local player_index = vstate.player_index
   for cx = vstate.chunk_left, vstate.chunk_right do
@@ -583,10 +587,10 @@ local function collect_overlays_in_player_view(vstate, chunks, all_overlays_in_v
 end
 
 --- Update the color epoch and function.
---- @param current_tick number
+--- @param current_tick           number
 --- @param color_pattern_duration number
---- @param rng LuaRandomGenerator
---- @param color_function_index integer?
+--- @param rng                    LuaRandomGenerator
+--- @param color_function_index   integer?
 --- @return ColorFunction color_function
 --- @return integer color_function_index
 --- @return number phase_base
@@ -600,15 +604,19 @@ local function update_color_epoch(current_tick, color_pattern_duration, rng, col
 
   -- Reconstruct previous from epoch-1 only during initial call after load.
   if not prev_index and epoch > 0 then
-    rng.re_seed((epoch - 1) % 10000 * 10000 + 12345)
-    rng()                   -- skip phase_base
+    rng.re_seed(
+      ((epoch - 1) % 10000 * 10000 + 12345) --[[@as uint]]
+    )
+    rng() -- skip phase_base
     random_phase_speed(rng) -- skip phase_speed
     local _
     _, prev_index = ColorFunctions.choose_random(nil, rng)
   end
 
   -- Deterministically derive current epoch state (O(1))
-  rng.re_seed(epoch % 10000 * 10000 + 12345)
+  rng.re_seed(
+    (epoch % 10000 * 10000 + 12345) --[[@as uint]]
+  )
   local phase_base = rng() * 1000
   local phase_speed = random_phase_speed(rng)
   local color_function, next_index = ColorFunctions.choose_random(prev_index, rng)
@@ -662,11 +670,11 @@ function LabOverlayRenderer:get_tick_function()
   -- Captured for inlined research color lookup in tick_function.
   local color_registry = self.color_registry
 
-  --- Overlays currently in any player's view, including invisible overlays.
-  local all_overlays_in_view = {} --- @type LabOverlay[]
-  --- Cached `#all_overlays_in_view`.
+  --- @type LabOverlay[] Overlays currently in any player's view, including invisible overlays.
+  local all_overlays_in_view = {}
+  --- @type number Cached `#all_overlays_in_view`.
   local n_all_in_view = 0
-  --- Number of currently visible overlays.
+  --- @type number Number of currently visible overlays.
   local n_visible_overlays = 0
 
   --- Force index to force research state including colors of ingredients
@@ -691,7 +699,7 @@ function LabOverlayRenderer:get_tick_function()
   --- @type PlayerViewportState[]
   local player_viewport_states = {}
   for i = 1, n_connected_players do
-    local player = connected_players[i]
+    local player = connected_players[i] --- @cast player - nil
     local pos = map_position_tuple(player.position)
     mp_player_positions[i] = pos
     mp_player_index_to_position[player.index] = pos
@@ -724,18 +732,27 @@ function LabOverlayRenderer:get_tick_function()
   -- Deterministically derived from game.tick and a constant seed.
   -- Re-calculated lazily inside tick_function when first called or at epoch boundaries.
   local rng = game.create_random_generator(0)
+  --- @type number
   local color_pattern_epoch_tick = 0
+  --- @type number
   local phase_base = 0
+  --- @type number
   local phase_speed = 0
-  local color_function_index = nil --- @type integer|nil
-  local color_function = nil       --- @type ColorFunction|nil
+  --- @type integer|nil
+  local color_function_index = nil
+  --- @type ColorFunction|nil
+  local color_function = nil
   local color = { 0, 0, 0 }
 
   -- === Singleplayer specific state ===
 
   local sp_player = connected_players[1]
-  local sp_vstate = player_viewport_states[1]
-  local sp_px, sp_py = mp_player_positions[1][1], mp_player_positions[1][2]
+  local sp_vstate = player_viewport_states[1] --- @cast sp_vstate - nil
+  local sp_pos = mp_player_positions[1] --- @cast sp_pos - nil
+  --- @type number
+  local sp_px = sp_pos[1]
+  --- @type number
+  local sp_py = sp_pos[2]
   local sp_fstate = force_states[sp_player.force_index]
 
   -- === Multiplayer specific state ===
@@ -746,7 +763,7 @@ function LabOverlayRenderer:get_tick_function()
 
   if is_multiplayer then
     chunk_map:set_furthest_game_view_for_players(connected_players)
-  else
+  elseif sp_player.zoom_limits.furthest_game_view then
     chunk_map:set_furthest_game_view(sp_player.zoom_limits.furthest_game_view, sp_vstate.viewport_width, sp_vstate.viewport_height)
   end
 
@@ -774,19 +791,21 @@ function LabOverlayRenderer:get_tick_function()
       local viewport_changed = false
       if is_multiplayer then
         for i = 1, n_connected_players do
-          local player = connected_players[i]
+          local player = connected_players[i] --- @cast player - nil
+          local vstate = player_viewport_states[i] --- @cast vstate - nil
           local pos = player.position
-          local px, py = pos.x, pos.y
-          local stored_pos = mp_player_positions[i]
+          local px, py = pos.x or 0, pos.y or 0
+          local stored_pos = mp_player_positions[i] --- @cast stored_pos - nil
           stored_pos[1] = px
           stored_pos[2] = py
-          if update_player_viewport_state(player, player_viewport_states[i], px, py, chunk_map) then
+          if update_player_viewport_state(player, vstate, px, py, chunk_map) then
             viewport_changed = true
           end
         end
       else
         local pos = sp_player.position
-        sp_px, sp_py = pos.x, pos.y
+        sp_px = pos.x --[[@as number]]
+        sp_py = pos.y --[[@as number]]
         if update_player_viewport_state(sp_player, sp_vstate, sp_px, sp_py, chunk_map) then
           viewport_changed = true
         end
@@ -800,11 +819,18 @@ function LabOverlayRenderer:get_tick_function()
         n_visible_overlays = 0
 
         for i = 1, n_connected_players do
-          local vstate = player_viewport_states[i]
+          local vstate = player_viewport_states[i] --- @cast vstate - nil
           if not vstate.was_skipped then
             local surface_chunks = chunk_map_data[vstate.surface_index]
             n_all_in_view, n_visible_overlays = collect_overlays_in_player_view(
-              vstate, surface_chunks, all_overlays_in_view, n_all_in_view, n_visible_overlays, current_tick, mp_visited_tick)
+              vstate,
+              surface_chunks,
+              all_overlays_in_view,
+              n_all_in_view,
+              n_visible_overlays,
+              current_tick,
+              mp_visited_tick
+            )
           end
         end
 
@@ -829,13 +855,16 @@ function LabOverlayRenderer:get_tick_function()
       needs_viewport_rebuild = false
     elseif has_any_research or needs_viewport_rebuild then
       -- If full scan is needed, iterate all overlays in the view. If not, use a budget that scales by n_all_in_view.
-      local budget = needs_viewport_rebuild and n_all_in_view or ceil(n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]])
+      local budget = needs_viewport_rebuild and n_all_in_view
+        or ceil(
+          n_all_in_view / 30 --[[$STATE_UPDATE_INTERVAL]]
+        )
       if budget < 1 then budget = 1 end
       needs_viewport_rebuild = false
       for _ = 1, budget do
         status_cursor = status_cursor + 1
         if status_cursor > n_all_in_view then status_cursor = 1 end
-        local overlay = all_overlays_in_view[status_cursor]
+        local overlay = all_overlays_in_view[status_cursor] --- @cast overlay - nil
         local entity = overlay.entity
         if not entity.valid then goto continue end
 
@@ -875,8 +904,12 @@ function LabOverlayRenderer:get_tick_function()
 
     local elapsed_tick = current_tick - color_pattern_epoch_tick
     if not color_function or elapsed_tick >= color_pattern_duration then
-      color_function, color_function_index, phase_base, phase_speed, color_pattern_epoch_tick =
-        update_color_epoch(current_tick, color_pattern_duration, rng, color_function_index)
+      color_function, color_function_index, phase_base, phase_speed, color_pattern_epoch_tick = update_color_epoch(
+        current_tick,
+        color_pattern_duration,
+        rng,
+        color_function_index
+      )
       elapsed_tick = current_tick - color_pattern_epoch_tick
     end
 
@@ -884,10 +917,23 @@ function LabOverlayRenderer:get_tick_function()
     local color_update_offset = (current_tick / color_update_interval) % color_update_stride + 1
 
     if is_multiplayer then
-      local cached_force_index, cached_colors, cached_n_colors, cached_scale = 0, nil, 0, 0.125
-      local cached_viewer_index, cached_px, cached_py = 0, 0, 0
+      --- @type integer
+      local cached_force_index = 0
+      --- @type number[]|nil
+      local cached_colors = nil
+      --- @type integer
+      local cached_n_colors = 0
+      --- @type number
+      local cached_scale = 0.125
+      --- @type integer
+      local cached_viewer_index = 0
+      --- @type number
+      local cached_px = 0
+      --- @type number
+      local cached_py = 0
+
       for i = color_update_offset, n_all_in_view, color_update_stride do
-        local overlay = all_overlays_in_view[i]
+        local overlay = all_overlays_in_view[i] --- @cast overlay - nil
         if overlay.visible then
           local f_index = overlay.force_index
           if f_index ~= cached_force_index then
@@ -925,7 +971,7 @@ function LabOverlayRenderer:get_tick_function()
       if cached_colors then
         local scale = (1 + cached_n_colors / n_visible_overlays) * 0.125
         for i = color_update_offset, n_all_in_view, color_update_stride do
-          local overlay = all_overlays_in_view[i]
+          local overlay = all_overlays_in_view[i] --- @cast overlay - nil
           if overlay.visible then
             local anim = overlay.animation
             if anim.valid then
@@ -942,8 +988,10 @@ function LabOverlayRenderer:get_tick_function()
     needs_viewport_rebuild = true
   end
 
-  local update_zoom_reach      --- @type fun()
-  local update_player_position --- @type fun (event: EventData.on_player_changed_position)
+  --- @type fun()
+  local update_zoom_reach
+  --- @type fun(event: EventData.on_player_changed_position)
+  local update_player_position
   if is_multiplayer then
     update_zoom_reach = function ()
       chunk_map:set_furthest_game_view_for_players(connected_players)
@@ -963,12 +1011,15 @@ function LabOverlayRenderer:get_tick_function()
     end
   else
     update_zoom_reach = function ()
-      chunk_map:set_furthest_game_view(sp_player.zoom_limits.furthest_game_view, sp_vstate.viewport_width, sp_vstate.viewport_height)
+      if sp_player.zoom_limits.furthest_game_view then
+        chunk_map:set_furthest_game_view(sp_player.zoom_limits.furthest_game_view, sp_vstate.viewport_width, sp_vstate.viewport_height)
+      end
     end
 
     update_player_position = function ()
       local pos = sp_player.position
-      sp_px, sp_py = pos.x, pos.y
+      sp_px = pos.x --[[@as number]]
+      sp_py = pos.y --[[@as number]]
     end
   end
 

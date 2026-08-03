@@ -1,39 +1,29 @@
-.PHONY: dev lint test typecheck consts graphics mods mod-description benchmark check full-check check-updates
-
-dev:
-	# If pcre2 is installed by Homebrew
-	# make dev C_INCLUDE_PATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib
-	@luarocks install --deps-only disco-science-lite-dev-1.rockspec
-
-lint:
-	@luacheck --formatter plain .
-	@uv run ruff check
-
-test:
-	@busted
+.PHONY: consts mods format typecheck test check check-updates graphics benchmark
 
 consts:
 	@lua tasks/update-consts.lua
 
-graphics:
-	@MOD=$(MOD) uv run tasks/graphics/update-graphics.py
-
-mod-description:
-	@uv run tasks/update-mod-description.py
-
 mods:
 	@tasks/update-all-mods.sh
+	@uv run tasks/update-mod-description.py
 
-check: consts mods mod-description lint test
+format:
+	@luafmt --write . --exclude "lua_modules/**" --exclude "vendor/**"
 
 typecheck:
+	@emmylua_check -c .luarc.json --ignore "lua_modules/**,vendor/**" .
 	@tsc -p tasks/typecheck/tsconfig.json
-	@lua-language-server --check_format=pretty --check=.
 
-full-check: check typecheck
+test:
+	@busted
+
+check: consts mods format typecheck test
 
 check-updates:
 	@uv run tasks/check-updates/check-updates.py
+
+graphics:
+	@MOD=$(MOD) uv run tasks/graphics/update-graphics.py
 
 benchmark:
 	@echo "## Color Functions"

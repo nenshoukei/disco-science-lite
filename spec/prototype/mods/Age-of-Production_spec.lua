@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/Age-of-Production", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers aop-quantum-computer", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["aop-quantum-computer"])
     end)
@@ -21,7 +23,8 @@ describe("mods/Age-of-Production", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- Source: https://github.com/AndreusAxolotl/Age-of-Production/blob/main/prototypes/entities.lua#L4012
@@ -36,20 +39,16 @@ describe("mods/Age-of-Production", function ()
     end)
 
     it("removes the emission layer and creates overlay", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(2, #on_animation.layers)
-      assert.are.equal(
+      Helper.assert_animation.has_layers({
         "__Age-of-Production-Graphics__/graphics/entity/quantum-computer/quantum-computer-hr-animation-1.png",
-        on_animation.layers[1].filename
-      )
-      assert.are.equal(
         "__Age-of-Production-Graphics__/graphics/entity/quantum-computer/quantum-computer-hr-shadow.png",
-        on_animation.layers[2].filename
-      )
+      }, on_animation)
 
       local overlay = _G.data.raw["animation"]["mks-dsl-aop-quantum-computer-overlay"]
-      assert.is_not_nil(overlay) --- @cast overlay -nil
+      assert.is_not_nil(overlay) --- @cast overlay - nil
       assert.are.equal("__disco-science-lite__/graphics/hurricane/fusion-reactor-hr-overlay.png", overlay.filename)
     end)
 
@@ -60,6 +59,7 @@ describe("mods/Age-of-Production", function ()
         },
       }
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_nil(_G.data.raw["animation"]["mks-dsl-aop-quantum-computer-overlay"])

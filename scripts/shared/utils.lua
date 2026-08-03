@@ -1,10 +1,11 @@
+--- @class DiscoScienceUtils
 local Utils = {}
 
 --- Make a deep copy of a table
 ---
 --- This function is copied from util.lua provided by Factorio
 ---
---- @generic T : table
+--- @generic T: table
 --- @param object T
 --- @return T
 function Utils.table_deep_copy(object)
@@ -32,14 +33,16 @@ end
 ---
 --- Values are shallow-copied.
 ---
---- @generic T : table
+--- @generic T: table
 --- @param ... T
 --- @return T
 function Utils.table_merge(...)
   local tables = table.pack(...)
   local result = {}
   for i = 1, tables.n do
-    for k, v in pairs(tables[i]) do
+    for k, v in pairs(
+      (tables[i]) --[[@as table]]
+    ) do
       result[k] = v
     end
   end
@@ -48,19 +51,19 @@ end
 
 --- Make a ColorTuple for color
 ---
---- @param color Color
+--- @param color Color|ColorTuple
 --- @return ColorTuple
 function Utils.color_tuple(color)
-  return {
+  return ({
     color[1] or color.r,
     color[2] or color.g,
     color[3] or color.b,
-  }
+  }) --[[@as ColorTuple]]
 end
 
 --- Make a ColorStruct for color
 ---
---- @param color Color
+--- @param color Color|ColorTuple
 --- @return ColorStruct
 function Utils.color_struct(color)
   return {
@@ -75,10 +78,10 @@ end
 --- @param position MapPosition
 --- @return MapPositionTuple
 function Utils.map_position_tuple(position)
-  return {
+  return ({
     position[1] or position.x,
     position[2] or position.y,
-  }
+  }) --[[@as MapPositionTuple]]
 end
 
 --- Make a MapPositionStruct for position
@@ -86,10 +89,10 @@ end
 --- @param position MapPosition
 --- @return MapPositionStruct
 function Utils.map_position_struct(position)
-  return {
+  return ({
     x = position[1] or position.x,
     y = position[2] or position.y,
-  }
+  }) --[[@as MapPositionStruct]]
 end
 
 --- Pre-expand a table by adding prefix/suffix derived entries from a base snapshot.
@@ -101,8 +104,8 @@ end
 ---
 --- @generic T
 --- @param base_table table<string, T>
---- @param prefixes string[]
---- @param suffixes string[]
+--- @param prefixes   string[]
+--- @param suffixes   string[]
 function Utils.pre_expand_with_affixes(base_table, prefixes, suffixes)
   local base_snapshot = {}
   for name, value in pairs(base_table) do

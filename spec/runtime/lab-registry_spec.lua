@@ -1,10 +1,12 @@
+--- @diagnostic disable: need-check-nil
+local assert = require("luassert")
 local LabRegistry = require("scripts.runtime.lab-registry")
 
 --- Set up mock mod_data for load_prototype_registrations tests.
 --- @param registrations table<string, LabRegistration>|nil
---- @param excluded table<string, boolean>|nil
---- @param lab_prefixes string[]|nil
---- @param lab_suffixes string[]|nil
+--- @param excluded      table<string, boolean>|nil
+--- @param lab_prefixes  string[]|nil
+--- @param lab_suffixes  string[]|nil
 local function set_prototype_data(registrations, excluded, lab_prefixes, lab_suffixes)
   if registrations or excluded or lab_prefixes or lab_suffixes then
     _G.prototypes.mod_data[ "mks-dsl-prototype-data" --[[$PROTOTYPE_DATA_MOD_DATA_NAME]] ] = ({
@@ -50,7 +52,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:register("my-lab")
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration)       --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.is_nil(registration.animation) -- nil for default value
       assert.is_nil(registration.scale)
     end)
@@ -59,7 +61,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:register("my-lab", { animation = "my-anim", scale = 2 })
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("my-anim", registration.animation)
       assert.are.equal(2, registration.scale)
     end)
@@ -69,7 +71,7 @@ describe("LabRegistry", function ()
       r:register("my-lab", { animation = "my-anim", scale = 2 })
       r:register("my-lab", { animation = "custom-anim", scale = 3 })
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("custom-anim", registration.animation)
       assert.are.equal(3, registration.scale)
     end)
@@ -86,23 +88,19 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("compressed-biolab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
 
     it("exact match takes priority over prefix match", function ()
-      set_prototype_data(
-        {
-          ["biolab"] = { animation = "biolab-anim" },
-          ["compressed-biolab"] = { animation = "compressed-anim" },
-        },
-        nil,
-        { "compressed-" }
-      )
+      set_prototype_data({
+        ["biolab"] = { animation = "biolab-anim" },
+        ["compressed-biolab"] = { animation = "compressed-anim" },
+      }, nil, { "compressed-" })
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("compressed-biolab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("compressed-anim", registration.animation)
     end)
 
@@ -122,7 +120,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("compressed-biolab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
   end)
@@ -139,24 +137,19 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("biolab-compressed-compact")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
 
     it("exact match takes priority over suffix match", function ()
-      set_prototype_data(
-        {
-          ["biolab"] = { animation = "biolab-anim" },
-          ["biolab-compressed-compact"] = { animation = "compact-anim" },
-        },
-        nil,
-        nil,
-        { "-compressed-compact" }
-      )
+      set_prototype_data({
+        ["biolab"] = { animation = "biolab-anim" },
+        ["biolab-compressed-compact"] = { animation = "compact-anim" },
+      }, nil, nil, { "-compressed-compact" })
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("biolab-compressed-compact")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("compact-anim", registration.animation)
     end)
 
@@ -193,7 +186,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("biolab-compressed-compact")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
 
@@ -202,7 +195,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("biolab-compressed-compact")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
 
@@ -211,7 +204,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("compressed-biolab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("biolab-anim", registration.animation)
     end)
   end)
@@ -245,7 +238,7 @@ describe("LabRegistry", function ()
       r:register("my-lab", { scale = 1 })
       r:set_scale("my-lab", 2)
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal(2, registration.scale)
     end)
 
@@ -260,7 +253,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:set_scale("new-lab", 4)
       local registration = r:get_registration("new-lab")
-      assert.is_not_nil(registration)       --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.is_nil(registration.animation) -- nil for default value
       assert.are.equal(4, registration.scale)
     end)
@@ -287,7 +280,7 @@ describe("LabRegistry", function ()
       r:register("my-lab", { scale = 1, ignores_scale_overrides = true })
       r:set_scale("my-lab", 2)
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal(1, registration.scale)
       assert.is_nil(scale_overrides["my-lab"])
     end)
@@ -312,7 +305,7 @@ describe("LabRegistry", function ()
       local r = LabRegistry.new()
       r:load_prototype_registrations()
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("proto-anim", registration.animation)
       assert.are.equal(2, registration.scale)
     end)
@@ -334,7 +327,7 @@ describe("LabRegistry", function ()
       r:register("my-lab", { animation = "old-anim", scale = 1 })
       r:load_prototype_registrations()
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("proto-anim", registration.animation)
       assert.are.equal(5, registration.scale)
     end)
@@ -359,7 +352,7 @@ describe("LabRegistry", function ()
       set_prototype_data({ ["my-lab"] = { animation = "new-proto-anim", scale = 2 } })
       r:load_prototype_registrations()
       local registration = r:get_registration("my-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       -- Animation is updated from prototype
       assert.are.equal("new-proto-anim", registration.animation)
       -- Scale override wins over new prototype value
@@ -372,7 +365,7 @@ describe("LabRegistry", function ()
       r:set_scale("unknown-lab", 4) -- not in prototype data
       r:load_prototype_registrations()
       local registration = r:get_registration("unknown-lab")
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.is_nil(registration.animation)
       assert.are.equal(4, registration.scale)
     end)

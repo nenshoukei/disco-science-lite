@@ -40,7 +40,7 @@ function PrototypeColorRegistry.reset()
 end
 
 --- Normalize a ColorTuple or ColorTuple[] to ColorTuple[].
---- @param color ColorTuple | ColorTuple[]
+--- @param color ColorTuple|ColorTuple[]
 --- @return ColorTuple[]
 local function normalize_colors(color)
   if type(color[1]) == "number" then
@@ -58,7 +58,7 @@ end
 --- @return Color|nil color Color for the ingredient, or `nil` for non-registered ingredients.
 function PrototypeColorRegistry.get(item_name)
   local colors = PrototypeColorRegistry.registered_colors[item_name]
-  return colors and Utils.color_struct(colors[1])
+  return colors and colors[1] and Utils.color_struct(colors[1])
 end
 
 --- Get all colors for an ingredient (science pack).
@@ -79,8 +79,8 @@ end
 ---
 --- This overwrites the existing color with the same name.
 ---
---- @param item_name string Name of ItemPrototype of the ingredient
---- @param color ColorTuple | ColorTuple[] Color or colors for the ingredient.
+--- @param item_name string                  Name of ItemPrototype of the ingredient
+--- @param color     ColorTuple|ColorTuple[] Color or colors for the ingredient.
 function PrototypeColorRegistry.set(item_name, color)
   PrototypeColorRegistry.registered_colors[item_name] = normalize_colors(color)
 end
@@ -89,7 +89,7 @@ end
 ---
 --- This overwrites the existing colors with the same names.
 ---
---- @param item_name_to_color table<string, ColorTuple | ColorTuple[]> ItemPrototype name to color table.
+--- @param item_name_to_color table<string, ColorTuple|ColorTuple[]> ItemPrototype name to color table.
 function PrototypeColorRegistry.set_by_table(item_name_to_color)
   local registered_colors = PrototypeColorRegistry.registered_colors
   for item_name, color in pairs(item_name_to_color) do

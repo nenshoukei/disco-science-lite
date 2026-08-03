@@ -64,7 +64,7 @@ end
 --- the original DiscoScience mod API where prepareLab(lab) without an animation
 --- always uses the vanilla lab overlay shape.
 ---
---- @param lab_name string LabPrototype name
+--- @param lab_name     string           LabPrototype name
 --- @param registration LabRegistration? If not specified, both animation and scale are nil.
 function PrototypeLabRegistry.register(lab_name, registration)
   registration = registration or {}

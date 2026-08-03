@@ -1,3 +1,5 @@
+--- @diagnostic disable: need-check-nil
+local assert = require("luassert")
 local ColorRegistry = require("scripts.runtime.color-registry")
 
 --- Helper: build a mock technology with the given ingredient names.
@@ -24,7 +26,7 @@ end
 
 --- Set up mock mod_data for load_prototype_colors tests.
 --- Colors may be in ColorTuple format {r,g,b} or ColorTuple[] format {{r,g,b},...} for convenience.
---- @param colors table<string, ColorTuple | ColorTuple[]>|nil
+--- @param colors   table<string, ColorTuple|ColorTuple[]>|nil
 --- @param prefixes string[]|nil
 --- @param suffixes string[]|nil
 local function set_prototype_data(colors, prefixes, suffixes)
@@ -33,9 +35,11 @@ local function set_prototype_data(colors, prefixes, suffixes)
     if colors then
       for name, color in pairs(colors) do
         if type(color[1]) == "number" then
-          normalized[name] = { color --[[@as ColorTuple]] }
+          normalized[name] = {
+            color, --[[@as ColorTuple]]
+          }
         else
-          normalized[name] = color --[=[@as ColorTuple[]]=]
+          normalized[name] = color --[[@as ColorTuple[] ]]
         end
       end
     end
@@ -88,7 +92,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:set_ingredient_color("automation-science-pack", { 0.91, 0.16, 0.20 })
       local color = r:get_ingredient_color("automation-science-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.is_number(color.r)
       assert.is_number(color.g)
       assert.is_number(color.b)
@@ -103,24 +107,21 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("compressed-automation-science-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.91, color.r)
         assert.are.equal(0.16, color.g)
         assert.are.equal(0.20, color.b)
       end)
 
       it("exact match takes priority over prefix match", function ()
-        set_prototype_data(
-          {
-            ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
-            ["compressed-automation-science-pack"] = { 0.1, 0.1, 0.1 },
-          },
-          { "compressed-" }
-        )
+        set_prototype_data({
+          ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
+          ["compressed-automation-science-pack"] = { 0.1, 0.1, 0.1 },
+        }, { "compressed-" })
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("compressed-automation-science-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.1, color.r)
       end)
 
@@ -140,7 +141,7 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("compressed-automation-science-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.91, color.r)
       end)
 
@@ -162,44 +163,36 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("automation-science-pack-compressed")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.91, color.r)
         assert.are.equal(0.16, color.g)
         assert.are.equal(0.20, color.b)
       end)
 
       it("exact match takes priority over suffix match", function ()
-        set_prototype_data(
-          {
-            ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
-            ["automation-science-pack-compressed"] = { 0.1, 0.1, 0.1 },
-          },
-          nil,
-          { "-compressed" }
-        )
+        set_prototype_data({
+          ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
+          ["automation-science-pack-compressed"] = { 0.1, 0.1, 0.1 },
+        }, nil, { "-compressed" })
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("automation-science-pack-compressed")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.1, color.r)
       end)
 
       it("prefix match takes priority over suffix match", function ()
-        set_prototype_data(
-          {
-            ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
-            ["science-pack"] = { 0.1, 0.1, 0.1 },
-          },
-          { "automation-" },
-          { "-compressed" }
-        )
+        set_prototype_data({
+          ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
+          ["science-pack"] = { 0.1, 0.1, 0.1 },
+        }, { "automation-" }, { "-compressed" })
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         -- "automation-science-pack-compressed":
         --   prefix "automation-" -> base "science-pack-compressed" (not in base) -> not found by prefix
         --   suffix "-compressed" -> base "automation-science-pack" (in base) -> 0.91
         local color = r:get_ingredient_color("automation-science-pack-compressed")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.91, color.r)
       end)
 
@@ -220,7 +213,7 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local color = r:get_ingredient_color("automation-science-pack-compressed")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.91, color.r)
       end)
 
@@ -240,7 +233,7 @@ describe("ColorRegistry", function ()
       r:set_ingredient_color("automation-science-pack", { 0.1, 0.2, 0.3 })
       local color = r:get_ingredient_color("automation-science-pack")
       assert.is_not_nil(color)
-      --- @cast color -nil
+      --- @cast color - nil
       assert.are.equal(0.1, color.r)
       assert.are.equal(0.2, color.g)
       assert.are.equal(0.3, color.b)
@@ -250,7 +243,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:set_ingredient_color("custom-pack", { 0.5, 0.6, 0.7 })
       local color = r:get_ingredient_color("custom-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.5, color.r)
     end)
 
@@ -258,7 +251,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:set_ingredient_color("custom-pack", { r = 0.1, g = 0.2, b = 0.3 })
       local color = r:get_ingredient_color("custom-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.1, color.r)
     end)
 
@@ -285,7 +278,7 @@ describe("ColorRegistry", function ()
         r:load_prototype_colors()
         r:set_ingredient_color("new-pack", { 0.9, 0.8, 0.7 })
         local color = r:get_ingredient_color("compressed-new-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.9, color.r)
       end)
 
@@ -295,7 +288,7 @@ describe("ColorRegistry", function ()
         r:load_prototype_colors()
         r:set_ingredient_color("new-pack", { 0.9, 0.8, 0.7 })
         local color = r:get_ingredient_color("new-pack-extra")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.9, color.r)
       end)
 
@@ -306,18 +299,15 @@ describe("ColorRegistry", function ()
       end)
 
       it("does not overwrite exact entry when expanding", function ()
-        set_prototype_data(
-          {
-            ["pack"] = { 0.1, 0.1, 0.1 },
-            ["compressed-pack"] = { 0.5, 0.5, 0.5 },
-          },
-          { "compressed-" }
-        )
+        set_prototype_data({
+          ["pack"] = { 0.1, 0.1, 0.1 },
+          ["compressed-pack"] = { 0.5, 0.5, 0.5 },
+        }, { "compressed-" })
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         -- "compressed-pack" is exact entry (0.5), not expanded from "pack" (0.1)
         local color = r:get_ingredient_color("compressed-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.5, color.r)
       end)
     end)
@@ -327,7 +317,7 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new()
         r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
         local color = r:get_ingredient_color("custom-pack")
-        assert.is_not_nil(color) --- @cast color -nil
+        assert.is_not_nil(color) --- @cast color - nil
         assert.are.equal(0.1, color.r)
       end)
 
@@ -336,7 +326,7 @@ describe("ColorRegistry", function ()
         local r = ColorRegistry.new(overrides)
         r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
         local stored = overrides["custom-pack"]
-        assert.is_not_nil(stored) --- @cast stored -nil
+        assert.is_not_nil(stored) --- @cast stored - nil
         assert.are.equal(2, #stored)
       end)
     end)
@@ -353,7 +343,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:set_ingredient_color("custom-pack", { 0.1, 0.2, 0.3 })
       local colors = r:get_ingredient_colors("custom-pack")
-      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.is_not_nil(colors) --- @cast colors - nil
       assert.are.equal(1, #colors)
       assert.are.equal(0.1, colors[1].r)
       assert.are.equal(0.2, colors[1].g)
@@ -364,7 +354,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:set_ingredient_color("custom-pack", { { 0.1, 0.2, 0.3 }, { 0.4, 0.5, 0.6 } })
       local colors = r:get_ingredient_colors("custom-pack")
-      assert.is_not_nil(colors) --- @cast colors -nil
+      assert.is_not_nil(colors) --- @cast colors - nil
       assert.are.equal(2, #colors)
       assert.are.equal(0.1, colors[1].r)
       assert.are.equal(0.4, colors[2].r)
@@ -390,7 +380,7 @@ describe("ColorRegistry", function ()
       local r = ColorRegistry.new()
       r:load_prototype_colors()
       local color = r:get_ingredient_color("automation-science-pack")
-      assert.is_not_nil(color) --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.91, color.r)
     end)
 
@@ -424,11 +414,11 @@ describe("ColorRegistry", function ()
       r:load_prototype_colors()
       -- Prototype color is updated
       local proto_color = r:get_ingredient_color("proto-pack")
-      assert.is_not_nil(proto_color) --- @cast proto_color -nil
+      assert.is_not_nil(proto_color) --- @cast proto_color - nil
       assert.are.equal(0.4, proto_color.r)
       -- Override wins over new prototype value
       local override_color = r:get_ingredient_color("override-pack")
-      assert.is_not_nil(override_color) --- @cast override_color -nil
+      assert.is_not_nil(override_color) --- @cast override_color - nil
       assert.are.equal(0.9, override_color.r)
     end)
 
@@ -438,7 +428,7 @@ describe("ColorRegistry", function ()
       r:set_ingredient_color("custom-pack", { 0.5, 0.5, 0.5 })
       r:load_prototype_colors() -- no mod_data
       local color = r:get_ingredient_color("custom-pack")
-      assert.is_not_nil(color)  --- @cast color -nil
+      assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.5, color.r)
     end)
 
@@ -812,13 +802,10 @@ describe("ColorRegistry", function ()
       end)
 
       it("exact match takes priority over prefix match", function ()
-        set_prototype_data(
-          {
-            ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
-            ["compressed-automation-science-pack"] = { 0.1, 0.1, 0.1 },
-          },
-          { "compressed-" }
-        )
+        set_prototype_data({
+          ["automation-science-pack"] = { 0.91, 0.16, 0.20 },
+          ["compressed-automation-science-pack"] = { 0.1, 0.1, 0.1 },
+        }, { "compressed-" })
         local r = ColorRegistry.new()
         r:load_prototype_colors()
         local tech = make_tech("compressed-automation-science-pack")
@@ -905,8 +892,7 @@ describe("ColorRegistry", function ()
   -- -------------------------------------------------------------------
   describe("get_flattened_rainbow_colors", function ()
     it("returns 7 rainbow colors", function ()
-      local r = ColorRegistry.new()
-      local flat, n = r:get_flattened_rainbow_colors()
+      local flat, n = ColorRegistry.get_flattened_rainbow_colors()
       assert.are.equal(11, n)
       assert.are.equal(33, #flat)
       -- Red: {1, 0, 0}
@@ -916,12 +902,12 @@ describe("ColorRegistry", function ()
     end)
 
     it("applies saturation and brightness", function ()
-      local r = ColorRegistry.new()
-      local flat, n = r:get_flattened_rainbow_colors(0.5, 0.5)
+      local flat, n = ColorRegistry.get_flattened_rainbow_colors(0.5, 0.5)
       assert.are.equal(11, n)
       -- Red {1, 0, 0} -> lum = 0.299
       -- r = (0.299 + (1.0 - 0.299) * 0.5) * 0.5 = 0.32475
-      assert.near(0.32475, flat[1], 0.00001)
+      local applied_r = flat[1] --- @cast applied_r - nil
+      assert.near(0.32475, applied_r, 0.00001)
     end)
   end)
 
@@ -957,7 +943,7 @@ describe("ColorRegistry", function ()
         make_tech("unknown-a", "automation-science-pack"),
       })
       local names = r:validate_technology_prototypes(protos)
-      assert.is_not_nil(names) --- @cast names -nil
+      assert.is_not_nil(names) --- @cast names - nil
       assert.are.equal(2, #names)
       assert.are.equal("unknown-a", names[1])
       assert.are.equal("unknown-z", names[2])
@@ -1000,7 +986,7 @@ describe("ColorRegistry", function ()
         make_tech("compressed-unknown-pack"),
       })
       local names = r:validate_technology_prototypes(protos)
-      assert.is_not_nil(names) --- @cast names -nil
+      assert.is_not_nil(names) --- @cast names - nil
       assert.are.equal(1, #names)
       assert.are.equal("compressed-unknown-pack", names[1])
     end)
@@ -1027,7 +1013,7 @@ describe("ColorRegistry", function ()
         make_tech("unknown-pack-compressed"),
       })
       local names = r:validate_technology_prototypes(protos)
-      assert.is_not_nil(names) --- @cast names -nil
+      assert.is_not_nil(names) --- @cast names - nil
       assert.are.equal(1, #names)
       assert.are.equal("unknown-pack-compressed", names[1])
     end)

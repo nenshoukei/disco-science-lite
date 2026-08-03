@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -14,6 +15,7 @@ describe("mods/CircularColliderLab", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers circular-collider-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       local registration = PrototypeLabRegistry.registered_labs["circular-collider-lab"]
       assert.is_not_nil(registration)
@@ -23,7 +25,8 @@ describe("mods/CircularColliderLab", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation --- @type data.Animation
+    --- @type data.Animation
+    local on_animation
 
     before_each(function ()
       -- No public code repository
@@ -38,15 +41,18 @@ describe("mods/CircularColliderLab", function ()
     end)
 
     it("modifies circular-collider-lab on_animation", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       -- original 3 - emission 1 = 2
-      assert.are.equal(2, #on_animation.layers)
-      assert.are.equal("__CircularColliderLab__/graphics/circular-collider-lab-animation.png", on_animation.layers[1].filename)
-      assert.are.equal("__CircularColliderLab__/graphics/circular-collider-lab-shadow.png", on_animation.layers[2].filename)
+      Helper.assert_animation.has_layers({
+        "__CircularColliderLab__/graphics/circular-collider-lab-animation.png",
+        "__CircularColliderLab__/graphics/circular-collider-lab-shadow.png",
+      }, on_animation)
     end)
 
     it("defines overlay animation", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_not_nil(data.raw["animation"]["mks-dsl-circular-collider-lab-overlay"])

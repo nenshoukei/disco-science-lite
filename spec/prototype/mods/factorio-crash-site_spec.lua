@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
@@ -18,16 +19,19 @@ describe("mods/factorio-crash-site", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers crash-site-lab-repaired", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["crash-site-lab-repaired"])
     end)
 
     it("registers crash-site-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["crash-site-lab"])
     end)
 
     it("registers crash-site-kry-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeLabRegistry.registered_labs["crash-site-kry-lab"])
     end)
@@ -35,8 +39,10 @@ describe("mods/factorio-crash-site", function ()
 
   -- -------------------------------------------------------------------
   describe("on_data_final_fixes", function ()
-    local on_animation_csl  --- @type data.Animation
-    local on_animation_cskl --- @type data.Animation
+    --- @type data.Animation
+    local on_animation_csl
+    --- @type data.Animation
+    local on_animation_cskl
 
     before_each(function ()
       -- No public code repository
@@ -55,19 +61,23 @@ describe("mods/factorio-crash-site", function ()
     end)
 
     it("applies modifications to crash-site-lab", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(2, #on_animation_csl.layers)
-      assert.are.equal("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired.png", on_animation_csl.layers[1].filename)
-      assert.are.equal("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-shadow.png", on_animation_csl.layers[2].filename)
+      Helper.assert_animation.has_layers({
+        "__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired.png",
+        "__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-shadow.png",
+      }, on_animation_csl)
     end)
 
     it("applies modifications to crash-site-kry-lab", function ()
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
-      assert.are.equal(2, #on_animation_cskl.layers)
-      assert.are.equal("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired.png", on_animation_cskl.layers[1].filename)
-      assert.are.equal("__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-shadow.png", on_animation_cskl.layers[2].filename)
+      Helper.assert_animation.has_layers({
+        "__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired.png",
+        "__factorio-crash-site__/graphics/entity/crash-site-lab/hr-crash-site-lab-repaired-shadow.png",
+      }, on_animation_cskl)
     end)
   end)
 end)

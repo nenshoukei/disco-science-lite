@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,6 +17,7 @@ describe("mods/space-exploration", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors for science packs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["se-rocket-science-pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["se-astronomic-science-pack-1"])
@@ -26,12 +28,14 @@ describe("mods/space-exploration", function ()
     end)
 
     it("registers color overrides for vanilla science packs", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["production-science-pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["utility-science-pack"])
     end)
 
     it("excludes the space science lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_true(PrototypeLabRegistry.excluded_labs["se-space-science-lab"])
     end)

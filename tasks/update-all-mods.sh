@@ -12,7 +12,7 @@ files=()
 while IFS= read -r -d '' f; do
   name="$(basename "$f" .lua)"
   files+=("$name")
-done < <(find "$MODS_DIR" -maxdepth 1 -name "*.lua" ! -name "_all.lua" -print0 | sort -z)
+done < <(find "$MODS_DIR" -maxdepth 1 -name "*.lua" ! -name "_*.lua" -print0 | sort -z)
 
 # Priority mods loaded first, in order
 priority=(base space-age)

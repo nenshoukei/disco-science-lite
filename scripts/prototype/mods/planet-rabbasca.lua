@@ -1,15 +1,17 @@
 --- Rabbasca, the forgotten Moon by PizzaPlanner
 --- https://mods.factorio.com/mod/planet-rabbasca
 
-if not mods["planet-rabbasca"] then return {} end
+--- @type ModSupport
+local mod = {}
+if not mods["planet-rabbasca"] then return mod end
 
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
-return {
-  on_data = function ()
-    PrototypeColorRegistry.set("athletic-science-pack", { 0.24, 0.76, 0.35 })
+mod.on_data = function ()
+  PrototypeColorRegistry.set("athletic-science-pack", { 0.24, 0.76, 0.35 })
 
-    PrototypeLabRegistry.add_prefix("harene-infused-")
-  end,
-}
+  PrototypeLabRegistry.add_prefix("harene-infused-")
+end
+
+return mod

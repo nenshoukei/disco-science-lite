@@ -31,18 +31,16 @@ This mod provides users with:
 - `migrations/` - Migration files.
 - `spec/` - Unit tests.
 - `tasks/` - Executables and configurations for make tasks.
+- `vendor/` - External libraries for typings.
 - `*.lua` - Entrypoints of Factorio mod.
 
 ## Commands
 
-- `make check`: Runs following: (very fast)
+- `make check`: Runs following:
     - `make consts`: Updates constant values for the special syntax
-    - `make mods`: Updates the [mod load list](/scripts/prototype/mods/_all.lua)
-    - `make mod-description`: Updates the [mod description](/docs/mod-portal/description.md)
-    - `make lint`: Lints codes by `luacheck`
+    - `make mods`: Updates the [mod list](/scripts/prototype/mods/_all.lua)
+    - `make format`: Format Lua files by `luafmt`
+    - `make typecheck`: Type check by `emmylua_check` and `tsc`
     - `make test`: Runs unit tests by `busted`
-- `make full-check`: Runs following: (approx. 30 seconds to run)
-    - `make check`
-    - `make typecheck`: Type-checks by lua-language-server, and checks [disco-science-lite.d.ts](/disco-science-lite.d.ts) by `tsc`
 - `make graphics`: Updates graphics
 - `make graphics MOD=mod-name`: Updates mod-name graphics only

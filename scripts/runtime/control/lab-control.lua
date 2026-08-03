@@ -4,7 +4,7 @@ local LabRegistry = require("scripts.runtime.lab-registry")
 local LabOverlayRenderer = require("scripts.runtime.lab-overlay-renderer")
 local Settings = require("scripts.shared.settings")
 
---- @class LabControl : event_handler
+--- @class LabControl: event_handler
 local LabControl = {}
 
 --- @type LabOverlayRenderer
@@ -38,10 +38,11 @@ local function setup_event_handlers()
     defines.events.on_research_started,
     defines.events.on_research_finished,
     defines.events.on_research_cancelled,
-  }, function ()
-    renderer:hide_all_overlays()
-    request_viewport_update()
-  end)
+  },
+    function ()
+      renderer:hide_all_overlays()
+      request_viewport_update()
+    end)
 
   script.on_event({
     defines.events.on_player_created,
@@ -59,10 +60,11 @@ local function setup_event_handlers()
   script.on_event({
     defines.events.on_player_left_game,
     defines.events.on_player_display_resolution_changed,
-  }, function ()
-    renderer:hide_all_overlays()
-    setup_event_handlers()
-  end)
+  },
+    function ()
+      renderer:hide_all_overlays()
+      setup_event_handlers()
+    end)
 
   script.on_event(defines.events.on_script_trigger_effect, function (event)
     local target_entity = event.target_entity
@@ -81,14 +83,14 @@ local function setup_event_handlers()
     end
   end)
 
-  script.on_event({
-    defines.events.on_surface_cleared,
-    defines.events.on_surface_deleted,
-  }, function (event)
-    --- @cast event EventData.on_surface_cleared|EventData.on_surface_deleted
-    renderer:remove_overlays_on_surface(event.surface_index)
-    request_viewport_update()
-  end)
+  script.on_event(
+    { defines.events.on_surface_cleared, defines.events.on_surface_deleted },
+    --- @param event EventData.on_surface_cleared|EventData.on_surface_deleted
+    function (event)
+      renderer:remove_overlays_on_surface(event.surface_index)
+      request_viewport_update()
+    end
+  )
 
   script.on_event(defines.events.script_raised_teleported, function (event)
     renderer:update_lab_position(event.entity)
@@ -101,7 +103,8 @@ local function setup_event_handlers()
     if string.sub(setting_name, 1, #prefix) == prefix then
       Settings.reload()
 
-      if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]] then
+      if setting_name == "mks-dsl-lab-blinking-disabled" --[[$LAB_BLINKING_DISABLED_NAME]]
+      then
         -- Force re-render all overlays.
         renderer:render_overlays_for_all_labs(true)
       end

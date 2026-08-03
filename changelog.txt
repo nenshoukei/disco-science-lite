@@ -3,6 +3,8 @@ Version: 0.6.1
 Date: ????
   Features:
     - Add support for "Crash Site Settings" mod by Kryzeth.
+  Debug:
+    - Development: Migrate from LuaLS to EmmyLua.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.0
 Date: 2026-06-25

@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
 
 describe("PrototypeLabRegistry", function ()
@@ -45,7 +46,7 @@ describe("PrototypeLabRegistry", function ()
     it("registers a new lab with LabRegistration", function ()
       PrototypeLabRegistry.register("my-lab", { animation = "my-anim", scale = 2 })
       local registration = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("my-anim", registration.animation)
       assert.are.equal(2, registration.scale)
     end)
@@ -53,7 +54,7 @@ describe("PrototypeLabRegistry", function ()
     it("registers a new lab with empty LabRegistration when nil is passed", function ()
       PrototypeLabRegistry.register("my-lab", nil)
       local registration = PrototypeLabRegistry.registered_labs["my-lab"]
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.is_nil(registration.animation)
       assert.is_nil(registration.scale)
     end)
@@ -61,7 +62,7 @@ describe("PrototypeLabRegistry", function ()
     it("overwrites existing registration", function ()
       PrototypeLabRegistry.register("lab", { animation = "new-anim", scale = 3 })
       local registration = PrototypeLabRegistry.registered_labs["lab"]
-      assert.is_not_nil(registration) --- @cast registration -nil
+      assert.is_not_nil(registration) --- @cast registration - nil
       assert.are.equal("new-anim", registration.animation)
       assert.are.equal(3, registration.scale)
     end)
@@ -98,6 +99,7 @@ describe("PrototypeLabRegistry", function ()
     it("returns independent tables after each reset (no shared state)", function ()
       local before_labs = PrototypeLabRegistry.registered_labs
       PrototypeLabRegistry.reset()
+      --- @diagnostic disable-next-line: preferred-local-alias
       assert.are_not.equal(before_labs, PrototypeLabRegistry.registered_labs)
     end)
 
@@ -116,12 +118,14 @@ describe("PrototypeLabRegistry", function ()
     it("returns independent prefix tables after each reset (no shared state)", function ()
       local before = PrototypeLabRegistry.registered_prefixes
       PrototypeLabRegistry.reset()
+      --- @diagnostic disable-next-line: preferred-local-alias
       assert.are_not.equal(before, PrototypeLabRegistry.registered_prefixes)
     end)
 
     it("returns independent suffix tables after each reset (no shared state)", function ()
       local before = PrototypeLabRegistry.registered_suffixes
       PrototypeLabRegistry.reset()
+      --- @diagnostic disable-next-line: preferred-local-alias
       assert.are_not.equal(before, PrototypeLabRegistry.registered_suffixes)
     end)
   end)

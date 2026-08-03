@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 local PrototypeLabRegistry = require("scripts.prototype.prototype-lab-registry")
@@ -16,6 +17,7 @@ describe("mods/Nexus", function ()
   -- -------------------------------------------------------------------
   describe("on_data", function ()
     it("registers colors", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["promethium-882-science-pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["antimatter-science-pack"])
@@ -33,6 +35,7 @@ describe("mods/Nexus", function ()
     end)
 
     it("excludes omega-lab", function ()
+      assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
       assert.is_true(PrototypeLabRegistry.excluded_labs["omega-lab"])
     end)

@@ -35,13 +35,13 @@
 ---
 --- See: https://lua-api.factorio.com/latest/types/Color.html
 ---
---- @alias DiscoScience.Color { r?: number, g?: number, b?: number, a?: number } | [number, number, number] | [number, number, number, number]
+--- @alias DiscoScience.Color { r?: number, g?: number, b?: number, a?: number }|[number, number, number]|[number, number, number, number]
 
 --- Lab Prototype for DiscoScience.prepareLab()
 ---
 --- See: https://lua-api.factorio.com/latest/prototypes/LabPrototype.html
 ---
---- @alias DiscoScience.LabPrototype { type: "lab", name: string }
+--- @alias DiscoScience.LabPrototype { type: "lab", name: string }|data.LabPrototype
 
 --- Public interface `DiscoScience` for other mods on prototype stage.
 ---
@@ -52,8 +52,7 @@
 --- Compatible with the original DiscoScience mod interface.
 ---
 --- @class DiscoScience.Interface
-_G.DiscoScience = {
-
+local DiscoScienceInterface = {
   --- `true` when running on Disco Science Lite. `nil` on the original Disco Science mod.
   ---
   --- Use this to distinguish between the two mods:
@@ -89,8 +88,8 @@ _G.DiscoScience = {
   --- @param lab DiscoScience.LabPrototype Lab to register for Disco Science colorization.
   --- @param options DiscoScience.PrepareLabOptions? Custom overlay options.
   prepareLab = function (lab, options) end,
-
 }
+_G.DiscoScience = DiscoScienceInterface
 
 --- Runtime interface via `remote.call("DiscoScience", ...)`.
 ---
@@ -99,7 +98,6 @@ _G.DiscoScience = {
 --- Compatible with the original DiscoScience mod interface.
 --- @class DiscoScience.Remote
 local DiscoScienceRemote = {
-
   --- Set the scale of a lab overlay at runtime.
   ---
   --- Works in both the original Disco Science mod and Disco Science Lite.
@@ -131,7 +129,6 @@ local DiscoScienceRemote = {
   --- @param item_name string Item prototype name of the ingredient.
   --- @return DiscoScience.Color[]|nil colors All colors for the ingredient, or `nil` if not registered.
   getIngredientColors = function (item_name) end,
-
 }
 
 -- For Factorio Modding Tool Kit Extension for VS Code

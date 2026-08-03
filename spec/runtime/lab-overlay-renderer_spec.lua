@@ -1,3 +1,5 @@
+--- @diagnostic disable: need-check-nil
+local assert = require("luassert")
 local ColorRegistry = require("scripts.runtime.color-registry")
 local LabRegistry = require("scripts.runtime.lab-registry")
 local ColorFunctions = require("scripts.runtime.color-functions")
@@ -33,11 +35,11 @@ local function make_force(index)
 end
 
 --- Build a mock LuaEntity representing a lab on a given surface.
---- @param unit_number number
+--- @param unit_number   number
 --- @param surface_index number
---- @param x number?
---- @param y number?
---- @param force LuaForce?
+--- @param x             number?
+--- @param y             number?
+--- @param force         LuaForce?
 --- @return LuaEntity
 local function make_entity(unit_number, surface_index, x, y, force)
   x = x or 0
@@ -55,7 +57,7 @@ local function make_entity(unit_number, surface_index, x, y, force)
     tile_width    = 3,
     tile_height   = 3,
     prototype     = { tile_width = 3, tile_height = 3 },
-    surface       = ({ index = surface_index }) --[[@as LuaSurface]],
+    surface       = ({ index = surface_index }), --[[@as LuaSurface]]
     status        = defines.entity_status.working,
   }) --[[@as LuaEntity]]
 end
@@ -67,10 +69,10 @@ local function make_renderer()
 end
 
 --- Build a mock LuaPlayer.
---- @param force LuaForce
+--- @param force         LuaForce
 --- @param surface_index number
---- @param px number?
---- @param py number?
+--- @param px            number?
+--- @param py            number?
 --- @return LuaPlayer
 local function make_player(force, surface_index, px, py)
   return ({
@@ -86,11 +88,11 @@ local function make_player(force, surface_index, px, py)
 end
 
 --- Set the single connected player in game.players[1].
---- @param index integer
---- @param force LuaForce
+--- @param index         integer
+--- @param force         LuaForce
 --- @param surface_index number
---- @param px number?
---- @param py number?
+--- @param px            number?
+--- @param py            number?
 --- @return LuaPlayer
 local function add_connected_player_at(index, force, surface_index, px, py)
   local player = make_player(force, surface_index, px, py)
@@ -101,10 +103,10 @@ local function add_connected_player_at(index, force, surface_index, px, py)
 end
 
 --- Set the single connected player in game.players[1].
---- @param force LuaForce
+--- @param force         LuaForce
 --- @param surface_index number
---- @param px number?
---- @param py number?
+--- @param px            number?
+--- @param py            number?
 --- @return LuaPlayer
 local function add_connected_player(force, surface_index, px, py)
   return add_connected_player_at(1, force, surface_index, px, py)
@@ -181,7 +183,7 @@ describe("LabOverlayRenderer", function ()
       r.lab_registry:register("lab", { animation = "lab-anim", scale = 1.5 })
       local ov = r:render_overlay_for_lab(make_entity(77, 1, 0, 0))
 
-      assert.is_not_nil(ov)       --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       assert.are.equal(77, ov.unit_number)
       assert.is_false(ov.visible) -- visible starts false; authoritative state is set by tick scan
       assert.are.equal("lab-anim", ov.animation.animation)
@@ -194,9 +196,9 @@ describe("LabOverlayRenderer", function ()
       r.lab_registry:register("lab", { animation = "lab-anim", companion = "comp-anim", scale = 1.5 })
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
 
-      assert.is_not_nil(ov)        --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       local companion = ov.companion
-      assert.is_not_nil(companion) --- @cast companion -nil
+      assert.is_not_nil(companion) --- @cast companion - nil
       assert.are.equal("comp-anim", companion.animation)
       assert.are.equal(1.5, companion.x_scale)
       assert.are.equal("higher-object-above", companion.render_layer)
@@ -210,9 +212,9 @@ describe("LabOverlayRenderer", function ()
       lab.force.current_research = nil
       local ov = r:render_overlay_for_lab(lab)
 
-      assert.is_not_nil(ov)        --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       local companion = ov.companion
-      assert.is_not_nil(companion) --- @cast companion -nil
+      assert.is_not_nil(companion) --- @cast companion - nil
       assert.is_false(ov.visible)
       assert.is_false(companion.visible)
     end)
@@ -222,12 +224,12 @@ describe("LabOverlayRenderer", function ()
       r.lab_registry:register("lab", { animation = "lab-anim", companion = "comp-anim" })
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
-      assert.is_not_nil(ov1)   --- @cast ov1 -nil
+      assert.is_not_nil(ov1) --- @cast ov1 - nil
       local comp1 = ov1.companion
-      assert.is_not_nil(comp1) --- @cast comp1 -nil
+      assert.is_not_nil(comp1) --- @cast comp1 - nil
 
       local ov2 = r:render_overlay_for_lab(lab, ov1.animation, comp1)
-      assert.is_not_nil(ov2) --- @cast ov2 -nil
+      assert.is_not_nil(ov2) --- @cast ov2 - nil
       assert.are.equal(comp1, ov2.companion)
     end)
 
@@ -236,8 +238,11 @@ describe("LabOverlayRenderer", function ()
       Settings.is_fallback_enabled = true
       -- lab_registry has no registration for "lab"
       local overlay = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(overlay) --- @cast overlay -nil
-      assert.are.equal("mks-dsl-general-overlay" --[[$GENERAL_OVERLAY_ANIMATION_NAME]], overlay.animation.animation)
+      assert.is_not_nil(overlay) --- @cast overlay - nil
+      assert.are.equal(
+        "mks-dsl-general-overlay", --[[$GENERAL_OVERLAY_ANIMATION_NAME]]
+        overlay.animation.animation
+      )
     end)
 
     it("stores and indexes the new overlay", function ()
@@ -251,8 +256,8 @@ describe("LabOverlayRenderer", function ()
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
       local ov2 = r:render_overlay_for_lab(lab)
-      assert.is_not_nil(ov1) --- @cast ov1 -nil
-      assert.is_not_nil(ov2) --- @cast ov2 -nil
+      assert.is_not_nil(ov1) --- @cast ov1 - nil
+      assert.is_not_nil(ov2) --- @cast ov2 - nil
       assert.are.equal(ov1.animation, ov2.animation)
     end)
 
@@ -261,13 +266,13 @@ describe("LabOverlayRenderer", function ()
       r.lab_registry:register("lab", { companion = "comp-anim" })
       local lab = make_entity(1, 1, 0, 0)
       local ov1 = r:render_overlay_for_lab(lab)
-      assert.is_not_nil(ov1)           --- @cast ov1 -nil
+      assert.is_not_nil(ov1) --- @cast ov1 - nil
       local old_companion = ov1.companion
-      assert.is_not_nil(old_companion) --- @cast old_companion -nil
+      assert.is_not_nil(old_companion) --- @cast old_companion - nil
 
       r.lab_registry:register("lab", {})
       local ov2 = r:render_overlay_for_lab(lab)
-      assert.is_not_nil(ov2) --- @cast ov2 -nil
+      assert.is_not_nil(ov2) --- @cast ov2 - nil
       assert.is_nil(ov2.companion)
       assert.is_false(old_companion.valid)
     end)
@@ -300,7 +305,9 @@ describe("LabOverlayRenderer", function ()
       local orphan = _G.rendering.draw_animation({
         animation = "lab-anim",
         surface = lab1.surface,
-        target = { entity = ({ valid = false }) --[[@as LuaEntity]] },
+        target = {
+          entity = ({ valid = false }), --[[@as LuaEntity]]
+        },
       })
       local orphan_id = orphan.id
       --- @diagnostic disable-next-line: duplicate-set-field
@@ -374,7 +381,7 @@ describe("LabOverlayRenderer", function ()
     it("removes overlay from chunk_map and destroys animation", function ()
       local r = make_renderer()
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(ov) --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       local anim = ov.animation
 
       r:remove_overlay_from_lab(1)
@@ -387,9 +394,9 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
       r.lab_registry:register("lab", { companion = "comp-anim" })
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(ov)        --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       local companion = ov.companion
-      assert.is_not_nil(companion) --- @cast companion -nil
+      assert.is_not_nil(companion) --- @cast companion - nil
 
       r:remove_overlay_from_lab(1)
 
@@ -399,7 +406,7 @@ describe("LabOverlayRenderer", function ()
     it("does not error for unknown unit_number or invalid animation", function ()
       local r = make_renderer()
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(ov) --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       ov.animation.valid = false
 
       assert.no_error(function ()
@@ -429,9 +436,9 @@ describe("LabOverlayRenderer", function ()
       local r = make_renderer()
       r.lab_registry:register("lab", { companion = "comp-anim" })
       local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0))
-      assert.is_not_nil(ov)        --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       local companion = ov.companion
-      assert.is_not_nil(companion) --- @cast companion -nil
+      assert.is_not_nil(companion) --- @cast companion - nil
 
       r:remove_overlays_on_surface(1)
 
@@ -450,7 +457,7 @@ describe("LabOverlayRenderer", function ()
       r:update_lab_position(lab)
 
       local ov = r.chunk_map:get(1)
-      assert.is_not_nil(ov) --- @cast ov -nil
+      assert.is_not_nil(ov) --- @cast ov - nil
       assert.are.equal(32, ov.x)
       assert.are.equal(64, ov.y)
       assert.are.equal(lab, ov.animation.target)
@@ -501,7 +508,7 @@ describe("LabOverlayRenderer", function ()
       local lab = make_entity(1, 1, 0, 0)
       r:render_overlay_for_lab(lab)
       local old_companion = r.chunk_map:get(1).companion
-      assert.is_not_nil(old_companion) --- @cast old_companion -nil
+      assert.is_not_nil(old_companion) --- @cast old_companion - nil
 
       lab.surface_index = 2
       lab.surface = ({ index = 2 }) --[[@as LuaSurface]]
@@ -541,8 +548,8 @@ describe("LabOverlayRenderer", function ()
         -- First tick triggers state update
         r:get_tick_function()(event)
 
-        assert.is_not_nil(ov_working) --- @cast ov_working -nil
-        assert.is_not_nil(ov_normal)  --- @cast ov_normal -nil
+        assert.is_not_nil(ov_working) --- @cast ov_working - nil
+        assert.is_not_nil(ov_normal) --- @cast ov_normal - nil
         assert.is_true(ov_working.visible)
         assert.is_false(ov_normal.visible)
       end)
@@ -552,9 +559,9 @@ describe("LabOverlayRenderer", function ()
         r.lab_registry:register("lab", { companion = "comp-anim" })
         local force = make_force(1)
         local ov = r:render_overlay_for_lab(make_entity(1, 1, 0, 0, force))
-        assert.is_not_nil(ov)        --- @cast ov -nil
+        assert.is_not_nil(ov) --- @cast ov - nil
         local companion = ov.companion
-        assert.is_not_nil(companion) --- @cast companion -nil
+        assert.is_not_nil(companion) --- @cast companion - nil
 
         add_connected_player(force, 1)
         r:get_tick_function()(event)
@@ -569,9 +576,9 @@ describe("LabOverlayRenderer", function ()
         local force = make_force(1)
         local lab = make_entity(1, 1, 0, 0, force)
         local ov = r:render_overlay_for_lab(lab)
-        assert.is_not_nil(ov)        --- @cast ov -nil
+        assert.is_not_nil(ov) --- @cast ov - nil
         local companion = ov.companion
-        assert.is_not_nil(companion) --- @cast companion -nil
+        assert.is_not_nil(companion) --- @cast companion - nil
 
         -- Make visible first
         add_connected_player(force, 1)
@@ -590,7 +597,7 @@ describe("LabOverlayRenderer", function ()
       it("detects research changes and applies colors", function ()
         local r, force = setup_tick_renderer()
         local ov = r.chunk_map:get(1)
-        assert.is_not_nil(ov) --- @cast ov -nil
+        assert.is_not_nil(ov) --- @cast ov - nil
 
         local tick, request_viewport_update = r:get_tick_function()
         tick(event) -- state update: picks up research, colors overlay
@@ -700,8 +707,8 @@ describe("LabOverlayRenderer", function ()
 
           local ov1 = r.chunk_map:get(1)
           local ov2 = r.chunk_map:get(2)
-          assert.is_not_nil(ov1) --- @cast ov1 -nil
-          assert.is_not_nil(ov2) --- @cast ov2 -nil
+          assert.is_not_nil(ov1) --- @cast ov1 - nil
+          assert.is_not_nil(ov2) --- @cast ov2 - nil
           assert.is_true(ov1.visible)
           assert.is_false(ov2.visible)
         end)
@@ -764,8 +771,8 @@ describe("LabOverlayRenderer", function ()
 
           local ov1 = r.chunk_map:get(1)
           local ov2 = r.chunk_map:get(2)
-          assert.is_not_nil(ov1)                --- @cast ov1 -nil
-          assert.is_not_nil(ov2)                --- @cast ov2 -nil
+          assert.is_not_nil(ov1) --- @cast ov1 - nil
+          assert.is_not_nil(ov2) --- @cast ov2 - nil
           assert.are.equal(1, ov1.viewer_index) -- player 1 at (0,0) sees ov1 at (0,0)
           assert.are.equal(2, ov2.viewer_index) -- player 2 at (100,0) sees ov2 at (100,0)
         end)
@@ -824,6 +831,7 @@ describe("LabOverlayRenderer", function ()
 
       before_each(function ()
         cf_calls = 0
+        --- @diagnostic disable-next-line: duplicate-set-field
         ColorFunctions.choose_random = function (idx)
           cf_calls = cf_calls + 1
           return original_choose_random(idx)
@@ -831,6 +839,7 @@ describe("LabOverlayRenderer", function ()
       end)
 
       after_each(function ()
+        --- @diagnostic disable-next-line: duplicate-set-field
         ColorFunctions.choose_random = original_choose_random
       end)
 
@@ -846,11 +855,11 @@ describe("LabOverlayRenderer", function ()
         assert.are.equal(1, cf_calls)
 
         increment_tick() -- tick=1
-        tick(event)      -- color: tick=1, elapsed=1
+        tick(event) -- color: tick=1, elapsed=1
         increment_tick() -- tick=2
-        tick(event)      -- color: tick=2, elapsed=2
+        tick(event) -- color: tick=2, elapsed=2
         increment_tick() -- tick=3
-        tick(event)      -- tick=3, epoch=1:
+        tick(event) -- tick=3, epoch=1:
         -- Advances naturally, so it uses current color_function_index as prev_index.
         -- Does NOT call ColorFunctions.choose_random for prev_index.
         -- Calls choose_random(prev_index, rng) once for current state.
@@ -870,7 +879,7 @@ describe("LabOverlayRenderer", function ()
           local orig = original_fns[i]
           ColorFunctions.functions[i] = function (color, phase, ...)
             captured_phase = phase
-            return orig(color, phase, ...)
+            orig(color, phase, ...)
           end
         end
       end)
@@ -910,7 +919,9 @@ describe("LabOverlayRenderer", function ()
         assert.is_not_nil(phase0)
 
         -- Advance to the start of epoch 1 (tick 10)
-        for _ = 1, 10 do increment_tick() end
+        for _ = 1, 10 do
+          increment_tick()
+        end
         tick(event)
         local phase10 = captured_phase
         assert.is_not_nil(phase10)
@@ -934,7 +945,9 @@ describe("LabOverlayRenderer", function ()
         _G.game.tick = 0
         event.tick = _G.game.tick
         local tick = r:get_tick_function()
-        for _ = 1, 25 do increment_tick() end
+        for _ = 1, 25 do
+          increment_tick()
+        end
         tick(event)
         local phase_b = captured_phase
 
@@ -957,7 +970,7 @@ describe("LabOverlayRenderer", function ()
       it("forces state update on next tick call", function ()
         local r, force = setup_tick_renderer()
         local ov = r.chunk_map:get(1)
-        assert.is_not_nil(ov) --- @cast ov -nil
+        assert.is_not_nil(ov) --- @cast ov - nil
 
         local tick, request_viewport_update = r:get_tick_function()
         tick(event) -- initial state update, overlay becomes visible

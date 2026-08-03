@@ -1,3 +1,4 @@
+local assert = require("luassert")
 local Helper = require("spec.helper")
 local PrototypeColorRegistry = require("scripts.prototype.prototype-color-registry")
 
@@ -21,6 +22,7 @@ describe("mods/quality_glassware", function ()
         icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_green.png",
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.same({ { 0.35, 0.98, 0.38 } }, PrototypeColorRegistry.registered_colors["my-green-pack"])
@@ -35,6 +37,7 @@ describe("mods/quality_glassware", function ()
         },
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.same({ { 0.22, 0.35, 0.98 } }, PrototypeColorRegistry.registered_colors["my-blue-pack"])
@@ -50,6 +53,7 @@ describe("mods/quality_glassware", function ()
         },
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.same({ { 0.75, 0.75, 0.75 } }, PrototypeColorRegistry.registered_colors["my-pack"])
@@ -65,6 +69,7 @@ describe("mods/quality_glassware", function ()
         icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_red.png",
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.are.same({ { 1.00, 0.29, 0.29 } }, PrototypeColorRegistry.registered_colors["already-registered"])
@@ -77,6 +82,7 @@ describe("mods/quality_glassware", function ()
         icon = "__base__/graphics/icons/automation-science-pack.png",
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_nil(PrototypeColorRegistry.registered_colors["vanilla-pack"])
@@ -88,6 +94,7 @@ describe("mods/quality_glassware", function ()
         name = "no-icon-pack",
       }) --[[@as data.ToolPrototype]]
 
+      assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
       Mod.on_data_final_fixes()
 
       assert.is_nil(PrototypeColorRegistry.registered_colors["no-icon-pack"])
@@ -95,20 +102,20 @@ describe("mods/quality_glassware", function ()
 
     -- -------------------------------------------------------------------
     describe("color mapping (COLORS)", function ()
-      --- @type { color: string, icon: string, expected: ColorTuple }[]
+      --- @type { color: string, icon: string, expected: ColorTuple } []
       local cases = {
-        { color = "empty",  icon = "__quality_glassware__/graphics/icons/cube_empty.png",                 expected = { 0.75, 0.75, 0.75 } },
-        { color = "red",    icon = "__quality_glassware__/graphics/icons/cube_clear_red.png",             expected = { 1.00, 0.29, 0.29 } },
-        { color = "green",  icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_green.png",  expected = { 0.35, 0.98, 0.38 } },
-        { color = "black",  icon = "__quality_glassware__/graphics/icons/cube_clear_black.png",           expected = { 0.31, 0.31, 0.31 } },
-        { color = "cyan",   icon = "__quality_glassware__/graphics/icons/sphere_double_clear_cyan.png",   expected = { 0.29, 0.94, 1.00 } },
+        { color = "empty", icon = "__quality_glassware__/graphics/icons/cube_empty.png", expected = { 0.75, 0.75, 0.75 } },
+        { color = "red", icon = "__quality_glassware__/graphics/icons/cube_clear_red.png", expected = { 1.00, 0.29, 0.29 } },
+        { color = "green", icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_green.png", expected = { 0.35, 0.98, 0.38 } },
+        { color = "black", icon = "__quality_glassware__/graphics/icons/cube_clear_black.png", expected = { 0.31, 0.31, 0.31 } },
+        { color = "cyan", icon = "__quality_glassware__/graphics/icons/sphere_double_clear_cyan.png", expected = { 0.29, 0.94, 1.00 } },
         { color = "purple", icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_purple.png", expected = { 0.68, 0.31, 0.82 } },
-        { color = "yellow", icon = "__quality_glassware__/graphics/icons/cube_clear_yellow.png",          expected = { 1.00, 0.88, 0.24 } },
-        { color = "white",  icon = "__quality_glassware__/graphics/icons/sphere_double_clear_white.png",  expected = { 1.00, 1.00, 1.00 } },
+        { color = "yellow", icon = "__quality_glassware__/graphics/icons/cube_clear_yellow.png", expected = { 1.00, 0.88, 0.24 } },
+        { color = "white", icon = "__quality_glassware__/graphics/icons/sphere_double_clear_white.png", expected = { 1.00, 1.00, 1.00 } },
         { color = "orange", icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_orange.png", expected = { 1.00, 0.71, 0.25 } },
-        { color = "pink",   icon = "__quality_glassware__/graphics/icons/cube_clear_pink.png",            expected = { 1.00, 0.33, 0.89 } },
-        { color = "blue",   icon = "__quality_glassware__/graphics/icons/sphere_double_clear_blue.png",   expected = { 0.22, 0.35, 0.98 } },
-        { color = "lime",   icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_lime.png",   expected = { 1.00, 0.98, 0.25 } },
+        { color = "pink", icon = "__quality_glassware__/graphics/icons/cube_clear_pink.png", expected = { 1.00, 0.33, 0.89 } },
+        { color = "blue", icon = "__quality_glassware__/graphics/icons/sphere_double_clear_blue.png", expected = { 0.22, 0.35, 0.98 } },
+        { color = "lime", icon = "__quality_glassware__/graphics/icons/cone_inverted_clear_lime.png", expected = { 1.00, 0.98, 0.25 } },
       }
 
       for i = 1, #cases do
@@ -120,6 +127,7 @@ describe("mods/quality_glassware", function ()
             icon = case.icon,
           }) --[[@as data.ToolPrototype]]
 
+          assert.is_not_nil(Mod.on_data_final_fixes) --- @cast Mod.on_data_final_fixes - nil
           Mod.on_data_final_fixes()
 
           assert.are.same({ case.expected }, PrototypeColorRegistry.registered_colors["test-pack"])

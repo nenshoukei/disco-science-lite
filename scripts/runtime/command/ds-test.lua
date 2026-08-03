@@ -19,13 +19,16 @@ local test_cases = {
         position = { x = 0, y = 0 },
         force = game.forces.player,
       })
-      assert(lab, "lab entity is not created")
+      assert(lab and lab.unit_number, "lab entity is not created")
 
       local overlay = renderer.chunk_map:get(lab.unit_number)
       assert(overlay, "overlay is not rendered")
       assert(overlay.entity == lab, "overlay.entity is not lab entity")
       assert(overlay.animation.valid, "overlay.animation is not valid")
-      assert(overlay.animation.animation == "mks-dsl-lab-overlay" --[[$LAB_OVERLAY_ANIMATION_NAME]], "overlay.animation is not lab overlay")
+      assert(
+        overlay.animation.animation == "mks-dsl-lab-overlay", --[[$LAB_OVERLAY_ANIMATION_NAME]]
+        "overlay.animation is not lab overlay"
+      )
       assert(overlay.animation.target.entity == lab, "overlay.animation.target is not lab entity")
 
       assert(renderer.chunk_map.entries[lab.unit_number], "chunk_map.entries not added")
@@ -40,7 +43,9 @@ local test_cases = {
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
-      local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+      local objects = rendering.get_all_objects(
+        "disco-science-lite" --[[$MOD_NAME]]
+      )
       assert(#objects == 0, "rendering object still remains")
     end,
   },
@@ -53,9 +58,9 @@ local test_cases = {
       local lab1 = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
       local lab2 = surface.create_entity({ name = "lab", position = { x = 40, y = 0 }, force = player.force })
       local lab3 = surface.create_entity({ name = "lab", position = { x = 0, y = 40 }, force = player.force })
-      assert(lab1, "lab1 entity is not created")
-      assert(lab2, "lab2 entity is not created")
-      assert(lab3, "lab3 entity is not created")
+      assert(lab1 and lab1.unit_number, "lab1 entity is not created")
+      assert(lab2 and lab2.unit_number, "lab2 entity is not created")
+      assert(lab3 and lab3.unit_number, "lab3 entity is not created")
 
       assert(table_size(renderer.chunk_map.entries) == 3, "Expected 3 overlays, got " .. table_size(renderer.chunk_map.entries))
       assert(renderer.chunk_map:get(lab1.unit_number), "overlay for lab1 not found")
@@ -80,7 +85,9 @@ local test_cases = {
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
-      local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+      local objects = rendering.get_all_objects(
+        "disco-science-lite" --[[$MOD_NAME]]
+      )
       assert(#objects == 0, "rendering object still remains")
     end,
   },
@@ -90,20 +97,24 @@ local test_cases = {
       CommandHelpers.clear_surface(surface)
 
       local lab = surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
-      assert(lab, "lab entity is not created")
+      assert(lab and lab.unit_number, "lab entity is not created")
 
       local entry_before = renderer.chunk_map.entries[lab.unit_number]
       assert(entry_before, "chunk_map.entries not found before teleport")
-      assert(entry_before.chunk_x == 0 and entry_before.chunk_y == 0,
-        "Expected initial chunk (0,0), got (" .. entry_before.chunk_x .. "," .. entry_before.chunk_y .. ")")
+      assert(
+        entry_before.chunk_x == 0 and entry_before.chunk_y == 0,
+        "Expected initial chunk (0,0), got (" .. entry_before.chunk_x .. "," .. entry_before.chunk_y .. ")"
+      )
 
       -- Teleport to chunk (1,1): position (40, 40) -> floor(40/32) = 1
       lab.teleport({ 40, 40 }, nil, true)
 
       local entry_after = renderer.chunk_map.entries[lab.unit_number]
       assert(entry_after, "chunk_map.entries not found after teleport")
-      assert(entry_after.chunk_x == 1 and entry_after.chunk_y == 1,
-        "Expected teleported chunk (1,1), got (" .. entry_after.chunk_x .. "," .. entry_after.chunk_y .. ")")
+      assert(
+        entry_after.chunk_x == 1 and entry_after.chunk_y == 1,
+        "Expected teleported chunk (1,1), got (" .. entry_after.chunk_x .. "," .. entry_after.chunk_y .. ")"
+      )
 
       -- Old chunk (0,0) should be gone
       local surface_chunks = renderer.chunk_map.data[surface.index]
@@ -118,7 +129,9 @@ local test_cases = {
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
-      local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+      local objects = rendering.get_all_objects(
+        "disco-science-lite" --[[$MOD_NAME]]
+      )
       assert(#objects == 0, "rendering object still remains")
     end,
   },
@@ -137,7 +150,7 @@ local test_cases = {
       CommandHelpers.clear_surface(new_surface)
 
       local lab = new_surface.create_entity({ name = "lab", position = { x = 0, y = 0 }, force = player.force })
-      assert(lab, "lab entity is not created")
+      assert(lab and lab.unit_number, "lab entity is not created")
       assert(renderer.chunk_map:get(lab.unit_number), "overlay not created")
       assert(renderer.chunk_map.entries[lab.unit_number].surface_index == new_surface.index, "overlay is created for different surface")
 
@@ -150,7 +163,9 @@ local test_cases = {
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
-      local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+      local objects = rendering.get_all_objects(
+        "disco-science-lite" --[[$MOD_NAME]]
+      )
       assert(#objects == 0, "rendering object still remains")
 
       local new_surface = game.surfaces["mks-dsl-" --[[$NAME_PREFIX]] .. "test-surface"]
@@ -160,7 +175,7 @@ local test_cases = {
   },
   {
     name = "Sets up research for colorization test",
-    test = function (renderer, surface, player)
+    test = function (_renderer, surface, player)
       CommandHelpers.clear_surface(surface)
       local force = player.force
 
@@ -180,7 +195,7 @@ local test_cases = {
   {
     name = "Colors are applied to overlays in viewport",
     test = function (renderer, surface, player)
-      local force = player.force
+      local force = player.force --[[@as LuaForce]]
 
       local labs = surface.find_entities_filtered({ type = "lab" })
       assert(#labs >= 1, "Expected at least 1 lab on surface")
@@ -190,9 +205,12 @@ local test_cases = {
       assert(overlay, "overlay not found for lab")
 
       -- Verify the overlay is visible (lab is working/low_power and research is active)
-      assert(overlay.visible,
+      assert(
+        overlay.visible,
         "overlay is not visible (entity.status=" .. tostring(lab.status)
-        .. ", current_research=" .. tostring(force.current_research and force.current_research.name) .. ")")
+          .. ", current_research=" .. tostring(force.current_research and force.current_research.name)
+          .. ")"
+      )
 
       -- Verify the overlay animation has a color applied (not default black)
       local color = overlay.animation.color
@@ -209,7 +227,8 @@ local test_cases = {
       CommandHelpers.clear_surface(surface)
 
       local lab_prototypes = prototypes.get_entity_filtered({ { filter = "type", type = "lab" } })
-      local created_labs = {} --- @type LuaEntity[]
+      --- @type LuaEntity[]
+      local created_labs = {}
       local x = 0
       for _, proto in pairs(lab_prototypes) do
         local lab = surface.create_entity({
@@ -224,6 +243,7 @@ local test_cases = {
 
       for i = 1, #created_labs do
         local lab = created_labs[i]
+        assert(lab.unit_number)
         local lab_name = lab.name
         local is_excluded = renderer.lab_registry:is_excluded(lab_name)
         local has_registration = renderer.lab_registry:get_registration(lab_name) ~= nil
@@ -249,7 +269,9 @@ local test_cases = {
       assert(next(renderer.chunk_map.entries) == nil, "chunk_map.entries is not empty")
       assert(next(renderer.chunk_map.data) == nil, "chunk_map.data is not empty")
 
-      local objects = rendering.get_all_objects("disco-science-lite" --[[$MOD_NAME]])
+      local objects = rendering.get_all_objects(
+        "disco-science-lite" --[[$MOD_NAME]]
+      )
       assert(#objects == 0, "rendering object still remains")
     end,
   },
@@ -257,54 +279,52 @@ local test_cases = {
 
 local TEST_INTERVAL = 31 -- state update = every 30 ticks, so use 30 + 1
 
-commands.add_command(
-  "ds-test",
-  "Run integration tests for Disco Science Lite. Usage: /ds-test",
-  function (event)
-    local player = game.get_player(event.player_index)
-    if not player then return end
+commands.add_command("ds-test", "Run integration tests for Disco Science Lite. Usage: /ds-test", function (event)
+  if not event.player_index then return end
 
-    local surface = player.surface
-    local renderer = LabControl.get_renderer()
-    if not renderer then
-      log("Error: LabOverlayRenderer is not initialized.")
-      return
+  local player = game.get_player(event.player_index)
+  if not player then return end
+
+  local surface = player.surface
+  local renderer = LabControl.get_renderer()
+  if not renderer then
+    log("Error: LabOverlayRenderer is not initialized.")
+    return
+  end
+
+  player.print("Disco Science Lite: Running integration tests")
+  CommandHelpers.setup_test_surface(surface)
+
+  local n_test_cases = #test_cases
+  local test_case_index = 1
+  local failed_tests = {}
+  script.on_nth_tick(TEST_INTERVAL, function ()
+    local test_case = test_cases[test_case_index] --- @cast test_case - nil
+    local log_name = string.format("[%2d/%2d] %s", test_case_index, n_test_cases, test_case.name)
+    log("⏩️ Running " .. log_name)
+
+    local success, err = pcall(test_case.test, renderer, surface, player)
+    if success then
+      log("✅️ Passed  " .. log_name)
+    else
+      log("❌️ Failed  " .. log_name .. ": " .. err)
+      table.insert(failed_tests, log_name .. ": " .. err)
     end
 
-    player.print("Disco Science Lite: Running integration tests")
-    CommandHelpers.setup_test_surface(surface)
-
-    local n_test_cases = #test_cases
-    local test_case_index = 1
-    local failed_tests = {}
-    script.on_nth_tick(TEST_INTERVAL, function ()
-      local test_case = test_cases[test_case_index]
-      local log_name = string.format("[%2d/%2d] %s", test_case_index, n_test_cases, test_case.name)
-      log("⏩️ Running " .. log_name)
-
-      local success, err = pcall(test_case.test, renderer, surface, player)
-      if success then
-        log("✅️ Passed  " .. log_name)
+    if test_case_index >= #test_cases then
+      player.print("Disco Science Lite: All integration tests have finished.")
+      log(string.rep("-", 80))
+      if #failed_tests == 0 then
+        log("✅️ All " .. #test_cases .. " tests have passed.")
       else
-        log("❌️ Failed  " .. log_name .. ": " .. err)
-        table.insert(failed_tests, log_name .. ": " .. err)
-      end
-
-      if test_case_index >= #test_cases then
-        player.print("Disco Science Lite: All integration tests have finished.")
-        log(string.rep("-", 80))
-        if #failed_tests == 0 then
-          log("✅️ All " .. #test_cases .. " tests have passed.")
-        else
-          log("❌️ " .. #failed_tests .. " tests have failed.")
-          for _, failed in ipairs(failed_tests) do
-            log(failed)
-          end
+        log("❌️ " .. #failed_tests .. " tests have failed.")
+        for _, failed in ipairs(failed_tests) do
+          log(failed)
         end
-        script.on_nth_tick(TEST_INTERVAL, nil)
-      else
-        test_case_index = test_case_index + 1
       end
-    end)
-  end
-)
+      script.on_nth_tick(TEST_INTERVAL, nil)
+    else
+      test_case_index = test_case_index + 1
+    end
+  end)
+end)

@@ -1,6 +1,6 @@
 local Utils = require("scripts.shared.utils")
 
---- @class LabRegistry
+--- @class (partial) LabRegistry
 local LabRegistry = {}
 LabRegistry.__index = LabRegistry
 
@@ -9,7 +9,7 @@ LabRegistry.__index = LabRegistry
 --- @param lab_scale_overrides table<string, number>?
 --- @return LabRegistry
 function LabRegistry.new(lab_scale_overrides)
-  --- @class LabRegistry
+  --- @class (partial) LabRegistry
   local self = {
     --- Registrations by LabPrototype name.
     --- Includes pre-expanded entries for all registered prefix/suffix combinations.
@@ -37,7 +37,7 @@ end
 ---
 --- If `registration` is not passed, the vanilla lab overlay is used.
 ---
---- @param lab_name string LabPrototype name.
+--- @param lab_name     string           LabPrototype name.
 --- @param registration LabRegistration? Registration for the lab.
 function LabRegistry:register(lab_name, registration)
   self.registered_labs[lab_name] = registration or {}
@@ -50,7 +50,7 @@ end
 --- If the lab was excluded, the exclusion is cancelled.
 ---
 --- @param lab_name string LabPrototype name.
---- @param scale integer Scale of the lab. (Default scale is `1`)
+--- @param scale    number Scale of the lab. (Default scale is `1`)
 function LabRegistry:set_scale(lab_name, scale)
   local registration = self.registered_labs[lab_name]
   if registration then
