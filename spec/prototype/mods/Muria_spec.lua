@@ -17,6 +17,7 @@ describe("mods/Muria", function ()
     it("registers colors", function ()
       assert.is_not_nil(Mod.on_data) --- @cast Mod.on_data - nil
       Mod.on_data()
+      assert.is_not_nil(PrototypeColorRegistry.registered_colors["acidworking-science-pack"])
       assert.is_not_nil(PrototypeColorRegistry.registered_colors["muriatic-science-pack"])
     end)
   end)

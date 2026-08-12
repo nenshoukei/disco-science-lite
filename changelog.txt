@@ -2,6 +2,7 @@
 Version: 0.6.2
 Date: ????
   Changes:
+    - Update support for "Planet Muria" mod for new science pack name in version 1.7.0.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.1
 Date: 2026-08-03
