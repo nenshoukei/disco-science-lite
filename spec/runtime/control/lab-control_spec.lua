@@ -102,6 +102,31 @@ describe("LabControl", function ()
       assert.is_not_nil(captured_handlers[defines.events.on_tick])
     end)
 
+    -- Factorio rejects a joining client when on_load does not re-register the same
+    -- nth-tick handlers that were registered when the map was saved.  The deferred
+    -- validation tick is part of that set whenever it had not run yet at save time.
+    it("re-registers the deferred validation tick when storage marks it pending", function ()
+      local nth_tick_handlers = {}
+      _G.script.on_nth_tick = function (tick, handler) nth_tick_handlers[tick] = handler end
+      local storage = make_storage()
+      storage.validation_pending = true
+      _G.storage = storage
+
+      LabControl.on_load()
+
+      assert.is_function(nth_tick_handlers[90])
+    end)
+
+    it("does not register the deferred validation tick when storage has none pending", function ()
+      local nth_tick_handlers = {}
+      _G.script.on_nth_tick = function (tick, handler) nth_tick_handlers[tick] = handler end
+      _G.storage = make_storage()
+
+      LabControl.on_load()
+
+      assert.is_nil(nth_tick_handlers[90])
+    end)
+
     -- Remote calls from other mods (e.g. setIngredientColor) that arrive
     -- before on_load is finished must be queued and applied on the first tick,
     -- because storage writes are forbidden during on_load.
@@ -183,6 +208,18 @@ describe("LabControl", function ()
       assert.is_not_nil(color) --- @cast color - nil
       assert.are.equal(0.1, color.r)
     end)
+
+    it("defers technology validation and marks it pending in storage", function ()
+      local nth_tick_handlers = {}
+      _G.script.on_nth_tick = function (tick, handler) nth_tick_handlers[tick] = handler end
+      local storage = make_storage()
+      _G.storage = storage
+
+      LabControl.on_configuration_changed()
+
+      assert.is_true(storage.validation_pending)
+      assert.is_function(nth_tick_handlers[90])
+    end)
   end)
 
   -- -------------------------------------------------------------------------
@@ -216,6 +253,23 @@ describe("LabControl", function ()
       assert.is_not_nil(storage.lab_scale_overrides)
       assert.are.equal("table", type(storage.color_overrides))
       assert.are.equal("table", type(storage.lab_scale_overrides))
+    end)
+
+    it("defers technology validation and clears the pending flag once it runs", function ()
+      local nth_tick_handlers = {}
+      _G.script.on_nth_tick = function (tick, handler) nth_tick_handlers[tick] = handler end
+      local storage = ({}) --[[@as DiscoScienceStorage]]
+      _G.storage = storage
+
+      LabControl.on_init()
+
+      assert.is_true(storage.validation_pending)
+      assert.is_function(nth_tick_handlers[90])
+
+      nth_tick_handlers[90]()
+
+      assert.is_nil(storage.validation_pending)
+      assert.is_nil(nth_tick_handlers[90])
     end)
   end)
 end)

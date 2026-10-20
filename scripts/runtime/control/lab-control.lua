@@ -114,12 +114,28 @@ local function setup_event_handlers()
   end)
 end
 
-local function validate_technology_prototypes()
-  -- Defer the validation for runtime color registration
+--- Register the one-shot technology validation on the next 90th tick.
+--- Factorio requires on_load to re-register exactly the nth-tick handlers that were
+--- registered when the map was saved, so this registration is driven by
+--- storage.validation_pending: set when the validation is deferred, cleared when it runs.
+local function register_validation_tick()
   script.on_nth_tick(90, function ()
+    -- After a load, this can fire before the deferred on_tick rebuild has created the
+    -- renderer. Leaving the flag and the registration in place retries 90 ticks later.
+    if not renderer then return end
     renderer.color_registry:validate_technology_prototypes()
+    local ds_storage = storage --[[@as DiscoScienceStorage]]
+    ds_storage.validation_pending = nil
     script.on_nth_tick(90, nil)
   end)
+end
+
+--- Defer the validation so other mods can register colors at runtime first.
+--- Writes storage, so this runs only from on_init and on_configuration_changed.
+local function validate_technology_prototypes()
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+  ds_storage.validation_pending = true
+  register_validation_tick()
 end
 
 --- Rebuild all overlays and refresh event handlers and registry bindings.
@@ -148,6 +164,8 @@ function LabControl.on_load()
   --
   -- However, Factorio requires that on_load registers the EXACT same set of events as the server.
   -- Register all events with noop handlers here; rebuild_overlays() on the first tick installs real ones.
+  local ds_storage = storage --[[@as DiscoScienceStorage]]
+
   script.on_event(defines.events.on_tick, function ()
     renderer = create_renderer()
     rebuild_overlays() -- overwrites on_tick handler
@@ -181,6 +199,12 @@ function LabControl.on_load()
     defines.events.script_raised_teleported,
     defines.events.on_runtime_mod_setting_changed,
   }, noop)
+
+  -- The deferred validation is part of the saved handler set whenever the map was saved
+  -- before it ran (for example on a dedicated server paused with no players connected).
+  if ds_storage.validation_pending then
+    register_validation_tick()
+  end
 end
 
 function LabControl.on_configuration_changed()

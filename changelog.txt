@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.3
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fix joining a multiplayer server failing with "mod event handlers are not identical" when the map was saved before the deferred technology validation had run, such as on a dedicated server paused with no players connected.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.2
 Date: 2026-08-12
